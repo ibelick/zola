@@ -24,8 +24,8 @@ import { cn } from "@/lib/utils"
 import { useChat } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
-import { redirect } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { redirect, useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useEffect, useState } from "react"
 
 const FeedbackWidget = dynamic(
   () => import("./feedback-widget").then((mod) => mod.FeedbackWidget),
@@ -58,6 +58,8 @@ export function Chat() {
     currentChat?.system_prompt || SYSTEM_PROMPT_DEFAULT
   )
   const [hydrated, setHydrated] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
   const isAuthenticated = !!user?.id
   const {
@@ -113,6 +115,46 @@ export function Chat() {
       })
     }
   }, [error])
+
+  useEffect(() => {
+    const prompt = searchParams.get("prompt")
+
+    if (!prompt || !chatId || messages.length > 0) return
+
+    sendInitialPrompt(prompt)
+  }, [chatId, searchParams])
+
+  const sendInitialPrompt = async (prompt: string) => {
+    setIsSubmitting(true)
+
+    const uid = await getOrCreateGuestUserId(user)
+    if (!uid) return
+
+    const allowed = await checkLimitsAndNotify(uid)
+    if (!allowed) {
+      setIsSubmitting(false)
+      return
+    }
+
+    const options = {
+      body: {
+        chatId,
+        userId: uid,
+        model: selectedModel,
+        isAuthenticated,
+        systemPrompt,
+      },
+    }
+
+    try {
+      append({ role: "user", content: prompt }, options)
+    } catch (err) {
+      toast({ title: "Failed to send prompt", status: "error" })
+    } finally {
+      setIsSubmitting(false)
+      router.replace(`/c/${chatId}`)
+    }
+  }
 
   const checkLimitsAndNotify = async (uid: string): Promise<boolean> => {
     try {

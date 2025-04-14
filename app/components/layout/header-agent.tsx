@@ -29,7 +29,7 @@ export function HeaderAgent({
   return (
     <div
       className={cn(
-        "bg-background/40 flex items-center justify-center gap-2 rounded-full p-0 backdrop-blur-xl md:p-2",
+        "bg-background/40 flex items-center justify-center gap-2 rounded-t-none rounded-b-md px-0 py-0 backdrop-blur-2xl md:px-3 md:py-3",
         className
       )}
     >

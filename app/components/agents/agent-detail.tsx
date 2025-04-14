@@ -36,7 +36,7 @@ export function AgentDetail({
   const { user } = useUser()
   const { createNewChat } = useChats()
 
-  const createNewChatWithAgent = async () => {
+  const createNewChatWithAgent = async (prompt?: string) => {
     const uid = await getOrCreateGuestUserId(user)
     if (!uid) return
 
@@ -51,7 +51,9 @@ export function AgentDetail({
       )
 
       if (newChat) {
-        router.push(`/c/${newChat.id}`)
+        router.push(
+          `/c/${newChat.id}${prompt ? `?prompt=${encodeURIComponent(prompt)}` : ""}`
+        )
       }
     } catch (error) {
       console.error("Failed to create chat with agent:", error)
@@ -85,13 +87,18 @@ export function AgentDetail({
         <h2 className="mb-4 text-lg font-medium">What can I ask?</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {example_inputs.map((example_input) => (
-            <button
+            <Button
               key={example_input}
               type="button"
-              className="text-foreground prose bg-accent hover:bg-muted relative rounded-3xl p-2 px-5 py-2.5 text-xs break-words whitespace-normal transition-colors"
+              className="flex h-auto w-full items-center justify-start px-2 py-1 text-left text-xs break-words whitespace-normal"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                createNewChatWithAgent(example_input)
+              }}
             >
               {example_input}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -138,7 +145,7 @@ export function AgentDetail({
 
       <div className="absolute right-0 bottom-0 left-0 mb-8 px-8">
         <Button
-          onClick={createNewChatWithAgent}
+          onClick={() => createNewChatWithAgent()}
           className="w-full text-center"
           type="button"
         >
