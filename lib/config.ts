@@ -37,6 +37,7 @@ export type Model = {
     id: string
     enabled: boolean
   }[]
+  description?: string
 }
 
 export const MODELS_NOT_AVAILABLE = [
@@ -190,6 +191,8 @@ export const MODELS = [
       },
     ],
     api_sdk: mistral("pixtral-large-latest"),
+    description:
+      "Mistral’s flagship model. Great for reasoning, writing, and advanced tasks.",
   },
   {
     id: "mistral-large-latest",
@@ -202,6 +205,8 @@ export const MODELS = [
       },
     ],
     api_sdk: mistral("mistral-large-latest"),
+    description:
+      "Fine-tuned for chat. A lighter, faster option for everyday use.",
   },
 ] as Model[]
 

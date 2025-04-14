@@ -83,7 +83,12 @@ export function ModelSelector({
               >
                 <div className="flex items-center gap-3">
                   {provider?.icon && <provider.icon className="size-5" />}
-                  <span className="text-base">{model.name}</span>
+                  <div className="flex flex-col gap-0">
+                    <span className="text-base">{model.name}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {model.description}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {hasFileUpload && (
