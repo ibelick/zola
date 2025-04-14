@@ -126,6 +126,7 @@ export function ChatsProvider({
       created_at: new Date().toISOString(),
       model: model || MODEL_DEFAULT,
       system_prompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
+      agent_id: agentId || null,
     }
     setChats((prev) => [...prev, optimisticChat])
 

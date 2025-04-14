@@ -21,7 +21,7 @@ export async function fetchAndCacheChats(userId: string): Promise<Chats[]> {
 
   const { data, error } = await supabase
     .from("chats")
-    .select("id, title, created_at, model, system_prompt")
+    .select("id, title, created_at, model, system_prompt, agent_id")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
 
@@ -183,6 +183,7 @@ export async function createNewChat(
       created_at: responseData.chat.created_at,
       model: responseData.chat.model,
       system_prompt: responseData.chat.system_prompt,
+      agent_id: responseData.chat.agent_id,
     }
 
     await writeToIndexedDB("chats", chat)
