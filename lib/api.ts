@@ -1,3 +1,4 @@
+import { UserProfile } from "@/app/types/user"
 import { APP_DOMAIN } from "@/lib/config"
 import { SupabaseClient } from "@supabase/supabase-js"
 import {
@@ -280,4 +281,18 @@ export async function signInWithGoogle(supabase: SupabaseClient) {
     console.error("Error signing in with Google:", err)
     throw err
   }
+}
+
+export const getOrCreateGuestUserId = async (
+  user: UserProfile | null
+): Promise<string | null> => {
+  if (user?.id) return user.id
+
+  const stored = localStorage.getItem("guestId")
+  if (stored) return stored
+
+  const guestId = crypto.randomUUID()
+  localStorage.setItem("guestId", guestId)
+  await createGuestUser(guestId)
+  return guestId
 }

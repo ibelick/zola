@@ -1,10 +1,6 @@
 import { Header } from "@/app/components/layout/header"
 
-export default async function LayoutApp({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export async function LayoutApp({ children }: { children: React.ReactNode }) {
   return (
     <div className="isolate">
       <div className="bg-background @container/mainview relative flex h-full w-full">

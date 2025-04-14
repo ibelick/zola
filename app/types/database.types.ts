@@ -135,7 +135,7 @@ export type Database = {
           system_prompt: string | null
         }
         Insert: {
-          agent_id: string | null
+          agent_id?: string | null
           created_at?: string | null
           id?: string
           model?: string | null
@@ -144,7 +144,7 @@ export type Database = {
           system_prompt?: string | null
         }
         Update: {
-          agent_id: string | null
+          agent_id?: string | null
           created_at?: string | null
           id?: string
           model?: string | null

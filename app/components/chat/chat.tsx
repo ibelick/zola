@@ -5,7 +5,7 @@ import { Conversation } from "@/app/components/chat/conversation"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import { toast } from "@/components/ui/toast"
-import { checkRateLimits, createGuestUser } from "@/lib/api"
+import { checkRateLimits, getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import {
@@ -37,7 +37,7 @@ const DialogAuth = dynamic(
   { ssr: false }
 )
 
-export default function Chat() {
+export function Chat() {
   const { chatId } = useChatSession()
   const {
     createNewChat,
@@ -111,18 +111,6 @@ export default function Chat() {
       })
     }
   }, [error])
-
-  const getOrCreateGuestUserId = async (): Promise<string | null> => {
-    if (user?.id) return user.id
-
-    const stored = localStorage.getItem("guestId")
-    if (stored) return stored
-
-    const guestId = crypto.randomUUID()
-    localStorage.setItem("guestId", guestId)
-    await createGuestUser(guestId)
-    return guestId
-  }
 
   const checkLimitsAndNotify = async (uid: string): Promise<boolean> => {
     try {
@@ -264,7 +252,7 @@ export default function Chat() {
   const submit = async () => {
     setIsSubmitting(true)
 
-    const uid = await getOrCreateGuestUserId()
+    const uid = await getOrCreateGuestUserId(user)
     if (!uid) return
 
     const optimisticId = `optimistic-${Date.now().toString()}`
@@ -389,7 +377,7 @@ export default function Chat() {
 
       setMessages((prev) => [...prev, optimisticMessage])
 
-      const uid = await getOrCreateGuestUserId()
+      const uid = await getOrCreateGuestUserId(user)
 
       if (!uid) {
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
@@ -440,7 +428,7 @@ export default function Chat() {
   }, [])
 
   const handleReload = async () => {
-    const uid = await getOrCreateGuestUserId()
+    const uid = await getOrCreateGuestUserId(user)
     if (!uid) {
       return
     }
