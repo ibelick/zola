@@ -59,9 +59,6 @@ export function Chat() {
   )
   const [hydrated, setHydrated] = useState(false)
 
-  console.log("currentChat", currentChat, chatId)
-  console.log("systemPrompt", systemPrompt, currentChat?.system_prompt)
-
   const isAuthenticated = !!user?.id
   const {
     messages,

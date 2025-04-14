@@ -4,7 +4,7 @@ import { MessagesProvider } from "@/lib/chat-store/messages/provider"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 
-export default async function Page({ params }: { params: { chatId: string } }) {
+export default async function Page() {
   const supabase = await createClient()
 
   const { data: userData, error: userError } = await supabase.auth.getUser()
