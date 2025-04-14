@@ -11,6 +11,71 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      agents: {
+        Row: {
+          avatar_url: string | null
+          category: string | null
+          created_at: string | null
+          creator_id: string | null
+          description: string
+          example_inputs: string[] | null
+          id: string
+          is_public: boolean
+          model_preference: string | null
+          name: string
+          remixable: boolean
+          slug: string
+          system_prompt: string
+          tags: string[] | null
+          tools_enabled: boolean
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          category?: string | null
+          created_at?: string | null
+          creator_id?: string | null
+          description: string
+          example_inputs?: string[] | null
+          id?: string
+          is_public?: boolean
+          model_preference?: string | null
+          name: string
+          remixable?: boolean
+          slug: string
+          system_prompt: string
+          tags?: string[] | null
+          tools_enabled?: boolean
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          category?: string | null
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string
+          example_inputs?: string[] | null
+          id?: string
+          is_public?: boolean
+          model_preference?: string | null
+          name?: string
+          remixable?: boolean
+          slug?: string
+          system_prompt?: string
+          tags?: string[] | null
+          tools_enabled?: boolean
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agents_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_attachments: {
         Row: {
           chat_id: string
@@ -61,6 +126,7 @@ export type Database = {
       }
       chats: {
         Row: {
+          agent_id: string | null
           created_at: string | null
           id: string
           model: string | null
@@ -69,6 +135,7 @@ export type Database = {
           system_prompt: string | null
         }
         Insert: {
+          agent_id: string | null
           created_at?: string | null
           id?: string
           model?: string | null
@@ -77,6 +144,7 @@ export type Database = {
           system_prompt?: string | null
         }
         Update: {
+          agent_id: string | null
           created_at?: string | null
           id?: string
           model?: string | null
@@ -85,6 +153,13 @@ export type Database = {
           system_prompt?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "chats_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chats_user_id_fkey"
             columns: ["user_id"]

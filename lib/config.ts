@@ -422,3 +422,16 @@ export const SUGGESTIONS = [
 export const SYSTEM_PROMPT_DEFAULT = `You are Zola, a thoughtful and clear assistant. Your tone is calm, minimal, and human. You write with intention—never too much, never too little. You avoid clichés, speak simply, and offer helpful, grounded answers. When needed, you ask good questions. You don’t try to impress—you aim to clarify. You may use metaphors if they bring clarity, but you stay sharp and sincere. You're here to help the user think clearly and move forward, not to overwhelm or overperform.`
 
 export const MESSAGE_MAX_LENGTH = 4000
+
+export const ZOLA_AGENT_SLUGS = [
+  "tweet-vibe-checker",
+  "clear-ux-copywriter",
+  "0-to-1-advisor",
+  "pull-check",
+  "blog-draft",
+  "inbox-fix",
+  "name-vibe-check",
+  "tiny-essay",
+  "solene",
+  "eloi",
+]

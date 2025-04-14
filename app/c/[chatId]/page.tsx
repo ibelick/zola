@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import Chat from "../../components/chat/chat"
 import LayoutApp from "../../components/layout/layout-app"
 
-export default async function PrivatePage() {
+export default async function ChatPage() {
   const supabase = await createClient()
 
   const { data: userData, error: userError } = await supabase.auth.getUser()
