@@ -5,6 +5,7 @@ import { AgentSummary } from "@/app/types/agent"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { getOrCreateGuestUserId } from "@/lib/api"
+import { useChats } from "@/lib/chat-store/chats/provider"
 import { cn } from "@/lib/utils"
 import { ChatCircle, User } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
@@ -33,29 +34,27 @@ export function AgentDetail({
 }: AgentDetailProps) {
   const router = useRouter()
   const { user } = useUser()
+  const { createNewChat } = useChats()
 
   const createNewChatWithAgent = async () => {
     const uid = await getOrCreateGuestUserId(user)
     if (!uid) return
 
-    const data = {
-      agentId: id,
-      userId: uid,
-      title: `Conversation with ${name}`,
-      model: "pixtral-large-latest",
-      isAuthenticated: true,
-    }
+    try {
+      const newChat = await createNewChat(
+        uid,
+        `Conversation with ${name}`,
+        "pixtral-large-latest",
+        true,
+        undefined, // No need to specify system prompt as it will be fetched from the agent
+        id
+      )
 
-    const response = await fetch("/api/create-chat-agent", {
-      method: "POST",
-      body: JSON.stringify(data),
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      router.push(`/c/${data.chatId}`)
-    } else {
-      console.error("Failed to create chat")
+      if (newChat) {
+        router.push(`/c/${newChat.id}`)
+      }
+    } catch (error) {
+      console.error("Failed to create chat with agent:", error)
     }
   }
 

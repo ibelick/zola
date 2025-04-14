@@ -52,9 +52,20 @@ export async function POST(request: Request) {
       )
     }
 
-    return new Response(JSON.stringify({ chatId: chatData.id }), {
-      status: 200,
-    })
+    return new Response(
+      JSON.stringify({
+        chat: {
+          id: chatData.id,
+          title: chatData.title,
+          created_at: chatData.created_at,
+          model: chatData.model,
+          system_prompt: chatData.system_prompt,
+        },
+      }),
+      {
+        status: 200,
+      }
+    )
   } catch (err: any) {
     console.error("Error in create-chat-agent endpoint:", err)
 

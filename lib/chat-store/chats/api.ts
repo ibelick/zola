@@ -5,6 +5,7 @@ import { MODEL_DEFAULT, SYSTEM_PROMPT_DEFAULT } from "../../config"
 import { fetchClient } from "../../fetch"
 import {
   API_ROUTE_CREATE_CHAT,
+  API_ROUTE_CREATE_CHAT_WITH_AGENT,
   API_ROUTE_UPDATE_CHAT_MODEL,
 } from "../../routes"
 
@@ -140,19 +141,34 @@ export async function createNewChat(
   title?: string,
   model?: string,
   isAuthenticated?: boolean,
-  systemPrompt?: string
+  systemPrompt?: string,
+  agentId?: string
 ): Promise<Chats> {
   try {
-    const res = await fetchClient(API_ROUTE_CREATE_CHAT, {
+    const apiRoute = agentId
+      ? API_ROUTE_CREATE_CHAT_WITH_AGENT
+      : API_ROUTE_CREATE_CHAT
+
+    const payload = agentId
+      ? {
+          userId,
+          agentId,
+          title: title || `Conversation with agent`,
+          model: model || MODEL_DEFAULT,
+          isAuthenticated,
+        }
+      : {
+          userId,
+          title,
+          model: model || MODEL_DEFAULT,
+          isAuthenticated,
+          systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
+        }
+
+    const res = await fetchClient(apiRoute, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        title,
-        model: model || MODEL_DEFAULT,
-        isAuthenticated,
-        systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-      }),
+      body: JSON.stringify(payload),
     })
 
     const responseData = await res.json()
@@ -168,8 +184,8 @@ export async function createNewChat(
       model: responseData.chat.model,
       system_prompt: responseData.chat.system_prompt,
     }
-    await writeToIndexedDB("chats", chat)
 
+    await writeToIndexedDB("chats", chat)
     return chat
   } catch (error) {
     console.error("Error creating new chat:", error)

@@ -3,7 +3,6 @@
 import { toast } from "@/components/ui/toast"
 import { createContext, useContext, useEffect, useState } from "react"
 import { MODEL_DEFAULT, SYSTEM_PROMPT_DEFAULT } from "../../config"
-import { ensureDbReady } from "../persist"
 import type { Chats } from "../types"
 import {
   createNewChat as createNewChatFromDb,
@@ -30,7 +29,8 @@ interface ChatsContextType {
     title?: string,
     model?: string,
     isAuthenticated?: boolean,
-    systemPrompt?: string
+    systemPrompt?: string,
+    agentId?: string
   ) => Promise<Chats | undefined>
   resetChats: () => Promise<void>
   getChatById: (id: string) => Chats | undefined
@@ -113,7 +113,8 @@ export function ChatsProvider({
     title?: string,
     model?: string,
     isAuthenticated?: boolean,
-    systemPrompt?: string
+    systemPrompt?: string,
+    agentId?: string
   ) => {
     if (!userId) return
     const prev = [...chats]
@@ -121,7 +122,7 @@ export function ChatsProvider({
     const optimisticId = `optimistic-${Date.now().toString()}`
     const optimisticChat = {
       id: optimisticId,
-      title: title || "New Chat",
+      title: title || (agentId ? `Conversation with agent` : "New Chat"),
       created_at: new Date().toISOString(),
       model: model || MODEL_DEFAULT,
       system_prompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
@@ -134,7 +135,8 @@ export function ChatsProvider({
         title,
         model,
         isAuthenticated,
-        systemPrompt
+        systemPrompt,
+        agentId
       )
       setChats((prev) =>
         prev
