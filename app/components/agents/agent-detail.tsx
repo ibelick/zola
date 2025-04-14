@@ -61,7 +61,7 @@ export function AgentDetail({
 
   return (
     <div className="bg-background overflow-x-hidden overflow-y-auto pb-16">
-      <div className="mb-6 flex items-center gap-4 pt-12 pl-8">
+      <div className="mb-6 flex items-center gap-4 pt-8 pl-8">
         <div className="bg-muted h-16 w-16 flex-shrink-0 overflow-hidden rounded-full">
           <img
             src={avatar_url || "/placeholder.svg"}
@@ -97,43 +97,46 @@ export function AgentDetail({
         </div>
       </div>
 
-      <div className="mt-8 pb-8">
-        <h2 className="mb-4 pl-8 text-lg font-medium">More agents</h2>
-        <div className="flex snap-x snap-mandatory scroll-ps-6 flex-nowrap gap-4 overflow-x-auto pl-8">
-          {randomAgents.map((agent, index) => (
-            <div
-              key={agent.id}
-              onClick={() => onAgentClick?.(agent.id)}
-              className={cn(
-                "bg-secondary hover:bg-accent h-full w-full max-w-[250px] min-w-[250px] cursor-pointer rounded-xl p-4 transition-colors",
-                index === randomAgents.length - 1 && "mr-6"
-              )}
-            >
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="bg-muted h-12 w-12 overflow-hidden rounded-full">
-                    <Avatar className="h-full w-full object-cover">
-                      <AvatarImage
-                        src={agent.avatar_url || "/placeholder.svg"}
-                        alt={agent.name}
-                        className="h-full w-full object-cover"
-                      />
-                    </Avatar>
+      {randomAgents && randomAgents.length > 0 && (
+        <div className="mt-8 pb-8">
+          <h2 className="mb-4 pl-8 text-lg font-medium">More agents</h2>
+          <div className="flex snap-x snap-mandatory scroll-ps-6 flex-nowrap gap-4 overflow-x-auto pl-8">
+            {randomAgents.map((agent, index) => (
+              <div
+                key={agent.id}
+                onClick={() => onAgentClick?.(agent.id)}
+                className={cn(
+                  "bg-secondary hover:bg-accent h-full w-full max-w-[250px] min-w-[250px] cursor-pointer rounded-xl p-4 transition-colors",
+                  index === randomAgents.length - 1 && "mr-6"
+                )}
+              >
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="bg-muted h-12 w-12 overflow-hidden rounded-full">
+                      <Avatar className="h-full w-full object-cover">
+                        <AvatarImage
+                          src={agent.avatar_url || "/placeholder.svg"}
+                          alt={agent.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </Avatar>
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-foreground truncate text-base font-medium">
+                      {agent.name}
+                    </h3>
+                    <p className="text-foreground mt-1 line-clamp-2 text-xs">
+                      {agent.description}
+                    </p>
                   </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-foreground truncate text-base font-medium">
-                    {agent.name}
-                  </h3>
-                  <p className="text-foreground mt-1 line-clamp-2 text-xs">
-                    {agent.description}
-                  </p>
-                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
       <div className="absolute right-0 bottom-0 left-0 mb-8 px-8">
         <Button
           onClick={createNewChatWithAgent}
