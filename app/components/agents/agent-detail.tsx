@@ -46,14 +46,14 @@ export function AgentDetail({
       isAuthenticated: true,
     }
 
-    const response = await fetch("/chat/api/create-chat-agent", {
+    const response = await fetch("/api/create-chat-agent", {
       method: "POST",
       body: JSON.stringify(data),
     })
 
     if (response.ok) {
       const data = await response.json()
-      router.push(`/chat/c/${data.chatId}`)
+      router.push(`/c/${data.chatId}`)
     } else {
       console.error("Failed to create chat")
     }

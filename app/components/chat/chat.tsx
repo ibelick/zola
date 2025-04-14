@@ -59,6 +59,9 @@ export function Chat() {
   )
   const [hydrated, setHydrated] = useState(false)
 
+  console.log("currentChat", currentChat, chatId)
+  console.log("systemPrompt", systemPrompt, currentChat?.system_prompt)
+
   const isAuthenticated = !!user?.id
   const {
     messages,
@@ -81,16 +84,18 @@ export function Chat() {
     },
   })
 
-  const isFirstMessage = useMemo(() => {
-    return messages.length === 0
-  }, [messages])
-
   // when chatId is null, set messages to an empty array
   useEffect(() => {
     if (chatId === null) {
       setMessages([])
     }
   }, [chatId])
+
+  useEffect(() => {
+    if (currentChat?.system_prompt) {
+      setSystemPrompt(currentChat?.system_prompt)
+    }
+  }, [currentChat])
 
   useEffect(() => {
     setHydrated(true)
@@ -141,7 +146,7 @@ export function Chat() {
       if (storedGuestChatId) return storedGuestChatId
     }
 
-    if (isFirstMessage) {
+    if (messages.length === 0) {
       try {
         const newChat = await createNewChat(
           userId,
@@ -447,13 +452,7 @@ export function Chat() {
   }
 
   // not user chatId and no messages
-  if (
-    hydrated &&
-    chatId &&
-    !isChatsLoading &&
-    !currentChat &&
-    messages.length === 0
-  ) {
+  if (hydrated && chatId && !isChatsLoading && !currentChat) {
     return redirect("/")
   }
 

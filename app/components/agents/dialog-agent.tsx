@@ -1,9 +1,7 @@
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { AgentSummary } from "@/app/types/agent"
-import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
-import { cn } from "@/lib/utils"
 import { AgentCard } from "./agent-card"
 import { AgentDetail } from "./agent-detail"
 

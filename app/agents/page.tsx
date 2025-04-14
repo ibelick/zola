@@ -1,10 +1,10 @@
 import { AgentsPage } from "@/app/components/agents/agents-page"
 import { LayoutApp } from "@/app/components/layout/layout-app"
+import { MessagesProvider } from "@/lib/chat-store/messages/provider"
 import { ZOLA_AGENT_SLUGS } from "@/lib/config"
 import { createClient } from "@/lib/supabase/server"
 
-export const revalidate = 60
-export const dynamic = "force-static"
+export const dynamic = "force-dynamic"
 
 export default async function Page() {
   const supabase = await createClient()
@@ -24,8 +24,10 @@ export default async function Page() {
   }
 
   return (
-    <LayoutApp>
-      <AgentsPage agents={agents} />
-    </LayoutApp>
+    <MessagesProvider>
+      <LayoutApp>
+        <AgentsPage agents={agents} />
+      </LayoutApp>
+    </MessagesProvider>
   )
 }

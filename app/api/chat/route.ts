@@ -116,7 +116,7 @@ export async function POST(req: Request) {
       headers,
     })
   } catch (err: any) {
-    console.error("Error in /chat/api/chat:", err)
+    console.error("Error in /api/chat:", err)
     // Return a structured error response if the error is a UsageLimitError.
     if (err.code === "DAILY_LIMIT_REACHED") {
       return new Response(
