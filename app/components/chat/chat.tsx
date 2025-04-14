@@ -148,6 +148,11 @@ export default function Chat() {
   }
 
   const ensureChatExists = async (userId: string) => {
+    if (!isAuthenticated) {
+      const storedGuestChatId = localStorage.getItem("guestChatId")
+      if (storedGuestChatId) return storedGuestChatId
+    }
+
     if (isFirstMessage) {
       try {
         const newChat = await createNewChat(
@@ -158,9 +163,13 @@ export default function Chat() {
           systemPrompt
         )
         if (!newChat) return null
+
         if (isAuthenticated) {
           window.history.pushState(null, "", `/c/${newChat.id}`)
+        } else {
+          localStorage.setItem("guestChatId", newChat.id)
         }
+
         return newChat.id
       } catch (err: any) {
         let errorMessage = "Something went wrong."
@@ -177,6 +186,7 @@ export default function Chat() {
         return null
       }
     }
+
     return chatId
   }
 
