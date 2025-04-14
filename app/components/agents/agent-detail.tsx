@@ -60,7 +60,7 @@ export function AgentDetail({
   }
 
   return (
-    <div className="bg-background overflow-x-hidden overflow-y-auto">
+    <div className="bg-background overflow-x-hidden overflow-y-auto pb-16">
       <div className="mb-6 flex items-center gap-4 pt-12 pl-8">
         <div className="bg-muted h-16 w-16 flex-shrink-0 overflow-hidden rounded-full">
           <img
@@ -80,16 +80,6 @@ export function AgentDetail({
 
       <div className="px-8">
         <p className="text-muted-foreground mb-6">{description}</p>
-        <div className="mb-8 flex flex-wrap gap-3">
-          <Button onClick={createNewChatWithAgent}>
-            <ChatCircle className="size-4" />
-            Try this agent
-          </Button>
-          {/* <Button variant="outline" disabled>
-            <Copy className="mr-2 h-4 w-4" />
-            Sign in to remix
-          </Button> */}
-        </div>
       </div>
 
       <div className="mb-8 px-8">
@@ -107,9 +97,9 @@ export function AgentDetail({
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8 pb-8">
         <h2 className="mb-4 pl-8 text-lg font-medium">More agents</h2>
-        <div className="flex snap-x snap-mandatory scroll-ps-6 flex-nowrap gap-4 overflow-x-auto pb-8 pl-8">
+        <div className="flex snap-x snap-mandatory scroll-ps-6 flex-nowrap gap-4 overflow-x-auto pl-8">
           {randomAgents.map((agent, index) => (
             <div
               key={agent.id}
@@ -143,6 +133,16 @@ export function AgentDetail({
             </div>
           ))}
         </div>
+      </div>
+      <div className="absolute right-0 bottom-0 left-0 mb-8 px-8">
+        <Button
+          onClick={createNewChatWithAgent}
+          className="w-full text-center"
+          type="button"
+        >
+          <ChatCircle className="size-4" />
+          Try this agent
+        </Button>
       </div>
     </div>
   )

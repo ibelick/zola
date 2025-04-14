@@ -32,8 +32,8 @@ export function AgentsPage({ agents }: AgentsPageProps) {
             Your every day AI assistant
           </div>
           <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-            Our takes on agents that can help you with your every day tasks, or
-            just for fun.
+            a growing set of personal AI agents, built for ideas, writing, and
+            product work.
           </p>
         </div>
 
