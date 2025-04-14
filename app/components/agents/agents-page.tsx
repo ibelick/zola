@@ -28,7 +28,7 @@ export function AgentsPage({ agents }: AgentsPageProps) {
       <div className="mx-auto max-w-3xl">
         <div className="mb-12 text-center">
           <h1 className="text-foreground text-sm font-medium">Agents</h1>
-          <div className="text-foreground mx-auto my-4 max-w-2xl text-5xl font-medium tracking-tight">
+          <div className="text-foreground mx-auto my-4 max-w-2xl text-3xl font-medium tracking-tight md:text-5xl">
             Your every day AI assistant
           </div>
           <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
