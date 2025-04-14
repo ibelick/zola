@@ -60,6 +60,7 @@ export async function POST(request: Request) {
           created_at: chatData.created_at,
           model: chatData.model,
           system_prompt: chatData.system_prompt,
+          agent_id: chatData.agent_id,
         },
       }),
       {

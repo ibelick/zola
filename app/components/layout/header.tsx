@@ -14,12 +14,14 @@ import { APP_NAME } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
 import { Info } from "@phosphor-icons/react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { HeaderAgent } from "./header-agent"
 
 type AgentHeader = Pick<Agent, "name" | "description" | "avatar_url">
 
 export function Header() {
+  const pathname = usePathname()
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
   const { getChatById } = useChats()
@@ -47,7 +49,7 @@ export function Header() {
       setAgent(data)
     }
     fetchAgent()
-  }, [currentChat?.agent_id])
+  }, [currentChat?.agent_id, pathname])
 
   const isLoggedIn = !!user
 
