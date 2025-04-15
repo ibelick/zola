@@ -51,7 +51,6 @@ export function ChatInput({
   selectedModel,
   isUserAuthenticated,
   onSelectSystemPrompt,
-  systemPrompt,
   stop,
   status,
   setSelectedAgentId,

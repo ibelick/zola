@@ -9,18 +9,14 @@ import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import type { Agent } from "@/app/types/agent"
 import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { APP_NAME } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
-import { Info, UsersThree } from "@phosphor-icons/react"
+import { Info } from "@phosphor-icons/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
+import { AgentLink } from "./agent-link"
 import { HeaderAgent } from "./header-agent"
 
 type AgentHeader = Pick<Agent, "name" | "description" | "avatar_url">
@@ -95,6 +91,7 @@ export function Header() {
                 </Button>
               }
             />
+            <AgentLink />
             <Link
               href="/auth"
               className="font-base text-muted-foreground hover:text-foreground text-base transition-colors"
@@ -104,18 +101,8 @@ export function Header() {
           </div>
         ) : (
           <div className="flex flex-1 items-center justify-end gap-4">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="/agents"
-                  className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-full p-1.5 transition-colors"
-                >
-                  <UsersThree className="text-muted-foreground" size={24} />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Agents</TooltipContent>
-            </Tooltip>
             <ButtonNewChat />
+            <AgentLink />
             <HistoryTrigger />
             <UserMenu />
           </div>

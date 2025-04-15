@@ -52,8 +52,7 @@ export function PopoverContentAuth() {
           Login to try more features for free
         </p>
         <p className="text-muted-foreground mb-5 text-base">
-          Add files, use more models. <br />
-          Soon search, agents, and more.
+          Add files, use more models, agents, and more.
         </p>
         <Button
           variant="secondary"

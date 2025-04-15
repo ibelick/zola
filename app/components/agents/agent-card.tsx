@@ -1,3 +1,4 @@
+import { useUser } from "@/app/providers/user-provider"
 import { AgentSummary } from "@/app/types/agent"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
