@@ -44,6 +44,7 @@ export function AgentsPage({ agents }: AgentsPageProps) {
               <DialogAgent
                 key={agent.id}
                 id={agent.id}
+                slug={agent.slug}
                 name={agent.name}
                 description={agent.description}
                 avatar_url={agent.avatar_url}
@@ -73,6 +74,7 @@ export function AgentsPage({ agents }: AgentsPageProps) {
                 avatar_url={agent?.avatar_url}
                 example_inputs={agent.example_inputs || []}
                 creator_id={agent.creator_id || "Zola"}
+                slug={agent.slug}
                 isAvailable={false}
                 agents={agents}
                 className="pointer-events-none opacity-50 select-none"

@@ -18,6 +18,7 @@ type DialogAgentProps = {
   className?: string
   isAvailable: boolean
   agents: AgentSummary[]
+  slug: string
   onAgentClick?: (agentId: string) => void
   isOpen: boolean
   onOpenChange: (open: boolean) => void
@@ -31,7 +32,7 @@ export function DialogAgent({
   creator_id,
   avatar_url,
   example_inputs,
-  agents,
+  slug,
   className,
   isAvailable,
   onAgentClick,
@@ -43,9 +44,12 @@ export function DialogAgent({
   const { user } = useUser()
 
   const handleOpenChange = (open: boolean) => {
-    if (isAvailable) {
-      onOpenChange(open)
+    if (!isAvailable) {
+      return
     }
+
+    window.history.replaceState(null, "", `/agents/${slug}`)
+    onOpenChange(open)
   }
 
   if (!user) {
@@ -77,7 +81,6 @@ export function DialogAgent({
       example_inputs={example_inputs}
       creator_id={creator_id}
       avatar_url={avatar_url}
-      agents={agents}
       onAgentClick={onAgentClick}
       randomAgents={randomAgents}
     />

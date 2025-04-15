@@ -1,4 +1,6 @@
 import { AgentDetail } from "@/app/components/agents/agent-detail"
+import { LayoutApp } from "@/app/components/layout/layout-app"
+import { MessagesProvider } from "@/lib/chat-store/messages/provider"
 import { createClient } from "@/lib/supabase/server"
 
 export default async function AgentIdPage({
@@ -20,10 +22,31 @@ export default async function AgentIdPage({
     return <div>Error: {error.message}</div>
   }
 
+  const { data: agents, error: agentsError } = await supabase
+    .from("agents")
+    .select("*")
+    .not("slug", "eq", agentSlug)
+    .limit(4)
+
+  if (agentsError) {
+    console.error("Error fetching agents", agentsError)
+  }
+
   return (
-    <div>
-      <h1>{agent.name}</h1>
-      <p>{agent.description}</p>
-    </div>
+    <MessagesProvider>
+      <LayoutApp>
+        <div className="bg-background mx-auto max-w-3xl px-4 pt-20 pb-20 sm:px-6">
+          <AgentDetail
+            id={agent.id}
+            name={agent.name}
+            description={agent.description}
+            example_inputs={agent.example_inputs || []}
+            creator_id={agent.creator_id || "Zola"}
+            avatar_url={agent.avatar_url}
+            randomAgents={agents || []}
+          />
+        </div>
+      </LayoutApp>
+    </MessagesProvider>
   )
 }

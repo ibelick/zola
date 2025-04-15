@@ -11,7 +11,9 @@ export default async function Page() {
 
   const { data: agents, error: agentsError } = await supabase
     .from("agents")
-    .select("id, name, description, avatar_url, example_inputs, creator_id")
+    .select(
+      "id, name, description, avatar_url, example_inputs, creator_id, slug"
+    )
     .in("slug", ZOLA_AGENT_SLUGS)
 
   if (agentsError) {

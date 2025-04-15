@@ -17,7 +17,6 @@ type AgentDetailProps = {
   example_inputs: string[]
   creator_id: string
   avatar_url?: string | null
-  agents: AgentSummary[]
   onAgentClick?: (agentId: string) => void
   randomAgents: AgentSummary[]
 }
@@ -60,7 +59,7 @@ export function AgentDetail({
   }
 
   return (
-    <div className="bg-background overflow-x-hidden overflow-y-auto pb-16">
+    <div className="bg-background relative overflow-x-hidden overflow-y-auto pb-16">
       <div className="mb-6 flex items-center gap-4 pt-8 pl-8">
         <div className="bg-muted h-16 w-16 flex-shrink-0 overflow-hidden rounded-full">
           <img
@@ -105,7 +104,12 @@ export function AgentDetail({
       {randomAgents && randomAgents.length > 0 && (
         <div className="mt-8 pb-8">
           <h2 className="mb-4 pl-8 text-lg font-medium">More agents</h2>
-          <div className="flex snap-x snap-mandatory scroll-ps-6 flex-nowrap gap-4 overflow-x-auto pl-8">
+          <div
+            className="flex snap-x snap-mandatory scroll-ps-6 flex-nowrap gap-4 overflow-x-auto pl-8"
+            style={{
+              scrollbarWidth: "none",
+            }}
+          >
             {randomAgents.map((agent, index) => (
               <div
                 key={agent.id}
