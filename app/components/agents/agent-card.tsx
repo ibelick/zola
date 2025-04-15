@@ -1,12 +1,13 @@
 import { AgentSummary } from "@/app/types/agent"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
+import { User } from "@phosphor-icons/react"
 
 type AgentCardProps = {
   id: string
   name: string
   description: string
-  avatar_url: string
+  avatar_url?: string | null
   creator_id: string
   className?: string
   isAvailable: boolean
@@ -38,14 +39,18 @@ export function AgentCard({
     >
       <div className="flex items-center space-x-4">
         <div className="flex-shrink-0">
-          <div className="bg-muted h-16 w-16 overflow-hidden rounded-full">
-            <Avatar className="h-full w-full object-cover">
-              <AvatarImage
-                src={avatar_url || "/placeholder.svg"}
-                alt={name}
-                className="h-full w-full object-cover"
-              />
-            </Avatar>
+          <div className="bg-muted size-16 overflow-hidden rounded-full">
+            {avatar_url ? (
+              <Avatar className="h-full w-full object-cover">
+                <AvatarImage
+                  src={avatar_url}
+                  alt={name}
+                  className="h-full w-full object-cover"
+                />
+              </Avatar>
+            ) : (
+              <div className="flex h-full w-full items-center justify-center rounded-full" />
+            )}
           </div>
         </div>
 

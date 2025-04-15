@@ -17,7 +17,7 @@ type AgentDetailProps = {
   description: string
   example_inputs: string[]
   creator_id: string
-  avatar_url: string
+  avatar_url?: string | null
   agents: AgentSummary[]
   onAgentClick?: (agentId: string) => void
   randomAgents: AgentSummary[]

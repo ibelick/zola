@@ -9,7 +9,7 @@ type DialogAgentProps = {
   id: string
   name: string
   description: string
-  avatar_url: string
+  avatar_url?: string | null
   example_inputs: string[]
   creator_id: string
   className?: string
