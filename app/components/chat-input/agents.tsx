@@ -3,6 +3,11 @@
 import type { AgentsSuggestions } from "@/app/types/agent"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 import { TRANSITION_SUGGESTIONS } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
@@ -14,6 +19,7 @@ type ButtonAgentProps = {
   selectedAgentId: string | null
   avatarUrl: string
   id: string
+  description: string
 }
 
 const ButtonAgent = memo(function ButtonAgent({
@@ -21,31 +27,39 @@ const ButtonAgent = memo(function ButtonAgent({
   setSelectedAgentId,
   selectedAgentId,
   avatarUrl,
+  description,
   id,
 }: ButtonAgentProps) {
   const isActive = selectedAgentId === id
 
   return (
-    <Button
-      key={label}
-      variant="outline"
-      size="lg"
-      onClick={() =>
-        isActive ? setSelectedAgentId(null) : setSelectedAgentId(id)
-      }
-      className={cn(
-        "rounded-full px-2.5",
-        isActive &&
-          "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground transition-none"
-      )}
-      type="button"
-    >
-      <Avatar className="size-6">
-        <AvatarImage src={avatarUrl} className="size-6 object-cover" />
-        <AvatarFallback>{label.charAt(0)}</AvatarFallback>
-      </Avatar>
-      {label}
-    </Button>
+    <HoverCard>
+      <HoverCardTrigger asChild>
+        <Button
+          key={label}
+          variant="outline"
+          size="lg"
+          onClick={() =>
+            isActive ? setSelectedAgentId(null) : setSelectedAgentId(id)
+          }
+          className={cn(
+            "rounded-full px-2.5",
+            isActive &&
+              "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground transition-none"
+          )}
+          type="button"
+        >
+          <Avatar className="size-6">
+            <AvatarImage src={avatarUrl} className="size-6 object-cover" />
+            <AvatarFallback>{label.charAt(0)}</AvatarFallback>
+          </Avatar>
+          {label}
+        </Button>
+      </HoverCardTrigger>
+      <HoverCardContent side="top" className="bg-popover px-2 py-1">
+        <p className="text-secondary-foreground text-sm">{description}</p>
+      </HoverCardContent>
+    </HoverCard>
   )
 })
 
@@ -93,6 +107,7 @@ export const Agents = memo(function Agents({
             selectedAgentId={selectedAgentId}
             avatarUrl={agent.avatar_url || ""}
             id={agent.id}
+            description={agent.description || ""}
           />
         </motion.div>
       ))}
