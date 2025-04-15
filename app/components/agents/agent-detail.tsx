@@ -9,6 +9,7 @@ import { MODEL_DEFAULT } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import { ChatCircle, User } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 type AgentDetailProps = {
   id: string
@@ -19,6 +20,7 @@ type AgentDetailProps = {
   avatar_url?: string | null
   onAgentClick?: (agentId: string) => void
   randomAgents: AgentSummary[]
+  isFullPage?: boolean
 }
 
 export function AgentDetail({
@@ -30,9 +32,11 @@ export function AgentDetail({
   avatar_url,
   onAgentClick,
   randomAgents,
+  isFullPage,
 }: AgentDetailProps) {
   const router = useRouter()
   const { user } = useUser()
+
   const { createNewChat } = useChats()
 
   const createNewChatWithAgent = async (prompt?: string) => {
@@ -43,7 +47,7 @@ export function AgentDetail({
         user?.id,
         `Conversation with ${name}`,
         user?.preferred_model || MODEL_DEFAULT,
-        !!user.id,
+        true,
         undefined, // No need to specify system prompt as it will be fetched from the agent
         id
       )
@@ -55,6 +59,22 @@ export function AgentDetail({
       }
     } catch (error) {
       console.error("Failed to create chat with agent:", error)
+    }
+  }
+
+  useEffect(() => {
+    if (randomAgents.length > 0 && isFullPage) {
+      randomAgents.forEach((agent) => {
+        router.prefetch(`/agents/${agent.slug}`)
+      })
+    }
+  }, [randomAgents, router, isFullPage])
+
+  const handleAgentClick = (agent: AgentSummary) => {
+    if (onAgentClick) {
+      onAgentClick(agent.id)
+    } else {
+      router.push(`/agents/${agent.slug}`)
     }
   }
 
@@ -77,11 +97,11 @@ export function AgentDetail({
         </div>
       </div>
 
-      <div className="px-8">
+      <div className="px-4 md:px-8">
         <p className="text-muted-foreground mb-6">{description}</p>
       </div>
 
-      <div className="mb-8 px-8">
+      <div className="mb-8 px-4 md:px-8">
         <h2 className="mb-4 text-lg font-medium">What can I ask?</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {example_inputs.map((example_input) => (
@@ -103,9 +123,13 @@ export function AgentDetail({
 
       {randomAgents && randomAgents.length > 0 && (
         <div className="mt-8 pb-8">
-          <h2 className="mb-4 pl-8 text-lg font-medium">More agents</h2>
+          <h2 className="mb-4 pl-4 text-lg font-medium md:pl-8">More agents</h2>
           <div
-            className="flex snap-x snap-mandatory scroll-ps-6 flex-nowrap gap-4 overflow-x-auto pl-8"
+            className={cn(
+              isFullPage
+                ? "grid grid-cols-2 gap-4 px-8"
+                : "flex snap-x snap-mandatory scroll-ps-6 flex-nowrap gap-4 overflow-x-auto pl-8"
+            )}
             style={{
               scrollbarWidth: "none",
             }}
@@ -113,9 +137,10 @@ export function AgentDetail({
             {randomAgents.map((agent, index) => (
               <div
                 key={agent.id}
-                onClick={() => onAgentClick?.(agent.id)}
+                onClick={() => handleAgentClick(agent)}
                 className={cn(
-                  "bg-secondary hover:bg-accent h-full w-full max-w-[250px] min-w-[250px] cursor-pointer rounded-xl p-4 transition-colors",
+                  "bg-secondary hover:bg-accent h-full cursor-pointer rounded-xl p-4 transition-colors",
+                  isFullPage ? "w-full" : "w-[250px]",
                   index === randomAgents.length - 1 && "mr-6"
                 )}
               >
@@ -146,7 +171,7 @@ export function AgentDetail({
         </div>
       )}
 
-      <div className="absolute right-0 bottom-0 left-0 mb-8 px-8">
+      <div className="absolute right-0 bottom-0 left-0 mb-8 px-4 md:px-8">
         <Button
           onClick={() => createNewChatWithAgent()}
           className="w-full text-center"

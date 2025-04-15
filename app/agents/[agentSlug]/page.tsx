@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server"
 export default async function AgentIdPage({
   params,
 }: {
-  params: { agentSlug: string }
+  params: Promise<{ agentSlug: string }>
 }) {
   const { agentSlug } = await params
   const supabase = await createClient()
@@ -35,7 +35,7 @@ export default async function AgentIdPage({
   return (
     <MessagesProvider>
       <LayoutApp>
-        <div className="bg-background mx-auto max-w-3xl px-4 pt-20 pb-20 sm:px-6">
+        <div className="bg-background mx-auto max-w-3xl pt-20">
           <AgentDetail
             id={agent.id}
             name={agent.name}
@@ -44,6 +44,7 @@ export default async function AgentIdPage({
             creator_id={agent.creator_id || "Zola"}
             avatar_url={agent.avatar_url}
             randomAgents={agents || []}
+            isFullPage
           />
         </div>
       </LayoutApp>
