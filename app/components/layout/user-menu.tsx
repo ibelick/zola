@@ -1,22 +1,13 @@
-"use client"
+"use client";
 
-import { useUser } from "@/app/providers/user-provider"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { AppInfoTrigger } from "./app-info/app-info-trigger"
-import { FeedbackTrigger } from "./feedback/feedback-trigger"
-import { SettingsTrigger } from "./settings/settings-trigger"
+import { useUser } from "@/app/providers/user-provider";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { AppInfoTrigger } from "./app-info/app-info-trigger";
+import { FeedbackTrigger } from "./feedback/feedback-trigger";
+import { SettingsTrigger } from "./settings/settings-trigger";
+
 
 export function UserMenu() {
   const { user } = useUser()
@@ -44,7 +35,9 @@ export function UserMenu() {
       >
         <DropdownMenuItem className="flex flex-col items-start gap-0 no-underline hover:bg-transparent focus:bg-transparent">
           <span>{user?.display_name}</span>
-          <span className="text-muted-foreground">{user?.email}</span>
+          <span className="text-muted-foreground max-w-full truncate">
+            {user?.email}
+          </span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <SettingsTrigger />
