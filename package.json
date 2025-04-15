@@ -35,7 +35,7 @@
     "idb-keyval": "^6.2.1",
     "jsdom": "^26.0.0",
     "marked": "^15.0.7",
-    "motion": "^12.6.3",
+    "motion": "^12.7.3",
     "next": "^15.3.1-canary.0",
     "next-themes": "^0.4.6",
     "postcss": "^8.5.3",
