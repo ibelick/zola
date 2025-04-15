@@ -35,6 +35,8 @@ export function AgentCard({
         if (isAvailable && onClick) {
           onClick()
         }
+
+        null
       }}
     >
       <div className="flex items-center space-x-4">
