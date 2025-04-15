@@ -35,6 +35,11 @@ export function Header() {
   const [agent, setAgent] = useState<AgentHeader | null>(null)
 
   useEffect(() => {
+    // reset agent when pathname changes
+    setAgent(null)
+  }, [pathname])
+
+  useEffect(() => {
     if (!currentChat?.agent_id) return
 
     const supabase = createClient()
@@ -64,7 +69,7 @@ export function Header() {
       <div className="bg-background relative mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:bg-transparent lg:px-8">
         {Boolean(!agent || !isMobile) && (
           <div className="flex-1">
-            <Link href="/chat" className="text-xl font-medium tracking-tight">
+            <Link href="/" className="text-xl font-medium tracking-tight">
               {APP_NAME}
             </Link>
           </div>

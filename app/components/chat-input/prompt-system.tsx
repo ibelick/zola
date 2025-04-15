@@ -1,6 +1,6 @@
 "use client"
 
-import { AgentSummary } from "@/app/types/agent"
+import type { AgentsSuggestions } from "@/app/types/agent"
 import { ZOLA_AGENT_SLUGS } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
@@ -14,7 +14,8 @@ type PromptSystemProps = {
   onSuggestion: (suggestion: string) => void
   onSelectSystemPrompt: (systemPrompt: string) => void
   value: string
-  systemPrompt?: string
+  setSelectedAgentId: (agentId: string | null) => void
+  selectedAgentId: string | null
 }
 
 export const PromptSystem = memo(function PromptSystem({
@@ -22,19 +23,20 @@ export const PromptSystem = memo(function PromptSystem({
   onSuggestion,
   onSelectSystemPrompt,
   value,
-  systemPrompt,
+  setSelectedAgentId,
+  selectedAgentId,
 }: PromptSystemProps) {
   const [isAgentMode, setIsAgentMode] = useState(false)
-  const [sugestedAgents, setSugestedAgents] = useState<AgentSummary[] | null>(
-    null
-  )
+  const [sugestedAgents, setSugestedAgents] = useState<
+    AgentsSuggestions[] | null
+  >(null)
 
   useEffect(() => {
     const fetchAgents = async () => {
       const supabase = createClient()
       const { data, error } = await supabase
         .from("agents")
-        .select("id, name, description, avatar_url, example_inputs, creator_id")
+        .select("id, name, description, avatar_url")
         .in("slug", ZOLA_AGENT_SLUGS)
 
       if (error) {
@@ -43,7 +45,7 @@ export const PromptSystem = memo(function PromptSystem({
 
       const randomAgents = data
         ?.sort(() => Math.random() - 0.5)
-        .slice(0, 8) as AgentSummary[]
+        .slice(0, 8) as AgentsSuggestions[]
 
       setSugestedAgents(randomAgents)
     }
@@ -59,6 +61,7 @@ export const PromptSystem = memo(function PromptSystem({
         onClick: () => {
           setIsAgentMode(true)
           onSelectSystemPrompt("")
+          setSelectedAgentId(null)
         },
       },
       {
@@ -68,6 +71,7 @@ export const PromptSystem = memo(function PromptSystem({
         onClick: () => {
           setIsAgentMode(false)
           onSelectSystemPrompt("")
+          setSelectedAgentId(null)
         },
       },
     ],
@@ -80,8 +84,8 @@ export const PromptSystem = memo(function PromptSystem({
         <AnimatePresence mode="popLayout">
           {isAgentMode ? (
             <Agents
-              onSelectSystemPrompt={onSelectSystemPrompt}
-              systemPrompt={systemPrompt}
+              setSelectedAgentId={setSelectedAgentId}
+              selectedAgentId={selectedAgentId}
               sugestedAgents={sugestedAgents || []}
             />
           ) : (

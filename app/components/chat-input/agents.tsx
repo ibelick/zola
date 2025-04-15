@@ -1,6 +1,6 @@
 "use client"
 
-import { AgentSummary } from "@/app/types/agent"
+import type { AgentsSuggestions } from "@/app/types/agent"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { TRANSITION_SUGGESTIONS } from "@/lib/motion"
@@ -10,20 +10,20 @@ import { memo } from "react"
 
 type ButtonAgentProps = {
   label: string
-  prompt: string
-  onSelectSystemPrompt: (systemPrompt: string) => void
-  systemPrompt?: string
+  setSelectedAgentId: (agentId: string | null) => void
+  selectedAgentId: string | null
   avatarUrl: string
+  id: string
 }
 
 const ButtonAgent = memo(function ButtonAgent({
   label,
-  prompt,
-  onSelectSystemPrompt,
-  systemPrompt,
+  setSelectedAgentId,
+  selectedAgentId,
   avatarUrl,
+  id,
 }: ButtonAgentProps) {
-  const isActive = systemPrompt === prompt
+  const isActive = selectedAgentId === id
 
   return (
     <Button
@@ -31,7 +31,7 @@ const ButtonAgent = memo(function ButtonAgent({
       variant="outline"
       size="lg"
       onClick={() =>
-        isActive ? onSelectSystemPrompt("") : onSelectSystemPrompt(prompt)
+        isActive ? setSelectedAgentId(null) : setSelectedAgentId(id)
       }
       className={cn(
         "rounded-full px-2.5",
@@ -50,14 +50,14 @@ const ButtonAgent = memo(function ButtonAgent({
 })
 
 type AgentsProps = {
-  onSelectSystemPrompt: (systemPrompt: string) => void
-  systemPrompt?: string
-  sugestedAgents: AgentSummary[]
+  setSelectedAgentId: (agentId: string | null) => void
+  selectedAgentId: string | null
+  sugestedAgents: AgentsSuggestions[]
 }
 
 export const Agents = memo(function Agents({
-  onSelectSystemPrompt,
-  systemPrompt,
+  setSelectedAgentId,
+  selectedAgentId,
   sugestedAgents,
 }: AgentsProps) {
   return (
@@ -89,10 +89,10 @@ export const Agents = memo(function Agents({
           <ButtonAgent
             key={agent.id}
             label={agent.name}
-            prompt={agent.description}
-            onSelectSystemPrompt={onSelectSystemPrompt}
-            systemPrompt={systemPrompt}
+            setSelectedAgentId={setSelectedAgentId}
+            selectedAgentId={selectedAgentId}
             avatarUrl={agent.avatar_url || ""}
+            id={agent.id}
           />
         </motion.div>
       ))}

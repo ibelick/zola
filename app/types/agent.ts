@@ -6,3 +6,8 @@ export type AgentSummary = Pick<
   Tables<"agents">,
   "id" | "name" | "description" | "avatar_url" | "example_inputs" | "creator_id"
 >
+
+export type AgentsSuggestions = Pick<
+  Tables<"agents">,
+  "id" | "name" | "description" | "avatar_url"
+>

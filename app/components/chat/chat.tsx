@@ -57,6 +57,9 @@ export function Chat() {
   const [systemPrompt, setSystemPrompt] = useState(
     currentChat?.system_prompt || SYSTEM_PROMPT_DEFAULT
   )
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(
+    currentChat?.agent_id || null
+  )
   const [hydrated, setHydrated] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -192,10 +195,11 @@ export function Chat() {
           input,
           selectedModel,
           isAuthenticated,
-          systemPrompt
+          selectedAgentId ? undefined : systemPrompt, // if agentId is set, systemPrompt is not used
+          selectedAgentId || undefined
         )
-        if (!newChat) return null
 
+        if (!newChat) return null
         if (isAuthenticated) {
           window.history.pushState(null, "", `/c/${newChat.id}`)
         } else {
@@ -363,6 +367,7 @@ export function Chat() {
         model: selectedModel,
         isAuthenticated,
         systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
+        agentId: selectedAgentId || undefined,
       },
       experimental_attachments: attachments || undefined,
     }
@@ -562,6 +567,8 @@ export function Chat() {
           systemPrompt={systemPrompt}
           stop={stop}
           status={status}
+          setSelectedAgentId={setSelectedAgentId}
+          selectedAgentId={selectedAgentId}
         />
       </motion.div>
       <FeedbackWidget authUserId={user?.id} />
