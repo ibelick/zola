@@ -6,6 +6,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
+import { MODEL_DEFAULT } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import { ChatCircle, User } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
@@ -44,7 +45,7 @@ export function AgentDetail({
       const newChat = await createNewChat(
         uid,
         `Conversation with ${name}`,
-        "pixtral-large-latest",
+        user?.preferred_model || MODEL_DEFAULT,
         true,
         undefined, // No need to specify system prompt as it will be fetched from the agent
         id
