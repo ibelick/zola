@@ -1,29 +1,29 @@
 "use client"
 
+import { AgentSummary } from "@/app/types/agent"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { PERSONAS } from "@/lib/config"
 import { TRANSITION_SUGGESTIONS } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
 import { memo } from "react"
 
-type ButtonPersonaProps = {
+type ButtonAgentProps = {
   label: string
   prompt: string
   onSelectSystemPrompt: (systemPrompt: string) => void
   systemPrompt?: string
-  icon: React.ElementType
+  avatarUrl: string
 }
 
-const ButtonPersona = memo(function ButtonPersona({
+const ButtonAgent = memo(function ButtonAgent({
   label,
   prompt,
   onSelectSystemPrompt,
   systemPrompt,
-  icon,
-}: ButtonPersonaProps) {
+  avatarUrl,
+}: ButtonAgentProps) {
   const isActive = systemPrompt === prompt
-  const Icon = icon
 
   return (
     <Button
@@ -34,27 +34,32 @@ const ButtonPersona = memo(function ButtonPersona({
         isActive ? onSelectSystemPrompt("") : onSelectSystemPrompt(prompt)
       }
       className={cn(
-        "rounded-full",
+        "rounded-full px-2.5",
         isActive &&
           "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground transition-none"
       )}
       type="button"
     >
-      <Icon className="size-4" />
+      <Avatar className="size-6">
+        <AvatarImage src={avatarUrl} className="size-6 object-cover" />
+        <AvatarFallback>{label.charAt(0)}</AvatarFallback>
+      </Avatar>
       {label}
     </Button>
   )
 })
 
-type PersonasProps = {
+type AgentsProps = {
   onSelectSystemPrompt: (systemPrompt: string) => void
   systemPrompt?: string
+  sugestedAgents: AgentSummary[]
 }
 
-export const Personas = memo(function Personas({
+export const Agents = memo(function Agents({
   onSelectSystemPrompt,
   systemPrompt,
-}: PersonasProps) {
+  sugestedAgents,
+}: AgentsProps) {
   return (
     <motion.div
       className="flex w-full max-w-full flex-nowrap justify-start gap-2 overflow-x-auto px-2 md:mx-auto md:max-w-2xl md:flex-wrap md:justify-center md:pl-0"
@@ -71,9 +76,9 @@ export const Personas = memo(function Personas({
         scrollbarWidth: "none",
       }}
     >
-      {PERSONAS.map((persona, index) => (
+      {sugestedAgents?.map((agent, index) => (
         <motion.div
-          key={persona.label}
+          key={agent.id}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{
@@ -81,13 +86,13 @@ export const Personas = memo(function Personas({
             delay: index * 0.02,
           }}
         >
-          <ButtonPersona
-            key={persona.label}
-            label={persona.label}
-            prompt={persona.prompt}
+          <ButtonAgent
+            key={agent.id}
+            label={agent.name}
+            prompt={agent.description}
             onSelectSystemPrompt={onSelectSystemPrompt}
             systemPrompt={systemPrompt}
-            icon={persona.icon}
+            avatarUrl={agent.avatar_url || ""}
           />
         </motion.div>
       ))}
