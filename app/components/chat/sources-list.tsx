@@ -1,26 +1,27 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { SourceUIPart } from "@ai-sdk/ui-utils"
-import { Check, Copy, Link } from "@phosphor-icons/react"
-import { useState } from "react"
+import { Link } from "@phosphor-icons/react"
 
 type SourcesListProps = {
   sources: SourceUIPart["source"][]
   className?: string
 }
 
+const getFavicon = (url: string) => {
+  const domain = new URL(url).hostname
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
+}
+
+const addUTM = (url: string) => {
+  const u = new URL(url)
+  u.searchParams.set("utm_source", "zola.chat")
+  u.searchParams.set("utm_medium", "research")
+  return u.toString()
+}
+
 export function SourcesList({ sources, className }: SourcesListProps) {
-  const [copiedId, setCopiedId] = useState<string | null>(null)
-
-  const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    setTimeout(() => setCopiedId(null), 2000)
-  }
-
-  // Format URL for display (remove protocol and trailing slashes)
   const formatUrl = (url: string) => {
     return url
       .replace(/^https?:\/\//, "")
@@ -34,34 +35,25 @@ export function SourcesList({ sources, className }: SourcesListProps) {
       <ul className="space-y-2">
         {sources.map((source) => (
           <li key={source.id} className="flex items-center text-sm">
-            <div className="flex-1">
+            <div className="min-w-0 flex-1 overflow-hidden">
               <a
-                href={source.url}
+                href={addUTM(source.url)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary group flex items-center gap-1 hover:underline"
+                className="text-primary group line-clamp-1 flex items-center gap-1 hover:underline"
               >
-                {source.title}
-                <Link className="inline h-3 w-3 opacity-70 transition-opacity group-hover:opacity-100" />
+                <img
+                  src={getFavicon(source.url)}
+                  alt=""
+                  className="h-4 w-4 flex-shrink-0 rounded-sm"
+                />
+                <span className="truncate">{source.title}</span>
+                <Link className="inline h-3 w-3 flex-shrink-0 opacity-70 transition-opacity group-hover:opacity-100" />
               </a>
-              <div className="text-muted-foreground text-xs">
+              <div className="text-muted-foreground line-clamp-1 text-xs">
                 {formatUrl(source.url)}
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-1 h-6 w-6 p-0"
-              onClick={() => copyToClipboard(source.url, source.id)}
-              title="Copy URL"
-            >
-              {copiedId === source.id ? (
-                <Check className="h-3 w-3 text-green-500" />
-              ) : (
-                <Copy className="h-3 w-3" />
-              )}
-              <span className="sr-only">Copy URL</span>
-            </Button>
           </li>
         ))}
       </ul>
