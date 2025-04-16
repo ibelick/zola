@@ -14,12 +14,13 @@ import {
   REMAINING_QUERY_ALERT_THRESHOLD,
   SYSTEM_PROMPT_DEFAULT,
 } from "@/lib/config"
+import { fetchClient } from "@/lib/fetch"
 import {
   Attachment,
   checkFileUploadLimit,
   processFiles,
 } from "@/lib/file-handling"
-import { API_ROUTE_CHAT } from "@/lib/routes"
+import { API_ROUTE_CHAT, API_ROUTE_RESEARCH } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 import { useChat } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -371,6 +372,53 @@ export function Chat() {
       },
       experimental_attachments: attachments || undefined,
     }
+
+    // START OF RESEARCH AGENT
+    // TODO: This is temporary solution with just checking for "research" in the input.
+    if (input.toLowerCase().includes("research")) {
+      const res = await fetchClient(API_ROUTE_RESEARCH, {
+        method: "POST",
+        body: JSON.stringify({
+          prompt: input,
+          chatId: currentChatId,
+          userId: uid,
+          isAuthenticated,
+        }),
+        headers: { "Content-Type": "application/json" },
+      })
+
+      const { markdown, parts } = await res.json()
+
+      console.log("Research message:", markdown)
+
+      append(
+        {
+          role: "assistant",
+          content: markdown,
+          parts,
+        },
+        {
+          body: {
+            chatId: currentChatId,
+            userId: uid,
+            model: selectedModel,
+            isAuthenticated,
+            systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
+          },
+        }
+      )
+      cacheAndAddMessage({
+        role: "assistant",
+        content: markdown,
+        parts,
+        id: optimisticId,
+      })
+
+      setInput("")
+      setIsSubmitting(false)
+      return
+    }
+    // END OF RESEARCH AGENT
 
     try {
       handleSubmit(undefined, options)

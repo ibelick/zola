@@ -177,6 +177,7 @@ export type Database = {
           created_at: string | null
           id: number
           role: "system" | "user" | "assistant" | "data"
+          parts: Json | null
         }
         Insert: {
           experimental_attachments?: Attachment[]
@@ -185,6 +186,7 @@ export type Database = {
           created_at?: string | null
           id?: number
           role: "system" | "user" | "assistant" | "data"
+          parts?: Json
         }
         Update: {
           experimental_attachments?: Attachment[]
@@ -193,6 +195,7 @@ export type Database = {
           created_at?: string | null
           id?: number
           role?: "system" | "user" | "assistant" | "data"
+          parts?: Json
         }
         Relationships: []
       }
