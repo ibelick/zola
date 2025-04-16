@@ -4,12 +4,17 @@ import { useUser } from "@/app/providers/user-provider"
 import { AgentSummary } from "@/app/types/agent"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { MODEL_DEFAULT } from "@/lib/config"
 import { cn } from "@/lib/utils"
-import { ChatCircle, User } from "@phosphor-icons/react"
+import { ChatCircle, Check, CopySimple, User } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 type AgentDetailProps = {
   id: string
@@ -34,10 +39,17 @@ export function AgentDetail({
   randomAgents,
   isFullPage,
 }: AgentDetailProps) {
+  const [copied, setCopied] = useState(false)
   const router = useRouter()
   const { user } = useUser()
 
   const { createNewChat } = useChats()
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/agents/${id}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1000)
+  }
 
   const createNewChatWithAgent = async (prompt?: string) => {
     if (!user) return
@@ -140,7 +152,7 @@ export function AgentDetail({
                 onClick={() => handleAgentClick(agent)}
                 className={cn(
                   "bg-secondary hover:bg-accent h-full cursor-pointer rounded-xl p-4 transition-colors",
-                  isFullPage ? "w-full" : "w-[250px]",
+                  isFullPage ? "w-full" : "min-w-[280px]",
                   index === randomAgents.length - 1 && "mr-6"
                 )}
               >
@@ -171,10 +183,30 @@ export function AgentDetail({
         </div>
       )}
 
-      <div className="absolute right-0 bottom-0 left-0 mb-8 px-4 md:px-8">
+      <div className="absolute right-0 bottom-0 left-0 mb-8 flex flex-row gap-2 px-4 md:px-8">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={copyToClipboard}
+              className="flex-1 text-center"
+              type="button"
+              variant="outline"
+            >
+              {copied ? (
+                <Check className="size-4" />
+              ) : (
+                <CopySimple className="size-4" />
+              )}
+              Share this agent
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {copied ? "Copied to clipboard" : "Copy link to clipboard"}
+          </TooltipContent>
+        </Tooltip>
         <Button
           onClick={() => createNewChatWithAgent()}
-          className="w-full text-center"
+          className="flex-1 text-center"
           type="button"
         >
           <ChatCircle className="size-4" />
