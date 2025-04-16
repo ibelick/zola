@@ -40,7 +40,7 @@ export async function fetchAndCacheMessages(
     ...message,
     id: String(message.id),
     createdAt: new Date(message.created_at || ""),
-    parts: message.parts as MessageAISDK["parts"],
+    parts: (message?.parts as MessageAISDK["parts"]) || undefined,
   }))
 
   return formattedMessages

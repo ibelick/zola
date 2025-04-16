@@ -389,8 +389,6 @@ export function Chat() {
 
       const { markdown, parts } = await res.json()
 
-      console.log("Research message:", markdown)
-
       append(
         {
           role: "assistant",
@@ -407,13 +405,6 @@ export function Chat() {
           },
         }
       )
-
-      console.log("Adding message:", {
-        role: "assistant",
-        content: markdown,
-        parts,
-        id: optimisticId,
-      })
 
       cacheAndAddMessage({
         role: "assistant",
@@ -555,6 +546,8 @@ export function Chat() {
   if (hydrated && chatId && !isChatsLoading && !currentChat) {
     return redirect("/")
   }
+
+  console.log("Messages:", messages)
 
   return (
     <div

@@ -94,13 +94,6 @@ export async function POST(req: Request) {
   try {
     const { prompt, chatId, userId, isAuthenticated } = await req.json()
 
-    console.log("Research agent request:", {
-      prompt,
-      chatId,
-      userId,
-      isAuthenticated,
-    })
-
     if (!prompt || !chatId || !userId) {
       return new Response(JSON.stringify({ error: "Missing data" }), {
         status: 400,

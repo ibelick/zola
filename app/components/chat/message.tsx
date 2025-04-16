@@ -28,8 +28,6 @@ export function Message({
   hasScrollAnchor,
   parts,
 }: MessageProps) {
-  console.log("Parts:", parts)
-
   const [copied, setCopied] = useState(false)
 
   const copyToClipboard = () => {

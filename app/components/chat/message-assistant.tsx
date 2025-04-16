@@ -32,8 +32,6 @@ export function MessageAssistant({
     ?.filter((part) => part.type === "source")
     .map((part) => part.source)
 
-  console.log("Sources:", sources)
-
   return (
     <Message
       className={cn(
@@ -49,7 +47,7 @@ export function MessageAssistant({
           {children}
         </MessageContent>
 
-        {sources && <SourcesList sources={sources} />}
+        {sources && sources.length > 0 && <SourcesList sources={sources} />}
 
         <MessageActions
           className={cn(

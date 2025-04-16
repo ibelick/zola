@@ -9,14 +9,9 @@ import { useState } from "react"
 type SourcesListProps = {
   sources: SourceUIPart["source"][]
   className?: string
-  title?: string
 }
 
-export function SourcesList({
-  sources,
-  className,
-  title = "Sources",
-}: SourcesListProps) {
+export function SourcesList({ sources, className }: SourcesListProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const copyToClipboard = (text: string, id: string) => {
@@ -35,7 +30,7 @@ export function SourcesList({
 
   return (
     <div className={cn("my-4", className)}>
-      <h3 className="mb-2 text-base">{title}</h3>
+      <h3 className="mb-2 text-base">Sources</h3>
       <ul className="space-y-2">
         {sources.map((source) => (
           <li key={source.id} className="flex items-center text-sm">
