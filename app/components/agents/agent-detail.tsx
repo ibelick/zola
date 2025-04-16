@@ -18,6 +18,7 @@ import { useEffect, useState } from "react"
 
 type AgentDetailProps = {
   id: string
+  slug: string
   name: string
   description: string
   example_inputs: string[]
@@ -26,10 +27,12 @@ type AgentDetailProps = {
   onAgentClick?: (agentId: string) => void
   randomAgents: AgentSummary[]
   isFullPage?: boolean
+  isMobile?: boolean
 }
 
 export function AgentDetail({
   id,
+  slug,
   name,
   description,
   example_inputs,
@@ -38,6 +41,7 @@ export function AgentDetail({
   onAgentClick,
   randomAgents,
   isFullPage,
+  isMobile,
 }: AgentDetailProps) {
   const [copied, setCopied] = useState(false)
   const router = useRouter()
@@ -46,7 +50,7 @@ export function AgentDetail({
   const { createNewChat } = useChats()
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/agents/${id}`)
+    navigator.clipboard.writeText(`${window.location.origin}/agents/${slug}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 1000)
   }
@@ -139,8 +143,8 @@ export function AgentDetail({
           <div
             className={cn(
               isFullPage
-                ? "grid grid-cols-2 gap-4 px-8"
-                : "flex snap-x snap-mandatory scroll-ps-6 flex-nowrap gap-4 overflow-x-auto pl-8"
+                ? "grid grid-cols-1 gap-4 px-4 md:grid-cols-2 md:px-8"
+                : "flex snap-x snap-mandatory scroll-ps-6 flex-nowrap gap-4 overflow-x-auto pl-4 md:pl-8"
             )}
             style={{
               scrollbarWidth: "none",
@@ -183,7 +187,12 @@ export function AgentDetail({
         </div>
       )}
 
-      <div className="absolute right-0 bottom-0 left-0 mb-8 flex flex-row gap-2 px-4 md:px-8">
+      <div
+        className={cn(
+          "right-0 bottom-0 left-0 mb-8 flex flex-row gap-2 px-4 md:px-8",
+          isMobile ? "relative" : "absolute"
+        )}
+      >
         <Tooltip>
           <TooltipTrigger asChild>
             <Button

@@ -73,9 +73,10 @@ export function DialogAgent({
     )
   }
 
-  const renderContent = () => (
+  const renderContent = (isMobile?: boolean) => (
     <AgentDetail
       id={id}
+      slug={slug}
       name={name}
       description={description}
       example_inputs={example_inputs}
@@ -83,6 +84,7 @@ export function DialogAgent({
       avatar_url={avatar_url}
       onAgentClick={onAgentClick}
       randomAgents={randomAgents}
+      isMobile={isMobile}
     />
   )
 
@@ -102,7 +104,7 @@ export function DialogAgent({
           />
         </DrawerTrigger>
         <DrawerContent className="bg-background border-border">
-          {renderContent()}
+          {renderContent(isMobile)}
         </DrawerContent>
       </Drawer>
     )

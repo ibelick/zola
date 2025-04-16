@@ -38,6 +38,7 @@ export default async function AgentIdPage({
         <div className="bg-background mx-auto max-w-3xl pt-20">
           <AgentDetail
             id={agent.id}
+            slug={agent.slug}
             name={agent.name}
             description={agent.description}
             example_inputs={agent.example_inputs || []}
