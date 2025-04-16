@@ -7,8 +7,6 @@ import { generateObject } from "ai"
 import { z } from "zod"
 
 async function runResearchAgent(prompt: string) {
-  const model = openai("gpt-4.1-nano")
-
   const { object: subtopics } = await generateObject({
     model: openai("gpt-4.1-nano", { structuredOutputs: true }),
     output: "object",
@@ -17,14 +15,14 @@ async function runResearchAgent(prompt: string) {
       "You are a research planner. You generate a diverse set of subtopics from a user research prompt. Avoid repetition.",
     schemaName: "ResearchSubtopics",
     schemaDescription:
-      "A list of 3–5 diverse subtopics related to the given query",
-    prompt: `Generate exactly 4–5 distinct and interesting subtopics related to:\n"${prompt}"`,
+      "A list of 2–3 diverse subtopics related to the given query",
+    prompt: `Generate exactly 2–3 distinct and interesting subtopics related to:\n"${prompt}"`,
   })
 
   const fakeSearchResults = await Promise.all(
     subtopics.topics.map(async (topic) => {
       const { object } = await generateObject({
-        model,
+        model: openai("gpt-4.1-nano"),
         schema: z.object({
           results: z
             .array(
@@ -34,10 +32,9 @@ async function runResearchAgent(prompt: string) {
                 snippet: z.string(),
               })
             )
-            .min(3)
-            .max(5),
+            .length(2),
         }),
-        prompt: `Give 3 fake but realistic search results for this subtopic:\n"${topic}". Include title, URL, and snippet.`,
+        prompt: `Give exactly 2 fake but realistic search results for this subtopic:\n"${topic}". Include title, URL, and snippet.`,
       })
       return { topic, sources: object.results }
     })
@@ -46,7 +43,7 @@ async function runResearchAgent(prompt: string) {
   const summaries = await Promise.all(
     fakeSearchResults.map(async ({ topic, sources }) => {
       const { object } = await generateObject({
-        model,
+        model: openai("gpt-4.1-mini"),
         schema: z.object({
           summary: z.string().min(100),
         }),
