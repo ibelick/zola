@@ -10,14 +10,16 @@ async function runResearchAgent(prompt: string) {
   const model = openai("gpt-4.1-nano")
 
   const { object: subtopics } = await generateObject({
-    model,
-    schema: z.object({
-      topics: z.array(z.string().min(3)).min(1).max(5),
-    }),
-    prompt: `Break this research request into 5 diverse and relevant subtopics. Return only distinct and meaningful aspects of the topic.\n\nTopic: "${prompt}"`,
+    model: openai("gpt-4.1-nano", { structuredOutputs: true }),
+    output: "object",
+    schema: z.object({ topics: z.array(z.string()) }),
+    system:
+      "You are a research planner. You generate a diverse set of subtopics from a user research prompt. Avoid repetition.",
+    schemaName: "ResearchSubtopics",
+    schemaDescription:
+      "A list of 3–5 diverse subtopics related to the given query",
+    prompt: `Generate exactly 4–5 distinct and interesting subtopics related to:\n"${prompt}"`,
   })
-
-  console.log("Subtopics:", subtopics)
 
   const fakeSearchResults = await Promise.all(
     subtopics.topics.map(async (topic) => {
@@ -41,8 +43,6 @@ async function runResearchAgent(prompt: string) {
     })
   )
 
-  console.log("Fake search results:", fakeSearchResults)
-
   const summaries = await Promise.all(
     fakeSearchResults.map(async ({ topic, sources }) => {
       const { object } = await generateObject({
@@ -65,8 +65,6 @@ async function runResearchAgent(prompt: string) {
       }
     })
   )
-
-  console.log("Summaries:", summaries)
 
   const markdown = [
     `# Research Report: ${prompt}`,
