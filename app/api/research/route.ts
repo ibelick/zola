@@ -4,7 +4,10 @@ import { validateUserIdentity } from "@/lib/server/api"
 import { openai } from "@ai-sdk/openai"
 import { SourceUIPart } from "@ai-sdk/ui-utils"
 import { generateObject } from "ai"
+import Exa from "exa-js"
 import { z } from "zod"
+
+const exa = new Exa(process.env.EXA_API_KEY!)
 
 async function runResearchAgent(prompt: string) {
   const { object: subtopics } = await generateObject({
@@ -19,35 +22,33 @@ async function runResearchAgent(prompt: string) {
     prompt: `Generate exactly 2–3 distinct and interesting subtopics related to:\n"${prompt}"`,
   })
 
-  const fakeSearchResults = await Promise.all(
+  const searchResults = await Promise.all(
     subtopics.topics.map(async (topic) => {
-      const { object } = await generateObject({
-        model: openai("gpt-4.1-nano"),
-        schema: z.object({
-          results: z
-            .array(
-              z.object({
-                title: z.string(),
-                url: z.string().url(),
-                snippet: z.string(),
-              })
-            )
-            .length(2),
-        }),
-        prompt: `Give exactly 2 fake but realistic search results for this subtopic:\n"${topic}". Include title, URL, and snippet.`,
+      const { results } = await exa.searchAndContents(topic, {
+        livecrawl: "always",
+        numResults: 3,
       })
-      return { topic, sources: object.results }
+
+      const parsed = results.slice(0, 2).map((r) => ({
+        title: r.title || "",
+        url: r.url || "",
+        snippet: r.text?.slice(0, 300) || "",
+      }))
+
+      return { topic, sources: parsed }
     })
   )
 
+  console.log("searchResults", searchResults)
+
   const summaries = await Promise.all(
-    fakeSearchResults.map(async ({ topic, sources }) => {
+    searchResults.map(async ({ topic, sources }) => {
       const { object } = await generateObject({
         model: openai("gpt-4.1-mini"),
         schema: z.object({
           summary: z.string().min(100),
         }),
-        prompt: `Write a clear summary based on these fake search results for "${topic}":\n\n${sources
+        prompt: `Write a clear summary based on these search results for "${topic}":\n\n${sources
           .map((s, i) => `${i + 1}. ${s.title} — ${s.snippet}`)
           .join("\n")}`,
       })
@@ -76,7 +77,7 @@ async function runResearchAgent(prompt: string) {
         sourceType: "url",
         id: `${index}-${Math.random().toString(16).slice(2, 8)}`,
         url: source.url,
-        title: source.title,
+        title: source.title || "",
       },
     }))
   )
