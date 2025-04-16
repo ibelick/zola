@@ -27,7 +27,7 @@ export async function fetchAndCacheMessages(
 
   const { data, error } = await supabase
     .from("messages")
-    .select("id, content, role, experimental_attachments, created_at")
+    .select("id, content, role, experimental_attachments, created_at, parts")
     .eq("chat_id", chatId)
     .order("created_at", { ascending: true })
 
@@ -40,6 +40,7 @@ export async function fetchAndCacheMessages(
     ...message,
     id: String(message.id),
     createdAt: new Date(message.created_at || ""),
+    parts: message.parts as MessageAISDK["parts"],
   }))
 
   return formattedMessages

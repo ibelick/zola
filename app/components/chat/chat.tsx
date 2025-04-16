@@ -407,6 +407,14 @@ export function Chat() {
           },
         }
       )
+
+      console.log("Adding message:", {
+        role: "assistant",
+        content: markdown,
+        parts,
+        id: optimisticId,
+      })
+
       cacheAndAddMessage({
         role: "assistant",
         content: markdown,

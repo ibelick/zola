@@ -24,6 +24,8 @@ export function Conversation({
   const scrollRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  console.log("Messages:", messages)
+
   if (!messages || messages.length === 0)
     return <div className="h-full w-full"></div>
 
@@ -54,6 +56,7 @@ export function Conversation({
               onEdit={onEdit}
               onReload={onReload}
               hasScrollAnchor={hasScrollAnchor}
+              parts={message.parts}
             >
               {message.content}
             </Message>

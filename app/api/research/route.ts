@@ -14,8 +14,10 @@ async function runResearchAgent(prompt: string) {
     schema: z.object({
       topics: z.array(z.string().min(3)).min(1).max(5),
     }),
-    prompt: `Break this research request into 3–5 subtopics:\n"${prompt}"`,
+    prompt: `Break this research request into 5 diverse and relevant subtopics. Return only distinct and meaningful aspects of the topic.\n\nTopic: "${prompt}"`,
   })
+
+  console.log("Subtopics:", subtopics)
 
   const fakeSearchResults = await Promise.all(
     subtopics.topics.map(async (topic) => {
@@ -30,14 +32,16 @@ async function runResearchAgent(prompt: string) {
                 snippet: z.string(),
               })
             )
-            .min(2)
-            .max(4),
+            .min(3)
+            .max(5),
         }),
         prompt: `Give 3 fake but realistic search results for this subtopic:\n"${topic}". Include title, URL, and snippet.`,
       })
       return { topic, sources: object.results }
     })
   )
+
+  console.log("Fake search results:", fakeSearchResults)
 
   const summaries = await Promise.all(
     fakeSearchResults.map(async ({ topic, sources }) => {
@@ -61,6 +65,8 @@ async function runResearchAgent(prompt: string) {
       }
     })
   )
+
+  console.log("Summaries:", summaries)
 
   const markdown = [
     `# Research Report: ${prompt}`,

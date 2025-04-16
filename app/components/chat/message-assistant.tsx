@@ -5,7 +5,9 @@ import {
   MessageContent,
 } from "@/components/prompt-kit/message"
 import { cn } from "@/lib/utils"
+import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
+import { SourcesList } from "./sources-list"
 
 type MessageAssistantProps = {
   children: string
@@ -14,6 +16,7 @@ type MessageAssistantProps = {
   copied?: boolean
   copyToClipboard?: () => void
   onReload?: () => void
+  parts?: MessageAISDK["parts"]
 }
 
 export function MessageAssistant({
@@ -23,7 +26,14 @@ export function MessageAssistant({
   copied,
   copyToClipboard,
   onReload,
+  parts,
 }: MessageAssistantProps) {
+  const sources = parts
+    ?.filter((part) => part.type === "source")
+    .map((part) => part.source)
+
+  console.log("Sources:", sources)
+
   return (
     <Message
       className={cn(
@@ -38,6 +48,8 @@ export function MessageAssistant({
         >
           {children}
         </MessageContent>
+
+        {sources && <SourcesList sources={sources} />}
 
         <MessageActions
           className={cn(
