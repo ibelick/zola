@@ -41,73 +41,76 @@ export function SourcesList({ sources, className }: SourcesListProps) {
 
   return (
     <div className={cn("my-4", className)}>
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="mb-2 flex w-full items-center gap-2"
-      >
-        <div className="flex flex-1 items-center gap-2 text-left text-base">
-          Sources
-          <div className="flex -space-x-1">
-            {sources.slice(0, 3).map((source) => (
-              <img
-                key={source.id}
-                src={getFavicon(source.url)}
-                alt={`Favicon for ${source.title}`}
-                className="border-background h-4 w-4 rounded-sm border"
-              />
-            ))}
-            {sources.length > 3 && (
-              <span className="text-muted-foreground ml-1 text-xs">
-                +{sources.length - 3}
-              </span>
-            )}
-          </div>
-        </div>
-        <CaretDown
-          className={cn(
-            "h-4 w-4 transition-transform",
-            isExpanded ? "rotate-180 transform" : ""
-          )}
-        />
-      </button>
-
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={TRANSITION}
-            className="overflow-hidden"
-          >
-            <ul className="space-y-2">
-              {sources.map((source) => (
-                <li key={source.id} className="flex items-center text-sm">
-                  <div className="min-w-0 flex-1 overflow-hidden">
-                    <a
-                      href={addUTM(source.url)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary group line-clamp-1 flex items-center gap-1 hover:underline"
-                    >
-                      <img
-                        src={getFavicon(source.url)}
-                        alt={`Favicon for ${source.title}`}
-                        className="h-4 w-4 flex-shrink-0 rounded-sm"
-                      />
-                      <span className="truncate">{source.title}</span>
-                      <Link className="inline h-3 w-3 flex-shrink-0 opacity-70 transition-opacity group-hover:opacity-100" />
-                    </a>
-                    <div className="text-muted-foreground line-clamp-1 text-xs">
-                      {formatUrl(source.url)}
-                    </div>
-                  </div>
-                </li>
+      <div className="border-border flex flex-col gap-0 overflow-hidden rounded-md border">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          type="button"
+          className="hover:bg-accent flex w-full flex-row items-center rounded-t-md px-3 py-2 transition-colors"
+        >
+          <div className="flex flex-1 flex-row items-center gap-2 text-left text-base">
+            Sources
+            <div className="flex -space-x-1">
+              {sources.slice(0, 3).map((source) => (
+                <img
+                  key={source.id}
+                  src={getFavicon(source.url)}
+                  alt={`Favicon for ${source.title}`}
+                  className="border-background h-4 w-4 rounded-sm border"
+                />
               ))}
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              {sources.length > 3 && (
+                <span className="text-muted-foreground ml-1 text-xs">
+                  +{sources.length - 3}
+                </span>
+              )}
+            </div>
+          </div>
+          <CaretDown
+            className={cn(
+              "h-4 w-4 transition-transform",
+              isExpanded ? "rotate-180 transform" : ""
+            )}
+          />
+        </button>
+
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={TRANSITION}
+              className="overflow-hidden"
+            >
+              <ul className="space-y-2 px-3 pt-3 pb-3">
+                {sources.map((source) => (
+                  <li key={source.id} className="flex items-center text-sm">
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                      <a
+                        href={addUTM(source.url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary group line-clamp-1 flex items-center gap-1 hover:underline"
+                      >
+                        <img
+                          src={getFavicon(source.url)}
+                          alt={`Favicon for ${source.title}`}
+                          className="h-4 w-4 flex-shrink-0 rounded-sm"
+                        />
+                        <span className="truncate">{source.title}</span>
+                        <Link className="inline h-3 w-3 flex-shrink-0 opacity-70 transition-opacity group-hover:opacity-100" />
+                      </a>
+                      <div className="text-muted-foreground line-clamp-1 text-xs">
+                        {formatUrl(source.url)}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
