@@ -2,7 +2,9 @@
 
 import { cn } from "@/lib/utils"
 import type { SourceUIPart } from "@ai-sdk/ui-utils"
-import { Link } from "@phosphor-icons/react"
+import { CaretDown, Link } from "@phosphor-icons/react"
+import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
 
 type SourcesListProps = {
   sources: SourceUIPart["source"][]
@@ -21,7 +23,15 @@ const addUTM = (url: string) => {
   return u.toString()
 }
 
+const TRANSITION = {
+  type: "spring",
+  duration: 0.2,
+  bounce: 0,
+}
+
 export function SourcesList({ sources, className }: SourcesListProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
   const formatUrl = (url: string) => {
     return url
       .replace(/^https?:\/\//, "")
@@ -31,32 +41,73 @@ export function SourcesList({ sources, className }: SourcesListProps) {
 
   return (
     <div className={cn("my-4", className)}>
-      <h3 className="mb-2 text-base">Sources</h3>
-      <ul className="space-y-2">
-        {sources.map((source) => (
-          <li key={source.id} className="flex items-center text-sm">
-            <div className="min-w-0 flex-1 overflow-hidden">
-              <a
-                href={addUTM(source.url)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary group line-clamp-1 flex items-center gap-1 hover:underline"
-              >
-                <img
-                  src={getFavicon(source.url)}
-                  alt=""
-                  className="h-4 w-4 flex-shrink-0 rounded-sm"
-                />
-                <span className="truncate">{source.title}</span>
-                <Link className="inline h-3 w-3 flex-shrink-0 opacity-70 transition-opacity group-hover:opacity-100" />
-              </a>
-              <div className="text-muted-foreground line-clamp-1 text-xs">
-                {formatUrl(source.url)}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="mb-2 flex w-full items-center gap-2"
+      >
+        <div className="flex flex-1 items-center gap-2 text-left text-base">
+          Sources
+          <div className="flex -space-x-1">
+            {sources.slice(0, 3).map((source) => (
+              <img
+                key={source.id}
+                src={getFavicon(source.url)}
+                alt={`Favicon for ${source.title}`}
+                className="border-background h-4 w-4 rounded-sm border"
+              />
+            ))}
+            {sources.length > 3 && (
+              <span className="text-muted-foreground ml-1 text-xs">
+                +{sources.length - 3}
+              </span>
+            )}
+          </div>
+        </div>
+        <CaretDown
+          className={cn(
+            "h-4 w-4 transition-transform",
+            isExpanded ? "rotate-180 transform" : ""
+          )}
+        />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={TRANSITION}
+            className="overflow-hidden"
+          >
+            <ul className="space-y-2">
+              {sources.map((source) => (
+                <li key={source.id} className="flex items-center text-sm">
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <a
+                      href={addUTM(source.url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary group line-clamp-1 flex items-center gap-1 hover:underline"
+                    >
+                      <img
+                        src={getFavicon(source.url)}
+                        alt={`Favicon for ${source.title}`}
+                        className="h-4 w-4 flex-shrink-0 rounded-sm"
+                      />
+                      <span className="truncate">{source.title}</span>
+                      <Link className="inline h-3 w-3 flex-shrink-0 opacity-70 transition-opacity group-hover:opacity-100" />
+                    </a>
+                    <div className="text-muted-foreground line-clamp-1 text-xs">
+                      {formatUrl(source.url)}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
