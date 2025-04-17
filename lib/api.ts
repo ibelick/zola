@@ -1,5 +1,5 @@
 import { UserProfile } from "@/app/types/user"
-import { APP_DOMAIN } from "@/lib/config"
+import { APP_DOMAIN, DAILY_SPECIAL_AGENT_LIMIT } from "@/lib/config"
 import { SupabaseClient } from "@supabase/supabase-js"
 import {
   AUTH_DAILY_MESSAGE_LIMIT,
@@ -295,4 +295,109 @@ export const getOrCreateGuestUserId = async (
   localStorage.setItem("guestId", guestId)
   await createGuestUser(guestId)
   return guestId
+}
+
+export class SpecialAgentLimitError extends Error {
+  code: string
+  constructor(message: string = "Special agent usage limit reached.") {
+    super(message)
+    this.code = "SPECIAL_AGENT_LIMIT_REACHED"
+  }
+}
+
+export async function checkSpecialAgentUsage(
+  supabase: SupabaseClient,
+  userId: string
+) {
+  const { data: user, error } = await supabase
+    .from("users")
+    .select("special_agent_count, special_agent_reset, premium")
+    .eq("id", userId)
+    .maybeSingle()
+
+  if (error) {
+    throw new Error("Failed to fetch user data: " + error.message)
+  }
+  if (!user) {
+    throw new Error("User not found")
+  }
+
+  const now = new Date()
+  const lastReset = user.special_agent_reset
+    ? new Date(user.special_agent_reset)
+    : null
+  let usageCount = user.special_agent_count || 0
+
+  const isNewDay =
+    !lastReset ||
+    now.getUTCFullYear() !== lastReset.getUTCFullYear() ||
+    now.getUTCMonth() !== lastReset.getUTCMonth() ||
+    now.getUTCDate() !== lastReset.getUTCDate()
+
+  if (isNewDay) {
+    usageCount = 0
+    const { error: resetError } = await supabase
+      .from("users")
+      .update({
+        special_agent_count: 0,
+        special_agent_reset: now.toISOString(),
+      })
+      .eq("id", userId)
+    if (resetError) {
+      throw new Error(
+        "Failed to reset special agent count: " + resetError.message
+      )
+    }
+  }
+
+  if (usageCount >= DAILY_SPECIAL_AGENT_LIMIT) {
+    const err = new SpecialAgentLimitError()
+    throw err
+  }
+
+  return {
+    usageCount,
+    limit: DAILY_SPECIAL_AGENT_LIMIT,
+  }
+}
+
+export async function incrementSpecialAgentUsage(
+  supabase: SupabaseClient,
+  userId: string,
+  currentCount?: number
+): Promise<void> {
+  let specialAgentCount: number
+
+  if (typeof currentCount === "number") {
+    specialAgentCount = currentCount
+  } else {
+    const { data, error } = await supabase
+      .from("users")
+      .select("special_agent_count")
+      .eq("id", userId)
+      .maybeSingle()
+
+    if (error || !data) {
+      throw new Error(
+        "Failed to fetch special agent count: " +
+          (error?.message || "Not found")
+      )
+    }
+
+    specialAgentCount = data.special_agent_count || 0
+  }
+
+  const { error: updateError } = await supabase
+    .from("users")
+    .update({
+      special_agent_count: specialAgentCount + 1,
+      last_active_at: new Date().toISOString(),
+    })
+    .eq("id", userId)
+
+  if (updateError) {
+    throw new Error(
+      "Failed to increment special agent count: " + updateError.message
+    )
+  }
 }

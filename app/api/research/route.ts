@@ -1,4 +1,9 @@
-import { checkUsage, incrementUsage } from "@/lib/api"
+import {
+  checkSpecialAgentUsage,
+  checkUsage,
+  incrementSpecialAgentUsage,
+  incrementUsage,
+} from "@/lib/api"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
 import { openai } from "@ai-sdk/openai"
@@ -101,6 +106,7 @@ export async function POST(req: Request) {
     const supabase = await validateUserIdentity(userId, isAuthenticated)
 
     await checkUsage(supabase, userId)
+    await checkSpecialAgentUsage(supabase, userId)
 
     const sanitizedPrompt = sanitizeUserInput(prompt)
 
@@ -124,6 +130,7 @@ export async function POST(req: Request) {
     })
 
     await incrementUsage(supabase, userId)
+    await incrementSpecialAgentUsage(supabase, userId)
 
     return new Response(JSON.stringify(result), {
       status: 200,
@@ -131,6 +138,14 @@ export async function POST(req: Request) {
     })
   } catch (err: any) {
     console.error("/api/research error", err)
+
+    if (err.code === "SPECIAL_AGENT_LIMIT_REACHED") {
+      return new Response(
+        JSON.stringify({ error: err.message, code: err.code }),
+        { status: 403 }
+      )
+    }
+
     return new Response(JSON.stringify({ error: "Something went wrong" }), {
       status: 500,
     })

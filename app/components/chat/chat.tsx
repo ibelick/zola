@@ -13,6 +13,7 @@ import {
   MODEL_DEFAULT,
   REMAINING_QUERY_ALERT_THRESHOLD,
   SYSTEM_PROMPT_DEFAULT,
+  ZOLA_SPECIAL_AGENTS_IDS,
 } from "@/lib/config"
 import { fetchClient } from "@/lib/fetch"
 import {
@@ -64,6 +65,14 @@ export function Chat() {
   const [hydrated, setHydrated] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
+  const [hasSentInitialPrompt, setHasSentInitialPrompt] = useState(false)
+
+  // TODO: Remove this once we have a proper agent layer
+  const isZolaResearch = ZOLA_SPECIAL_AGENTS_IDS.includes(
+    currentChat?.agent_id || ""
+  )
+
+  // console.log("isZolaResearch", isZolaResearch)
 
   const isAuthenticated = !!user?.id
   const {
@@ -104,6 +113,7 @@ export function Chat() {
     setHydrated(true)
   }, [])
 
+  // handle errors
   useEffect(() => {
     if (error) {
       let errorMsg = "Something went wrong."
@@ -123,12 +133,84 @@ export function Chat() {
   useEffect(() => {
     const prompt = searchParams.get("prompt")
 
-    if (!prompt || !chatId || messages.length > 0) return
+    console.log("[debug] useEffect triggered")
+    console.log("[debug] chatId:", chatId)
+    console.log("[debug] messages.length:", messages.length)
+    console.log("[debug] prompt param:", prompt)
+    console.log("[debug] hasSentInitialPrompt:", hasSentInitialPrompt)
 
+    if (!prompt || !chatId || messages.length > 0 || hasSentInitialPrompt) {
+      console.log("[debug] ❌ conditions not met, skipping sendInitialPrompt")
+      return
+    }
+
+    console.log("[debug] ✅ triggering sendInitialPrompt")
+    setHasSentInitialPrompt(true)
     sendInitialPrompt(prompt)
-  }, [chatId, searchParams])
+  }, [chatId, messages.length, searchParams, hasSentInitialPrompt])
+
+  const handleZolaResearch = async (
+    prompt: string,
+    uid: string,
+    chatId: string
+  ) => {
+    console.log("handleZolaResearch", prompt, uid, chatId)
+
+    try {
+      const res = await fetchClient(API_ROUTE_RESEARCH, {
+        method: "POST",
+        body: JSON.stringify({
+          prompt,
+          chatId,
+          userId: uid,
+          isAuthenticated,
+        }),
+        headers: { "Content-Type": "application/json" },
+      })
+
+      if (!res.ok) {
+        const errorText = await res.text()
+        throw new Error(errorText || "Failed to fetch research response.")
+      }
+
+      const { markdown, parts } = await res.json()
+
+      append(
+        {
+          role: "assistant",
+          content: markdown,
+          parts,
+        },
+        {
+          body: {
+            chatId,
+            userId: uid,
+            model: selectedModel,
+            isAuthenticated,
+            systemPrompt,
+          },
+        }
+      )
+
+      cacheAndAddMessage({
+        role: "assistant",
+        content: markdown,
+        parts,
+        id: `research-${Date.now()}`,
+      })
+    } catch (err: any) {
+      console.error("Zola Research Error:", err)
+      toast({
+        title: "Zola Research failed",
+        description: err.message || "Something went wrong.",
+        status: "error",
+      })
+    }
+  }
 
   const sendInitialPrompt = async (prompt: string) => {
+    console.log("sendInitialPrompt")
+
     setIsSubmitting(true)
 
     const uid = await getOrCreateGuestUserId(user)
@@ -148,6 +230,13 @@ export function Chat() {
         isAuthenticated,
         systemPrompt,
       },
+    }
+
+    if (isZolaResearch && chatId) {
+      handleZolaResearch(prompt, uid, chatId)
+      setIsSubmitting(false)
+      router.replace(`/c/${chatId}`)
+      return
     }
 
     try {
@@ -373,46 +462,12 @@ export function Chat() {
       experimental_attachments: attachments || undefined,
     }
 
+    console.log("submit")
+
     // START OF RESEARCH AGENT
-    // TODO: This is temporary solution with just checking for "research" in the input.
-    if (input.toLowerCase().includes("research")) {
-      const res = await fetchClient(API_ROUTE_RESEARCH, {
-        method: "POST",
-        body: JSON.stringify({
-          prompt: input,
-          chatId: currentChatId,
-          userId: uid,
-          isAuthenticated,
-        }),
-        headers: { "Content-Type": "application/json" },
-      })
-
-      const { markdown, parts } = await res.json()
-
-      append(
-        {
-          role: "assistant",
-          content: markdown,
-          parts,
-        },
-        {
-          body: {
-            chatId: currentChatId,
-            userId: uid,
-            model: selectedModel,
-            isAuthenticated,
-            systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-          },
-        }
-      )
-
-      cacheAndAddMessage({
-        role: "assistant",
-        content: markdown,
-        parts,
-        id: optimisticId,
-      })
-
+    // @todo: This is temporary solution
+    if (isZolaResearch) {
+      handleZolaResearch(input, uid, currentChatId)
       setInput("")
       setIsSubmitting(false)
       return
@@ -546,8 +601,6 @@ export function Chat() {
   if (hydrated && chatId && !isChatsLoading && !currentChat) {
     return redirect("/")
   }
-
-  console.log("Messages:", messages)
 
   return (
     <div

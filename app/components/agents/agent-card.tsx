@@ -32,13 +32,7 @@ export function AgentCard({
         !isAvailable && "cursor-not-allowed opacity-50"
       )}
       type="button"
-      onClick={() => {
-        if (isAvailable && onClick) {
-          onClick()
-        }
-
-        null
-      }}
+      onClick={() => isAvailable && onClick?.()}
     >
       <div className="flex items-center space-x-4">
         <div className="flex-shrink-0">
