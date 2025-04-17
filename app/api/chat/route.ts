@@ -5,6 +5,8 @@ import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { Message as MessageAISDK, streamText } from "ai"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider"
+
 
 // Maximum allowed duration for streaming (in seconds)
 export const maxDuration = 30
@@ -79,8 +81,22 @@ export async function POST(req: Request) {
       }
     }
 
+    const modelConfig = MODELS.find((m) => m.id === model)
+    if (!modelConfig){
+      throw new Error(`Model ${model} not found`)
+    }
+    let modelInstance
+    if (modelConfig.provider === 'openrouter') {
+      const openRouter = createOpenRouter({
+        apiKey: process.env.OPENROUTER_API_KEY,
+      })
+      modelInstance = openRouter.chat(modelConfig.api_sdk) // this is a special case for openrouter. Normal openrouter models are not supported.
+    } else {
+      modelInstance = modelConfig.api_sdk
+    }
+
     const result = streamText({
-      model: MODELS.find((m) => m.id === model)?.api_sdk!,
+      model: modelInstance,
       system: effectiveSystemPrompt,
       messages,
       onError: (err) => {

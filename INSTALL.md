@@ -28,6 +28,9 @@ OPENAI_API_KEY=your_openai_api_key
 # Mistral
 MISTRAL_API_KEY=your_mistral_api_key
 
+# OpenRouter
+OPENROUTER_API_KEY=your_openrouter_api_key
+
 # CSRF Protection
 CSRF_SECRET=your_csrf_secret_key
 
@@ -58,6 +61,35 @@ python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
 Copy the generated value and add it to your `.env.local` file as the `CSRF_SECRET` value.
+
+#### Google OAuth Authentication
+
+1. Go to your Supabase project dashboard
+2. Navigate to Authentication > Providers
+3. Find the "Google" provider
+4. Enable it by toggling the switch
+5. Configure the Google OAuth credentials:
+    - You'll need to set up OAuth 2.0 credentials in the Google Cloud Console
+    - Add your application's redirect URL: https://[YOUR_PROJECT_REF].supabase.co/auth/v1/callback
+    - Get the Client ID and Client Secret from Google Cloud Console
+    - Add these credentials to the Google provider settings in Supabase
+
+Here are the detailed steps to set up Google OAuth:
+
+1. Go to the Google Cloud Console
+2. Create a new project or select an existing one
+3. Enable the Google+ API
+4. Go to Credentials > Create Credentials > OAuth Client ID
+5. Configure the OAuth consent screen if you haven't already
+6. Set the application type as "Web application"
+7. Add these authorized redirect URIs:
+  - https://[YOUR_PROJECT_REF].supabase.co/auth/v1/callback
+  - http://localhost:3000/auth/callback (for local development)
+8. Copy the Client ID and Client Secret
+9. Go back to your Supabase dashboard
+10. Paste the Client ID and Client Secret in the Google provider settings
+11. Save the changes
+
 
 ## Local Installation
 
@@ -118,8 +150,8 @@ CREATE TABLE users (
   preferred_model TEXT,
   premium BOOLEAN DEFAULT false,
   profile_image TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-  last_active_at: TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  last_active_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Chats table

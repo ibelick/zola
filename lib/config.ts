@@ -4,6 +4,7 @@ import Gemini from "@/components/icons/gemini"
 import Grok from "@/components/icons/grok"
 import Mistral from "@/components/icons/mistral"
 import OpenAI from "@/components/icons/openai"
+import OpenRouter from "@/components/icons/openrouter"
 import { mistral } from "@ai-sdk/mistral"
 import { openai } from "@ai-sdk/openai"
 import {
@@ -41,19 +42,7 @@ export type Model = {
 }
 
 export const MODELS_NOT_AVAILABLE = [
-  {
-    id: "deepseek-r1",
-    name: "DeepSeek R1",
-    provider: "deepseek",
-    available: false,
-    api_sdk: false,
-    features: [
-      {
-        id: "file-upload",
-        enabled: false,
-      },
-    ],
-  },
+  
   {
     id: "gemini-1.5-pro",
     name: "Gemini 1.5 Pro",
@@ -205,8 +194,22 @@ export const MODELS = [
       },
     ],
     api_sdk: mistral("mistral-large-latest"),
+    icon: Mistral,
+    description: "Fine-tuned for chat. A lighter, faster option for everyday use.",
+  },
+  {
+    id: "deepseek-r1",
+    name: "DeepSeek R1",
+    provider: "openrouter",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: "deepseek/deepseek-r1:free", // this is a special case for openrouter
     description:
-      "Fine-tuned for chat. A lighter, faster option for everyday use.",
+      "A reasoning-first model trained with reinforcement learning, built for math, code, and complex problem solving",
   },
 ] as Model[]
 
@@ -253,6 +256,11 @@ const PROVIDERS_NOT_AVAILABLE = [
 ] as Provider[]
 
 export const PROVIDERS = [
+  {
+    id: "openrouter",
+    name: "OpenRouter",
+    icon: OpenRouter,
+  },
   {
     id: "openai",
     name: "OpenAI",
@@ -410,7 +418,7 @@ export const SUGGESTIONS = [
     highlight: "Explain",
     prompt: `Explain`,
     items: [
-      "Explain quantum physics like I’m 10",
+      "Explain quantum physics like I'm 10",
       "Explain stoicism in simple terms",
       "Explain how a neural network works",
       "Explain the difference between AI and AGI",
