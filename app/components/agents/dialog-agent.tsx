@@ -23,6 +23,7 @@ type DialogAgentProps = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   randomAgents: AgentSummary[]
+  trigger?: React.ReactNode
 }
 
 export function DialogAgent({
@@ -39,6 +40,7 @@ export function DialogAgent({
   isOpen,
   onOpenChange,
   randomAgents,
+  trigger,
 }: DialogAgentProps) {
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
@@ -52,11 +54,24 @@ export function DialogAgent({
     onOpenChange(open)
   }
 
+  const defaultTrigger = (
+    <AgentCard
+      id={id}
+      name={name}
+      description={description}
+      creator_id={creator_id}
+      avatar_url={avatar_url}
+      className={className}
+      isAvailable={isAvailable}
+      onClick={() => handleOpenChange(true)}
+    />
+  )
+
   if (!user) {
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <div>
+          {trigger || (
             <AgentCard
               id={id}
               name={name}
@@ -66,7 +81,7 @@ export function DialogAgent({
               className={className}
               isAvailable={isAvailable}
             />
-          </div>
+          )}
         </PopoverTrigger>
         <PopoverContentAuth />
       </Popover>
@@ -91,18 +106,7 @@ export function DialogAgent({
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={handleOpenChange}>
-        <DrawerTrigger asChild>
-          <AgentCard
-            id={id}
-            name={name}
-            description={description}
-            creator_id={creator_id}
-            avatar_url={avatar_url}
-            className={className}
-            isAvailable={isAvailable}
-            onClick={() => handleOpenChange(true)}
-          />
-        </DrawerTrigger>
+        <DrawerTrigger asChild>{trigger || defaultTrigger}</DrawerTrigger>
         <DrawerContent className="bg-background border-border">
           {renderContent(isMobile)}
         </DrawerContent>
@@ -112,18 +116,7 @@ export function DialogAgent({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <AgentCard
-          id={id}
-          name={name}
-          description={description}
-          creator_id={creator_id}
-          avatar_url={avatar_url}
-          className={className}
-          isAvailable={isAvailable}
-          onClick={() => handleOpenChange(true)}
-        />
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
       <DialogContent className="[&>button:last-child]:bg-background max-w-[600px] gap-0 overflow-hidden rounded-3xl p-0 shadow-xs [&>button:last-child]:rounded-full [&>button:last-child]:p-1">
         {renderContent()}
       </DialogContent>

@@ -1,7 +1,7 @@
 "use client"
 
 import type { AgentsSuggestions } from "@/app/types/agent"
-import { ZOLA_AGENT_SLUGS } from "@/lib/config"
+import { ZOLA_AGENTS_SLUGS } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
@@ -37,7 +37,7 @@ export const PromptSystem = memo(function PromptSystem({
       const { data, error } = await supabase
         .from("agents")
         .select("id, name, description, avatar_url")
-        .in("slug", ZOLA_AGENT_SLUGS)
+        .in("slug", ZOLA_AGENTS_SLUGS)
 
       if (error) {
         throw new Error("Error fetching agents: " + error.message)

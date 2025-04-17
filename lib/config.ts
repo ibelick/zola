@@ -423,7 +423,7 @@ export const SYSTEM_PROMPT_DEFAULT = `You are Zola, a thoughtful and clear assis
 
 export const MESSAGE_MAX_LENGTH = 4000
 
-export const ZOLA_AGENT_SLUGS = [
+export const ZOLA_AGENTS_SLUGS = [
   "tweet-vibe-checker",
   "clear-ux-copywriter",
   "0-to-1-advisor",
@@ -435,6 +435,8 @@ export const ZOLA_AGENT_SLUGS = [
   "solene",
   "eloi",
 ]
+
+export const ZOLA_SPECIAL_AGENTS_SLUGS = ["zola-research"]
 
 export const ZOLA_COMING_SOON_AGENTS = [
   {
