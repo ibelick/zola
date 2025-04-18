@@ -21,34 +21,29 @@ async function runResearchAgent(prompt: string) {
   const { object: titleObj } = await generateObject({
     model: openai("gpt-4.1-nano", { structuredOutputs: true }),
     schema: z.object({ title: z.string() }),
-    prompt: `Craft a concise, descriptive report title (≤ 12 words) for:
-              "${prompt}". Do NOT prefix with "Report".`,
+    prompt: `Write a short report title (max 12 words) for:
+                "${prompt}". Only capitalize the first letter of the first word. Do NOT prefix with "Report", no fluff.`,
   })
   const reportTitle = titleObj.title
-
-  console.log("reportTitle", reportTitle)
 
   /* ---------- 2. pick 2‑3 distinct sub‑topics ---------- */
   const { object: subtopics } = await generateObject({
     model: openai("gpt-4.1-nano", { structuredOutputs: true }),
     schema: z.object({
-      topics: z.array(z.string()), // remove .min() and .max()
+      topics: z.array(z.string()),
     }),
-    prompt: `List 2–3 truly different angles that together answer:
-              "${prompt}". Return plain strings – no numbering.`,
+    prompt: `Give 2–3 subtopics that cover clearly different aspects of:
+    "${prompt}". Avoid overlap. Respond with plain text only, no numbers.`,
   })
-
-  console.log("subtopics", subtopics)
 
   /* ---------- 3. fetch and deduplicate sources ---------- */
   const searchResults = await Promise.all(
     subtopics.topics.map(async (topic) => {
       const { results } = await exa.searchAndContents(topic, {
         livecrawl: "always",
-        numResults: 4,
+        numResults: 3,
       })
 
-      // deduplicate by URL, take first 2 unique
       const seen = new Set<string>()
       const unique = results
         .filter((r) => {
@@ -69,8 +64,6 @@ async function runResearchAgent(prompt: string) {
     })
   )
 
-  console.log("searchResults", searchResults)
-
   /* ---------- 4. produce bullet‑style summaries ---------- */
   const summaries = await Promise.all(
     searchResults.map(async ({ topic, sources }) => {
@@ -83,23 +76,22 @@ async function runResearchAgent(prompt: string) {
         schema: z.object({
           summary: z.string().min(120),
         }),
-        prompt: `Write a clear, structured bullet list (max 6 bullets) summarizing key insights about "${topic}" for a 5-person startup.
-
-        Use the info below only. Don’t include links.
-        
-        Sources:
+        prompt: `Summarize the key insights about "${topic}" in 4–6 bullets.
+        • Use “–” or “•” for bullets — no numbering.
+        • Do not start or end with a paragraph.
+        • Keep it tight, and insight-focused.
+        • Avoid summary phrases like “overall” or “in conclusion.”
+        Use only the sources below:
         ${bulletedSources}`,
       })
 
       return {
         topic,
         summary: object.summary,
-        citations: sources, // we’ll convert to parts later
+        citations: sources,
       }
     })
   )
-
-  console.log("summaries", summaries)
 
   /* ---------- 5. build Markdown & citation parts ---------- */
   const markdown =
@@ -107,8 +99,6 @@ async function runResearchAgent(prompt: string) {
     summaries
       .map(({ topic, summary }) => `## ${topic}\n\n${summary.trim()}\n`)
       .join("\n")
-
-  console.log("markdown", markdown)
 
   let globalIndex = 0
   const parts: SourceUIPart[] = summaries.flatMap(({ citations }) =>
