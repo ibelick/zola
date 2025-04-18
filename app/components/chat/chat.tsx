@@ -605,6 +605,8 @@ export function Chat() {
     return redirect("/")
   }
 
+  console.log("messages", messages)
+
   return (
     <div
       className={cn(
