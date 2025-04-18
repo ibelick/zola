@@ -70,8 +70,6 @@ async function runResearchAgent(prompt: string) {
   )
 
   const markdown = [
-    `# ${prompt}`,
-    "",
     ...summaries.map(({ topic, summary }) => `## ${topic}\n\n${summary}\n`),
   ].join("\n")
 

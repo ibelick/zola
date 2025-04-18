@@ -27,7 +27,7 @@ import { useChat } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 const FeedbackWidget = dynamic(
   () => import("./feedback-widget").then((mod) => mod.FeedbackWidget),
@@ -65,7 +65,8 @@ export function Chat() {
   const [hydrated, setHydrated] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [hasSentInitialPrompt, setHasSentInitialPrompt] = useState(false)
+  const hasSentInitialPromptRef = useRef(false)
+  const hasSentFirstMessageRef = useRef(false)
 
   // TODO: Remove this once we have a proper agent layer
   const isZolaResearch = ZOLA_SPECIAL_AGENTS_IDS.includes(
@@ -133,29 +134,24 @@ export function Chat() {
   useEffect(() => {
     const prompt = searchParams.get("prompt")
 
-    console.log("[debug] useEffect triggered")
-    console.log("[debug] chatId:", chatId)
-    console.log("[debug] messages.length:", messages.length)
-    console.log("[debug] prompt param:", prompt)
-    console.log("[debug] hasSentInitialPrompt:", hasSentInitialPrompt)
-
-    if (!prompt || !chatId || messages.length > 0 || hasSentInitialPrompt) {
-      console.log("[debug] ❌ conditions not met, skipping sendInitialPrompt")
+    if (
+      !prompt ||
+      !chatId ||
+      messages.length > 0 ||
+      hasSentInitialPromptRef.current
+    ) {
       return
     }
 
-    console.log("[debug] ✅ triggering sendInitialPrompt")
-    setHasSentInitialPrompt(true)
+    hasSentInitialPromptRef.current = true
     sendInitialPrompt(prompt)
-  }, [chatId, messages.length, searchParams, hasSentInitialPrompt])
+  }, [chatId, messages.length, searchParams])
 
   const handleZolaResearch = async (
     prompt: string,
     uid: string,
     chatId: string
   ) => {
-    console.log("handleZolaResearch", prompt, uid, chatId)
-
     try {
       const res = await fetchClient(API_ROUTE_RESEARCH, {
         method: "POST",
@@ -169,8 +165,8 @@ export function Chat() {
       })
 
       if (!res.ok) {
-        const errorText = await res.text()
-        throw new Error(errorText || "Failed to fetch research response.")
+        const errorText = (await res.json()) as { error: string }
+        throw new Error(errorText.error || "Failed to fetch research response.")
       }
 
       const { markdown, parts } = await res.json()
@@ -466,9 +462,8 @@ export function Chat() {
 
     // START OF RESEARCH AGENT
     // @todo: This is temporary solution
-    if (isZolaResearch) {
-      handleZolaResearch(input, uid, currentChatId)
-      setInput("")
+    if (isZolaResearch && messages.length === 0) {
+      await handleZolaResearch(input, uid, currentChatId)
       setIsSubmitting(false)
       return
     }
@@ -479,6 +474,8 @@ export function Chat() {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
+
+      hasSentFirstMessageRef.current = true
     } catch (error) {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
