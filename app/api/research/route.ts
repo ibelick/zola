@@ -21,19 +21,17 @@ async function runResearchAgent(prompt: string) {
   const { object: titleObj } = await generateObject({
     model: openai("gpt-4.1-nano", { structuredOutputs: true }),
     schema: z.object({ title: z.string() }),
-    prompt: `Write a short report title (max 12 words) for:
-  "${prompt}". Only capitalize the first word. No fluff, no punctuation at the end. Don’t include the word “report”.`,
+    prompt: `Write a short report title (max 12 words) for:
+  "${prompt}". Only capitalize the first word; no trailing punctuation; avoid the word “report”.`,
   })
   const reportTitle = titleObj.title
 
-  /* ---------- 2. pick 2‑3 distinct sub‑topics ---------- */
+  /* ---------- 2. pick 2–3 distinct sub‑topics ---------- */
   const { object: subtopics } = await generateObject({
     model: openai("gpt-4.1-nano", { structuredOutputs: true }),
-    schema: z.object({
-      topics: z.array(z.string()),
-    }),
-    prompt: `List 2–3 distinct subtopics that cover different sides of:
-  "${prompt}". Respond with plain strings only, no numbering or overlap.`,
+    schema: z.object({ topics: z.array(z.string()) }),
+    prompt: `Give *exactly* 2 or 3 sub‑topics that cover clearly different aspects of:
+  "${prompt}". Return each as a plain line of text – no bullets or numbers.`,
   })
 
   /* ---------- 3. fetch and deduplicate sources ---------- */
@@ -43,14 +41,9 @@ async function runResearchAgent(prompt: string) {
         livecrawl: "always",
         numResults: 3,
       })
-
       const seen = new Set<string>()
       const unique = results
-        .filter((r) => {
-          if (!r.url || seen.has(r.url)) return false
-          seen.add(r.url)
-          return true
-        })
+        .filter((r) => r.url && !seen.has(r.url) && seen.add(r.url))
         .slice(0, 2)
 
       return {
@@ -64,40 +57,38 @@ async function runResearchAgent(prompt: string) {
     })
   )
 
-  /* ---------- 4. produce bullet‑style summaries ---------- */
+  /* ---------- 4. produce tight bullet‑style summaries ---------- */
   const summaries = await Promise.all(
     searchResults.map(async ({ topic, sources }) => {
       const bulletedSources = sources
-        .map((s, i) => `${i + 1}. “${s.title}”: ${s.snippet}`)
+        .map((s, i) => `${i + 1}. "${s.title}": ${s.snippet}`)
         .join("\n")
 
       const { object } = await generateObject({
         model: openai("gpt-4.1-mini"),
-        schema: z.object({
-          summary: z.string().min(120),
-        }),
-        prompt: `Summarize the key insights about "${topic}" in 4–6 short bullet points.
-        • Use - or * for each bullet.
-        • NEVER use paragraph formatting or wrap bullets in text blocks.
-        • No introduction, no conclusion, no transitions.
-        • Each bullet should be 1 sentence max, clear and practical.
-        Use ONLY the info below:
-        ${bulletedSources}`,
+        schema: z.object({ summary: z.string() }),
+        prompt: `Summarize the key insights about "${topic}" as **exactly 4‑6 bullets**.
+  • Each bullet **must start with "-" "** (hyphen + space) – no other bullet symbols.
+  • One concise sentence per bullet; no intro, no conclusion, no extra paragraphs.
+  • Base the bullets only on the information below – do not include links.
+  
+  ${bulletedSources}`,
       })
 
       return {
         topic,
-        summary: object.summary,
+        summary: object.summary.trim(),
         citations: sources,
       }
     })
   )
 
+  /* ---------- 5. assemble markdown & citation parts ---------- */
   return {
     markdown:
       `# ${reportTitle}\n\n` +
       summaries
-        .map(({ topic, summary }) => `## ${topic}\n\n${summary.trim()}`)
+        .map(({ topic, summary }) => `## ${topic}\n\n${summary}`)
         .join("\n\n"),
     parts: summaries.flatMap(({ citations }, i) =>
       citations.map((src, j) => ({
