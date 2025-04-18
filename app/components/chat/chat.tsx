@@ -67,13 +67,15 @@ export function Chat() {
   const router = useRouter()
   const hasSentInitialPromptRef = useRef(false)
   const hasSentFirstMessageRef = useRef(false)
+  // @todo: will move to agent layer
+  const [researchStatus, setResearchStatus] = useState<"idle" | "loading">(
+    "idle"
+  )
 
   // TODO: Remove this once we have a proper agent layer
   const isZolaResearch = ZOLA_SPECIAL_AGENTS_IDS.includes(
     currentChat?.agent_id || ""
   )
-
-  // console.log("isZolaResearch", isZolaResearch)
 
   const isAuthenticated = !!user?.id
   const {
@@ -153,6 +155,8 @@ export function Chat() {
     chatId: string
   ) => {
     try {
+      setResearchStatus("loading")
+
       const res = await fetchClient(API_ROUTE_RESEARCH, {
         method: "POST",
         body: JSON.stringify({
@@ -194,6 +198,8 @@ export function Chat() {
         parts,
         id: `research-${Date.now()}`,
       })
+
+      setResearchStatus("idle")
     } catch (err: any) {
       console.error("Zola Research Error:", err)
       toast({
@@ -201,12 +207,12 @@ export function Chat() {
         description: err.message || "Something went wrong.",
         status: "error",
       })
+
+      setResearchStatus("idle")
     }
   }
 
   const sendInitialPrompt = async (prompt: string) => {
-    console.log("sendInitialPrompt")
-
     setIsSubmitting(true)
 
     const uid = await getOrCreateGuestUserId(user)
@@ -634,6 +640,7 @@ export function Chat() {
             onDelete={handleDelete}
             onEdit={handleEdit}
             onReload={handleReload}
+            researchStatus={researchStatus}
           />
         )}
       </AnimatePresence>
@@ -668,6 +675,11 @@ export function Chat() {
           status={status}
           setSelectedAgentId={setSelectedAgentId}
           selectedAgentId={selectedAgentId}
+          placeholder={
+            isZolaResearch && messages.length === 0
+              ? "Describe what you want to research in detail, e.g. a specific company, trend, or question. Add context like audience, angle, goals, or examples to help me create a focused and useful report."
+              : "Ask Zola anything"
+          }
         />
       </motion.div>
       <FeedbackWidget authUserId={user?.id} />

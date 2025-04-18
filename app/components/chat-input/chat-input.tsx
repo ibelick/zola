@@ -35,6 +35,7 @@ type ChatInputProps = {
   status?: "submitted" | "streaming" | "ready" | "error"
   setSelectedAgentId: (agentId: string | null) => void
   selectedAgentId: string | null
+  placeholder?: string
 }
 
 export function ChatInput({
@@ -55,6 +56,7 @@ export function ChatInput({
   status,
   setSelectedAgentId,
   selectedAgentId,
+  placeholder,
 }: ChatInputProps) {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -109,7 +111,7 @@ export function ChatInput({
         >
           <FileList files={files} onFileRemove={onFileRemove} />
           <PromptInputTextarea
-            placeholder={`Ask ${APP_NAME}`}
+            placeholder={placeholder}
             onKeyDown={handleKeyDown}
             className="mt-2 ml-2 min-h-[44px] text-base leading-[1.3] sm:text-base md:text-base"
           />

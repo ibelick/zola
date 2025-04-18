@@ -11,6 +11,7 @@ type ConversationProps = {
   onDelete: (id: string) => void
   onEdit: (id: string, newText: string) => void
   onReload: () => void
+  researchStatus?: "idle" | "loading"
 }
 
 export function Conversation({
@@ -19,6 +20,7 @@ export function Conversation({
   onDelete,
   onEdit,
   onReload,
+  researchStatus,
 }: ConversationProps) {
   const initialMessageCount = useRef(messages.length)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -67,6 +69,11 @@ export function Conversation({
               <Loader />
             </div>
           )}
+        {researchStatus === "loading" && (
+          <div className="group min-h-scroll-anchor flex w-full max-w-3xl flex-col items-start gap-2 px-6 pb-2">
+            <Loader text="Generating research report" />
+          </div>
+        )}
       </ChatContainer>
       <div className="absolute bottom-0 w-full max-w-3xl">
         <ScrollButton
