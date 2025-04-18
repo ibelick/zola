@@ -22,7 +22,7 @@ async function runResearchAgent(prompt: string) {
     model: openai("gpt-4.1-nano", { structuredOutputs: true }),
     schema: z.object({ title: z.string() }),
     prompt: `Write a short report title (max 12 words) for:
-                "${prompt}". Only capitalize the first letter of the first word. Do NOT prefix with "Report", no fluff.`,
+  "${prompt}". Only capitalize the first word. No fluff, no punctuation at the end. Don’t include the word “report”.`,
   })
   const reportTitle = titleObj.title
 
@@ -32,8 +32,8 @@ async function runResearchAgent(prompt: string) {
     schema: z.object({
       topics: z.array(z.string()),
     }),
-    prompt: `Give 2–3 subtopics that cover clearly different aspects of:
-    "${prompt}". Avoid overlap. Respond with plain text only, no numbers.`,
+    prompt: `List 2–3 distinct subtopics that cover different sides of:
+  "${prompt}". Respond with plain strings only, no numbering or overlap.`,
   })
 
   /* ---------- 3. fetch and deduplicate sources ---------- */
@@ -76,12 +76,12 @@ async function runResearchAgent(prompt: string) {
         schema: z.object({
           summary: z.string().min(120),
         }),
-        prompt: `Summarize the key insights about "${topic}" in 4–6 bullets.
-        • Use “–” or “•” for bullets — no numbering.
-        • Do not start or end with a paragraph.
-        • Keep it tight, and insight-focused.
-        • Avoid summary phrases like “overall” or “in conclusion.”
-        Use only the sources below:
+        prompt: `Summarize the key insights about "${topic}" in 4–6 short bullet points.
+        • Use - or * for each bullet.
+        • NEVER use paragraph formatting or wrap bullets in text blocks.
+        • No introduction, no conclusion, no transitions.
+        • Each bullet should be 1 sentence max, clear and practical.
+        Use ONLY the info below:
         ${bulletedSources}`,
       })
 
@@ -93,27 +93,24 @@ async function runResearchAgent(prompt: string) {
     })
   )
 
-  /* ---------- 5. build Markdown & citation parts ---------- */
-  const markdown =
-    `# ${reportTitle}\n\n` +
-    summaries
-      .map(({ topic, summary }) => `## ${topic}\n\n${summary.trim()}\n`)
-      .join("\n")
-
-  let globalIndex = 0
-  const parts: SourceUIPart[] = summaries.flatMap(({ citations }) =>
-    citations.map((src) => ({
-      type: "source",
-      source: {
-        sourceType: "url",
-        id: `src-${globalIndex++}`,
-        url: src.url,
-        title: src.title,
-      },
-    }))
-  )
-
-  return { markdown, parts }
+  return {
+    markdown:
+      `# ${reportTitle}\n\n` +
+      summaries
+        .map(({ topic, summary }) => `## ${topic}\n\n${summary.trim()}`)
+        .join("\n\n"),
+    parts: summaries.flatMap(({ citations }, i) =>
+      citations.map((src, j) => ({
+        type: "source",
+        source: {
+          sourceType: "url",
+          id: `src-${i}-${j}`,
+          url: src.url,
+          title: src.title,
+        },
+      }))
+    ),
+  }
 }
 
 function jsonRes(
