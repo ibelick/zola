@@ -266,6 +266,11 @@ export function Chat() {
       if (storedGuestChatId) return storedGuestChatId
     }
 
+    // @todo: remove this once we have a proper agent layer
+    if (selectedAgentId && messages.length === 0) {
+      return chatId
+    }
+
     if (messages.length === 0) {
       try {
         const newChat = await createNewChat(
