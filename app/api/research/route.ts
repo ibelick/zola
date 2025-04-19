@@ -29,7 +29,7 @@ async function runResearchAgent(prompt: string) {
   const { object: subtopics } = await generateObject({
     model: openai("gpt-4.1-nano", { structuredOutputs: true }),
     schema: z.object({ topics: z.array(z.string()) }),
-    prompt: `Give *exactly* 2 or 3 sub‑topics that cover clearly different aspects of:
+    prompt: `Give between 2 and 3 sub-topics that cover clearly different aspects of:
   "${prompt}". Return each as a plain line of text – no bullets or numbers.`,
   })
 
@@ -38,7 +38,7 @@ async function runResearchAgent(prompt: string) {
     subtopics.topics.map(async (topic) => {
       const { results } = await exa.searchAndContents(topic, {
         livecrawl: "always",
-        numResults: 3,
+        numResults: 2,
       })
       const seen = new Set<string>()
       const unique = results
@@ -66,10 +66,12 @@ async function runResearchAgent(prompt: string) {
       const { object } = await generateObject({
         model: openai("gpt-4.1-mini"),
         schema: z.object({ summary: z.string() }),
-        prompt: `Summarize the key insights about "${topic}" as **exactly 4‑6 bullets**.
+        prompt: `Summarize the key insights about "${topic}" as **exactly 2‑6 bullets**.
   • Each bullet **must start with "-" "** (hyphen + space) – no other bullet symbols.
   • One concise sentence per bullet; no intro, no conclusion, no extra paragraphs.
-  • Base the bullets only on the information below – do not include links.
+  • Base the bullets only on the information below, do not include links.
+  • Focus on specific ideas, patterns, or tactics, not general claims.
+  • Do not sound AI-generated, sound like a human writing a report.
   
   ${bulletedSources}`,
       })
