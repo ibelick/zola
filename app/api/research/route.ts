@@ -9,7 +9,6 @@ import {
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
 import { openai } from "@ai-sdk/openai"
-import { SourceUIPart } from "@ai-sdk/ui-utils"
 import { generateObject } from "ai"
 import Exa from "exa-js"
 import { z } from "zod"

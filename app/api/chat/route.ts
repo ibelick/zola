@@ -40,7 +40,6 @@ export async function POST(req: Request) {
 
     const supabase = await validateUserIdentity(userId, isAuthenticated)
 
-    // First check if the user is within their usage limits
     await checkUsage(supabase, userId)
 
     const userMessage = messages[messages.length - 1]
@@ -57,8 +56,6 @@ export async function POST(req: Request) {
         console.error("Error saving user message:", msgError)
       } else {
         console.log("User message saved successfully.")
-
-        // Increment usage only after confirming the message was saved
         await incrementUsage(supabase, userId)
       }
     }

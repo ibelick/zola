@@ -23,7 +23,7 @@ import {
 } from "@/lib/file-handling"
 import { API_ROUTE_CHAT, API_ROUTE_RESEARCH } from "@/lib/routes"
 import { cn } from "@/lib/utils"
-import { useChat } from "@ai-sdk/react"
+import { Message, useChat } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useRouter, useSearchParams } from "next/navigation"
@@ -175,29 +175,16 @@ export function Chat() {
 
       const { markdown, parts } = await res.json()
 
-      append(
-        {
-          role: "assistant",
-          content: markdown,
-          parts,
-        },
-        {
-          body: {
-            chatId,
-            userId: uid,
-            model: selectedModel,
-            isAuthenticated,
-            systemPrompt,
-          },
-        }
-      )
-
-      cacheAndAddMessage({
+      const researchMessage = {
         role: "assistant",
         content: markdown,
         parts,
         id: `research-${Date.now()}`,
-      })
+      } as Message
+
+      setMessages((prev) => [...prev, researchMessage])
+
+      await cacheAndAddMessage(researchMessage)
 
       setResearchStatus("idle")
     } catch (err: any) {
@@ -234,10 +221,9 @@ export function Chat() {
       },
     }
 
-    if (isZolaResearch && chatId) {
-      handleZolaResearch(prompt, uid, chatId)
+    if (isZolaResearch && messages.length === 0 && chatId) {
+      await handleZolaResearch(prompt, uid, chatId)
       setIsSubmitting(false)
-      router.replace(`/c/${chatId}`)
       return
     }
 
@@ -464,8 +450,6 @@ export function Chat() {
       experimental_attachments: attachments || undefined,
     }
 
-    console.log("submit")
-
     // START OF RESEARCH AGENT
     // @todo: This is temporary solution
     if (isZolaResearch && messages.length === 0) {
@@ -604,8 +588,6 @@ export function Chat() {
   if (hydrated && chatId && !isChatsLoading && !currentChat) {
     return redirect("/")
   }
-
-  console.log("messages", messages)
 
   return (
     <div
