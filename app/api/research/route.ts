@@ -13,6 +13,9 @@ import { generateObject } from "ai"
 import Exa from "exa-js"
 import { z } from "zod"
 
+// set to nodejs to avoid timeout
+export const runtime = "nodejs"
+
 const exa = new Exa(process.env.EXA_API_KEY!)
 
 async function generateReportTitle(prompt: string) {
