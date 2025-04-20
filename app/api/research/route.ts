@@ -29,8 +29,14 @@ async function runResearchAgent(prompt: string) {
   const { object: subtopics } = await generateObject({
     model: openai("gpt-4.1-nano", { structuredOutputs: true }),
     schema: z.object({ topics: z.array(z.string()) }),
-    prompt: `Give between 2 and 3 sub-topics that cover clearly different aspects of:
-  "${prompt}". Return each as a plain line of text – no bullets or numbers.`,
+    prompt: `Suggest 2–3 clear subtopics that explore different, useful angles of the main topic.
+
+Each subtopic should:
+- be practical or specific (not too broad or abstract)
+- be distinct from the others (no overlap)
+- sound like a good section title in a short report
+
+"${prompt}"`,
   })
 
   /* ---------- 3. fetch and deduplicate sources ---------- */
