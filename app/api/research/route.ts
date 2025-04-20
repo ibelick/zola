@@ -116,10 +116,7 @@ type ResearchFinding = {
   citations: { title: string; url: string; snippet: string }[]
 }
 
-export async function analyzeSufficiency(
-  findings: ResearchFinding[],
-  topic: string
-) {
+async function analyzeSufficiency(findings: ResearchFinding[], topic: string) {
   const content = findings
     .map((f) => f.summary)
     .join("\n\n")
@@ -164,10 +161,7 @@ Only return structured JSON. No filler.
   }
 }
 
-export async function generateReport(
-  findings: ResearchFinding[],
-  title: string
-) {
+async function generateReport(findings: ResearchFinding[], title: string) {
   const content = findings
     .map((f) => f.summary)
     .join("\n\n")
