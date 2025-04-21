@@ -66,8 +66,11 @@ export function AgentsPage({ agents }: AgentsPageProps) {
               }
               randomAgents={randomAgents}
               trigger={
-                <button className="group w-full" type="button">
-                  <div className="relative aspect-[4/1] overflow-hidden rounded-2xl shadow-lg">
+                <button
+                  className="group w-full items-end justify-start"
+                  type="button"
+                >
+                  <div className="relative min-h-[140px] w-full overflow-hidden rounded-2xl shadow-lg md:aspect-[4/1]">
                     <div className="absolute inset-0">
                       <img
                         src="/banner_cloud.jpg"
@@ -78,13 +81,13 @@ export function AgentsPage({ agents }: AgentsPageProps) {
 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent dark:from-black/70 dark:via-black/20" />
 
-                    <div className="relative flex h-full flex-col p-5">
+                    <div className="relative flex h-full min-h-[140px] flex-col p-5">
                       {/* <div className="self-start rounded-full bg-black/70 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
                   Research
                 </div> */}
 
                       <div className="mt-auto flex flex-row items-end justify-between gap-2">
-                        <div className="flex flex-col items-start gap-0.5">
+                        <div className="flex flex-col items-start gap-0.5 text-left">
                           <h3 className="text-2xl leading-tight font-medium text-white">
                             Zola Research
                           </h3>
