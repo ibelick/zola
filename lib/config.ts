@@ -40,10 +40,10 @@ export type Model = {
     enabled: boolean
   }[]
   description?: string
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
 
 export const MODELS_NOT_AVAILABLE = [
-  
   {
     id: "gemini-1.5-pro",
     name: "Gemini 1.5 Pro",
@@ -56,6 +56,7 @@ export const MODELS_NOT_AVAILABLE = [
         enabled: true,
       },
     ],
+    icon: Gemini,
   },
   {
     id: "claude-3-5-sonnet",
@@ -69,6 +70,7 @@ export const MODELS_NOT_AVAILABLE = [
         enabled: true,
       },
     ],
+    icon: Claude,
   },
   {
     id: "claude-3.7-sonnet",
@@ -82,6 +84,7 @@ export const MODELS_NOT_AVAILABLE = [
         enabled: true,
       },
     ],
+    icon: Claude,
   },
   {
     id: "grok-2",
@@ -95,6 +98,7 @@ export const MODELS_NOT_AVAILABLE = [
         enabled: true,
       },
     ],
+    icon: Grok,
   },
   {
     id: "gemini-2.0-flash",
@@ -108,6 +112,7 @@ export const MODELS_NOT_AVAILABLE = [
         enabled: true,
       },
     ],
+    icon: Gemini,
   },
   {
     id: "gemini-2.5-pro",
@@ -121,6 +126,7 @@ export const MODELS_NOT_AVAILABLE = [
         enabled: true,
       },
     ],
+    icon: Gemini,
   },
 ] as Model[]
 
@@ -136,9 +142,9 @@ export const MODELS = [
       },
     ],
     api_sdk: openai("gpt-4.1"),
-    icon: OpenAI,
     description:
       "OpenAI’s most powerful model. Excellent at coding, writing, and complex tasks.",
+    icon: OpenAI,
   },
   {
     id: "gpt-4.1-mini",
@@ -151,9 +157,9 @@ export const MODELS = [
       },
     ],
     api_sdk: openai("gpt-4.1-mini"),
-    icon: OpenAI,
     description:
       "Fast and smart — a great balance for most tasks. Outperforms GPT‑4o mini.",
+    icon: OpenAI,
   },
   {
     id: "gpt-4.1-nano",
@@ -166,9 +172,9 @@ export const MODELS = [
       },
     ],
     api_sdk: openai("gpt-4.1-nano"),
-    icon: OpenAI,
     description:
       "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
+    icon: OpenAI,
   },
   {
     id: "pixtral-large-latest",
@@ -183,6 +189,7 @@ export const MODELS = [
     api_sdk: mistral("pixtral-large-latest"),
     description:
       "Mistral’s flagship model. Great for reasoning, writing, and advanced tasks.",
+    icon: Mistral,
   },
   {
     id: "mistral-large-latest",
@@ -195,8 +202,9 @@ export const MODELS = [
       },
     ],
     api_sdk: mistral("mistral-large-latest"),
+    description:
+      "Fine-tuned for chat. A lighter, faster option for everyday use.",
     icon: Mistral,
-    description: "Fine-tuned for chat. A lighter, faster option for everyday use.",
   },
   {
     id: "deepseek-r1",
@@ -211,6 +219,7 @@ export const MODELS = [
     api_sdk: "deepseek/deepseek-r1:free", // this is a special case for openrouter
     description:
       "A reasoning-first model trained with reinforcement learning, built for math, code, and complex problem solving",
+    icon: DeepSeek,
   },
 ] as Model[]
 
@@ -271,6 +280,11 @@ export const PROVIDERS = [
     id: "mistral",
     name: "Mistral",
     icon: Mistral,
+  },
+  {
+    id: "deepseek",
+    name: "DeepSeek",
+    icon: DeepSeek,
   },
 ] as Provider[]
 

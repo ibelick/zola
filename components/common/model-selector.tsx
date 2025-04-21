@@ -29,9 +29,6 @@ export function ModelSelector({
   className,
 }: ModelSelectorProps) {
   const model = MODELS_OPTIONS.find((model) => model.id === selectedModelId)
-  const provider = PROVIDERS_OPTIONS.find(
-    (provider) => provider.id === model?.provider
-  )
 
   return (
     <TooltipProvider>
@@ -46,14 +43,14 @@ export function ModelSelector({
             )}
           >
             <div className="flex items-center gap-2">
-              {provider?.icon && <provider.icon className="size-5" />}
+              {model?.icon && <model.icon className="size-5" />}
               <span>{model?.name}</span>
             </div>
             <CaretDown className="size-4 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="max-h-[400px] w-[400px] overflow-y-auto"
+          className="flex max-h-[400px] w-[400px] flex-col space-y-0.5 overflow-y-auto"
           align="start"
           sideOffset={4}
         >
@@ -82,7 +79,7 @@ export function ModelSelector({
                 onClick={() => model.available && setSelectedModelId(model.id)}
               >
                 <div className="flex items-center gap-3">
-                  {provider?.icon && <provider.icon className="size-5" />}
+                  {model?.icon && <model.icon className="size-5" />}
                   <div className="flex flex-col gap-0">
                     <span className="text-base">{model.name}</span>
                     <span className="text-muted-foreground text-xs">

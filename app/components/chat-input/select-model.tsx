@@ -46,7 +46,6 @@ export function SelectModel({
           </TooltipTrigger>
           <TooltipContent>Select a model</TooltipContent>
         </Tooltip>
-
         <PopoverContentAuth />
       </Popover>
     )
