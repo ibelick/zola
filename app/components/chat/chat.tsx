@@ -21,7 +21,7 @@ import {
   checkFileUploadLimit,
   processFiles,
 } from "@/lib/file-handling"
-import { API_ROUTE_CHAT, API_ROUTE_RESEARCH } from "@/lib/routes"
+import { API_ROUTE_AGENT_RESEARCH, API_ROUTE_CHAT } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 import { Message, useChat } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -99,6 +99,19 @@ export function Chat() {
     },
   })
 
+  // @todo: reasoning agent
+  const {
+    input: reasoningInput,
+    messages: reasoningMessages,
+    append: appendReasoning,
+    setMessages: setReasoningMessages,
+    status: reasoningStatus,
+  } = useChat({
+    api: "/api/agents/reasoning",
+  })
+
+  console.log("=>", reasoningInput, reasoningMessages, reasoningStatus)
+
   // when chatId is null, set messages to an empty array
   useEffect(() => {
     if (chatId === null) {
@@ -157,7 +170,7 @@ export function Chat() {
     try {
       setResearchStatus("loading")
 
-      const res = await fetchClient(API_ROUTE_RESEARCH, {
+      const res = await fetchClient(API_ROUTE_AGENT_RESEARCH, {
         method: "POST",
         body: JSON.stringify({
           prompt,
@@ -222,6 +235,7 @@ export function Chat() {
     }
 
     if (isZolaResearch && messages.length === 0 && chatId) {
+      appendReasoning({ role: "user", content: prompt })
       await handleZolaResearch(prompt, uid, chatId)
       setIsSubmitting(false)
       return
@@ -458,7 +472,8 @@ export function Chat() {
     // START OF RESEARCH AGENT
     // @todo: This is temporary solution
     if (isZolaResearch && messages.length === 0) {
-      await handleZolaResearch(input, uid, currentChatId)
+      appendReasoning({ role: "user", content: input })
+      // await handleZolaResearch(input, uid, currentChatId)
       setIsSubmitting(false)
       return
     }
@@ -630,6 +645,9 @@ export function Chat() {
             onEdit={handleEdit}
             onReload={handleReload}
             researchStatus={researchStatus}
+            reasoning={
+              reasoningMessages?.find((m) => m.role === "assistant")?.content
+            }
           />
         )}
       </AnimatePresence>
