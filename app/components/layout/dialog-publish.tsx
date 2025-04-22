@@ -1,59 +1,77 @@
 "use client"
 
+import { AgentHeader } from "@/app/components/layout/header"
+import { useChatSession } from "@/app/providers/chat-session-provider"
+import XIcon from "@/components/icons/x"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-// import { Switch } from "@/components/ui/switch"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Globe } from "@phosphor-icons/react"
+import { APP_DOMAIN } from "@/lib/config"
+import { createClient } from "@/lib/supabase/client"
+import { Globe, Spinner } from "@phosphor-icons/react"
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
-type PublishDialogProps = {
-  defaultTitle?: string
+type DialogPublishProps = {
+  agent: AgentHeader
 }
 
-// Preview link button after generation (e.g. "View Page")
-// Share on X / Copy Link CTA immediately after, for instant sharing
-export function PublishDialog({
-  defaultTitle = "How solo French founders use AI to scale in 2025",
-}: PublishDialogProps) {
-  const [open, setOpen] = useState(false)
-  const [title, setTitle] = useState(defaultTitle)
-  const [slug, setSlug] = useState("")
+export function DialogPublish({ agent }: DialogPublishProps) {
+  const [openDialog, setOpenDialog] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { chatId } = useChatSession()
 
-  // Generate slug from title
-  useEffect(() => {
-    const generatedSlug = title
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim()
-
-    setSlug(generatedSlug)
-  }, [title])
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value)
+  if (!chatId) {
+    return null
   }
 
-  const handleSubmit = () => {
-    // Handle form submission
-    console.log("Generating public page with:", { title, slug })
-    setOpen(false)
+  const publicLink = `${APP_DOMAIN}/agents/${agent.slug}/${chatId}`
+
+  const openPage = () => {
+    setOpenDialog(false)
+
+    window.open(publicLink, "_blank")
+  }
+
+  const shareOnX = () => {
+    setOpenDialog(false)
+
+    const X_TEXT = `Check out this public page I created with Zola! ${publicLink}`
+    window.open(`https://x.com/intent/tweet?text=${X_TEXT}`, "_blank")
+  }
+
+  const handlePublish = async () => {
+    setIsLoading(true)
+
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("chats")
+      .update({ public: true })
+      .eq("id", chatId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error(error)
+    }
+
+    if (data) {
+      setIsLoading(false)
+      setOpenDialog(true)
+    }
   }
 
   return (
@@ -65,9 +83,14 @@ export function PublishDialog({
               variant="ghost"
               size="icon"
               className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-full p-1.5 transition-colors"
-              onClick={() => setOpen(true)}
+              onClick={handlePublish}
+              disabled={isLoading}
             >
-              <Globe className="size-5" />
+              {isLoading ? (
+                <Spinner className="size-5 animate-spin" />
+              ) : (
+                <Globe className="size-5" />
+              )}
               <span className="sr-only">Make public</span>
             </Button>
           </TooltipTrigger>
@@ -77,68 +100,34 @@ export function PublishDialog({
         </Tooltip>
       </TooltipProvider>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Make public</DialogTitle>
+            <DialogTitle>Your conversation is now public!</DialogTitle>
+            <DialogDescription>
+              Anyone with the link can now view this conversation and may appear
+              in community feeds, featured pages, or search results in the
+              future.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="title" className="font-normal">
-                Title
-              </Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={handleTitleChange}
-                placeholder="Enter a title for your research"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="slug" className="font-normal">
-                URL preview
-              </Label>
               <div className="flex items-center gap-1">
                 <Input
                   id="slug"
-                  value={`/r/${slug}`}
+                  value={publicLink}
                   readOnly
                   className="flex-1 bg-gray-50"
                 />
               </div>
             </div>
-            {/* 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="research" className="text-sm font-normal">
-                  Original research query
-                </Label>
-                <Switch id="research" defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="summary" className="text-sm font-normal">
-                  Agent response summary
-                </Label>
-                <Switch id="summary" defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="sources" className="text-sm font-normal">
-                  Sources
-                </Label>
-                <Switch id="sources" defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="conversation" className="text-sm font-normal">
-                  Include entire conversation
-                </Label>
-                <Switch id="conversation" />
-              </div>
-            </div> */}
           </div>
-          <DialogFooter>
-            <Button onClick={handleSubmit} className="w-full">
-              Make Public
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={openPage} className="flex-1">
+              View Page
+            </Button>
+            <Button onClick={shareOnX} className="flex-1">
+              Share on <XIcon className="text-primary-foreground size-4" />
             </Button>
           </DialogFooter>
         </DialogContent>

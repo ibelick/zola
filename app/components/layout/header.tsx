@@ -17,10 +17,13 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { AgentLink } from "./agent-link"
-import { PublishDialog } from "./dialog-publish"
+import { DialogPublish } from "./dialog-publish"
 import { HeaderAgent } from "./header-agent"
 
-type AgentHeader = Pick<Agent, "name" | "description" | "avatar_url">
+export type AgentHeader = Pick<
+  Agent,
+  "name" | "description" | "avatar_url" | "slug"
+>
 
 export function Header() {
   const pathname = usePathname()
@@ -44,7 +47,7 @@ export function Header() {
     const fetchAgent = async () => {
       const { data, error } = await supabase
         .from("agents")
-        .select("name, description, avatar_url")
+        .select("name, description, avatar_url, slug")
         .eq("id", currentChat?.agent_id || "")
         .single()
 
@@ -102,7 +105,7 @@ export function Header() {
           </div>
         ) : (
           <div className="flex flex-1 items-center justify-end gap-2">
-            {agent && <PublishDialog />}
+            {agent && <DialogPublish agent={agent} />}
             <ButtonNewChat />
             <AgentLink />
             <HistoryTrigger />

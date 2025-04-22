@@ -133,6 +133,7 @@ export type Database = {
           title: string | null
           user_id: string
           system_prompt: string | null
+          public: boolean
         }
         Insert: {
           agent_id?: string | null
@@ -142,6 +143,7 @@ export type Database = {
           title?: string | null
           user_id: string
           system_prompt?: string | null
+          public?: boolean
         }
         Update: {
           agent_id?: string | null
@@ -151,6 +153,7 @@ export type Database = {
           title?: string | null
           user_id?: string
           system_prompt?: string | null
+          public?: boolean
         }
         Relationships: [
           {
