@@ -1,3 +1,4 @@
+import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Tooltip,
@@ -21,6 +22,7 @@ export function HeaderAgent({
   info,
   className,
 }: HeaderAgentProps) {
+  const isMobile = useBreakpoint(768)
   const initials = name
     .split(" ")
     .map((n) => n[0])
@@ -40,7 +42,7 @@ export function HeaderAgent({
 
       <div className="flex items-center">
         <h2 className="text-sm font-medium">{name}</h2>
-        {info && (
+        {!isMobile && info && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
