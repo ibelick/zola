@@ -15,7 +15,7 @@ export function AgentLink() {
           className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-full p-1.5 transition-colors"
           prefetch
         >
-          <UsersThree className="text-muted-foreground" size={24} />
+          <UsersThree size={24} />
         </Link>
       </TooltipTrigger>
       <TooltipContent>Agents</TooltipContent>
