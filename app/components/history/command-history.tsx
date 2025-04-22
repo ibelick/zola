@@ -1,431 +1,586 @@
 "use client"
 
-import { useChatSession } from "@/app/providers/chat-session-provider"
 import { Button } from "@/components/ui/button"
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+// Removed Label import as it's no longer used
+import { ScrollArea } from "@/components/ui/scroll-area"
+// Removed Switch import
 import type { Chats } from "@/lib/chat-store/types"
 import { cn } from "@/lib/utils"
-import { Check, PencilSimple, TrashSimple, X } from "@phosphor-icons/react"
+// Import cache, fetch, AND the explicit cache function
+import { getCachedMessages, fetchAndCacheMessages, cacheMessages } from "@/lib/chat-store/messages/api"
+import { Check, CircleNotch, MagnifyingGlass, NotePencil, PencilSimple, TrashSimple, X } from "@phosphor-icons/react" // Added CircleNotch
+import type { Message as MessageAISDK } from "ai"
+import dynamic from "next/dynamic"
+import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { formatDate, groupChatsByDate } from "./utils"
+
+// Dynamically import Markdown component
+const Markdown = dynamic(
+  () => import("@/components/prompt-kit/markdown").then((mod) => mod.Markdown),
+  { ssr: false }
+)
+
+/* ------------------------------------------------------------------
+  Hook: useChatMessages (Moved to CommandHistory component)
+  ------------------------------------------------------------------*/
+// Removed useChatMessages hook definition from here
+
+/* ------------------------------------------------------------------
+  Component: ChatPreview (simplified)
+  ------------------------------------------------------------------*/
+
+// Updated props for ChatPreview
+type ChatPreviewProps = {
+  chat: Chats | null
+  messages: MessageAISDK[]
+  isLoading: boolean
+}
+
+const ChatPreview = React.memo<ChatPreviewProps>(({ chat, messages, isLoading }) => {
+  // Removed useChatMessages hook call
+  const contentRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for auto-scrolling
+
+  // Auto‑scroll to bottom on new messages
+  useEffect(() => {
+    // Scroll when loading finishes or messages update
+    if (!isLoading && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+    }
+  }, [messages, isLoading]); // Depend on messages and isLoading
+
+  // 1. Handle case where no chat is selected
+  if (!chat) {
+    return (
+      <div className="flex h-full items-center justify-center p-8 text-lg text-muted-foreground">
+        Select a conversation to preview
+      </div>
+    )
+  }
+
+  // 2. Handle loading state (uses the same container structure as the "Select..." message)
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center p-8 text-muted-foreground">
+        <div className="flex flex-col items-center">
+          <CircleNotch size={24} className="mb-2 animate-spin" />
+          <p>Loading messages...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 3. Handle loaded state (with messages or empty)
+  const empty = messages.length === 0
+
+  return (
+    <ScrollArea className="h-full">
+      <div className="p-8 flex flex-col h-full" ref={contentRef}>
+        {/* Render Title and Date */}
+        <h2 className="mb-2 text-xl font-bold">{chat.title || 'Untitled Chat'}</h2>
+        <div className="mb-6 text-xs text-muted-foreground">{formatDate(chat.created_at)}</div>
+
+        {/* Container for messages or empty state */}
+        <div className="flex flex-col flex-1 min-h-[100px] space-y-4 overflow-y-auto"> {/* Added overflow-y-auto */}
+          {empty ? (
+            <div className="flex flex-1 items-center justify-center">
+              <p className="text-muted-foreground">No messages found in this chat.</p>
+            </div>
+          ) : (
+            <>
+              {messages.map((m) => (
+                <div key={m.id} className={cn('flex w-full', m.role === 'user' ? 'justify-end' : 'justify-start')}>
+                  <div
+                    className={cn(
+                      m.role === 'user'
+                        ? 'bg-accent rounded-3xl px-5 py-2.5 max-w-[70%]'
+                        : 'text-foreground max-w-[75%] px-3 py-2'
+                    )}
+                  >
+                    {typeof m.content === 'string' ? (
+                      <Markdown className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 prose-p:last-of-type:mb-0">
+                        {m.content}
+                      </Markdown>
+                    ) : (
+                      <span className="text-xs italic text-muted-foreground">[Unsupported message content]</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} /> {/* Element to scroll to */}
+            </>
+          )}
+        </div>
+      </div>
+    </ScrollArea>
+  )
+})
+ChatPreview.displayName = 'ChatPreview'
+
+/* ------------------------------------------------------------------
+  Component: ChatItem (memo with custom equality)
+  ------------------------------------------------------------------*/
+
+type ChatItemProps = {
+  chat: Chats
+  isSelected: boolean
+  isEditing: boolean
+  isDeleting: boolean
+  editTitle: string
+  onSetHovered: (id: string | null) => void
+  onEdit: (chat: Chats) => void
+  onDelete: (id: string) => void
+  onSaveEdit: (id: string) => void
+  onCancelEdit: () => void
+  onConfirmDelete: (id: string) => void
+  onCancelDelete: () => void
+  onLinkClick: (e: React.MouseEvent) => void
+  onSetEditTitle: (title: string) => void
+}
+
+function areEqual(prev: ChatItemProps, next: ChatItemProps) {
+  return (
+    prev.chat === next.chat &&
+    prev.isSelected === next.isSelected &&
+    prev.isEditing === next.isEditing &&
+    prev.isDeleting === next.isDeleting &&
+    prev.editTitle === next.editTitle
+  )
+}
+
+// Export ChatItem so it can be reused by sidebar/drawer if needed later
+export const ChatItem = React.memo<ChatItemProps>(function ChatItem(props) {
+  const {
+    chat,
+    isSelected,
+    isEditing,
+    isDeleting,
+    editTitle,
+    onSetHovered,
+    onEdit,
+    onDelete,
+    onSaveEdit,
+    onCancelEdit,
+    onConfirmDelete,
+    onCancelDelete,
+    onLinkClick,
+    onSetEditTitle
+  } = props
+
+  const stopPropagation = useCallback((e: React.SyntheticEvent) => {
+    e.stopPropagation()
+    if (e.type === 'click') (e as React.MouseEvent).preventDefault()
+  }, [])
+
+  const handleSave = useCallback(() => onSaveEdit(chat.id), [chat.id, onSaveEdit])
+  const handleConfirmDel = useCallback(() => onConfirmDelete(chat.id), [chat.id, onConfirmDelete])
+
+  const actionBtn = (
+    icon: React.ReactNode,
+    onClick: () => void,
+    title: string,
+    extraCN = ''
+  ) => (
+    <Button
+      size="icon"
+      variant="ghost"
+      className={cn('h-7 w-7', extraCN)}
+      type="button"
+      title={title}
+      onClick={(e) => {
+        stopPropagation(e)
+        onClick()
+      }}
+    >
+      {icon}
+    </Button>
+  )
+
+  return (
+    <div
+      className={cn(
+        'group relative flex cursor-pointer items-center justify-between rounded-lg px-2 py-1.5',
+        (isSelected && !isEditing && !isDeleting) || isEditing || isDeleting ? 'bg-muted' : 'hover:bg-muted'
+      )}
+      onMouseEnter={() => !isEditing && !isDeleting && onSetHovered(chat.id)}
+    >
+      <div className="flex min-w-0 flex-1 items-center pr-16">
+        {isEditing ? (
+          <form className="w-full" onSubmit={(e) => { e.preventDefault(); handleSave() }}>
+            <Input
+              value={editTitle}
+              onChange={(e) => onSetEditTitle(e.target.value)}
+              className="h-8 w-full border-input bg-transparent px-2 text-sm"
+              autoFocus
+              onClick={stopPropagation}
+              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+            />
+          </form>
+        ) : isDeleting ? (
+          <form className="w-full" onSubmit={(e) => { e.preventDefault(); handleConfirmDel() }}>
+            <span className="text-sm text-destructive">Delete this chat?</span>
+            {/* hidden input keeps auto‑focus */}
+            <input type="text" className="sr-only" autoFocus />
+          </form>
+        ) : (
+          <Link
+            href={`/c/${chat.id}`}
+            onClick={onLinkClick}
+            className="flex min-w-0 flex-1 flex-col items-start overflow-hidden"
+            prefetch={false}
+            aria-label={`Open chat: ${chat.title || 'Untitled Chat'}`}
+          >
+            <span className="line-clamp-1 text-base font-normal">{chat.title || 'Untitled Chat'}</span>
+            <span className="mr-2 text-xs font-normal text-gray-500">{formatDate(chat.created_at)}</span>
+          </Link>
+        )}
+      </div>
+
+      {/* Action buttons */}
+      <div className="absolute right-1 top-1/2 flex -translate-y-1/2 transform items-center gap-1">
+        {isEditing ? (
+          <>
+            {actionBtn(<Check className="size-4" />, handleSave, 'Save')}
+            {actionBtn(<X className="size-4" />, onCancelEdit, 'Cancel')}
+          </>
+        ) : isDeleting ? (
+          <>
+            {actionBtn(<Check className="size-4" />, handleConfirmDel, 'Confirm Delete', 'text-destructive hover:bg-destructive/10')}
+            {actionBtn(<X className="size-4" />, onCancelDelete, 'Cancel')}
+          </>
+        ) : (
+          <div
+            className={cn(
+              'flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100',
+              isSelected && 'opacity-100'
+            )}
+          >
+            {actionBtn(<PencilSimple className="size-4" />, () => onEdit(chat), 'Rename', 'text-muted-foreground hover:text-foreground')}
+            {actionBtn(<TrashSimple className="size-4" />, () => onDelete(chat.id), 'Delete', 'text-muted-foreground hover:text-destructive')}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}, areEqual)
+ChatItem.displayName = 'ChatItem'
+
+/* ------------------------------------------------------------------
+  Component: LeftPanelHeader (memo)
+  ------------------------------------------------------------------*/
+
+type LeftPanelHeaderProps = {
+  searchQuery: string
+  onSearchChange: (value: string) => void
+  showCreateNewChat: boolean
+  onCreateNewChat: () => void
+}
+
+const LeftPanelHeader = React.memo<LeftPanelHeaderProps>(function LeftPanelHeader({
+  searchQuery,
+  onSearchChange,
+  showCreateNewChat,
+  onCreateNewChat
+}) {
+  return (
+    <div className="flex flex-col gap-3 border-b p-4 pb-3 pt-4">
+      <div className="relative">
+        <Input
+          placeholder="Search..."
+          className="w-full rounded-lg py-1.5 pl-8 text-sm"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
+        <MagnifyingGlass className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 transform text-gray-400" />
+      </div>
+
+      <div className="pt-2">
+        <h3 className="mb-1 px-2 text-sm font-medium text-muted-foreground">Actions</h3>
+        <div className="space-y-1">
+          {showCreateNewChat && (
+            <Button
+              variant="ghost"
+              className="h-auto w-full justify-start rounded-lg px-2 py-1.5 text-base font-normal hover:bg-muted"
+              onClick={onCreateNewChat}
+            >
+              <NotePencil size={18} className="mr-2" /> Create New Chat
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+})
+LeftPanelHeader.displayName = 'LeftPanelHeader'
+
+/* ------------------------------------------------------------------
+  Hook: useChatMessages (Moved here)
+  ------------------------------------------------------------------*/
+
+const MIN_LOADING_TIME_MS = 300;
+
+type LoadingStatus = 'idle' | 'loading' | 'loaded' | 'error'
+
+// Now used within CommandHistory
+function useChatMessages(chatId: string | null | undefined) { // Accept chatId directly
+  const [messages, setMessages] = useState<MessageAISDK[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const statusRef = useRef<Record<string, LoadingStatus>>({})
+  const currentIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    // Reset when chat ID is cleared or undefined
+    if (!chatId) {
+      setMessages([])
+      setIsLoading(false)
+      currentIdRef.current = null
+      return
+    }
+
+    // Prevent duplicate work for the same chat
+    if (currentIdRef.current === chatId) return
+
+    currentIdRef.current = chatId
+
+    const load = async () => {
+      const start = Date.now()
+      statusRef.current[chatId] = 'loading'
+      setIsLoading(true)
+
+      try {
+        let msgs = await getCachedMessages(chatId)
+        if (msgs.length === 0) {
+          msgs = await fetchAndCacheMessages(chatId)
+          if (msgs.length) {
+            cacheMessages(chatId, msgs).catch(() => {})
+          }
+        }
+        statusRef.current[chatId] = 'loaded'
+        setMessages(msgs)
+      } catch (err) {
+        console.error(`useChatMessages: failed to load ${chatId}`, err)
+        statusRef.current[chatId] = 'error'
+        setMessages([]) // Clear messages on error
+      } finally {
+        const elapsed = Date.now() - start
+        const delay = Math.max(0, MIN_LOADING_TIME_MS - elapsed)
+        // Use setTimeout to ensure loading state persists for minimum duration
+        setTimeout(() => {
+             // Only set loading to false if the current chat ID hasn't changed during the delay
+             if (currentIdRef.current === chatId) {
+                setIsLoading(false)
+             }
+        }, delay)
+      }
+    }
+
+    load()
+  // Effect dependency is now just the chatId
+  }, [chatId])
+
+  return { messages, isLoading }
+}
+
+/* ------------------------------------------------------------------
+  Component: CommandHistory (root)
+  ------------------------------------------------------------------*/
 
 type CommandHistoryProps = {
   chatHistory: Chats[]
+  onClose: () => void
   onSaveEdit: (id: string, newTitle: string) => Promise<void>
   onConfirmDelete: (id: string) => Promise<void>
-  trigger: React.ReactNode
-  isOpen: boolean
-  setIsOpen: (open: boolean) => void
 }
 
-type CommandItemEditProps = {
-  chat: Chats
-  editTitle: string
-  setEditTitle: (title: string) => void
-  onSave: (id: string) => void
-  onCancel: () => void
-}
-
-type CommandItemDeleteProps = {
-  chat: Chats
-  onConfirm: (id: string) => void
-  onCancel: () => void
-}
-
-type CommandItemRowProps = {
-  chat: Chats
-  onEdit: (chat: Chats) => void
-  onDelete: (id: string) => void
-  editingId: string | null
-  deletingId: string | null
-}
-
-// Component for editing a chat item
-function CommandItemEdit({
-  chat,
-  editTitle,
-  setEditTitle,
-  onSave,
-  onCancel,
-}: CommandItemEditProps) {
-  return (
-    <form
-      className="flex w-full items-center justify-between"
-      onSubmit={(e) => {
-        e.preventDefault()
-        onSave(chat.id)
-      }}
-    >
-      <Input
-        value={editTitle}
-        onChange={(e) => setEditTitle(e.target.value)}
-        className="border-input h-8 flex-1 rounded border bg-transparent px-3 py-1 text-sm"
-        autoFocus
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault()
-            onSave(chat.id)
-          }
-        }}
-      />
-      <div className="ml-2 flex gap-1">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground size-8"
-          type="submit"
-        >
-          <Check className="size-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground size-8"
-          type="button"
-          onClick={onCancel}
-        >
-          <X className="size-4" />
-        </Button>
-      </div>
-    </form>
-  )
-}
-
-// Component for deleting a chat item
-function CommandItemDelete({
-  chat,
-  onConfirm,
-  onCancel,
-}: CommandItemDeleteProps) {
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault()
-        onConfirm(chat.id)
-      }}
-      className="flex w-full items-center justify-between"
-    >
-      <div className="flex flex-1 items-center">
-        <span className="line-clamp-1 text-base font-normal">{chat.title}</span>
-        <input
-          type="text"
-          className="sr-only hidden"
-          autoFocus
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              e.preventDefault()
-              onCancel()
-            } else if (e.key === "Enter") {
-              e.preventDefault()
-              onConfirm(chat.id)
-            }
-          }}
-        />
-      </div>
-      <div className="ml-2 flex gap-1">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-muted-foreground hover:text-destructive-foreground hover:bg-destructive-foreground/10 size-8"
-          type="submit"
-        >
-          <Check className="size-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground size-8"
-          onClick={onCancel}
-          type="button"
-        >
-          <X className="size-4" />
-        </Button>
-      </div>
-    </form>
-  )
-}
-
-// Component for displaying a normal chat row
-function CommandItemRow({
-  chat,
-  onEdit,
-  onDelete,
-  editingId,
-  deletingId,
-}: CommandItemRowProps) {
-  return (
-    <>
-      <div className="min-w-0 flex-1">
-        <span className="line-clamp-1 text-base font-normal">
-          {chat?.title || "Untitled Chat"}
-        </span>
-      </div>
-
-      {/* Date and actions container */}
-      <div className="relative flex min-w-[120px] flex-shrink-0 justify-end">
-        {/* Date that shows by default but hides on selection */}
-        <span
-          className={cn(
-            "text-muted-foreground text-sm font-normal opacity-100 transition-opacity duration-0",
-            "group-data-[selected=true]:opacity-0",
-            Boolean(editingId || deletingId) &&
-              "group-data-[selected=true]:opacity-100"
-          )}
-        >
-          {formatDate(chat?.created_at)}
-        </span>
-
-        {/* Action buttons that appear on selection, positioned over the date */}
-        <div
-          className={cn(
-            "absolute inset-0 flex items-center justify-end gap-1 opacity-0 transition-opacity duration-0",
-            "group-data-[selected=true]:opacity-100",
-            Boolean(editingId || deletingId) &&
-              "group-data-[selected=true]:opacity-0"
-          )}
-        >
-          <Button
-            size="icon"
-            variant="ghost"
-            className="text-muted-foreground hover:text-foreground size-8"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (chat) onEdit(chat)
-            }}
-            type="button"
-          >
-            <PencilSimple className="size-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="text-muted-foreground hover:text-destructive size-8"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (chat?.id) onDelete(chat.id)
-            }}
-            type="button"
-          >
-            <TrashSimple className="size-4" />
-          </Button>
-        </div>
-      </div>
-    </>
-  )
-}
-
-export function CommandHistory({
-  chatHistory,
-  onSaveEdit,
-  onConfirmDelete,
-  trigger,
-  isOpen,
-  setIsOpen,
-}: CommandHistoryProps) {
-  const { chatId } = useChatSession()
+export function CommandHistory({ chatHistory, onClose, onSaveEdit, onConfirmDelete }: CommandHistoryProps) {
   const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState("")
+  const params = useParams<{ chatId?: string }>()
+
+  /* ----------------------------- local state ----------------------------- */
+  const [searchQuery, setSearchQuery] = useState('')
+  const [hoveredChatId, setHoveredChatId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editTitle, setEditTitle] = useState("")
+  const [editTitle, setEditTitle] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open)
-    if (!open) {
-      setSearchQuery("")
-      setEditingId(null)
-      setEditTitle("")
-      setDeletingId(null)
-    }
-  }
+  /* --------------------------- prefetech routes -------------------------- */
+  useEffect(() => {
+    chatHistory.forEach((chat) => router.prefetch(`/c/${chat.id}`))
+  }, [chatHistory, router])
+
+  /* ------------------------------ memo data ------------------------------ */
+  const filteredChat = useMemo(() => {
+    const q = searchQuery.toLowerCase()
+    return q ? chatHistory.filter((c) => (c.title || 'Untitled Chat').toLowerCase().includes(q)) : chatHistory
+  }, [chatHistory, searchQuery])
+
+  const groupedChats = useMemo(() => groupChatsByDate(filteredChat, searchQuery), [filteredChat, searchQuery])
+
+  // Determine the chat to preview (hovered or selected)
+  const previewChatId = useMemo(() => hoveredChatId || params.chatId, [hoveredChatId, params.chatId]);
+  const previewChat = useMemo(() => {
+      return previewChatId ? chatHistory.find((c) => c.id === previewChatId) || null : null
+  }, [previewChatId, chatHistory]);
+
+  // Fetch messages for the preview chat using the hook
+  const { messages: previewMessages, isLoading: isPreviewLoading } = useChatMessages(previewChatId);
+
+  /* --------------------------- handlers (memo) --------------------------- */
+  const handleSearchChange = useCallback((v: string) => setSearchQuery(v), [])
+  const handleSetHoveredChatId = useCallback((id: string | null) => setHoveredChatId(id), [])
+  const handleSetEditTitle = useCallback((title: string) => setEditTitle(title), [])
+
+  const handleCreateNewChat = useCallback(() => {
+    router.push('/')
+    onClose()
+  }, [router, onClose])
 
   const handleEdit = useCallback((chat: Chats) => {
     setEditingId(chat.id)
-    setEditTitle(chat.title || "")
+    setEditTitle(chat.title || '')
+    setDeletingId(null)
   }, [])
 
-  const handleSaveEdit = useCallback(
-    async (id: string) => {
-      setEditingId(null)
-      await onSaveEdit(id, editTitle)
-    },
-    [editTitle, onSaveEdit]
-  )
+  const handleSaveEdit = useCallback(async (id: string) => {
+    setEditingId(null)
+    await onSaveEdit(id, editTitle)
+  }, [editTitle, onSaveEdit])
 
   const handleCancelEdit = useCallback(() => {
     setEditingId(null)
-    setEditTitle("")
+    setEditTitle('')
   }, [])
 
   const handleDelete = useCallback((id: string) => {
     setDeletingId(id)
+    setEditingId(null)
   }, [])
 
-  const handleConfirmDelete = useCallback(
-    async (id: string) => {
-      setDeletingId(null)
-      await onConfirmDelete(id)
-    },
-    [onConfirmDelete]
-  )
-
-  const handleCancelDelete = useCallback(() => {
+  const handleConfirmDelete = useCallback(async (id: string) => {
     setDeletingId(null)
-  }, [])
+    await onConfirmDelete(id)
+    // If the deleted chat was the active one, navigate away (optional)
+    if (params.chatId === id) {
+       router.push('/');
+    }
+  }, [onConfirmDelete, params.chatId, router])
 
-  const filteredChat = useMemo(() => {
-    const query = searchQuery.toLowerCase()
-    return query
-      ? chatHistory.filter((chat) =>
-          (chat.title || "").toLowerCase().includes(query)
-        )
-      : chatHistory
-  }, [chatHistory, searchQuery])
+  const handleCancelDelete = useCallback(() => setDeletingId(null), [])
+  const handleLinkClick = useCallback(() => onClose(), [onClose])
 
-  // Group chats by time periods
-  const groupedChats = useMemo(
-    () => groupChatsByDate(chatHistory, searchQuery),
-    [chatHistory, searchQuery]
-  )
-
-  const renderChatItem = useCallback(
-    (chat: Chats) => {
-      const isCurrentChatSession = chat.id === chatId
-      const isCurrentChatEditOrDelete =
-        chat.id === editingId || chat.id === deletingId
-      const isEditOrDeleteMode = editingId || deletingId
-
-      return (
-        <CommandItem
-          key={chat.id}
-          onSelect={() => {
-            if (isCurrentChatSession) {
-              setIsOpen(false)
-              return
-            }
-            if (!editingId && !deletingId) {
-              router.push(`/c/${chat.id}`)
-            }
-          }}
-          className={cn(
-            "group group data-[selected=true]:bg-accent flex w-full items-center justify-between rounded-md",
-            isCurrentChatEditOrDelete ? "!py-2" : "py-2",
-            isCurrentChatEditOrDelete &&
-              "bg-accent data-[selected=true]:bg-accent",
-            !isCurrentChatEditOrDelete &&
-              isEditOrDeleteMode &&
-              "data-[selected=true]:bg-transparent"
-          )}
-          value={chat.id}
-          data-value-id={chat.id}
-        >
-          {editingId === chat.id ? (
-            <CommandItemEdit
-              chat={chat}
-              editTitle={editTitle}
-              setEditTitle={setEditTitle}
-              onSave={handleSaveEdit}
-              onCancel={handleCancelEdit}
-            />
-          ) : deletingId === chat.id ? (
-            <CommandItemDelete
-              chat={chat}
-              onConfirm={handleConfirmDelete}
-              onCancel={handleCancelDelete}
-            />
-          ) : (
-            <CommandItemRow
-              chat={chat}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              editingId={editingId}
-              deletingId={deletingId}
-            />
-          )}
-        </CommandItem>
-      )
-    },
-    [
-      editingId,
-      deletingId,
-      editTitle,
-      handleSaveEdit,
-      handleCancelEdit,
-      handleConfirmDelete,
-      handleCancelDelete,
-      handleEdit,
-      handleDelete,
-    ]
-  )
-
-  // Prefetch chat pages, later we will do pagination + infinite scroll
+  /* --------------------------- Handle Escape Key --------------------------- */
   useEffect(() => {
-    if (!isOpen) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+         if (editingId) {
+            handleCancelEdit();
+         } else if (deletingId) {
+            handleCancelDelete();
+         } else {
+            onClose();
+         }
+      }
+    }
 
-    // Simply prefetch all the chat routes when dialog opens
-    chatHistory.forEach((chat) => {
-      router.prefetch(`/c/${chat.id}`)
-    })
-  }, [isOpen, chatHistory, router])
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+    // Include dependencies for edit/delete cancellation
+  }, [onClose, editingId, deletingId, handleCancelEdit, handleCancelDelete])
 
+  /* ----------------------------- render UI ------------------------------ */
   return (
-    <>
-      <Tooltip>
-        <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-        <TooltipContent>History</TooltipContent>
-      </Tooltip>
-      <CommandDialog
-        open={isOpen}
-        onOpenChange={handleOpenChange}
-        title="Chat History"
-        description="Search through your past conversations"
-      >
-        <Command shouldFilter={false}>
-          <CommandInput
-            placeholder="Search history..."
-            value={searchQuery}
-            onValueChange={(value) => setSearchQuery(value)}
-          />
-          <CommandList className="max-h-[480px] min-h-[480px] flex-1 [&>[cmdk-list-sizer]]:space-y-6 [&>[cmdk-list-sizer]]:py-2">
-            {filteredChat.length === 0 && (
-              <CommandEmpty>No chat history found.</CommandEmpty>
-            )}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={onClose} />
 
-            {searchQuery ? (
-              // When searching, display a flat list without grouping
-              <CommandGroup className="p-1.5">
-                {filteredChat.map((chat) => renderChatItem(chat))}
-              </CommandGroup>
-            ) : (
-              // When not searching, display grouped by date
-              groupedChats?.map((group) => (
-                <CommandGroup
-                  key={group.name}
-                  heading={group.name}
-                  className="space-y-0 px-1.5"
-                >
-                  {group.chats.map((chat) => renderChatItem(chat))}
-                </CommandGroup>
-              ))
-            )}
-          </CommandList>
-        </Command>
-      </CommandDialog>
-    </>
+      {/* Modal */}
+      <div className="relative flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-lg border bg-background shadow-xl">
+        {/* Left Panel */}
+        <div className="relative flex h-full w-full max-w-[300px] flex-col border-r bg-background">
+          <LeftPanelHeader
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            showCreateNewChat={!!params.chatId}
+            onCreateNewChat={handleCreateNewChat}
+          />
+
+          {/* Chat list */}
+          <ScrollArea className="flex-1 overflow-auto">
+            <div className="flex flex-col space-y-1 px-2 py-2">
+              {searchQuery ? (
+                /* Search active */
+                filteredChat.length === 0 ? (
+                  <div className="py-4 text-center text-sm text-muted-foreground">No matching chats found.</div>
+                ) : (
+                  filteredChat.map((chat) => (
+                    <ChatItem
+                      key={chat.id}
+                      chat={chat}
+                      isSelected={previewChatId === chat.id} // Use previewChatId for selection highlight
+                      isEditing={editingId === chat.id}
+                      isDeleting={deletingId === chat.id}
+                      editTitle={editingId === chat.id ? editTitle : ''}
+                      onSetHovered={handleSetHoveredChatId}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onSaveEdit={handleSaveEdit}
+                      onCancelEdit={handleCancelEdit}
+                      onConfirmDelete={handleConfirmDelete}
+                      onCancelDelete={handleCancelDelete}
+                      onLinkClick={handleLinkClick}
+                      onSetEditTitle={handleSetEditTitle}
+                    />
+                  ))
+                )
+              ) : !groupedChats ? (
+                <div className="py-4 text-center text-sm text-muted-foreground">Loading history...</div>
+              ) : groupedChats.length === 0 ? (
+                <div className="py-4 text-center text-sm text-muted-foreground">No chat history found.</div>
+              ) : (
+                groupedChats.map((group) => (
+                  <div key={group.name} className="space-y-0.5">
+                    <h3 className="pl-2 pt-2 text-sm font-medium text-muted-foreground">{group.name}</h3>
+                    {group.chats.map((chat) => (
+                      <ChatItem
+                        key={chat.id}
+                        chat={chat}
+                        isSelected={previewChatId === chat.id} // Use previewChatId for selection highlight
+                        isEditing={editingId === chat.id}
+                        isDeleting={deletingId === chat.id}
+                        editTitle={editingId === chat.id ? editTitle : ''}
+                        onSetHovered={handleSetHoveredChatId}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onSaveEdit={handleSaveEdit}
+                        onCancelEdit={handleCancelEdit}
+                        onConfirmDelete={handleConfirmDelete}
+                        onCancelDelete={handleCancelDelete}
+                        onLinkClick={handleLinkClick}
+                        onSetEditTitle={handleSetEditTitle}
+                      />
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Preview Panel */}
+        <div className="h-full flex-1 border-l bg-muted/60">
+          {/* Pass necessary props to ChatPreview */}
+          <ChatPreview
+             chat={previewChat}
+             messages={previewMessages}
+             isLoading={isPreviewLoading}
+          />
+        </div>
+      </div>
+    </div>
   )
 }

@@ -27,7 +27,7 @@ export function HistoryTrigger() {
       setIsOpen(false)
     }
     await deleteMessages()
-    await deleteChat(id, chatId!, () => router.push("/"))
+    await deleteChat(id, chatId ?? undefined, () => router.push("/")) // Use nullish coalescing for chatId
   }
 
   const trigger = (
@@ -53,14 +53,18 @@ export function HistoryTrigger() {
     )
   }
 
+  // Conditionally render CommandHistory based on isOpen state for desktop
   return (
-    <CommandHistory
-      chatHistory={chats}
-      onSaveEdit={handleSaveEdit}
-      onConfirmDelete={handleConfirmDelete}
-      trigger={trigger}
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-    />
+    <>
+      {trigger} {/* Render the trigger button */}
+      {isOpen && !isMobile && ( // Only render when open and not mobile
+        <CommandHistory
+          chatHistory={chats}
+          onClose={() => setIsOpen(false)} // Pass the close handler
+          onSaveEdit={handleSaveEdit} // Pass edit handler
+          onConfirmDelete={handleConfirmDelete} // Pass delete handler
+        />
+      )}
+    </>
   )
 }
