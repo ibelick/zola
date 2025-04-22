@@ -7,10 +7,7 @@ import {
 import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
 
-const Markdown = dynamic(
-  () => import("./markdown").then((mod) => mod.Markdown),
-  { ssr: false }
-)
+const Markdown = dynamic(() => import("./markdown").then((mod) => mod.Markdown))
 
 export type MessageProps = {
   children: React.ReactNode
