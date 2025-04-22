@@ -16,11 +16,7 @@ import {
   ZOLA_SPECIAL_AGENTS_IDS,
 } from "@/lib/config"
 import { fetchClient } from "@/lib/fetch"
-import {
-  Attachment,
-  checkFileUploadLimit,
-  processFiles,
-} from "@/lib/file-handling"
+import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_AGENT_RESEARCH, API_ROUTE_CHAT } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 import { Message, useChat } from "@ai-sdk/react"
@@ -28,6 +24,7 @@ import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useFileUpload } from "./use-file-upload"
 
 const FeedbackWidget = dynamic(
   () => import("./feedback-widget").then((mod) => mod.FeedbackWidget),
@@ -52,7 +49,15 @@ export function Chat() {
   const { user } = useUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
-  const [files, setFiles] = useState<File[]>([])
+  const {
+    files,
+    setFiles,
+    handleFileUploads,
+    createOptimisticAttachments,
+    cleanupOptimisticAttachments,
+    handleFileUpload,
+    handleFileRemove,
+  } = useFileUpload()
   const [selectedModel, setSelectedModel] = useState(
     currentChat?.model || user?.preferred_model || MODEL_DEFAULT
   )
@@ -352,48 +357,6 @@ export function Chat() {
     [chatId]
   )
 
-  const handleFileUploads = async (
-    uid: string,
-    chatId: string
-  ): Promise<Attachment[] | null> => {
-    if (files.length === 0) return []
-
-    try {
-      await checkFileUploadLimit(uid)
-    } catch (err: any) {
-      if (err.code === "DAILY_FILE_LIMIT_REACHED") {
-        toast({ title: err.message, status: "error" })
-        return null
-      }
-    }
-
-    try {
-      const processed = await processFiles(files, chatId, uid)
-      setFiles([])
-      return processed
-    } catch (err) {
-      toast({ title: "Failed to process files", status: "error" })
-      return null
-    }
-  }
-
-  const createOptimisticAttachments = (files: File[]) => {
-    return files.map((file) => ({
-      name: file.name,
-      contentType: file.type,
-      url: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
-    }))
-  }
-
-  const cleanupOptimisticAttachments = (attachments?: any[]) => {
-    if (!attachments) return
-    attachments.forEach((attachment) => {
-      if (attachment.url?.startsWith("blob:")) {
-        URL.revokeObjectURL(attachment.url)
-      }
-    })
-  }
-
   const submit = async () => {
     setIsSubmitting(true)
 
@@ -513,14 +476,6 @@ export function Chat() {
     },
     [setInput]
   )
-
-  const handleFileUpload = useCallback((newFiles: File[]) => {
-    setFiles((prev) => [...prev, ...newFiles])
-  }, [])
-
-  const handleFileRemove = useCallback((file: File) => {
-    setFiles((prev) => prev.filter((f) => f !== file))
-  }, [])
 
   const handleSuggestion = useCallback(
     async (suggestion: string) => {
