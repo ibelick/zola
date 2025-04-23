@@ -5,12 +5,12 @@ import { fetchClient } from "../fetch"
 import { useAgentContext } from "./provider"
 
 type UseAgentProps = {
-  initialAgentId?: string
+  initialAgentId?: string | null
 }
 
 export const useAgent = ({ initialAgentId }: UseAgentProps) => {
   const { user } = useUser()
-  const { agentId, setAgentId, status, setStatus } = useAgentContext()
+  const { agentId, setAgentId, status, setStatus, agent } = useAgentContext()
 
   //   @todo: need to move, no need initialAgentId
   useEffect(() => {
@@ -57,5 +57,6 @@ export const useAgent = ({ initialAgentId }: UseAgentProps) => {
     setStatus,
     isTooling,
     callAgent,
+    agent,
   }
 }

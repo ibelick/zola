@@ -9,13 +9,13 @@ import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import type { Agent } from "@/app/types/agent"
 import { Button } from "@/components/ui/button"
+import { useAgent } from "@/lib/agent-store/hooks"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { APP_NAME } from "@/lib/config"
-import { createClient } from "@/lib/supabase/client"
 import { Info } from "@phosphor-icons/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { AgentLink } from "./agent-link"
 import { DialogPublish } from "./dialog-publish"
 import { HeaderAgent } from "./header-agent"
@@ -32,34 +32,19 @@ export function Header() {
   const { getChatById } = useChats()
   const { chatId } = useChatSession()
   const currentChat = chatId ? getChatById(chatId) : null
-  const [agent, setAgent] = useState<AgentHeader | null>(null)
+  const { agent, setAgentId } = useAgent({
+    initialAgentId: currentChat?.agent_id || undefined,
+  })
 
   useEffect(() => {
     // reset agent when pathname changes
-    setAgent(null)
-  }, [pathname])
+    setAgentId(null)
+  }, [pathname, setAgentId])
 
   useEffect(() => {
     if (!currentChat?.agent_id) return
-
-    const supabase = createClient()
-
-    const fetchAgent = async () => {
-      const { data, error } = await supabase
-        .from("agents")
-        .select("name, description, avatar_url, slug")
-        .eq("id", currentChat?.agent_id || "")
-        .single()
-
-      if (error || !data) {
-        console.error("Error fetching agent:", error)
-        return
-      }
-
-      setAgent(data)
-    }
-    fetchAgent()
-  }, [currentChat?.agent_id, pathname])
+    setAgentId(currentChat.agent_id)
+  }, [currentChat?.agent_id, setAgentId])
 
   const isLoggedIn = !!user
 
