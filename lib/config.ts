@@ -462,10 +462,12 @@ export const ZOLA_AGENTS_SLUGS = [
 export const ZOLA_SPECIAL_AGENTS_SLUGS = [
   "zola-research",
   "competitor-teardown",
+  "positioning-snapshot",
 ]
 export const ZOLA_AGENTS_TOOLING_IDS = [
   "321c68a2-6c1a-4bd4-948c-9d20e4aeb10c", // research
   "ecd82d26-7c82-4661-83f6-8f362b2687da", // competitor teardown
+  "b2a4ddaa-8e99-49dd-8156-71d95ccfd717", // positioning snapshot
 ]
 
 export const ZOLA_COMING_SOON_AGENTS = [

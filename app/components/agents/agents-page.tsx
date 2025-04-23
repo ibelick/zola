@@ -33,8 +33,10 @@ export function AgentsPage({ agents }: AgentsPageProps) {
     ZOLA_AGENTS_SLUGS.includes(agent.slug)
   )
 
-  const competitorTeardownAgent = agents.find(
-    (agent) => agent.slug === "competitor-teardown"
+  const newAgents = agents.filter(
+    (agent) =>
+      agent.slug === "competitor-teardown" ||
+      agent.slug === "positioning-snapshot"
   )
 
   return (
@@ -125,26 +127,24 @@ export function AgentsPage({ agents }: AgentsPageProps) {
             Analyze your competitors, fast. Get insights on their pricing,
             marketing, and more.
           </p>
-          {competitorTeardownAgent && (
+          {newAgents.map((agent) => (
             <DialogAgent
-              key={competitorTeardownAgent.id}
-              id={competitorTeardownAgent.id}
-              slug={competitorTeardownAgent.slug}
-              name={competitorTeardownAgent.name}
-              description={competitorTeardownAgent.description}
-              avatar_url={competitorTeardownAgent.avatar_url}
-              example_inputs={competitorTeardownAgent.example_inputs || []}
-              creator_id={competitorTeardownAgent.creator_id || "Zola"}
+              key={agent.id}
+              id={agent.id}
+              slug={agent.slug}
+              name={agent.name}
+              description={agent.description}
+              avatar_url={agent.avatar_url}
+              example_inputs={agent.example_inputs || []}
+              creator_id={agent.creator_id || "Zola"}
               isAvailable={true}
               agents={agents}
               onAgentClick={handleAgentClick}
-              isOpen={openAgentId === competitorTeardownAgent.id}
-              onOpenChange={(open) =>
-                setOpenAgentId(open ? competitorTeardownAgent.id : null)
-              }
+              isOpen={openAgentId === agent.id}
+              onOpenChange={(open) => setOpenAgentId(open ? agent.id : null)}
               randomAgents={randomAgents}
             />
-          )}
+          ))}
         </div>
 
         <div className="mt-12">

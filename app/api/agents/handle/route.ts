@@ -2,11 +2,13 @@ import { runAgent } from "@/app/api/agents/core/agentRunner"
 import { runCompetitorTeardownAgent } from "@/app/api/agents/handlers/competitor-teardown/route"
 import { runResearchAgent } from "@/app/api/agents/handlers/research/route"
 import { runSummarizeAgent } from "@/app/api/agents/handlers/summarize/index"
+import { runPositioningSnapshotAgent } from "../handlers/positioning-snapshot/route"
 
 const AGENT_HANDLERS = {
   "zola-research": runResearchAgent,
   "zola-summarize": runSummarizeAgent,
   "competitor-teardown": runCompetitorTeardownAgent,
+  "positioning-snapshot": runPositioningSnapshotAgent,
 }
 
 export const runtime = "nodejs"

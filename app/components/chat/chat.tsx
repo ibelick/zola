@@ -73,10 +73,11 @@ export function Chat() {
   // @todo: will move to agent layer
   const [agentStatus, setAgentStatus] = useState<"idle" | "loading">("idle")
 
-  const { callAgent, isTooling, agentId, setAgentId } = useAgent({
+  const { callAgent, isTooling, agentId, setAgentId, agent } = useAgent({
     initialAgentId: currentChat?.agent_id || undefined,
   })
 
+  console.log("🔍 agent", agent)
   console.log("🔍 agentId", agentId)
   console.log("isTooling", isTooling)
 

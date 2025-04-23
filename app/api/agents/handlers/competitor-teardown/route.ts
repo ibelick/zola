@@ -39,6 +39,43 @@ Prompt:
   return object.product.toLowerCase().trim()
 }
 
+const extractProductsFromPrompt = async (prompt: string) => {
+  const schema = z.object({
+    isMultiple: z.boolean(),
+    products: z
+      .array(
+        z.object({
+          name: z.string(),
+          url: z.string().optional(),
+        })
+      )
+      .min(1),
+  })
+
+  const { object } = await generateObject({
+    model: openai("gpt-4.1-nano"),
+    schema,
+    prompt: `Analyze this prompt and return structured data:
+
+1. Detect if it's about multiple products (use true/false).
+2. Extract a list of products. Each product can include:
+- name (always)
+- url (if available)
+
+Example input:
+"1. Linear: https://linear.app\n2. Mozza: https://mozza.io\nOr analyze Figma."
+
+Only extract names and URLs. If no URL is present, skip it or leave it empty.
+
+Prompt:
+"""
+${prompt}
+"""`,
+  })
+
+  return object
+}
+
 export async function extractRelevantUrls(
   productName: string
 ): Promise<RelevantUrl[]> {
@@ -242,20 +279,14 @@ export async function runCompetitorTeardownAgent(
   prompt: string
 ): Promise<AgentOutput> {
   const productName = await extractProductSlug(prompt)
-  console.log("productName", productName)
 
   const urls = await extractRelevantUrls(productName)
-  console.log("urls", urls)
 
   const pageContents = await fetchWebsiteContent(urls)
 
-  console.log("pageContents", pageContents)
-
   const teardown = await summarizeContentByType(pageContents)
-  console.log("teardown", teardown)
 
   const enriched = await enrichWithExaInsights(prompt)
-  console.log("enriched", enriched)
 
   const formatted = generateFinalTeardown({
     productName: prompt,
@@ -263,7 +294,6 @@ export async function runCompetitorTeardownAgent(
     exaInsights: enriched,
     citations: [],
   })
-  console.log("formatted", formatted)
 
   return {
     markdown: formatted,
