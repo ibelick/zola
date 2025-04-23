@@ -23,6 +23,7 @@ import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
 import { useReasoning } from "./use-reasoning"
@@ -126,6 +127,24 @@ export function Chat() {
     setReasoningMessages,
     reasoningStatus,
   } = useReasoning()
+
+  const {
+    handleInputChange,
+    handleSelectSystemPrompt,
+    handleModelChange,
+    handleDelete,
+    handleEdit,
+  } = useChatHandlers({
+    messages,
+    setMessages,
+    setInput,
+    setSystemPrompt,
+    setSelectedModel,
+    selectedModel,
+    chatId,
+    updateChatModel,
+    user,
+  })
 
   // when chatId is null, set messages to an empty array
   useEffect(() => {
@@ -266,35 +285,6 @@ export function Chat() {
     }
   }
 
-  const handleModelChange = useCallback(
-    async (model: string) => {
-      if (!user?.id) {
-        return
-      }
-
-      if (!chatId && user?.id) {
-        setSelectedModel(model)
-        return
-      }
-
-      const oldModel = selectedModel
-
-      setSelectedModel(model)
-
-      try {
-        await updateChatModel(chatId!, model)
-      } catch (err) {
-        console.error("Failed to update chat model:", err)
-        setSelectedModel(oldModel)
-        toast({
-          title: "Failed to update chat model",
-          status: "error",
-        })
-      }
-    },
-    [chatId]
-  )
-
   const submit = async () => {
     setIsSubmitting(true)
 
@@ -396,25 +386,6 @@ export function Chat() {
     }
   }
 
-  const handleDelete = (id: string) => {
-    setMessages(messages.filter((message) => message.id !== id))
-  }
-
-  const handleEdit = (id: string, newText: string) => {
-    setMessages(
-      messages.map((message) =>
-        message.id === id ? { ...message, content: newText } : message
-      )
-    )
-  }
-
-  const handleInputChange = useCallback(
-    (value: string) => {
-      setInput(value)
-    },
-    [setInput]
-  )
-
   const handleSuggestion = useCallback(
     async (suggestion: string) => {
       setIsSubmitting(true)
@@ -473,10 +444,6 @@ export function Chat() {
     },
     [ensureChatExists, selectedModel, user?.id, append]
   )
-
-  const handleSelectSystemPrompt = useCallback((newSystemPrompt: string) => {
-    setSystemPrompt(newSystemPrompt)
-  }, [])
 
   const handleReload = async () => {
     const uid = await getOrCreateGuestUserId(user)
