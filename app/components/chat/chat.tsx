@@ -5,6 +5,7 @@ import { Conversation } from "@/app/components/chat/conversation"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import { toast } from "@/components/ui/toast"
+import { useAgent } from "@/lib/agent-store/hooks"
 import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
@@ -66,9 +67,9 @@ export function Chat() {
   const [systemPrompt, setSystemPrompt] = useState(
     currentChat?.system_prompt || SYSTEM_PROMPT_DEFAULT
   )
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(
-    currentChat?.agent_id || null
-  )
+  // const [selectedAgentId, setSelectedAgentId] = useState<string | null>(
+  //   currentChat?.agent_id || null
+  // )
   const [hydrated, setHydrated] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -80,9 +81,17 @@ export function Chat() {
   )
 
   // TODO: Remove this once we have a proper agent layer
-  const isZolaResearch = ZOLA_SPECIAL_AGENTS_IDS.includes(
-    currentChat?.agent_id || ""
-  )
+  // const isZolaResearch = ZOLA_SPECIAL_AGENTS_IDS.includes(
+  //   currentChat?.agent_id || ""
+  // )
+
+  const { callZolaResearchAgent, isZolaResearch, agentId, setAgentId } =
+    useAgent({
+      initialAgentId: currentChat?.agent_id || undefined,
+    })
+
+  console.log("🔍 agentId", agentId)
+  console.log("isZolaResearch", isZolaResearch)
 
   const isAuthenticated = !!user?.id
   const {
@@ -114,7 +123,7 @@ export function Chat() {
     input,
     selectedModel,
     systemPrompt,
-    selectedAgentId,
+    selectedAgentId: agentId,
     createNewChat,
     setHasDialogAuth,
   })
@@ -204,23 +213,27 @@ export function Chat() {
     try {
       setResearchStatus("loading")
 
-      const res = await fetchClient(API_ROUTE_AGENT_RESEARCH, {
-        method: "POST",
-        body: JSON.stringify({
-          prompt,
-          chatId,
-          userId: uid,
-          isAuthenticated,
-        }),
-        headers: { "Content-Type": "application/json" },
+      // const res = await fetchClient(API_ROUTE_AGENT_RESEARCH, {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     prompt,
+      //     chatId,
+      //     userId: uid,
+      //     isAuthenticated,
+      //   }),
+      //   headers: { "Content-Type": "application/json" },
+      // })
+
+      // if (!res.ok) {
+      //   const errorText = (await res.json()) as { error: string }
+      //   throw new Error(errorText.error || "Failed to fetch research response.")
+      // }
+
+      const { markdown, parts } = await callZolaResearchAgent({
+        prompt,
+        chatId,
+        userId: uid,
       })
-
-      if (!res.ok) {
-        const errorText = (await res.json()) as { error: string }
-        throw new Error(errorText.error || "Failed to fetch research response.")
-      }
-
-      const { markdown, parts } = await res.json()
 
       const researchMessage = {
         role: "assistant",
@@ -355,7 +368,7 @@ export function Chat() {
         model: selectedModel,
         isAuthenticated,
         systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-        agentId: selectedAgentId || undefined,
+        agentId: agentId || undefined,
       },
       experimental_attachments: attachments || undefined,
     }
@@ -363,8 +376,10 @@ export function Chat() {
     // START OF RESEARCH AGENT
     // @todo: This is temporary solution
     if (isZolaResearch && messages.length === 0) {
-      appendReasoning({ role: "user", content: input })
-      // await handleZolaResearch(input, uid, currentChatId)
+      // appendReasoning({ role: "user", content: input })
+
+      console.log("🔍 Calling Zola Research Agent")
+      await handleZolaResearch(input, uid, currentChatId)
       setIsSubmitting(false)
       return
     }
@@ -540,8 +555,8 @@ export function Chat() {
           systemPrompt={systemPrompt}
           stop={stop}
           status={status}
-          setSelectedAgentId={setSelectedAgentId}
-          selectedAgentId={selectedAgentId}
+          setSelectedAgentId={setAgentId}
+          selectedAgentId={agentId}
           placeholder={
             isZolaResearch && messages.length === 0
               ? "Describe what you want to research in detail, e.g. a specific company, trend, or question. Add context like audience, angle, goals, or examples to help me create a focused and useful report."

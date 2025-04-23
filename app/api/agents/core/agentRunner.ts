@@ -14,13 +14,21 @@ type AgentFunction<T> = (prompt: string) => Promise<T>
  * Generic agent runner that handles validation, execution, and persisting results
  */
 export async function runAgent<T extends AgentOutput>(
-  req: Request,
+  data: {
+    prompt: string
+    chatId: string
+    userId: string
+    // @todo: check isAuthenticated here server-side
+    isAuthenticated: boolean
+  },
   agentFunction: AgentFunction<T>
 ) {
   const start = Date.now()
   try {
     // Extract and validate request data
-    const { prompt, chatId, userId, isAuthenticated } = await req.json()
+    const { prompt, chatId, userId, isAuthenticated } = data
+
+    console.log("🔍 Running agent", { prompt, chatId, userId, isAuthenticated })
 
     let supabase: SupabaseClient
     let sanitizedPrompt: string

@@ -1,13 +1,13 @@
-import { runAgent } from "../core/agentRunner"
+import { runAgent } from "@/app/api/agents/core/agentRunner"
 import {
-  analyzeSufficiency,
+  // analyzeSufficiency,
   generateReport,
   generateReportTitle,
   generateSearchQueries,
   summarizeSources,
-} from "../core/tools/ai"
-import { fetchSearchResults } from "../core/tools/search"
-import { AgentOutput } from "../core/types"
+} from "@/app/api/agents/core/tools/ai"
+import { fetchSearchResults } from "@/app/api/agents/core/tools/search"
+import { AgentOutput } from "@/app/api/agents/core/types"
 
 // set to nodejs to avoid timeout
 export const runtime = "nodejs"
@@ -15,7 +15,7 @@ export const runtime = "nodejs"
 /**
  * Research agent that generates a report based on web search results
  */
-async function runResearchAgent(prompt: string): Promise<AgentOutput> {
+export async function runResearchAgent(prompt: string): Promise<AgentOutput> {
   // 1. Generate a title for the report
   const reportTitle = await generateReportTitle(prompt)
 
@@ -49,11 +49,4 @@ async function runResearchAgent(prompt: string): Promise<AgentOutput> {
       }))
     ),
   }
-}
-
-/**
- * API route handler for the research agent
- */
-export async function POST(req: Request) {
-  return runAgent(req, runResearchAgent)
 }

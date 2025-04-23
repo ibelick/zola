@@ -1,10 +1,10 @@
+import { runAgent } from "@/app/api/agents/core/agentRunner"
+import { TECHNICAL_WRITER_PROMPT } from "@/app/api/agents/core/prompts"
+import { generateReportTitle } from "@/app/api/agents/core/tools/ai"
+import { AgentOutput } from "@/app/api/agents/core/types"
 import { openai } from "@ai-sdk/openai"
 import { generateObject } from "ai"
 import { z } from "zod"
-import { runAgent } from "../core/agentRunner"
-import { TECHNICAL_WRITER_PROMPT } from "../core/prompts"
-import { generateReportTitle } from "../core/tools/ai"
-import { AgentOutput } from "../core/types"
 
 // set to nodejs to avoid timeout
 export const runtime = "nodejs"
@@ -31,7 +31,7 @@ async function generateSummary(prompt: string): Promise<string> {
 /**
  * Summarization agent
  */
-async function runSummarizeAgent(prompt: string): Promise<AgentOutput> {
+export async function runSummarizeAgent(prompt: string): Promise<AgentOutput> {
   // 1. Generate a title for the summary
   const title = await generateReportTitle(prompt)
 
@@ -43,11 +43,4 @@ async function runSummarizeAgent(prompt: string): Promise<AgentOutput> {
     markdown: summary,
     parts: [],
   }
-}
-
-/**
- * API route handler for the summarize agent
- */
-export async function POST(req: Request) {
-  return runAgent(req, runSummarizeAgent)
 }
