@@ -1,5 +1,5 @@
 import { useUser } from "@/app/providers/user-provider"
-import { ZOLA_SPECIAL_AGENTS_IDS } from "@/lib/config"
+import { ZOLA_AGENTS_TOOLING_IDS } from "@/lib/config"
 import { useEffect } from "react"
 import { fetchClient } from "../fetch"
 import { useAgentContext } from "./provider"
@@ -19,11 +19,9 @@ export const useAgent = ({ initialAgentId }: UseAgentProps) => {
     }
   }, [initialAgentId, setAgentId])
 
-  const isZolaResearch = agentId
-    ? ZOLA_SPECIAL_AGENTS_IDS.includes(agentId)
-    : false
+  const isTooling = agentId ? ZOLA_AGENTS_TOOLING_IDS.includes(agentId) : false
 
-  async function callZolaResearchAgent({
+  async function callAgent({
     prompt,
     chatId,
     userId,
@@ -35,7 +33,7 @@ export const useAgent = ({ initialAgentId }: UseAgentProps) => {
     const res = await fetchClient("/api/agents/handle", {
       method: "POST",
       body: JSON.stringify({
-        agentId: "zola-research",
+        agentSlug: "zola-research",
         prompt,
         chatId,
         userId,
@@ -57,7 +55,7 @@ export const useAgent = ({ initialAgentId }: UseAgentProps) => {
     setAgentId,
     status,
     setStatus,
-    isZolaResearch,
-    callZolaResearchAgent,
+    isTooling,
+    callAgent,
   }
 }

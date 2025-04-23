@@ -12,7 +12,7 @@ type ConversationProps = {
   onDelete: (id: string) => void
   onEdit: (id: string, newText: string) => void
   onReload: () => void
-  researchStatus?: "idle" | "loading"
+  agentStatus?: "idle" | "loading"
   reasoning?: string
 }
 
@@ -22,7 +22,7 @@ export function Conversation({
   onDelete,
   onEdit,
   onReload,
-  researchStatus,
+  agentStatus,
   reasoning,
 }: ConversationProps) {
   const initialMessageCount = useRef(messages.length)
@@ -72,7 +72,7 @@ export function Conversation({
               <Loader />
             </div>
           )}
-        {researchStatus === "loading" && (
+        {agentStatus === "loading" && (
           <div className="group min-h-scroll-anchor flex w-full max-w-3xl flex-col items-start gap-2 px-6 pb-2">
             <Loader text="Generating research report" />
           </div>

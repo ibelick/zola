@@ -13,9 +13,9 @@ export const runtime = "nodejs"
 
 export async function POST(request: Request) {
   const body = await request.json()
-  const { agentId, ...rest } = body
+  const { agentSlug, ...rest } = body
 
-  const handler = AGENT_HANDLERS[agentId as keyof typeof AGENT_HANDLERS]
+  const handler = AGENT_HANDLERS[agentSlug as keyof typeof AGENT_HANDLERS]
   if (!handler) {
     return new Response(JSON.stringify({ error: "Unknown agent" }), {
       status: 400,

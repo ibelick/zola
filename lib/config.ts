@@ -460,7 +460,7 @@ export const ZOLA_AGENTS_SLUGS = [
 ]
 
 export const ZOLA_SPECIAL_AGENTS_SLUGS = ["zola-research"]
-export const ZOLA_SPECIAL_AGENTS_IDS = ["321c68a2-6c1a-4bd4-948c-9d20e4aeb10c"]
+export const ZOLA_AGENTS_TOOLING_IDS = ["321c68a2-6c1a-4bd4-948c-9d20e4aeb10c"]
 
 export const ZOLA_COMING_SOON_AGENTS = [
   {
