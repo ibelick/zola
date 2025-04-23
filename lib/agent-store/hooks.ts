@@ -30,10 +30,14 @@ export const useAgent = ({ initialAgentId }: UseAgentProps) => {
     chatId: string
     userId: string
   }) {
+    if (!agent) {
+      throw new Error("Agent not found")
+    }
+
     const res = await fetchClient("/api/agents/handle", {
       method: "POST",
       body: JSON.stringify({
-        agentSlug: "zola-research",
+        agentSlug: agent.slug,
         prompt,
         chatId,
         userId,

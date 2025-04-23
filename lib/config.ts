@@ -459,8 +459,14 @@ export const ZOLA_AGENTS_SLUGS = [
   "eloi",
 ]
 
-export const ZOLA_SPECIAL_AGENTS_SLUGS = ["zola-research"]
-export const ZOLA_AGENTS_TOOLING_IDS = ["321c68a2-6c1a-4bd4-948c-9d20e4aeb10c"]
+export const ZOLA_SPECIAL_AGENTS_SLUGS = [
+  "zola-research",
+  "competitor-teardown",
+]
+export const ZOLA_AGENTS_TOOLING_IDS = [
+  "321c68a2-6c1a-4bd4-948c-9d20e4aeb10c", // research
+  "ecd82d26-7c82-4661-83f6-8f362b2687da", // competitor teardown
+]
 
 export const ZOLA_COMING_SOON_AGENTS = [
   {

@@ -1,7 +1,11 @@
 "use client"
 
 import { AgentSummary } from "@/app/types/agent"
-import { ZOLA_AGENTS_SLUGS, ZOLA_COMING_SOON_AGENTS } from "@/lib/config"
+import {
+  ZOLA_AGENTS_SLUGS,
+  ZOLA_COMING_SOON_AGENTS,
+  ZOLA_SPECIAL_AGENTS_SLUGS,
+} from "@/lib/config"
 import { ArrowUpRight } from "@phosphor-icons/react"
 import { useMemo, useState } from "react"
 import { DialogAgent } from "./dialog-agent"
@@ -27,6 +31,10 @@ export function AgentsPage({ agents }: AgentsPageProps) {
   const researchAgent = agents.find((agent) => agent.slug === "zola-research")
   const featuredAgents = agents.filter((agent) =>
     ZOLA_AGENTS_SLUGS.includes(agent.slug)
+  )
+
+  const competitorTeardownAgent = agents.find(
+    (agent) => agent.slug === "competitor-teardown"
   )
 
   return (
@@ -108,6 +116,36 @@ export function AgentsPage({ agents }: AgentsPageProps) {
             />
           </div>
         )}
+
+        <div className="mt-12">
+          <h2 className="text-foreground mb-1 text-lg font-medium">
+            Competitor Teardown
+          </h2>
+          <p className="text-muted-foreground">
+            Analyze your competitors, fast. Get insights on their pricing,
+            marketing, and more.
+          </p>
+          {competitorTeardownAgent && (
+            <DialogAgent
+              key={competitorTeardownAgent.id}
+              id={competitorTeardownAgent.id}
+              slug={competitorTeardownAgent.slug}
+              name={competitorTeardownAgent.name}
+              description={competitorTeardownAgent.description}
+              avatar_url={competitorTeardownAgent.avatar_url}
+              example_inputs={competitorTeardownAgent.example_inputs || []}
+              creator_id={competitorTeardownAgent.creator_id || "Zola"}
+              isAvailable={true}
+              agents={agents}
+              onAgentClick={handleAgentClick}
+              isOpen={openAgentId === competitorTeardownAgent.id}
+              onOpenChange={(open) =>
+                setOpenAgentId(open ? competitorTeardownAgent.id : null)
+              }
+              randomAgents={randomAgents}
+            />
+          )}
+        </div>
 
         <div className="mt-12">
           <h2 className="text-foreground mb-1 text-lg font-medium">Featured</h2>
