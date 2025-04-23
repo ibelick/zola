@@ -24,6 +24,7 @@ import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
 
 const FeedbackWidget = dynamic(
@@ -102,6 +103,19 @@ export function Chat() {
       if (!chatId) return
       await cacheAndAddMessage(message)
     },
+  })
+
+  // Use the custom hook for chat utilities
+  const { checkLimitsAndNotify, ensureChatExists } = useChatUtils({
+    isAuthenticated,
+    chatId,
+    messages,
+    input,
+    selectedModel,
+    systemPrompt,
+    selectedAgentId,
+    createNewChat,
+    setHasDialogAuth,
   })
 
   // @todo: reasoning agent
@@ -254,78 +268,6 @@ export function Chat() {
       setIsSubmitting(false)
       router.replace(`/c/${chatId}`)
     }
-  }
-
-  const checkLimitsAndNotify = async (uid: string): Promise<boolean> => {
-    try {
-      const rateData = await checkRateLimits(uid, isAuthenticated)
-
-      if (rateData.remaining === 0 && !isAuthenticated) {
-        setHasDialogAuth(true)
-        return false
-      }
-
-      if (rateData.remaining === REMAINING_QUERY_ALERT_THRESHOLD) {
-        toast({
-          title: `Only ${rateData.remaining} query${rateData.remaining === 1 ? "" : "ies"} remaining today.`,
-          status: "info",
-        })
-      }
-
-      return true
-    } catch (err) {
-      console.error("Rate limit check failed:", err)
-      return false
-    }
-  }
-
-  const ensureChatExists = async (userId: string) => {
-    if (!isAuthenticated) {
-      const storedGuestChatId = localStorage.getItem("guestChatId")
-      if (storedGuestChatId) return storedGuestChatId
-    }
-
-    // @todo: remove this once we have a proper agent layer
-    if (selectedAgentId && messages.length === 0) {
-      return chatId
-    }
-
-    if (messages.length === 0) {
-      try {
-        const newChat = await createNewChat(
-          userId,
-          input,
-          selectedModel,
-          isAuthenticated,
-          selectedAgentId ? undefined : systemPrompt, // if agentId is set, systemPrompt is not used
-          selectedAgentId || undefined
-        )
-
-        if (!newChat) return null
-        if (isAuthenticated) {
-          window.history.pushState(null, "", `/c/${newChat.id}`)
-        } else {
-          localStorage.setItem("guestChatId", newChat.id)
-        }
-
-        return newChat.id
-      } catch (err: any) {
-        let errorMessage = "Something went wrong."
-        try {
-          const parsed = JSON.parse(err.message)
-          errorMessage = parsed.error || errorMessage
-        } catch {
-          errorMessage = err.message || errorMessage
-        }
-        toast({
-          title: errorMessage,
-          status: "error",
-        })
-        return null
-      }
-    }
-
-    return chatId
   }
 
   const handleModelChange = useCallback(
