@@ -5,13 +5,12 @@ import { Conversation } from "@/app/components/chat/conversation"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import { toast } from "@/components/ui/toast"
-import { checkRateLimits, getOrCreateGuestUserId } from "@/lib/api"
+import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import {
   MESSAGE_MAX_LENGTH,
   MODEL_DEFAULT,
-  REMAINING_QUERY_ALERT_THRESHOLD,
   SYSTEM_PROMPT_DEFAULT,
   ZOLA_SPECIAL_AGENTS_IDS,
 } from "@/lib/config"
@@ -26,6 +25,7 @@ import { redirect, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
+import { useReasoning } from "./use-reasoning"
 
 const FeedbackWidget = dynamic(
   () => import("./feedback-widget").then((mod) => mod.FeedbackWidget),
@@ -118,18 +118,14 @@ export function Chat() {
     setHasDialogAuth,
   })
 
-  // @todo: reasoning agent
+  // @todo: improve
   const {
-    input: reasoningInput,
-    messages: reasoningMessages,
-    append: appendReasoning,
-    setMessages: setReasoningMessages,
-    status: reasoningStatus,
-  } = useChat({
-    api: "/api/agents/reasoning",
-  })
-
-  console.log("=>", reasoningInput, reasoningMessages, reasoningStatus)
+    reasoningInput,
+    reasoningMessages,
+    appendReasoning,
+    setReasoningMessages,
+    reasoningStatus,
+  } = useReasoning()
 
   // when chatId is null, set messages to an empty array
   useEffect(() => {
