@@ -72,6 +72,22 @@ export type GeminiModel =
   | "gemma-3-27b-it"
   | "learnlm-1.5-pro-experimental"
 
-export type Provider = "openai" | "mistral" | "google"
+export type AnthropicModel =
+  | "claude-3-7-sonnet-20250219"
+  | "claude-3-5-sonnet-latest"
+  | "claude-3-5-sonnet-20241022"
+  | "claude-3-5-sonnet-20240620"
+  | "claude-3-5-haiku-latest"
+  | "claude-3-5-haiku-20241022"
+  | "claude-3-opus-latest"
+  | "claude-3-opus-20240229"
+  | "claude-3-sonnet-20240229"
+  | "claude-3-haiku-20240307"
 
-export type SupportedModel = OpenAIModel | MistralModel | GeminiModel
+export type Provider = "openai" | "mistral" | "google" | "anthropic"
+
+export type SupportedModel =
+  | OpenAIModel
+  | MistralModel
+  | GeminiModel
+  | AnthropicModel

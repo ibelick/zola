@@ -29,10 +29,9 @@ const openai_provider = openproviders("gpt-3.5-turbo", {
     "50256": -100,
   },
   user: "test-user", // optional unique user identifier
-  safetySettings: [
-    { category: "HARM_CATEGORY_UNSPECIFIED", threshold: "BLOCK_LOW_AND_ABOVE" },
-  ],
 })
+
+const anthropic_model = openproviders("claude-3-7-sonnet-20250219")
 
 const open_model = openai("gpt-3.5-turbo", {
   logitBias: {

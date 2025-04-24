@@ -74,6 +74,18 @@ const MODEL_PROVIDER_MAP: Record<SupportedModel, Provider> = {
   "gemini-exp-1206": "google",
   "gemma-3-27b-it": "google",
   "learnlm-1.5-pro-experimental": "google",
+
+  // Anthropic
+  "claude-3-7-sonnet-20250219": "anthropic",
+  "claude-3-5-sonnet-latest": "anthropic",
+  "claude-3-5-sonnet-20241022": "anthropic",
+  "claude-3-5-sonnet-20240620": "anthropic",
+  "claude-3-5-haiku-latest": "anthropic",
+  "claude-3-5-haiku-20241022": "anthropic",
+  "claude-3-opus-latest": "anthropic",
+  "claude-3-opus-20240229": "anthropic",
+  "claude-3-sonnet-20240229": "anthropic",
+  "claude-3-haiku-20240307": "anthropic",
 }
 
 export function getProviderForModel(model: SupportedModel): Provider {
