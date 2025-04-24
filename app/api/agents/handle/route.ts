@@ -1,8 +1,8 @@
 import { runAgent } from "@/app/api/agents/core/agentRunner"
-import { runCompetitorTeardownAgent } from "@/app/api/agents/handlers/competitor-teardown/route"
-import { runResearchAgent } from "@/app/api/agents/handlers/research/route"
-import { runSummarizeAgent } from "@/app/api/agents/handlers/summarize/index"
-import { runPositioningSnapshotAgent } from "../handlers/positioning-snapshot/route"
+import { runCompetitorTeardownAgent } from "@/app/api/agents/handlers/competitor-teardown"
+import { runPositioningSnapshotAgent } from "@/app/api/agents/handlers/positioning-snapshot"
+import { runResearchAgent } from "@/app/api/agents/handlers/research"
+import { runSummarizeAgent } from "@/app/api/agents/handlers/summarize"
 
 const AGENT_HANDLERS = {
   "zola-research": runResearchAgent,

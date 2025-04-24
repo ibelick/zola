@@ -7,9 +7,6 @@ import { z } from "zod"
 // Initialize Exa client
 const exa = new Exa(process.env.EXA_API_KEY!)
 
-// set to nodejs to avoid timeout
-export const runtime = "nodejs"
-
 type RelevantUrl = {
   type:
     | "homepage"

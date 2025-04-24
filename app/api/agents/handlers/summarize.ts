@@ -1,13 +1,9 @@
-import { runAgent } from "@/app/api/agents/core/agentRunner"
 import { TECHNICAL_WRITER_PROMPT } from "@/app/api/agents/core/prompts"
 import { generateReportTitle } from "@/app/api/agents/core/tools/ai"
 import { AgentOutput } from "@/app/api/agents/core/types"
 import { openai } from "@ai-sdk/openai"
 import { generateObject } from "ai"
 import { z } from "zod"
-
-// set to nodejs to avoid timeout
-export const runtime = "nodejs"
 
 /**
  * Generate a concise summary

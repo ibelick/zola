@@ -1,7 +1,7 @@
 "use client"
 
 import { AgentSummary } from "@/app/types/agent"
-import { ZOLA_COMING_SOON_AGENTS } from "@/lib/config"
+import { ZOLA_AGENTS_SLUGS, ZOLA_COMING_SOON_AGENTS } from "@/lib/config"
 import { ArrowUpRight } from "@phosphor-icons/react"
 import { useMemo, useState } from "react"
 import { DialogAgent } from "./dialog-agent"
@@ -25,6 +25,9 @@ export function AgentsPage({ agents }: AgentsPageProps) {
   }
 
   const researchAgent = agents.find((agent) => agent.slug === "zola-research")
+  const featuredAgents = agents.filter((agent) =>
+    ZOLA_AGENTS_SLUGS.includes(agent.slug)
+  )
 
   return (
     <div className="bg-background min-h-screen px-4 pt-20 pb-20 sm:px-6">
@@ -105,6 +108,30 @@ export function AgentsPage({ agents }: AgentsPageProps) {
             />
           </div>
         )}
+
+        <div className="mt-12">
+          <h2 className="text-foreground mb-1 text-lg font-medium">Featured</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {featuredAgents.map((agent) => (
+              <DialogAgent
+                key={agent.id}
+                id={agent.id}
+                slug={agent.slug}
+                name={agent.name}
+                description={agent.description}
+                avatar_url={agent.avatar_url}
+                example_inputs={agent.example_inputs || []}
+                creator_id={agent.creator_id || "Zola"}
+                isAvailable={true}
+                agents={agents}
+                onAgentClick={handleAgentClick}
+                isOpen={openAgentId === agent.id}
+                onOpenChange={(open) => setOpenAgentId(open ? agent.id : null)}
+                randomAgents={randomAgents}
+              />
+            ))}
+          </div>
+        </div>
 
         <div className="mt-12">
           <h2 className="text-foreground mb-1 text-lg font-medium">

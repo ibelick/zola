@@ -1,4 +1,3 @@
-import { runAgent } from "@/app/api/agents/core/agentRunner"
 import {
   // analyzeSufficiency,
   generateReport,
@@ -8,9 +7,6 @@ import {
 } from "@/app/api/agents/core/tools/ai"
 import { fetchSearchResults } from "@/app/api/agents/core/tools/search"
 import { AgentOutput } from "@/app/api/agents/core/types"
-
-// set to nodejs to avoid timeout
-export const runtime = "nodejs"
 
 /**
  * Research agent that generates a report based on web search results
