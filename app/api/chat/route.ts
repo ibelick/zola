@@ -1,13 +1,7 @@
-import { UsageLimitError } from "@/lib/api"
-import {
-  MODELS_FREE,
-  MODELS_OPTIONS,
-  MODELS_PRO,
-  SYSTEM_PROMPT_DEFAULT,
-} from "@/lib/config"
+import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
-import { checkUsage, incrementUsage } from "@/lib/usage"
+import { checkUsageByModel, incrementUsageByModel } from "@/lib/usage"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { LanguageModelV1, Message as MessageAISDK, streamText } from "ai"
@@ -46,7 +40,7 @@ export async function POST(req: Request) {
 
     const supabase = await validateUserIdentity(userId, isAuthenticated)
 
-    await checkUsage(supabase, userId)
+    await checkUsageByModel(supabase, userId, model, isAuthenticated)
 
     const userMessage = messages[messages.length - 1]
     if (userMessage && userMessage.role === "user") {
@@ -62,7 +56,7 @@ export async function POST(req: Request) {
         console.error("Error saving user message:", msgError)
       } else {
         console.log("User message saved successfully.")
-        await incrementUsage(supabase, userId)
+        await incrementUsageByModel(supabase, userId, model, isAuthenticated)
       }
     }
 

@@ -1,6 +1,6 @@
-import { checkUsage } from "@/lib/api"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { validateUserIdentity } from "@/lib/server/api"
+import { checkUsageByModel } from "@/lib/usage"
 
 export async function POST(request: Request) {
   try {
@@ -14,8 +14,7 @@ export async function POST(request: Request) {
 
     const supabase = await validateUserIdentity(userId, isAuthenticated)
 
-    // Only check usage but don't increment
-    await checkUsage(supabase, userId)
+    await checkUsageByModel(supabase, userId, model, isAuthenticated)
 
     // Insert a new chat record in the chats table
     const { data: chatData, error: chatError } = await supabase
