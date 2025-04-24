@@ -94,7 +94,7 @@ export async function runAgent<T extends AgentOutput>(
     return jsonRes(
       {
         error: "Internal server error",
-        detail: err instanceof Error ? err.message : String(err),
+        detail: "An unexpected error occurred. Please try again later.",
       },
       500
     )

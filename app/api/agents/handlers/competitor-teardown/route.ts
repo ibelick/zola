@@ -22,7 +22,7 @@ type RelevantUrl = {
   url: string
 }
 
-export async function extractProductSlug(prompt: string) {
+async function extractProductSlug(prompt: string) {
   const schema = z.object({
     product: z.string().min(2).max(50), // example: linear.app or notion.so
   })
@@ -76,7 +76,7 @@ ${prompt}
   return object
 }
 
-export async function extractRelevantUrls(
+async function extractRelevantUrls(
   productName: string
 ): Promise<RelevantUrl[]> {
   const query = `Find the homepage, pricing page, features page, and blog (if available) for the product \"${productName}\". Only return URLs from the official product site.`
