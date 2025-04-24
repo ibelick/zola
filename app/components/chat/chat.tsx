@@ -70,14 +70,7 @@ export function Chat() {
   const router = useRouter()
   const hasSentInitialPromptRef = useRef(false)
   const hasSentFirstMessageRef = useRef(false)
-  // @todo: will move to agent layer
-  const [agentStatus, setAgentStatus] = useState<"idle" | "loading">("idle")
-
-  const { callAgent, isTooling, agentId, agent } = useAgent()
-
-  // console.log("🔍 agent", agent)
-  // console.log("🔍 agentId", agentId)
-  // console.log("isTooling", isTooling)
+  const { callAgent, isTooling, statusCall, agent } = useAgent()
 
   const isAuthenticated = !!user?.id
   const {
@@ -109,7 +102,7 @@ export function Chat() {
     input,
     selectedModel,
     systemPrompt,
-    selectedAgentId: agentId,
+    selectedAgentId: agent?.id || null,
     createNewChat,
     setHasDialogAuth,
   })
@@ -193,8 +186,6 @@ export function Chat() {
 
   const handleAgent = async (prompt: string, uid: string, chatId: string) => {
     try {
-      setAgentStatus("loading")
-
       const { markdown, parts } = await callAgent({
         prompt,
         chatId,
@@ -211,8 +202,6 @@ export function Chat() {
       setMessages((prev) => [...prev, agentMessage])
 
       await cacheAndAddMessage(agentMessage)
-
-      setAgentStatus("idle")
     } catch (err: any) {
       console.error("Zola Agent Error:", err)
       toast({
@@ -220,8 +209,6 @@ export function Chat() {
         description: err.message || "Something went wrong.",
         status: "error",
       })
-
-      setAgentStatus("idle")
     }
   }
 
@@ -334,7 +321,7 @@ export function Chat() {
         model: selectedModel,
         isAuthenticated,
         systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-        agentId: agentId || undefined,
+        ...(agent?.id && { agentId: agent.id }),
       },
       experimental_attachments: attachments || undefined,
     }
@@ -344,7 +331,6 @@ export function Chat() {
     if (isTooling && messages.length === 0) {
       // appendReasoning({ role: "user", content: input })
 
-      console.log("🔍 Calling Zola Research Agent")
       await handleAgent(input, uid, currentChatId)
       setIsSubmitting(false)
       return
@@ -485,7 +471,7 @@ export function Chat() {
             onDelete={handleDelete}
             onEdit={handleEdit}
             onReload={handleReload}
-            agentStatus={agentStatus}
+            agentStatus={statusCall}
             reasoning={
               reasoningMessages?.find((m) => m.role === "assistant")?.content
             }
@@ -521,8 +507,6 @@ export function Chat() {
           systemPrompt={systemPrompt}
           stop={stop}
           status={status}
-          // setSelectedAgentId={setAgentId}
-          // selectedAgentId={agentId}
           placeholder={
             isTooling && messages.length === 0
               ? "Describe what you want to research in detail, e.g. a specific company, trend, or question. Add context like audience, angle, goals, or examples to help me create a focused and useful report."

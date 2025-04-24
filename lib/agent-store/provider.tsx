@@ -17,6 +17,8 @@ type AgentMetadata = {
   description: string
   avatar_url: string | null
   slug: string
+  tools_enabled: boolean
+  id: string
 }
 
 type AgentState = {
@@ -24,7 +26,6 @@ type AgentState = {
 }
 
 type AgentContextType = AgentState & {
-  agentId: string | null
   setStatus: (status: AgentState["status"]) => void
   agent: AgentMetadata | null
 }
@@ -40,10 +41,10 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
   const currentChat = chatId ? getChatById(chatId) : null
   const [status, setStatus] = useState<AgentState["status"]>("idle")
   const [agent, setAgent] = useState<AgentMetadata | null>(null)
-  const agentId = currentChat?.agent_id || null
+  const currentChatAgentId = currentChat?.agent_id || null
 
   const fetchAgent = useCallback(async () => {
-    if (!agentSlug && !agentId) {
+    if (!agentSlug && !currentChatAgentId) {
       setAgent(null)
       return
     }
@@ -53,12 +54,12 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
 
     let query = supabase
       .from("agents")
-      .select("name, description, avatar_url, slug")
+      .select("name, description, avatar_url, slug, tools_enabled, id")
 
     if (agentSlug) {
       query = query.eq("slug", agentSlug)
-    } else if (agentId) {
-      query = query.eq("id", agentId)
+    } else if (currentChatAgentId) {
+      query = query.eq("id", currentChatAgentId)
     }
 
     const { data, error } = await query.single()
@@ -71,19 +72,19 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setStatus("idle")
-  }, [agentSlug, agentId])
+  }, [agentSlug, currentChatAgentId])
 
   useEffect(() => {
-    if (!agentSlug && !agentId) {
+    if (!agentSlug && !currentChatAgentId) {
       setAgent(null)
       return
     }
 
     fetchAgent()
-  }, [pathname, agentSlug, agentId, fetchAgent])
+  }, [pathname, agentSlug, currentChatAgentId, fetchAgent])
 
   return (
-    <AgentContext.Provider value={{ agentId, status, setStatus, agent }}>
+    <AgentContext.Provider value={{ status, setStatus, agent }}>
       {children}
     </AgentContext.Provider>
   )

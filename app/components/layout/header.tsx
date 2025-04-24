@@ -28,12 +28,7 @@ export type AgentHeader = Pick<
 export function Header() {
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
-  // const { getChatById } = useChats()
-  // const { chatId } = useChatSession()
-  // const currentChat = chatId ? getChatById(chatId) : null
   const { agent } = useAgent()
-
-  // console.log("🔍 agent", agent)
 
   const isLoggedIn = !!user
 
