@@ -22,6 +22,31 @@ import {
   PenNib,
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr"
+import { openproviders } from "./openproviders"
+
+const openai_provider = openproviders("gpt-3.5-turbo", {
+  logitBias: {
+    "50256": -100,
+  },
+  user: "test-user", // optional unique user identifier
+  safetySettings: [
+    { category: "HARM_CATEGORY_UNSPECIFIED", threshold: "BLOCK_LOW_AND_ABOVE" },
+  ],
+})
+
+const open_model = openai("gpt-3.5-turbo", {
+  logitBias: {
+    // optional likelihood for specific tokens
+    "50256": -100,
+  },
+  user: "test-user", // optional unique user identifier
+})
+
+const google_model = openproviders("gemini-1.5-pro", {
+  safetySettings: [
+    { category: "HARM_CATEGORY_UNSPECIFIED", threshold: "BLOCK_LOW_AND_ABOVE" },
+  ],
+})
 
 export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5
 export const AUTH_DAILY_MESSAGE_LIMIT = 100

@@ -37,6 +37,7 @@ export type OpenAIModel =
   | "gpt-3.5-turbo"
   | "gpt-3.5-turbo-1106"
   | "chatgpt-4o-latest"
+  | "gpt-3.5-turbo-instruct"
 
 export type MistralModel =
   | "ministral-3b-latest"

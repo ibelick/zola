@@ -40,6 +40,7 @@ const MODEL_PROVIDER_MAP: Record<SupportedModel, Provider> = {
   "gpt-3.5-turbo": "openai",
   "gpt-3.5-turbo-1106": "openai",
   "chatgpt-4o-latest": "openai",
+  "gpt-3.5-turbo-instruct": "openai",
 
   // Mistral
   "ministral-3b-latest": "mistral",
