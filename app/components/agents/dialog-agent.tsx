@@ -40,7 +40,7 @@ export function DialogAgent({
   isOpen,
   onOpenChange,
   randomAgents,
-  trigger,
+  trigger = null,
 }: DialogAgentProps) {
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
@@ -70,7 +70,7 @@ export function DialogAgent({
   if (!user) {
     return (
       <Popover>
-        <PopoverTrigger asChild>
+        <PopoverTrigger className="flex w-full">
           {trigger || (
             <AgentCard
               id={id}
