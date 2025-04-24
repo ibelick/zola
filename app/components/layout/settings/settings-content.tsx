@@ -7,7 +7,11 @@ import { toast } from "@/components/ui/toast"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import { clearAllIndexedDBStores } from "@/lib/chat-store/persist"
-import { AUTH_DAILY_MESSAGE_LIMIT, MODEL_DEFAULT } from "@/lib/config"
+import {
+  AUTH_DAILY_MESSAGE_LIMIT,
+  DAILY_LIMIT_PRO_MODELS,
+  MODEL_DEFAULT,
+} from "@/lib/config"
 import { cn } from "@/lib/utils"
 import { SignOut, User, X } from "@phosphor-icons/react"
 import { useTheme } from "next-themes"
@@ -106,7 +110,7 @@ export function SettingsContent({
       {/* Message Usage */}
       <div className="border-border border-t">
         <div className="px-6 py-4">
-          <h3 className="mb-3 text-sm font-medium">Message Usage</h3>
+          <h3 className="mb-3 text-sm font-medium">Standard usage</h3>
           <div className="bg-secondary rounded-lg p-3">
             <div className="mb-2 flex justify-between">
               <span className="text-secondary-foreground text-sm">Today</span>
@@ -129,6 +133,37 @@ export function SettingsContent({
             </div>
             <p className="text-muted-foreground mt-2 text-xs">
               Limit of {AUTH_DAILY_MESSAGE_LIMIT} messages per day
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Pro Message Usage */}
+      <div className="border-border border-t">
+        <div className="px-6 py-4">
+          <h3 className="mb-3 text-sm font-medium">Advanced model usage</h3>
+          <div className="bg-secondary rounded-lg p-3">
+            <div className="mb-2 flex justify-between">
+              <span className="text-secondary-foreground text-sm">Today</span>
+              <span className="text-sm font-medium">
+                {user?.daily_pro_message_count || 0} / {DAILY_LIMIT_PRO_MODELS}{" "}
+                messages
+              </span>
+            </div>
+            <div className="bg-muted h-1.5 w-full rounded-full">
+              <div
+                className="bg-primary h-1.5 rounded-full"
+                style={{
+                  width: `${
+                    ((user?.daily_pro_message_count || 0) /
+                      DAILY_LIMIT_PRO_MODELS) *
+                    100
+                  }%`,
+                }}
+              ></div>
+            </div>
+            <p className="text-muted-foreground mt-2 text-xs">
+              Limit of {DAILY_LIMIT_PRO_MODELS} pro model messages per day
             </p>
           </div>
         </div>
