@@ -1,0 +1,5 @@
+export const env = {
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
+  MISTRAL_API_KEY: process.env.MISTRAL_API_KEY!,
+  GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
+}
