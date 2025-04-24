@@ -43,7 +43,7 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
   const agentId = currentChat?.agent_id || null
 
   const fetchAgent = useCallback(async () => {
-    if (!agentSlug) {
+    if (!agentSlug && !agentId) {
       setAgent(null)
       return
     }
@@ -51,11 +51,17 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
     const supabase = createClient()
     setStatus("loading")
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("agents")
       .select("name, description, avatar_url, slug")
-      .eq("slug", agentSlug)
-      .single()
+
+    if (agentSlug) {
+      query = query.eq("slug", agentSlug)
+    } else if (agentId) {
+      query = query.eq("id", agentId)
+    }
+
+    const { data, error } = await query.single()
 
     if (error || !data) {
       console.error("Error fetching agent:", error)
@@ -65,16 +71,16 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setStatus("idle")
-  }, [agentSlug])
+  }, [agentSlug, agentId])
 
   useEffect(() => {
-    if (!agentSlug) {
+    if (!agentSlug && !agentId) {
       setAgent(null)
       return
     }
 
     fetchAgent()
-  }, [pathname, agentSlug])
+  }, [pathname, agentSlug, agentId, fetchAgent])
 
   return (
     <AgentContext.Provider value={{ agentId, status, setStatus, agent }}>
