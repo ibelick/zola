@@ -5,8 +5,6 @@ import Grok from "@/components/icons/grok"
 import Mistral from "@/components/icons/mistral"
 import OpenAI from "@/components/icons/openai"
 import OpenRouter from "@/components/icons/openrouter"
-import { mistral } from "@ai-sdk/mistral"
-import { openai } from "@ai-sdk/openai"
 import {
   BookOpenText,
   Brain,
@@ -22,7 +20,8 @@ import {
   PenNib,
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr"
-import { openproviders } from "./openproviders"
+import { openproviders, OpenProvidersOptions } from "./openproviders"
+import { SupportedModel } from "./openproviders/types"
 
 export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5
 export const AUTH_DAILY_MESSAGE_LIMIT = 100
@@ -35,7 +34,7 @@ export type Model = {
   name: string
   provider: string
   available?: boolean
-  api_sdk?: any
+  api_sdk?: OpenProvidersOptions<SupportedModel>
   features?: {
     id: string
     enabled: boolean
@@ -70,7 +69,7 @@ export const MODELS_FREE = [
         enabled: true,
       },
     ],
-    api_sdk: mistral("pixtral-large-latest"),
+    api_sdk: openproviders("pixtral-large-latest"),
     description:
       "Mistral’s flagship model. Great for reasoning, writing, and advanced tasks.",
     icon: Mistral,
@@ -85,7 +84,7 @@ export const MODELS_FREE = [
         enabled: false,
       },
     ],
-    api_sdk: mistral("mistral-large-latest"),
+    api_sdk: openproviders("mistral-large-latest"),
     description:
       "Fine-tuned for chat. A lighter, faster option for everyday use.",
     icon: Mistral,
@@ -103,7 +102,7 @@ export const MODELS_PRO = [
         enabled: true,
       },
     ],
-    api_sdk: openai("gpt-4.1"),
+    api_sdk: openproviders("gpt-4.1"),
     description:
       "OpenAI’s most powerful model. Excellent at coding, writing, and complex tasks.",
     icon: OpenAI,
@@ -118,7 +117,7 @@ export const MODELS_PRO = [
         enabled: true,
       },
     ],
-    api_sdk: openai("gpt-4.1-mini"),
+    api_sdk: openproviders("gpt-4.1-mini"),
     description:
       "Fast and smart — a great balance for most tasks. Outperforms GPT‑4o mini.",
     icon: OpenAI,
@@ -133,7 +132,7 @@ export const MODELS_PRO = [
         enabled: true,
       },
     ],
-    api_sdk: openai("gpt-4.1-nano"),
+    api_sdk: openproviders("gpt-4.1-nano"),
     description:
       "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
     icon: OpenAI,
@@ -193,6 +192,36 @@ export const MODELS_PRO = [
     api_sdk: openproviders("gemini-1.5-flash"),
     description: "Balanced speed and quality, great for a variety of tasks.",
     icon: Gemini,
+  },
+  {
+    id: "claude-3-7-sonnet-20250219",
+    name: "Claude 3.7 Sonnet",
+    provider: "anthropic",
+    features: [],
+    api_sdk: openproviders("claude-3-7-sonnet-20250219"),
+    description:
+      "Anthropic’s most intelligent model. Excels at step-by-step reasoning and complex tasks.",
+    icon: Claude,
+  },
+  {
+    id: "claude-3-5-haiku-20241022",
+    name: "Claude 3.5 Haiku",
+    provider: "anthropic",
+    features: [],
+    api_sdk: openproviders("claude-3-5-haiku-20241022"),
+    description:
+      "Fastest and most cost-effective Claude model. Ideal for quick, everyday tasks.",
+    icon: Claude,
+  },
+  {
+    id: "claude-3-opus-20240229",
+    name: "Claude 3 Opus",
+    provider: "anthropic",
+    features: [],
+    api_sdk: openproviders("claude-3-opus-20240229"),
+    description:
+      "Anthropic’s most powerful model for highly complex reasoning and generation tasks.",
+    icon: Claude,
   },
 ]
 
