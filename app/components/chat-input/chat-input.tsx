@@ -33,8 +33,8 @@ type ChatInputProps = {
   systemPrompt?: string
   stop: () => void
   status?: "submitted" | "streaming" | "ready" | "error"
-  setSelectedAgentId: (agentId: string | null) => void
-  selectedAgentId: string | null
+  // setSelectedAgentId: (agentId: string | null) => void
+  // selectedAgentId: string | null
   placeholder?: string
 }
 
@@ -54,8 +54,8 @@ export function ChatInput({
   onSelectSystemPrompt,
   stop,
   status,
-  setSelectedAgentId,
-  selectedAgentId,
+  // setSelectedAgentId,
+  // selectedAgentId,
   placeholder,
 }: ChatInputProps) {
   const handleKeyDown = useCallback(
@@ -98,8 +98,8 @@ export function ChatInput({
           onValueChange={onValueChange}
           onSuggestion={onSuggestion}
           value={value}
-          setSelectedAgentId={setSelectedAgentId}
-          selectedAgentId={selectedAgentId}
+          // setSelectedAgentId={setSelectedAgentId}
+          // selectedAgentId={selectedAgentId}
         />
       )}
       <div className="relative order-2 px-2 pb-3 sm:pb-4 md:order-1">

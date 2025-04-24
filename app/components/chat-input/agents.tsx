@@ -11,27 +11,26 @@ import {
 import { TRANSITION_SUGGESTIONS } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
-import { memo } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { memo, useEffect, useState } from "react"
 
 type ButtonAgentProps = {
   label: string
-  setSelectedAgentId: (agentId: string | null) => void
-  selectedAgentId: string | null
   avatarUrl: string
-  id: string
   description: string
+  slug: string
+  isActive: boolean
+  onSelect: (slug: string) => void
 }
 
 const ButtonAgent = memo(function ButtonAgent({
   label,
-  setSelectedAgentId,
-  selectedAgentId,
   avatarUrl,
   description,
-  id,
+  slug,
+  isActive,
+  onSelect,
 }: ButtonAgentProps) {
-  const isActive = selectedAgentId === id
-
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
@@ -39,9 +38,7 @@ const ButtonAgent = memo(function ButtonAgent({
           key={label}
           variant="outline"
           size="lg"
-          onClick={() =>
-            isActive ? setSelectedAgentId(null) : setSelectedAgentId(id)
-          }
+          onClick={() => onSelect(slug)}
           className={cn(
             "rounded-full px-2.5",
             isActive &&
@@ -64,16 +61,29 @@ const ButtonAgent = memo(function ButtonAgent({
 })
 
 type AgentsProps = {
-  setSelectedAgentId: (agentId: string | null) => void
-  selectedAgentId: string | null
   sugestedAgents: AgentsSuggestions[]
 }
 
-export const Agents = memo(function Agents({
-  setSelectedAgentId,
-  selectedAgentId,
-  sugestedAgents,
-}: AgentsProps) {
+export const Agents = memo(function Agents({ sugestedAgents }: AgentsProps) {
+  const router = useRouter()
+  const params = useSearchParams()
+  const agentSlug = params.get("agent")
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(agentSlug)
+
+  // Keep URL in sync with state
+  useEffect(() => {
+    if (selectedAgent) {
+      router.push(`/?agent=${selectedAgent}`)
+    } else {
+      router.push(`/`)
+    }
+  }, [selectedAgent, router])
+
+  const handleAgentSelect = (slug: string) => {
+    // Toggle selection: if already selected, deselect it
+    setSelectedAgent((currentSlug) => (currentSlug === slug ? null : slug))
+  }
+
   return (
     <motion.div
       className="flex w-full max-w-full flex-nowrap justify-start gap-2 overflow-x-auto px-2 md:mx-auto md:max-w-2xl md:flex-wrap md:justify-center md:pl-0"
@@ -103,11 +113,11 @@ export const Agents = memo(function Agents({
           <ButtonAgent
             key={agent.id}
             label={agent.name}
-            setSelectedAgentId={setSelectedAgentId}
-            selectedAgentId={selectedAgentId}
             avatarUrl={agent.avatar_url || ""}
-            id={agent.id}
+            slug={agent.slug}
             description={agent.description || ""}
+            isActive={selectedAgent === agent.slug}
+            onSelect={handleAgentSelect}
           />
         </motion.div>
       ))}

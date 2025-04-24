@@ -18,7 +18,6 @@ export async function runAgent<T extends AgentOutput>(
     prompt: string
     chatId: string
     userId: string
-    // @todo: check isAuthenticated here server-side
     isAuthenticated: boolean
   },
   agentFunction: AgentFunction<T>
@@ -27,8 +26,6 @@ export async function runAgent<T extends AgentOutput>(
   try {
     // Extract and validate request data
     const { prompt, chatId, userId, isAuthenticated } = data
-
-    console.log("🔍 Running agent", { prompt, chatId, userId, isAuthenticated })
 
     let supabase: SupabaseClient
     let sanitizedPrompt: string

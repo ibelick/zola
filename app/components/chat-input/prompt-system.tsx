@@ -14,8 +14,8 @@ type PromptSystemProps = {
   onSuggestion: (suggestion: string) => void
   onSelectSystemPrompt: (systemPrompt: string) => void
   value: string
-  setSelectedAgentId: (agentId: string | null) => void
-  selectedAgentId: string | null
+  // setSelectedAgentId: (agentId: string | null) => void
+  // selectedAgentId: string | null
 }
 
 export const PromptSystem = memo(function PromptSystem({
@@ -23,8 +23,8 @@ export const PromptSystem = memo(function PromptSystem({
   onSuggestion,
   onSelectSystemPrompt,
   value,
-  setSelectedAgentId,
-  selectedAgentId,
+  // setSelectedAgentId,
+  // selectedAgentId,
 }: PromptSystemProps) {
   const [isAgentMode, setIsAgentMode] = useState(false)
   const [sugestedAgents, setSugestedAgents] = useState<
@@ -36,7 +36,7 @@ export const PromptSystem = memo(function PromptSystem({
       const supabase = createClient()
       const { data, error } = await supabase
         .from("agents")
-        .select("id, name, description, avatar_url")
+        .select("id, name, description, avatar_url, slug")
         .in("slug", ZOLA_AGENTS_SLUGS)
 
       if (error) {
@@ -61,7 +61,7 @@ export const PromptSystem = memo(function PromptSystem({
         onClick: () => {
           setIsAgentMode(true)
           onSelectSystemPrompt("")
-          setSelectedAgentId(null)
+          // setSelectedAgentId(null)
         },
       },
       {
@@ -71,7 +71,7 @@ export const PromptSystem = memo(function PromptSystem({
         onClick: () => {
           setIsAgentMode(false)
           onSelectSystemPrompt("")
-          setSelectedAgentId(null)
+          // setSelectedAgentId(null)
         },
       },
     ],
@@ -84,8 +84,8 @@ export const PromptSystem = memo(function PromptSystem({
         <AnimatePresence mode="popLayout">
           {isAgentMode ? (
             <Agents
-              setSelectedAgentId={setSelectedAgentId}
-              selectedAgentId={selectedAgentId}
+              // setSelectedAgentId={setSelectedAgentId}
+              // selectedAgentId={selectedAgentId}
               sugestedAgents={sugestedAgents || []}
             />
           ) : (

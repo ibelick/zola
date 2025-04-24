@@ -1,23 +1,11 @@
 import { useUser } from "@/app/providers/user-provider"
 import { ZOLA_AGENTS_TOOLING_IDS } from "@/lib/config"
-import { useEffect } from "react"
 import { fetchClient } from "../fetch"
 import { useAgentContext } from "./provider"
 
-type UseAgentProps = {
-  initialAgentId?: string | null
-}
-
-export const useAgent = ({ initialAgentId }: UseAgentProps) => {
+export const useAgent = () => {
   const { user } = useUser()
-  const { agentId, setAgentId, status, setStatus, agent } = useAgentContext()
-
-  //   @todo: need to move, no need initialAgentId
-  useEffect(() => {
-    if (initialAgentId) {
-      setAgentId(initialAgentId)
-    }
-  }, [initialAgentId, setAgentId])
+  const { agentId, status, setStatus, agent } = useAgentContext()
 
   const isTooling = agentId ? ZOLA_AGENTS_TOOLING_IDS.includes(agentId) : false
 
@@ -56,7 +44,6 @@ export const useAgent = ({ initialAgentId }: UseAgentProps) => {
 
   return {
     agentId,
-    setAgentId,
     status,
     setStatus,
     isTooling,

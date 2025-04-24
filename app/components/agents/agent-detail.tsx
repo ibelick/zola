@@ -94,6 +94,10 @@ export function AgentDetail({
     }
   }
 
+  const tryAgent = async () => {
+    router.push(`/?agent=${slug}`)
+  }
+
   return (
     <div className="bg-background relative overflow-x-hidden overflow-y-auto pb-16">
       <div className="mb-6 flex items-center gap-4 pt-8 pl-8">
@@ -213,11 +217,7 @@ export function AgentDetail({
             {copied ? "Copied to clipboard" : "Copy link to clipboard"}
           </TooltipContent>
         </Tooltip>
-        <Button
-          onClick={() => createNewChatWithAgent()}
-          className="flex-1 text-center"
-          type="button"
-        >
+        <Button onClick={tryAgent} className="flex-1 text-center" type="button">
           <ChatCircle className="size-4" />
           Try this agent
         </Button>

@@ -1,5 +1,7 @@
 "use client"
 
+import { useChatSession } from "@/app/providers/chat-session-provider"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   createContext,
   useCallback,
@@ -7,6 +9,7 @@ import {
   useEffect,
   useState,
 } from "react"
+import { useChats } from "../chat-store/chats/provider"
 import { createClient } from "../supabase/client"
 
 type AgentMetadata = {
@@ -21,9 +24,7 @@ type AgentState = {
 }
 
 type AgentContextType = AgentState & {
-  //@todo: need better typing
   agentId: string | null
-  setAgentId: (id: string | null) => void
   setStatus: (status: AgentState["status"]) => void
   agent: AgentMetadata | null
 }
@@ -31,18 +32,29 @@ type AgentContextType = AgentState & {
 const AgentContext = createContext<AgentContextType | undefined>(undefined)
 
 export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
-  const [agentId, setAgentId] = useState<string | null>(null)
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const agentSlug = searchParams.get("agent")
+  const { getChatById } = useChats()
+  const { chatId } = useChatSession()
+  const currentChat = chatId ? getChatById(chatId) : null
   const [status, setStatus] = useState<AgentState["status"]>("idle")
   const [agent, setAgent] = useState<AgentMetadata | null>(null)
+  const agentId = currentChat?.agent_id || null
 
-  const fetchAgent = useCallback(async (id: string) => {
+  const fetchAgent = useCallback(async () => {
+    if (!agentSlug) {
+      setAgent(null)
+      return
+    }
+
     const supabase = createClient()
     setStatus("loading")
 
     const { data, error } = await supabase
       .from("agents")
       .select("name, description, avatar_url, slug")
-      .eq("id", id)
+      .eq("slug", agentSlug)
       .single()
 
     if (error || !data) {
@@ -53,21 +65,19 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setStatus("idle")
-  }, [])
+  }, [agentSlug])
 
   useEffect(() => {
-    if (!agentId) {
+    if (!agentSlug) {
       setAgent(null)
       return
     }
 
-    fetchAgent(agentId)
-  }, [agentId, fetchAgent])
+    fetchAgent()
+  }, [pathname, agentSlug])
 
   return (
-    <AgentContext.Provider
-      value={{ agentId, setAgentId, status, setStatus, agent }}
-    >
+    <AgentContext.Provider value={{ agentId, status, setStatus, agent }}>
       {children}
     </AgentContext.Provider>
   )

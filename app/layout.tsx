@@ -67,8 +67,8 @@ export default async function RootLayout({
         <LayoutClient />
         <UserProvider initialUser={userProfile}>
           <ChatsProvider userId={userProfile?.id}>
-            <AgentProvider>
-              <ChatSessionProvider>
+            <ChatSessionProvider>
+              <AgentProvider>
                 <ThemeProvider
                   attribute="class"
                   defaultTheme="light"
@@ -78,8 +78,8 @@ export default async function RootLayout({
                   <Toaster position="top-center" />
                   {children}
                 </ThemeProvider>
-              </ChatSessionProvider>
-            </AgentProvider>
+              </AgentProvider>
+            </ChatSessionProvider>
           </ChatsProvider>
         </UserProvider>
       </body>

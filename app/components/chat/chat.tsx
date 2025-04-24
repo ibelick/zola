@@ -73,13 +73,11 @@ export function Chat() {
   // @todo: will move to agent layer
   const [agentStatus, setAgentStatus] = useState<"idle" | "loading">("idle")
 
-  const { callAgent, isTooling, agentId, setAgentId, agent } = useAgent({
-    initialAgentId: currentChat?.agent_id || undefined,
-  })
+  const { callAgent, isTooling, agentId, agent } = useAgent()
 
-  console.log("🔍 agent", agent)
-  console.log("🔍 agentId", agentId)
-  console.log("isTooling", isTooling)
+  // console.log("🔍 agent", agent)
+  // console.log("🔍 agentId", agentId)
+  // console.log("isTooling", isTooling)
 
   const isAuthenticated = !!user?.id
   const {
@@ -523,8 +521,8 @@ export function Chat() {
           systemPrompt={systemPrompt}
           stop={stop}
           status={status}
-          setSelectedAgentId={setAgentId}
-          selectedAgentId={agentId}
+          // setSelectedAgentId={setAgentId}
+          // selectedAgentId={agentId}
           placeholder={
             isTooling && messages.length === 0
               ? "Describe what you want to research in detail, e.g. a specific company, trend, or question. Add context like audience, angle, goals, or examples to help me create a focused and useful report."

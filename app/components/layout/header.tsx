@@ -26,25 +26,14 @@ export type AgentHeader = Pick<
 >
 
 export function Header() {
-  const pathname = usePathname()
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
-  const { getChatById } = useChats()
-  const { chatId } = useChatSession()
-  const currentChat = chatId ? getChatById(chatId) : null
-  const { agent, setAgentId } = useAgent({
-    initialAgentId: currentChat?.agent_id || undefined,
-  })
+  // const { getChatById } = useChats()
+  // const { chatId } = useChatSession()
+  // const currentChat = chatId ? getChatById(chatId) : null
+  const { agent } = useAgent()
 
-  useEffect(() => {
-    // reset agent when pathname changes
-    setAgentId(null)
-  }, [pathname, setAgentId])
-
-  useEffect(() => {
-    if (!currentChat?.agent_id) return
-    setAgentId(currentChat.agent_id)
-  }, [currentChat?.agent_id, setAgentId])
+  // console.log("🔍 agent", agent)
 
   const isLoggedIn = !!user
 
@@ -64,6 +53,7 @@ export function Header() {
             avatarUrl={agent?.avatar_url || ""}
             name={agent?.name || "Tiny Essay"}
             info={agent?.description || ""}
+            key={agent?.slug}
           />
         )}
         {!isLoggedIn ? (
