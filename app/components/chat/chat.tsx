@@ -170,19 +170,10 @@ export function Chat() {
 
   useEffect(() => {
     const prompt = searchParams.get("prompt")
-
-    if (
-      !prompt ||
-      !chatId ||
-      messages.length > 0 ||
-      hasSentInitialPromptRef.current
-    ) {
-      return
+    if (prompt) {
+      setInput(prompt)
     }
-
-    hasSentInitialPromptRef.current = true
-    sendInitialPrompt(prompt)
-  }, [chatId, messages.length, searchParams])
+  }, [searchParams])
 
   const handleAgent = async (prompt: string, uid: string, chatId: string) => {
     try {
@@ -209,45 +200,6 @@ export function Chat() {
         description: err.message || "Something went wrong.",
         status: "error",
       })
-    }
-  }
-
-  const sendInitialPrompt = async (prompt: string) => {
-    setIsSubmitting(true)
-
-    const uid = await getOrCreateGuestUserId(user)
-    if (!uid) return
-
-    const allowed = await checkLimitsAndNotify(uid)
-    if (!allowed) {
-      setIsSubmitting(false)
-      return
-    }
-
-    const options = {
-      body: {
-        chatId,
-        userId: uid,
-        model: selectedModel,
-        isAuthenticated,
-        systemPrompt,
-      },
-    }
-
-    if (isTooling && messages.length === 0 && chatId) {
-      appendReasoning({ role: "user", content: prompt })
-      await handleAgent(prompt, uid, chatId)
-      setIsSubmitting(false)
-      return
-    }
-
-    try {
-      append({ role: "user", content: prompt }, options)
-    } catch (err) {
-      toast({ title: "Failed to send prompt", status: "error" })
-    } finally {
-      setIsSubmitting(false)
-      router.replace(`/c/${chatId}`)
     }
   }
 
@@ -326,16 +278,14 @@ export function Chat() {
       experimental_attachments: attachments || undefined,
     }
 
-    // START OF RESEARCH AGENT
-    // @todo: This is temporary solution
+    // if its an agent with tooling and first message
+    // we need to handle the agent call differently
     if (isTooling && messages.length === 0) {
       // appendReasoning({ role: "user", content: input })
-
       await handleAgent(input, uid, currentChatId)
       setIsSubmitting(false)
       return
     }
-    // END OF RESEARCH AGENT
 
     try {
       handleSubmit(undefined, options)
