@@ -198,7 +198,12 @@ export const MODELS_PRO = [
     id: "claude-3-7-sonnet-20250219",
     name: "Claude 3.7 Sonnet",
     provider: "anthropic",
-    features: [],
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
     api_sdk: openproviders("claude-3-7-sonnet-20250219"),
     description:
       "Anthropic’s most intelligent model. Excels at step-by-step reasoning and complex tasks.",
@@ -208,7 +213,12 @@ export const MODELS_PRO = [
     id: "claude-3-5-haiku-20241022",
     name: "Claude 3.5 Haiku",
     provider: "anthropic",
-    features: [],
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
     api_sdk: openproviders("claude-3-5-haiku-20241022"),
     description:
       "Fastest and most cost-effective Claude model. Ideal for quick, everyday tasks.",
@@ -218,7 +228,12 @@ export const MODELS_PRO = [
     id: "claude-3-opus-20240229",
     name: "Claude 3 Opus",
     provider: "anthropic",
-    features: [],
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
     api_sdk: openproviders("claude-3-opus-20240229"),
     description:
       "Anthropic’s most powerful model for highly complex reasoning and generation tasks.",

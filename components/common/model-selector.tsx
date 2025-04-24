@@ -51,8 +51,8 @@ export function ModelSelector({
         <div className="flex items-center gap-3">
           {model?.icon && <model.icon className="size-5" />}
           <div className="flex flex-col gap-0">
-            <span className="text-base">{model.name}</span>
-            <span className="text-muted-foreground text-xs">
+            <span className="text-sm">{model.name}</span>
+            <span className="text-muted-foreground line-clamp-2 text-xs">
               {model.description}
             </span>
           </div>
@@ -99,13 +99,11 @@ export function ModelSelector({
           align="start"
           sideOffset={4}
         >
-          {/* Free Models Section */}
           <div className="text-muted-foreground px-2 py-1.5 text-sm font-medium">
             Free Models
           </div>
           {MODELS_FREE.map(renderModelItem)}
 
-          {/* Pro Models Section */}
           <div className="text-muted-foreground flex items-center justify-between px-2 py-1.5 text-sm font-medium">
             <span>Pro Models</span>
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700 dark:bg-slate-900 dark:text-slate-300">
