@@ -1,5 +1,6 @@
 import {
   AUTH_DAILY_MESSAGE_LIMIT,
+  DAILY_LIMIT_PRO_MODELS,
   NON_AUTH_DAILY_MESSAGE_LIMIT,
 } from "@/lib/config"
 import { validateUserIdentity } from "../../../lib/server/api"
@@ -19,7 +20,7 @@ export async function GET(req: Request) {
 
   const { data, error } = await supabase
     .from("users")
-    .select("daily_message_count")
+    .select("daily_message_count, daily_pro_message_count")
     .eq("id", userId)
     .maybeSingle()
 
@@ -32,10 +33,22 @@ export async function GET(req: Request) {
   const dailyLimit = isAuthenticated
     ? AUTH_DAILY_MESSAGE_LIMIT
     : NON_AUTH_DAILY_MESSAGE_LIMIT
+  const proDailyLimit = DAILY_LIMIT_PRO_MODELS
   const dailyCount = data.daily_message_count || 0
+  const dailyProCount = data.daily_pro_message_count || 0
   const remaining = dailyLimit - dailyCount
+  const remainingPro = proDailyLimit - dailyProCount
 
-  return new Response(JSON.stringify({ dailyCount, dailyLimit, remaining }), {
-    status: 200,
-  })
+  return new Response(
+    JSON.stringify({
+      dailyCount,
+      dailyLimit,
+      remaining,
+      dailyProCount,
+      remainingPro,
+    }),
+    {
+      status: 200,
+    }
+  )
 }

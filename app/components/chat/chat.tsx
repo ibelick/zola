@@ -67,8 +67,6 @@ export function Chat() {
   )
   const [hydrated, setHydrated] = useState(false)
   const searchParams = useSearchParams()
-  const router = useRouter()
-  const hasSentInitialPromptRef = useRef(false)
   const hasSentFirstMessageRef = useRef(false)
   const { callAgent, isTooling, statusCall, agent } = useAgent()
 
