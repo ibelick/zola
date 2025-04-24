@@ -1,13 +1,7 @@
-import {
-  checkSpecialAgentUsage,
-  checkUsage,
-  incrementSpecialAgentUsage,
-  incrementUsage,
-  SpecialAgentLimitError,
-  UsageLimitError,
-} from "@/lib/api"
+import { checkSpecialAgentUsage, incrementSpecialAgentUsage } from "@/lib/api"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
+import { checkUsage, incrementUsage } from "@/lib/usage"
 import { SupabaseClient } from "@supabase/supabase-js"
 
 /**

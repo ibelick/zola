@@ -1,10 +1,16 @@
-import { checkUsage, incrementUsage } from "@/lib/api"
-import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
+import { UsageLimitError } from "@/lib/api"
+import {
+  MODELS_FREE,
+  MODELS_OPTIONS,
+  MODELS_PRO,
+  SYSTEM_PROMPT_DEFAULT,
+} from "@/lib/config"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
+import { checkUsage, incrementUsage } from "@/lib/usage"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import { Message as MessageAISDK, streamText } from "ai"
+import { LanguageModelV1, Message as MessageAISDK, streamText } from "ai"
 
 // Maximum allowed duration for streaming (in seconds)
 export const maxDuration = 30
@@ -86,13 +92,13 @@ export async function POST(req: Request) {
       const openRouter = createOpenRouter({
         apiKey: process.env.OPENROUTER_API_KEY,
       })
-      modelInstance = openRouter.chat(modelConfig.api_sdk) // this is a special case for openrouter. Normal openrouter models are not supported.
+      modelInstance = openRouter.chat(modelConfig.api_sdk as string) // this is a special case for openrouter. Normal openrouter models are not supported.
     } else {
       modelInstance = modelConfig.api_sdk
     }
 
     const result = streamText({
-      model: modelInstance,
+      model: modelInstance as LanguageModelV1,
       system: effectiveSystemPrompt,
       messages,
       onError: (err) => {

@@ -24,10 +24,11 @@ import { openproviders, OpenProvidersOptions } from "./openproviders"
 import { SupportedModel } from "./openproviders/types"
 
 export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5
-export const AUTH_DAILY_MESSAGE_LIMIT = 100
+export const AUTH_DAILY_MESSAGE_LIMIT = 10000
 export const REMAINING_QUERY_ALERT_THRESHOLD = 2
-export const DAILY_FILE_UPLOAD_LIMIT = 10
+export const DAILY_FILE_UPLOAD_LIMIT = 5
 export const DAILY_SPECIAL_AGENT_LIMIT = 2
+export const DAILY_LIMIT_PRO_MODELS = 5
 
 export type Model = {
   id: string
@@ -226,35 +227,7 @@ export const MODELS_PRO = [
 ]
 
 // export const MODELS_NOT_AVAILABLE = [
-//   {
-//     id: "claude-3-5-sonnet",
-//     name: "Claude 3.5 Sonnet",
-//     provider: "claude",
-//     available: false,
-//     api_sdk: false,
-//     features: [
-//       {
-//         id: "file-upload",
-//         enabled: true,
-//       },
-//     ],
-//     icon: Claude,
-//   },
-//   {
-//     id: "claude-3.7-sonnet",
-//     name: "Claude 3.7 Sonnet",
-//     provider: "claude",
-//     available: false,
-//     api_sdk: false,
-//     features: [
-//       {
-//         id: "file-upload",
-//         enabled: true,
-//       },
-//     ],
-//     icon: Claude,
-//   },
-//   {
+// {
 //     id: "grok-2",
 //     name: "Grok 2",
 //     provider: "grok",
