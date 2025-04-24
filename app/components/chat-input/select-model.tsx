@@ -6,8 +6,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { MODELS_OPTIONS, PROVIDERS } from "@/lib/config"
 import { CaretDown } from "@phosphor-icons/react"
-import { MODELS_OPTIONS, PROVIDERS_OPTIONS } from "../../../lib/config"
 import { PopoverContentAuth } from "./popover-content-auth"
 
 export type SelectModelProps = {
@@ -21,9 +21,11 @@ export function SelectModel({
   onSelectModel,
   isUserAuthenticated,
 }: SelectModelProps) {
-  const model = MODELS_OPTIONS.find((model) => model.id === selectedModel)
-  const provider = PROVIDERS_OPTIONS.find(
-    (provider) => provider.id === model?.provider
+  const currentModel = MODELS_OPTIONS.find(
+    (model) => model.id === selectedModel
+  )
+  const currentProvider = PROVIDERS.find(
+    (provider) => provider.id === currentModel?.provider
   )
 
   if (!isUserAuthenticated) {
@@ -38,8 +40,10 @@ export function SelectModel({
                 className="border-border dark:bg-secondary text-accent-foreground h-9 w-auto rounded-full border bg-transparent"
                 type="button"
               >
-                {provider?.icon && <provider.icon className="size-5" />}
-                {model?.name}
+                {currentProvider?.icon && (
+                  <currentProvider.icon className="size-5" />
+                )}
+                {currentModel?.name}
                 <CaretDown className="size-4" />
               </Button>
             </PopoverTrigger>

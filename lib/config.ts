@@ -24,29 +24,6 @@ import {
 } from "@phosphor-icons/react/dist/ssr"
 import { openproviders } from "./openproviders"
 
-const openai_provider = openproviders("gpt-3.5-turbo", {
-  logitBias: {
-    "50256": -100,
-  },
-  user: "test-user", // optional unique user identifier
-})
-
-const anthropic_model = openproviders("claude-3-7-sonnet-20250219")
-
-const open_model = openai("gpt-3.5-turbo", {
-  logitBias: {
-    // optional likelihood for specific tokens
-    "50256": -100,
-  },
-  user: "test-user", // optional unique user identifier
-})
-
-const google_model = openproviders("gemini-1.5-pro", {
-  safetySettings: [
-    { category: "HARM_CATEGORY_UNSPECIFIED", threshold: "BLOCK_LOW_AND_ABOVE" },
-  ],
-})
-
 export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5
 export const AUTH_DAILY_MESSAGE_LIMIT = 100
 export const REMAINING_QUERY_ALERT_THRESHOLD = 2
@@ -67,94 +44,55 @@ export type Model = {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
 
-export const MODELS_NOT_AVAILABLE = [
+export const MODELS_FREE = [
   {
-    id: "gemini-1.5-pro",
-    name: "Gemini 1.5 Pro",
-    provider: "gemini",
-    available: false,
-    api_sdk: false,
+    id: "deepseek-r1",
+    name: "DeepSeek R1",
+    provider: "openrouter",
     features: [
       {
         id: "file-upload",
         enabled: true,
       },
     ],
-    icon: Gemini,
+    api_sdk: "deepseek/deepseek-r1:free", // this is a special case for openrouter
+    description:
+      "A reasoning-first model trained with reinforcement learning, built for math, code, and complex problem solving",
+    icon: DeepSeek,
   },
   {
-    id: "claude-3-5-sonnet",
-    name: "Claude 3.5 Sonnet",
-    provider: "claude",
-    available: false,
-    api_sdk: false,
+    id: "pixtral-large-latest",
+    name: "Pixtral Large",
+    provider: "mistral",
     features: [
       {
         id: "file-upload",
         enabled: true,
       },
     ],
-    icon: Claude,
+    api_sdk: mistral("pixtral-large-latest"),
+    description:
+      "Mistral’s flagship model. Great for reasoning, writing, and advanced tasks.",
+    icon: Mistral,
   },
   {
-    id: "claude-3.7-sonnet",
-    name: "Claude 3.7 Sonnet",
-    provider: "claude",
-    available: false,
-    api_sdk: false,
+    id: "mistral-large-latest",
+    name: "Mistral Large",
+    provider: "mistral",
     features: [
       {
         id: "file-upload",
-        enabled: true,
+        enabled: false,
       },
     ],
-    icon: Claude,
+    api_sdk: mistral("mistral-large-latest"),
+    description:
+      "Fine-tuned for chat. A lighter, faster option for everyday use.",
+    icon: Mistral,
   },
-  {
-    id: "grok-2",
-    name: "Grok 2",
-    provider: "grok",
-    available: false,
-    api_sdk: false,
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    icon: Grok,
-  },
-  {
-    id: "gemini-2.0-flash",
-    name: "Gemini 2.0 Flash",
-    provider: "gemini",
-    available: false,
-    api_sdk: false,
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    icon: Gemini,
-  },
-  {
-    id: "gemini-2.5-pro",
-    name: "Gemini 2.5 Pro",
-    provider: "gemini",
-    available: false,
-    api_sdk: false,
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    icon: Gemini,
-  },
-] as Model[]
+]
 
-export const MODELS = [
+export const MODELS_PRO = [
   {
     id: "gpt-4.1",
     name: "GPT-4.1",
@@ -201,59 +139,109 @@ export const MODELS = [
     icon: OpenAI,
   },
   {
-    id: "pixtral-large-latest",
-    name: "Pixtral Large",
-    provider: "mistral",
+    id: "gemini-2.5-pro-preview-03-25",
+    name: "Gemini 2.5 Pro",
+    provider: "gemini",
     features: [
       {
         id: "file-upload",
         enabled: true,
       },
     ],
-    api_sdk: mistral("pixtral-large-latest"),
-    description:
-      "Mistral’s flagship model. Great for reasoning, writing, and advanced tasks.",
-    icon: Mistral,
+    api_sdk: openproviders("gemini-2.5-pro-exp-03-25"),
+    description: "Advanced reasoning, coding, and multimodal understanding.",
+    icon: Gemini,
   },
   {
-    id: "mistral-large-latest",
-    name: "Mistral Large",
-    provider: "mistral",
-    features: [
-      {
-        id: "file-upload",
-        enabled: false,
-      },
-    ],
-    api_sdk: mistral("mistral-large-latest"),
-    description:
-      "Fine-tuned for chat. A lighter, faster option for everyday use.",
-    icon: Mistral,
-  },
-  {
-    id: "deepseek-r1",
-    name: "DeepSeek R1",
-    provider: "openrouter",
+    id: "gemini-2.0-flash-001",
+    name: "Gemini 2.0 Flash",
+    provider: "gemini",
     features: [
       {
         id: "file-upload",
         enabled: true,
       },
     ],
-    api_sdk: "deepseek/deepseek-r1:free", // this is a special case for openrouter
-    description:
-      "A reasoning-first model trained with reinforcement learning, built for math, code, and complex problem solving",
-    icon: DeepSeek,
+    api_sdk: openproviders("gemini-2.0-flash-001"),
+    description: "Fast and cost-efficient with streaming and real-time output.",
+    icon: Gemini,
   },
-] as Model[]
+  {
+    id: "gemini-1.5-pro",
+    name: "Gemini 1.5 Pro",
+    provider: "gemini",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("gemini-1.5-pro"),
+    description: "Smart general-purpose model for complex reasoning tasks.",
+    icon: Gemini,
+  },
+  {
+    id: "gemini-1.5-flash",
+    name: "Gemini 1.5 Flash",
+    provider: "gemini",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("gemini-1.5-flash"),
+    description: "Balanced speed and quality, great for a variety of tasks.",
+    icon: Gemini,
+  },
+]
 
-export const MODELS_OPTIONS = [
-  ...MODELS.map((model) => ({
-    ...model,
-    available: true,
-  })),
-  ...MODELS_NOT_AVAILABLE,
-] as Model[]
+// export const MODELS_NOT_AVAILABLE = [
+//   {
+//     id: "claude-3-5-sonnet",
+//     name: "Claude 3.5 Sonnet",
+//     provider: "claude",
+//     available: false,
+//     api_sdk: false,
+//     features: [
+//       {
+//         id: "file-upload",
+//         enabled: true,
+//       },
+//     ],
+//     icon: Claude,
+//   },
+//   {
+//     id: "claude-3.7-sonnet",
+//     name: "Claude 3.7 Sonnet",
+//     provider: "claude",
+//     available: false,
+//     api_sdk: false,
+//     features: [
+//       {
+//         id: "file-upload",
+//         enabled: true,
+//       },
+//     ],
+//     icon: Claude,
+//   },
+//   {
+//     id: "grok-2",
+//     name: "Grok 2",
+//     provider: "grok",
+//     available: false,
+//     api_sdk: false,
+//     features: [
+//       {
+//         id: "file-upload",
+//         enabled: true,
+//       },
+//     ],
+//     icon: Grok,
+//   },
+// ] as Model[]
+
+export const MODELS_OPTIONS = [...MODELS_FREE, ...MODELS_PRO] as Model[]
 
 export type Provider = {
   id: string
@@ -261,33 +249,6 @@ export type Provider = {
   available: boolean
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
-
-const PROVIDERS_NOT_AVAILABLE = [
-  {
-    id: "deepseek",
-    name: "DeepSeek",
-    available: false,
-    icon: DeepSeek,
-  },
-  {
-    id: "gemini",
-    name: "Gemini",
-    icon: Gemini,
-    available: false,
-  },
-  {
-    id: "claude",
-    name: "Claude",
-    available: false,
-    icon: Claude,
-  },
-  {
-    id: "grok",
-    name: "Grok",
-    available: false,
-    icon: Grok,
-  },
-] as Provider[]
 
 export const PROVIDERS = [
   {
@@ -310,14 +271,21 @@ export const PROVIDERS = [
     name: "DeepSeek",
     icon: DeepSeek,
   },
-] as Provider[]
-
-export const PROVIDERS_OPTIONS = [
-  ...PROVIDERS.map((provider) => ({
-    ...provider,
-    available: true,
-  })),
-  ...PROVIDERS_NOT_AVAILABLE,
+  {
+    id: "gemini",
+    name: "Gemini",
+    icon: Gemini,
+  },
+  {
+    id: "claude",
+    name: "Claude",
+    icon: Claude,
+  },
+  {
+    id: "grok",
+    name: "Grok",
+    icon: Grok,
+  },
 ] as Provider[]
 
 export const MODEL_DEFAULT = "pixtral-large-latest"

@@ -1,6 +1,5 @@
-// /chat/api/chat.ts
 import { checkUsage, incrementUsage } from "@/lib/api"
-import { MODELS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
+import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
 import { Attachment } from "@ai-sdk/ui-utils"
@@ -77,7 +76,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const modelConfig = MODELS.find((m) => m.id === model)
+    const modelConfig = MODELS_OPTIONS.find((m) => m.id === model)
 
     if (!modelConfig) {
       throw new Error(`Model ${model} not found`)
