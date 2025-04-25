@@ -8,7 +8,7 @@ import {
 } from "@/components/prompt-kit/prompt-input"
 import { Button } from "@/components/ui/button"
 import { ArrowUp, Stop } from "@phosphor-icons/react"
-import React, { useCallback } from "react"
+import React, { useCallback, useEffect, useRef } from "react"
 import { ButtonFileUpload } from "./button-file-upload"
 import { FileList } from "./file-list"
 import { PromptSystem } from "./prompt-system"
@@ -53,6 +53,8 @@ export function ChatInput({
   status,
   placeholder,
 }: ChatInputProps) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (isSubmitting) {
@@ -85,6 +87,46 @@ export function ChatInput({
     onSend()
   }
 
+  const handlePaste = useCallback(
+    async (e: ClipboardEvent) => {
+      if (!isUserAuthenticated) {
+        e.preventDefault()
+        return
+      }
+
+      const items = e.clipboardData?.items
+      if (!items) return
+
+      const imageFiles: File[] = []
+
+      for (const item of Array.from(items)) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile()
+          if (file) {
+            const newFile = new File(
+              [file],
+              `pasted-image-${Date.now()}.${file.type.split("/")[1]}`,
+              { type: file.type }
+            )
+            imageFiles.push(newFile)
+          }
+        }
+      }
+
+      if (imageFiles.length > 0) {
+        onFileUpload(imageFiles)
+      }
+    },
+    [isUserAuthenticated, onFileUpload]
+  )
+
+  useEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.addEventListener("paste", handlePaste)
+    return () => el.removeEventListener("paste", handlePaste)
+  }, [handlePaste])
+
   return (
     <div className="relative flex w-full flex-col gap-4">
       {hasSuggestions && (
@@ -107,6 +149,7 @@ export function ChatInput({
             placeholder={placeholder}
             onKeyDown={handleKeyDown}
             className="mt-2 ml-2 min-h-[44px] text-base leading-[1.3] sm:text-base md:text-base"
+            ref={textareaRef}
           />
           <PromptInputActions className="mt-5 w-full justify-between px-2">
             <div className="flex gap-2">
