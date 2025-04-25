@@ -5,17 +5,13 @@ import { AppInfoTrigger } from "@/app/components/layout/app-info/app-info-trigge
 import { ButtonNewChat } from "@/app/components/layout/button-new-chat"
 import { UserMenu } from "@/app/components/layout/user-menu"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
-import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import type { Agent } from "@/app/types/agent"
 import { Button } from "@/components/ui/button"
 import { useAgent } from "@/lib/agent-store/hooks"
-import { useChats } from "@/lib/chat-store/chats/provider"
 import { APP_NAME } from "@/lib/config"
 import { Info } from "@phosphor-icons/react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useEffect } from "react"
 import { AgentLink } from "./agent-link"
 import { DialogPublish } from "./dialog-publish"
 import { HeaderAgent } from "./header-agent"
@@ -43,14 +39,7 @@ export function Header() {
             </Link>
           </div>
         )}
-        {agent && (
-          <HeaderAgent
-            avatarUrl={agent?.avatar_url || ""}
-            name={agent?.name || "Tiny Essay"}
-            info={agent?.description || ""}
-            key={agent?.slug}
-          />
-        )}
+        <HeaderAgent agent={agent} />
         {!isLoggedIn ? (
           <div className="flex flex-1 items-center justify-end gap-4">
             <AppInfoTrigger
