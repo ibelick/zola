@@ -4,6 +4,7 @@ import { Loader } from "@/components/prompt-kit/loader"
 import { Message as MessageType } from "@ai-sdk/react"
 import { useRef } from "react"
 import { Message } from "./message"
+import { Reasoning } from "./reasoning"
 
 type ConversationProps = {
   messages: MessageType[]
@@ -11,7 +12,8 @@ type ConversationProps = {
   onDelete: (id: string) => void
   onEdit: (id: string, newText: string) => void
   onReload: () => void
-  researchStatus?: "idle" | "loading"
+  agentStatus?: "idle" | "loading"
+  reasoning?: string
 }
 
 export function Conversation({
@@ -20,7 +22,8 @@ export function Conversation({
   onDelete,
   onEdit,
   onReload,
-  researchStatus,
+  agentStatus,
+  reasoning,
 }: ConversationProps) {
   const initialMessageCount = useRef(messages.length)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -69,9 +72,14 @@ export function Conversation({
               <Loader />
             </div>
           )}
-        {researchStatus === "loading" && (
+        {agentStatus === "loading" && (
           <div className="group min-h-scroll-anchor flex w-full max-w-3xl flex-col items-start gap-2 px-6 pb-2">
             <Loader text="Generating research report" />
+          </div>
+        )}
+        {reasoning && (
+          <div className="group min-h-scroll-anchor flex w-full max-w-3xl flex-col items-start gap-2 px-6 pb-2">
+            <Reasoning reasoning={reasoning} />
           </div>
         )}
       </ChatContainer>

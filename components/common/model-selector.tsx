@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { MODELS_OPTIONS, PROVIDERS_OPTIONS } from "@/lib/config"
+import { MODELS_FREE, MODELS_OPTIONS, MODELS_PRO } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import { CaretDown, Image } from "@phosphor-icons/react"
 
@@ -28,7 +28,52 @@ export function ModelSelector({
   setSelectedModelId,
   className,
 }: ModelSelectorProps) {
-  const model = MODELS_OPTIONS.find((model) => model.id === selectedModelId)
+  const currentModel = MODELS_OPTIONS.find(
+    (model) => model.id === selectedModelId
+  )
+
+  const renderModelItem = (model: any) => {
+    const hasFileUpload = model.features?.find(
+      (feature: any) => feature.id === "file-upload"
+    )?.enabled
+
+    return (
+      <DropdownMenuItem
+        key={model.id}
+        className={cn(
+          "flex items-center justify-between px-3 py-2",
+          // !model.available && "cursor-not-allowed opacity-50",
+          selectedModelId === model.id && "bg-accent"
+        )}
+        // disabled={!model.available}
+        onClick={() => setSelectedModelId(model.id)}
+      >
+        <div className="flex items-center gap-3">
+          {model?.icon && <model.icon className="size-5" />}
+          <div className="flex flex-col gap-0">
+            <span className="text-sm">{model.name}</span>
+            <span className="text-muted-foreground line-clamp-2 text-xs">
+              {model.description}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {hasFileUpload && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="cursor-help rounded-full bg-blue-100 p-1 text-blue-600 dark:bg-blue-900">
+                  <Image className="h-4 w-4" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                <p>This model can process and understand images.</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </DropdownMenuItem>
+    )
+  }
 
   return (
     <TooltipProvider>
@@ -38,13 +83,13 @@ export function ModelSelector({
             variant="outline"
             className={cn(
               "dark:bg-secondary justify-between",
-              !model?.available && "cursor-not-allowed opacity-50",
+              // !currentModel?.available && "cursor-not-allowed opacity-50",
               className
             )}
           >
             <div className="flex items-center gap-2">
-              {model?.icon && <model.icon className="size-5" />}
-              <span>{model?.name}</span>
+              {currentModel?.icon && <currentModel.icon className="size-5" />}
+              <span>{currentModel?.name}</span>
             </div>
             <CaretDown className="size-4 opacity-50" />
           </Button>
@@ -54,56 +99,18 @@ export function ModelSelector({
           align="start"
           sideOffset={4}
         >
-          {/* Models Section */}
           <div className="text-muted-foreground px-2 py-1.5 text-sm font-medium">
-            Available Models
+            Free Models
           </div>
+          {MODELS_FREE.map(renderModelItem)}
 
-          {MODELS_OPTIONS.map((model) => {
-            const provider = PROVIDERS_OPTIONS.find(
-              (provider) => provider.id === model.provider
-            )
-            const hasFileUpload = model.features?.find(
-              (feature) => feature.id === "file-upload"
-            )?.enabled
-
-            return (
-              <DropdownMenuItem
-                key={model.id}
-                className={cn(
-                  "flex items-center justify-between px-3 py-2",
-                  !model.available && "cursor-not-allowed opacity-50",
-                  selectedModelId === model.id && "bg-accent"
-                )}
-                disabled={!model.available}
-                onClick={() => model.available && setSelectedModelId(model.id)}
-              >
-                <div className="flex items-center gap-3">
-                  {model?.icon && <model.icon className="size-5" />}
-                  <div className="flex flex-col gap-0">
-                    <span className="text-base">{model.name}</span>
-                    <span className="text-muted-foreground text-xs">
-                      {model.description}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {hasFileUpload && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="cursor-help rounded-full bg-blue-100 p-1 text-blue-600 dark:bg-blue-900">
-                          <Image className="h-4 w-4" />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="left">
-                        <p>This model can process and understand images.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-              </DropdownMenuItem>
-            )
-          })}
+          <div className="text-muted-foreground flex items-center justify-between px-2 py-1.5 text-sm font-medium">
+            <span>Pro Models</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700 dark:bg-slate-900 dark:text-slate-300">
+              5 free per day
+            </span>
+          </div>
+          {MODELS_PRO.map(renderModelItem)}
         </DropdownMenuContent>
       </DropdownMenu>
     </TooltipProvider>

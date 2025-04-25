@@ -132,6 +132,7 @@ export function AgentsPage({ agents }: AgentsPageProps) {
             ))}
           </div>
         </div>
+
         <div className="mt-12">
           <h2 className="text-foreground mb-1 text-lg font-medium">
             Coming Soon

@@ -5,8 +5,6 @@ import Grok from "@/components/icons/grok"
 import Mistral from "@/components/icons/mistral"
 import OpenAI from "@/components/icons/openai"
 import OpenRouter from "@/components/icons/openrouter"
-import { mistral } from "@ai-sdk/mistral"
-import { openai } from "@ai-sdk/openai"
 import {
   BookOpenText,
   Brain,
@@ -22,19 +20,22 @@ import {
   PenNib,
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr"
+import { openproviders, OpenProvidersOptions } from "./openproviders"
+import { SupportedModel } from "./openproviders/types"
 
 export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5
-export const AUTH_DAILY_MESSAGE_LIMIT = 100
+export const AUTH_DAILY_MESSAGE_LIMIT = 10000
 export const REMAINING_QUERY_ALERT_THRESHOLD = 2
-export const DAILY_FILE_UPLOAD_LIMIT = 10
+export const DAILY_FILE_UPLOAD_LIMIT = 5
 export const DAILY_SPECIAL_AGENT_LIMIT = 2
+export const DAILY_LIMIT_PRO_MODELS = 5
 
 export type Model = {
   id: string
   name: string
   provider: string
   available?: boolean
-  api_sdk?: any
+  api_sdk?: OpenProvidersOptions<SupportedModel>
   features?: {
     id: string
     enabled: boolean
@@ -43,169 +44,7 @@ export type Model = {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
 
-export const MODELS_NOT_AVAILABLE = [
-  {
-    id: "gemini-1.5-pro",
-    name: "Gemini 1.5 Pro",
-    provider: "gemini",
-    available: false,
-    api_sdk: false,
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    icon: Gemini,
-  },
-  {
-    id: "claude-3-5-sonnet",
-    name: "Claude 3.5 Sonnet",
-    provider: "claude",
-    available: false,
-    api_sdk: false,
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    icon: Claude,
-  },
-  {
-    id: "claude-3.7-sonnet",
-    name: "Claude 3.7 Sonnet",
-    provider: "claude",
-    available: false,
-    api_sdk: false,
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    icon: Claude,
-  },
-  {
-    id: "grok-2",
-    name: "Grok 2",
-    provider: "grok",
-    available: false,
-    api_sdk: false,
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    icon: Grok,
-  },
-  {
-    id: "gemini-2.0-flash",
-    name: "Gemini 2.0 Flash",
-    provider: "gemini",
-    available: false,
-    api_sdk: false,
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    icon: Gemini,
-  },
-  {
-    id: "gemini-2.5-pro",
-    name: "Gemini 2.5 Pro",
-    provider: "gemini",
-    available: false,
-    api_sdk: false,
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    icon: Gemini,
-  },
-] as Model[]
-
-export const MODELS = [
-  {
-    id: "gpt-4.1",
-    name: "GPT-4.1",
-    provider: "openai",
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    api_sdk: openai("gpt-4.1"),
-    description:
-      "OpenAI’s most powerful model. Excellent at coding, writing, and complex tasks.",
-    icon: OpenAI,
-  },
-  {
-    id: "gpt-4.1-mini",
-    name: "GPT-4.1 Mini",
-    provider: "openai",
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    api_sdk: openai("gpt-4.1-mini"),
-    description:
-      "Fast and smart — a great balance for most tasks. Outperforms GPT‑4o mini.",
-    icon: OpenAI,
-  },
-  {
-    id: "gpt-4.1-nano",
-    name: "GPT-4.1 Nano",
-    provider: "openai",
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    api_sdk: openai("gpt-4.1-nano"),
-    description:
-      "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
-    icon: OpenAI,
-  },
-  {
-    id: "pixtral-large-latest",
-    name: "Pixtral Large",
-    provider: "mistral",
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    api_sdk: mistral("pixtral-large-latest"),
-    description:
-      "Mistral’s flagship model. Great for reasoning, writing, and advanced tasks.",
-    icon: Mistral,
-  },
-  {
-    id: "mistral-large-latest",
-    name: "Mistral Large",
-    provider: "mistral",
-    features: [
-      {
-        id: "file-upload",
-        enabled: false,
-      },
-    ],
-    api_sdk: mistral("mistral-large-latest"),
-    description:
-      "Fine-tuned for chat. A lighter, faster option for everyday use.",
-    icon: Mistral,
-  },
+export const MODELS_FREE = [
   {
     id: "deepseek-r1",
     name: "DeepSeek R1",
@@ -221,15 +60,221 @@ export const MODELS = [
       "A reasoning-first model trained with reinforcement learning, built for math, code, and complex problem solving",
     icon: DeepSeek,
   },
-] as Model[]
+  {
+    id: "pixtral-large-latest",
+    name: "Pixtral Large",
+    provider: "mistral",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("pixtral-large-latest"),
+    description:
+      "Mistral’s flagship model. Great for reasoning, writing, and advanced tasks.",
+    icon: Mistral,
+  },
+  {
+    id: "mistral-large-latest",
+    name: "Mistral Large",
+    provider: "mistral",
+    features: [
+      {
+        id: "file-upload",
+        enabled: false,
+      },
+    ],
+    api_sdk: openproviders("mistral-large-latest"),
+    description:
+      "Fine-tuned for chat. A lighter, faster option for everyday use.",
+    icon: Mistral,
+  },
+  // free for now
+  {
+    id: "gpt-4.1-nano",
+    name: "GPT-4.1 Nano",
+    provider: "openai",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("gpt-4.1-nano"),
+    description:
+      "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
+    icon: OpenAI,
+  },
+]
 
-export const MODELS_OPTIONS = [
-  ...MODELS.map((model) => ({
-    ...model,
-    available: true,
-  })),
-  ...MODELS_NOT_AVAILABLE,
-] as Model[]
+export const MODELS_PRO = [
+  {
+    id: "gpt-4.1",
+    name: "GPT-4.1",
+    provider: "openai",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("gpt-4.1"),
+    description:
+      "OpenAI’s most powerful model. Excellent at coding, writing, and complex tasks.",
+    icon: OpenAI,
+  },
+  {
+    id: "gpt-4.1-mini",
+    name: "GPT-4.1 Mini",
+    provider: "openai",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("gpt-4.1-mini"),
+    description:
+      "Fast and smart — a great balance for most tasks. Outperforms GPT‑4o mini.",
+    icon: OpenAI,
+  },
+  // {
+  //   id: "gpt-4.1-nano",
+  //   name: "GPT-4.1 Nano",
+  //   provider: "openai",
+  //   features: [
+  //     {
+  //       id: "file-upload",
+  //       enabled: true,
+  //     },
+  //   ],
+  //   api_sdk: openproviders("gpt-4.1-nano"),
+  //   description:
+  //     "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
+  //   icon: OpenAI,
+  // },
+  {
+    id: "gemini-2.5-pro-preview-03-25",
+    name: "Gemini 2.5 Pro",
+    provider: "gemini",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("gemini-2.5-pro-exp-03-25"),
+    description: "Advanced reasoning, coding, and multimodal understanding.",
+    icon: Gemini,
+  },
+  {
+    id: "gemini-2.0-flash-001",
+    name: "Gemini 2.0 Flash",
+    provider: "gemini",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("gemini-2.0-flash-001"),
+    description: "Fast and cost-efficient with streaming and real-time output.",
+    icon: Gemini,
+  },
+  {
+    id: "gemini-1.5-pro",
+    name: "Gemini 1.5 Pro",
+    provider: "gemini",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("gemini-1.5-pro"),
+    description: "Smart general-purpose model for complex reasoning tasks.",
+    icon: Gemini,
+  },
+  {
+    id: "gemini-1.5-flash",
+    name: "Gemini 1.5 Flash",
+    provider: "gemini",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("gemini-1.5-flash"),
+    description: "Balanced speed and quality, great for a variety of tasks.",
+    icon: Gemini,
+  },
+  {
+    id: "claude-3-7-sonnet-20250219",
+    name: "Claude 3.7 Sonnet",
+    provider: "anthropic",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("claude-3-7-sonnet-20250219"),
+    description:
+      "Anthropic’s most intelligent model. Excels at step-by-step reasoning and complex tasks.",
+    icon: Claude,
+  },
+  {
+    id: "claude-3-5-haiku-20241022",
+    name: "Claude 3.5 Haiku",
+    provider: "anthropic",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("claude-3-5-haiku-20241022"),
+    description:
+      "Fastest and most cost-effective Claude model. Ideal for quick, everyday tasks.",
+    icon: Claude,
+  },
+  {
+    id: "claude-3-opus-20240229",
+    name: "Claude 3 Opus",
+    provider: "anthropic",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("claude-3-opus-20240229"),
+    description:
+      "Anthropic’s most powerful model for highly complex reasoning and generation tasks.",
+    icon: Claude,
+  },
+]
+
+// export const MODELS_NOT_AVAILABLE = [
+// {
+//     id: "grok-2",
+//     name: "Grok 2",
+//     provider: "grok",
+//     available: false,
+//     api_sdk: false,
+//     features: [
+//       {
+//         id: "file-upload",
+//         enabled: true,
+//       },
+//     ],
+//     icon: Grok,
+//   },
+// ] as Model[]
+
+export const MODELS_OPTIONS = [...MODELS_FREE, ...MODELS_PRO] as Model[]
 
 export type Provider = {
   id: string
@@ -237,33 +282,6 @@ export type Provider = {
   available: boolean
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
-
-const PROVIDERS_NOT_AVAILABLE = [
-  {
-    id: "deepseek",
-    name: "DeepSeek",
-    available: false,
-    icon: DeepSeek,
-  },
-  {
-    id: "gemini",
-    name: "Gemini",
-    icon: Gemini,
-    available: false,
-  },
-  {
-    id: "claude",
-    name: "Claude",
-    available: false,
-    icon: Claude,
-  },
-  {
-    id: "grok",
-    name: "Grok",
-    available: false,
-    icon: Grok,
-  },
-] as Provider[]
 
 export const PROVIDERS = [
   {
@@ -286,14 +304,21 @@ export const PROVIDERS = [
     name: "DeepSeek",
     icon: DeepSeek,
   },
-] as Provider[]
-
-export const PROVIDERS_OPTIONS = [
-  ...PROVIDERS.map((provider) => ({
-    ...provider,
-    available: true,
-  })),
-  ...PROVIDERS_NOT_AVAILABLE,
+  {
+    id: "gemini",
+    name: "Gemini",
+    icon: Gemini,
+  },
+  {
+    id: "claude",
+    name: "Claude",
+    icon: Claude,
+  },
+  {
+    id: "grok",
+    name: "Grok",
+    icon: Grok,
+  },
 ] as Provider[]
 
 export const MODEL_DEFAULT = "pixtral-large-latest"
@@ -459,8 +484,16 @@ export const ZOLA_AGENTS_SLUGS = [
   "eloi",
 ]
 
-export const ZOLA_SPECIAL_AGENTS_SLUGS = ["zola-research"]
-export const ZOLA_SPECIAL_AGENTS_IDS = ["321c68a2-6c1a-4bd4-948c-9d20e4aeb10c"]
+export const ZOLA_SPECIAL_AGENTS_SLUGS = [
+  "zola-research",
+  "competitor-teardown",
+  "positioning-snapshot",
+]
+export const ZOLA_AGENTS_TOOLING_IDS = [
+  "321c68a2-6c1a-4bd4-948c-9d20e4aeb10c", // research
+  "ecd82d26-7c82-4661-83f6-8f362b2687da", // competitor teardown
+  "b2a4ddaa-8e99-49dd-8156-71d95ccfd717", // positioning snapshot
+]
 
 export const ZOLA_COMING_SOON_AGENTS = [
   {

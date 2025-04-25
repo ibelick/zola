@@ -8,11 +8,12 @@
 
 ## Features
 
-- multi-model support (OpenAI, Mistral, etc.)
+- multi-model support (OpenAI, Anthropic, Mistral, Gemini, etc.)
 - light and dark mode
 - prompt suggestions
 - file uploads
 - mobile-friendly layout
+- AI agents (WIP)
 
 ## Installation
 
@@ -30,8 +31,8 @@ See [INSTALL.md](./INSTALL.md) for setup instructions.
 
 - more model support
 - search
-- agent mode
-- memory
+- MCP
+- improve agent layer and capabilities
 
 ## License
 

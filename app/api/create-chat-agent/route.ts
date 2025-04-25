@@ -1,5 +1,5 @@
-import { checkUsage } from "@/lib/api"
 import { validateUserIdentity } from "@/lib/server/api"
+import { checkUsageByModel } from "@/lib/usage"
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const supabase = await validateUserIdentity(userId, isAuthenticated)
 
-    await checkUsage(supabase, userId)
+    await checkUsageByModel(supabase, userId, model, isAuthenticated)
 
     const { data: agent, error: agentError } = await supabase
       .from("agents")

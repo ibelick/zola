@@ -5,29 +5,27 @@ import { Conversation } from "@/app/components/chat/conversation"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import { toast } from "@/components/ui/toast"
-import { checkRateLimits, getOrCreateGuestUserId } from "@/lib/api"
+import { useAgent } from "@/lib/agent-store/hooks"
+import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import {
   MESSAGE_MAX_LENGTH,
   MODEL_DEFAULT,
-  REMAINING_QUERY_ALERT_THRESHOLD,
   SYSTEM_PROMPT_DEFAULT,
-  ZOLA_SPECIAL_AGENTS_IDS,
 } from "@/lib/config"
-import { fetchClient } from "@/lib/fetch"
-import {
-  Attachment,
-  checkFileUploadLimit,
-  processFiles,
-} from "@/lib/file-handling"
-import { API_ROUTE_CHAT, API_ROUTE_RESEARCH } from "@/lib/routes"
+import { Attachment } from "@/lib/file-handling"
+import { API_ROUTE_CHAT } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 import { Message, useChat } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useChatHandlers } from "./use-chat-handlers"
+import { useChatUtils } from "./use-chat-utils"
+import { useFileUpload } from "./use-file-upload"
+import { useReasoning } from "./use-reasoning"
 
 const FeedbackWidget = dynamic(
   () => import("./feedback-widget").then((mod) => mod.FeedbackWidget),
@@ -52,30 +50,25 @@ export function Chat() {
   const { user } = useUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
-  const [files, setFiles] = useState<File[]>([])
+  const {
+    files,
+    setFiles,
+    handleFileUploads,
+    createOptimisticAttachments,
+    cleanupOptimisticAttachments,
+    handleFileUpload,
+    handleFileRemove,
+  } = useFileUpload()
   const [selectedModel, setSelectedModel] = useState(
     currentChat?.model || user?.preferred_model || MODEL_DEFAULT
   )
   const [systemPrompt, setSystemPrompt] = useState(
     currentChat?.system_prompt || SYSTEM_PROMPT_DEFAULT
   )
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(
-    currentChat?.agent_id || null
-  )
   const [hydrated, setHydrated] = useState(false)
   const searchParams = useSearchParams()
-  const router = useRouter()
-  const hasSentInitialPromptRef = useRef(false)
   const hasSentFirstMessageRef = useRef(false)
-  // @todo: will move to agent layer
-  const [researchStatus, setResearchStatus] = useState<"idle" | "loading">(
-    "idle"
-  )
-
-  // TODO: Remove this once we have a proper agent layer
-  const isZolaResearch = ZOLA_SPECIAL_AGENTS_IDS.includes(
-    currentChat?.agent_id || ""
-  )
+  const { callAgent, isTooling, statusCall, agent } = useAgent()
 
   const isAuthenticated = !!user?.id
   const {
@@ -97,6 +90,46 @@ export function Chat() {
       if (!chatId) return
       await cacheAndAddMessage(message)
     },
+  })
+
+  // Use the custom hook for chat utilities
+  const { checkLimitsAndNotify, ensureChatExists } = useChatUtils({
+    isAuthenticated,
+    chatId,
+    messages,
+    input,
+    selectedModel,
+    systemPrompt,
+    selectedAgentId: agent?.id || null,
+    createNewChat,
+    setHasDialogAuth,
+  })
+
+  // @todo: improve
+  const {
+    reasoningInput,
+    reasoningMessages,
+    appendReasoning,
+    setReasoningMessages,
+    reasoningStatus,
+  } = useReasoning()
+
+  const {
+    handleInputChange,
+    handleSelectSystemPrompt,
+    handleModelChange,
+    handleDelete,
+    handleEdit,
+  } = useChatHandlers({
+    messages,
+    setMessages,
+    setInput,
+    setSystemPrompt,
+    setSelectedModel,
+    selectedModel,
+    chatId,
+    updateChatModel,
+    user,
   })
 
   // when chatId is null, set messages to an empty array
@@ -135,249 +168,37 @@ export function Chat() {
 
   useEffect(() => {
     const prompt = searchParams.get("prompt")
-
-    if (
-      !prompt ||
-      !chatId ||
-      messages.length > 0 ||
-      hasSentInitialPromptRef.current
-    ) {
-      return
+    if (prompt) {
+      setInput(prompt)
     }
+  }, [searchParams])
 
-    hasSentInitialPromptRef.current = true
-    sendInitialPrompt(prompt)
-  }, [chatId, messages.length, searchParams])
-
-  const handleZolaResearch = async (
-    prompt: string,
-    uid: string,
-    chatId: string
-  ) => {
+  const handleAgent = async (prompt: string, uid: string, chatId: string) => {
     try {
-      setResearchStatus("loading")
-
-      const res = await fetchClient(API_ROUTE_RESEARCH, {
-        method: "POST",
-        body: JSON.stringify({
-          prompt,
-          chatId,
-          userId: uid,
-          isAuthenticated,
-        }),
-        headers: { "Content-Type": "application/json" },
+      const { markdown, parts } = await callAgent({
+        prompt,
+        chatId,
+        userId: uid,
       })
 
-      if (!res.ok) {
-        const errorText = (await res.json()) as { error: string }
-        throw new Error(errorText.error || "Failed to fetch research response.")
-      }
-
-      const { markdown, parts } = await res.json()
-
-      const researchMessage = {
+      const agentMessage = {
         role: "assistant",
         content: markdown,
         parts,
-        id: `research-${Date.now()}`,
+        id: `agent-${Date.now()}`,
       } as Message
 
-      setMessages((prev) => [...prev, researchMessage])
+      setMessages((prev) => [...prev, agentMessage])
 
-      await cacheAndAddMessage(researchMessage)
-
-      setResearchStatus("idle")
+      await cacheAndAddMessage(agentMessage)
     } catch (err: any) {
-      console.error("Zola Research Error:", err)
+      console.error("Zola Agent Error:", err)
       toast({
-        title: "Zola Research failed",
+        title: "Zola Agent failed",
         description: err.message || "Something went wrong.",
         status: "error",
       })
-
-      setResearchStatus("idle")
     }
-  }
-
-  const sendInitialPrompt = async (prompt: string) => {
-    setIsSubmitting(true)
-
-    const uid = await getOrCreateGuestUserId(user)
-    if (!uid) return
-
-    const allowed = await checkLimitsAndNotify(uid)
-    if (!allowed) {
-      setIsSubmitting(false)
-      return
-    }
-
-    const options = {
-      body: {
-        chatId,
-        userId: uid,
-        model: selectedModel,
-        isAuthenticated,
-        systemPrompt,
-      },
-    }
-
-    if (isZolaResearch && messages.length === 0 && chatId) {
-      await handleZolaResearch(prompt, uid, chatId)
-      setIsSubmitting(false)
-      return
-    }
-
-    try {
-      append({ role: "user", content: prompt }, options)
-    } catch (err) {
-      toast({ title: "Failed to send prompt", status: "error" })
-    } finally {
-      setIsSubmitting(false)
-      router.replace(`/c/${chatId}`)
-    }
-  }
-
-  const checkLimitsAndNotify = async (uid: string): Promise<boolean> => {
-    try {
-      const rateData = await checkRateLimits(uid, isAuthenticated)
-
-      if (rateData.remaining === 0 && !isAuthenticated) {
-        setHasDialogAuth(true)
-        return false
-      }
-
-      if (rateData.remaining === REMAINING_QUERY_ALERT_THRESHOLD) {
-        toast({
-          title: `Only ${rateData.remaining} query${rateData.remaining === 1 ? "" : "ies"} remaining today.`,
-          status: "info",
-        })
-      }
-
-      return true
-    } catch (err) {
-      console.error("Rate limit check failed:", err)
-      return false
-    }
-  }
-
-  const ensureChatExists = async (userId: string) => {
-    if (!isAuthenticated) {
-      const storedGuestChatId = localStorage.getItem("guestChatId")
-      if (storedGuestChatId) return storedGuestChatId
-    }
-
-    // @todo: remove this once we have a proper agent layer
-    if (selectedAgentId && messages.length === 0) {
-      return chatId
-    }
-
-    if (messages.length === 0) {
-      try {
-        const newChat = await createNewChat(
-          userId,
-          input,
-          selectedModel,
-          isAuthenticated,
-          selectedAgentId ? undefined : systemPrompt, // if agentId is set, systemPrompt is not used
-          selectedAgentId || undefined
-        )
-
-        if (!newChat) return null
-        if (isAuthenticated) {
-          window.history.pushState(null, "", `/c/${newChat.id}`)
-        } else {
-          localStorage.setItem("guestChatId", newChat.id)
-        }
-
-        return newChat.id
-      } catch (err: any) {
-        let errorMessage = "Something went wrong."
-        try {
-          const parsed = JSON.parse(err.message)
-          errorMessage = parsed.error || errorMessage
-        } catch {
-          errorMessage = err.message || errorMessage
-        }
-        toast({
-          title: errorMessage,
-          status: "error",
-        })
-        return null
-      }
-    }
-
-    return chatId
-  }
-
-  const handleModelChange = useCallback(
-    async (model: string) => {
-      if (!user?.id) {
-        return
-      }
-
-      if (!chatId && user?.id) {
-        setSelectedModel(model)
-        return
-      }
-
-      const oldModel = selectedModel
-
-      setSelectedModel(model)
-
-      try {
-        await updateChatModel(chatId!, model)
-      } catch (err) {
-        console.error("Failed to update chat model:", err)
-        setSelectedModel(oldModel)
-        toast({
-          title: "Failed to update chat model",
-          status: "error",
-        })
-      }
-    },
-    [chatId]
-  )
-
-  const handleFileUploads = async (
-    uid: string,
-    chatId: string
-  ): Promise<Attachment[] | null> => {
-    if (files.length === 0) return []
-
-    try {
-      await checkFileUploadLimit(uid)
-    } catch (err: any) {
-      if (err.code === "DAILY_FILE_LIMIT_REACHED") {
-        toast({ title: err.message, status: "error" })
-        return null
-      }
-    }
-
-    try {
-      const processed = await processFiles(files, chatId, uid)
-      setFiles([])
-      return processed
-    } catch (err) {
-      toast({ title: "Failed to process files", status: "error" })
-      return null
-    }
-  }
-
-  const createOptimisticAttachments = (files: File[]) => {
-    return files.map((file) => ({
-      name: file.name,
-      contentType: file.type,
-      url: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
-    }))
-  }
-
-  const cleanupOptimisticAttachments = (attachments?: any[]) => {
-    if (!attachments) return
-    attachments.forEach((attachment) => {
-      if (attachment.url?.startsWith("blob:")) {
-        URL.revokeObjectURL(attachment.url)
-      }
-    })
   }
 
   const submit = async () => {
@@ -450,19 +271,19 @@ export function Chat() {
         model: selectedModel,
         isAuthenticated,
         systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-        agentId: selectedAgentId || undefined,
+        ...(agent?.id && { agentId: agent.id }),
       },
       experimental_attachments: attachments || undefined,
     }
 
-    // START OF RESEARCH AGENT
-    // @todo: This is temporary solution
-    if (isZolaResearch && messages.length === 0) {
-      await handleZolaResearch(input, uid, currentChatId)
+    // if its an agent with tooling and first message
+    // we need to handle the agent call differently
+    if (isTooling && messages.length === 0) {
+      // appendReasoning({ role: "user", content: input })
+      await handleAgent(input, uid, currentChatId)
       setIsSubmitting(false)
       return
     }
-    // END OF RESEARCH AGENT
 
     try {
       handleSubmit(undefined, options)
@@ -479,33 +300,6 @@ export function Chat() {
       setIsSubmitting(false)
     }
   }
-
-  const handleDelete = (id: string) => {
-    setMessages(messages.filter((message) => message.id !== id))
-  }
-
-  const handleEdit = (id: string, newText: string) => {
-    setMessages(
-      messages.map((message) =>
-        message.id === id ? { ...message, content: newText } : message
-      )
-    )
-  }
-
-  const handleInputChange = useCallback(
-    (value: string) => {
-      setInput(value)
-    },
-    [setInput]
-  )
-
-  const handleFileUpload = useCallback((newFiles: File[]) => {
-    setFiles((prev) => [...prev, ...newFiles])
-  }, [])
-
-  const handleFileRemove = useCallback((file: File) => {
-    setFiles((prev) => prev.filter((f) => f !== file))
-  }, [])
 
   const handleSuggestion = useCallback(
     async (suggestion: string) => {
@@ -566,10 +360,6 @@ export function Chat() {
     [ensureChatExists, selectedModel, user?.id, append]
   )
 
-  const handleSelectSystemPrompt = useCallback((newSystemPrompt: string) => {
-    setSystemPrompt(newSystemPrompt)
-  }, [])
-
   const handleReload = async () => {
     const uid = await getOrCreateGuestUserId(user)
     if (!uid) {
@@ -629,7 +419,10 @@ export function Chat() {
             onDelete={handleDelete}
             onEdit={handleEdit}
             onReload={handleReload}
-            researchStatus={researchStatus}
+            agentStatus={statusCall}
+            reasoning={
+              reasoningMessages?.find((m) => m.role === "assistant")?.content
+            }
           />
         )}
       </AnimatePresence>
@@ -662,10 +455,8 @@ export function Chat() {
           systemPrompt={systemPrompt}
           stop={stop}
           status={status}
-          setSelectedAgentId={setSelectedAgentId}
-          selectedAgentId={selectedAgentId}
           placeholder={
-            isZolaResearch && messages.length === 0
+            isTooling && messages.length === 0
               ? "Describe what you want to research in detail, e.g. a specific company, trend, or question. Add context like audience, angle, goals, or examples to help me create a focused and useful report."
               : "Ask Zola anything"
           }

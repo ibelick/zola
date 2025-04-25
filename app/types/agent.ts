@@ -15,5 +15,5 @@ export type AgentSummary = Pick<
 
 export type AgentsSuggestions = Pick<
   Tables<"agents">,
-  "id" | "name" | "description" | "avatar_url"
+  "id" | "name" | "description" | "avatar_url" | "slug"
 >

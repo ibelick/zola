@@ -45,37 +45,11 @@ export function AgentDetail({
 }: AgentDetailProps) {
   const [copied, setCopied] = useState(false)
   const router = useRouter()
-  const { user } = useUser()
-
-  const { createNewChat } = useChats()
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(`${window.location.origin}/agents/${slug}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 1000)
-  }
-
-  const createNewChatWithAgent = async (prompt?: string) => {
-    if (!user) return
-
-    try {
-      const newChat = await createNewChat(
-        user?.id,
-        `Conversation with ${name}`,
-        user?.preferred_model || MODEL_DEFAULT,
-        true,
-        undefined, // No need to specify system prompt as it will be fetched from the agent
-        id
-      )
-
-      if (newChat) {
-        router.push(
-          `/c/${newChat.id}${prompt ? `?prompt=${encodeURIComponent(prompt)}` : ""}`
-        )
-      }
-    } catch (error) {
-      console.error("Failed to create chat with agent:", error)
-    }
   }
 
   useEffect(() => {
@@ -92,6 +66,14 @@ export function AgentDetail({
     } else {
       router.push(`/agents/${agent.slug}`)
     }
+  }
+
+  const tryAgentWithPrompt = async (prompt: string) => {
+    router.push(`/?agent=${slug}&prompt=${encodeURIComponent(prompt)}`)
+  }
+
+  const tryAgent = async () => {
+    router.push(`/?agent=${slug}`)
   }
 
   return (
@@ -127,9 +109,7 @@ export function AgentDetail({
               className="flex h-auto w-full items-center justify-start px-2 py-1 text-left text-xs break-words whitespace-normal"
               variant="outline"
               size="sm"
-              onClick={() => {
-                createNewChatWithAgent(example_input)
-              }}
+              onClick={() => tryAgentWithPrompt(example_input)}
             >
               {example_input}
             </Button>
@@ -213,11 +193,7 @@ export function AgentDetail({
             {copied ? "Copied to clipboard" : "Copy link to clipboard"}
           </TooltipContent>
         </Tooltip>
-        <Button
-          onClick={() => createNewChatWithAgent()}
-          className="flex-1 text-center"
-          type="button"
-        >
+        <Button onClick={tryAgent} className="flex-1 text-center" type="button">
           <ChatCircle className="size-4" />
           Try this agent
         </Button>

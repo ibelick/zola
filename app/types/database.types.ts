@@ -216,6 +216,8 @@ export type Database = {
           premium: boolean | null
           profile_image: string | null
           last_active_at: string | null
+          daily_pro_message_count: number | null
+          daily_pro_reset: string | null
         }
         Insert: {
           anonymous?: boolean | null
@@ -230,6 +232,8 @@ export type Database = {
           premium?: boolean | null
           profile_image?: string | null
           last_active_at?: string | null
+          daily_pro_message_count?: number | null
+          daily_pro_reset?: string | null
         }
         Update: {
           anonymous?: boolean | null
@@ -244,6 +248,8 @@ export type Database = {
           premium?: boolean | null
           profile_image?: string | null
           last_active_at?: string | null
+          daily_pro_message_count?: number | null
+          daily_pro_reset?: string | null
         }
         Relationships: []
       }

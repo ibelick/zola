@@ -38,6 +38,8 @@ CSRF_SECRET=your_csrf_secret_key
 # NEXT_PUBLIC_VERCEL_URL=your_production_url
 ```
 
+A `.env.example` file is included in the repository for reference. Copy this file to `.env.local` and update the values with your credentials.
+
 ### Generating a CSRF Secret
 
 The `CSRF_SECRET` is used to protect your application against Cross-Site Request Forgery attacks. You need to generate a secure random string for this value. Here are a few ways to generate one:
@@ -69,10 +71,10 @@ Copy the generated value and add it to your `.env.local` file as the `CSRF_SECRE
 3. Find the "Google" provider
 4. Enable it by toggling the switch
 5. Configure the Google OAuth credentials:
-    - You'll need to set up OAuth 2.0 credentials in the Google Cloud Console
-    - Add your application's redirect URL: https://[YOUR_PROJECT_REF].supabase.co/auth/v1/callback
-    - Get the Client ID and Client Secret from Google Cloud Console
-    - Add these credentials to the Google provider settings in Supabase
+   - You'll need to set up OAuth 2.0 credentials in the Google Cloud Console
+   - Add your application's redirect URL: https://[YOUR_PROJECT_REF].supabase.co/auth/v1/callback
+   - Get the Client ID and Client Secret from Google Cloud Console
+   - Add these credentials to the Google provider settings in Supabase
 
 Here are the detailed steps to set up Google OAuth:
 
@@ -83,13 +85,122 @@ Here are the detailed steps to set up Google OAuth:
 5. Configure the OAuth consent screen if you haven't already
 6. Set the application type as "Web application"
 7. Add these authorized redirect URIs:
-  - https://[YOUR_PROJECT_REF].supabase.co/auth/v1/callback
-  - http://localhost:3000/auth/callback (for local development)
+
+- https://[YOUR_PROJECT_REF].supabase.co/auth/v1/callback
+- http://localhost:3000/auth/callback (for local development)
+
 8. Copy the Client ID and Client Secret
 9. Go back to your Supabase dashboard
 10. Paste the Client ID and Client Secret in the Google provider settings
 11. Save the changes
 
+### Database Schema
+
+Create the following tables in your Supabase SQL editor:
+
+```sql
+-- Users table
+CREATE TABLE users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  anonymous BOOLEAN DEFAULT false,
+  daily_message_count INTEGER DEFAULT 0,
+  daily_reset TIMESTAMPTZ,
+  display_name TEXT,
+  message_count INTEGER DEFAULT 0,
+  preferred_model TEXT,
+  premium BOOLEAN DEFAULT false,
+  profile_image TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  last_active_at TIMESTAMPTZ DEFAULT NOW(),
+  daily_pro_message_count INTEGER DEFAULT 0,
+  daily_pro_reset TIMESTAMPTZ
+);
+
+-- Agents table
+CREATE TABLE agents (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  avatar_url TEXT,
+  creator_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  system_prompt TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  is_public BOOLEAN DEFAULT false,
+  remixable BOOLEAN DEFAULT false,
+  tools_enabled BOOLEAN DEFAULT false,
+  category TEXT,
+  tags TEXT[],
+  example_inputs TEXT[],
+  model_preference TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ
+);
+
+-- Chats table
+CREATE TABLE chats (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  title TEXT,
+  model TEXT,
+  system_prompt TEXT,
+  agent_id UUID REFERENCES agents(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  public BOOLEAN DEFAULT FALSE
+);
+
+-- Messages table
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  chat_id UUID REFERENCES chats(id) ON DELETE CASCADE NOT NULL,
+  content TEXT NOT NULL,
+  role TEXT NOT NULL,
+  experimental_attachments JSONB,
+  parts JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Chat attachments table
+CREATE TABLE chat_attachments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  chat_id UUID REFERENCES chats(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  file_url TEXT NOT NULL,
+  file_name TEXT,
+  file_type TEXT,
+  file_size INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Feedback table
+CREATE TABLE feedback (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Set up RLS policies
+RLS setup and policies coming soon.
+For now, make sure to enable RLS on all user-related tables:
+users, agents, chats, messages, chat_attachments, feedback
+```
+
+### Storage Setup
+
+Create a bucket named `chat-attachments` with the following CORS configuration:
+
+```json
+{
+  "cors": [
+    {
+      "origin": "*",
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "headers": ["Content-Type"]
+    }
+  ]
+}
+```
 
 ## Local Installation
 
@@ -132,88 +243,6 @@ Zola requires Supabase for authentication and storage. Follow these steps to set
 3. Create storage buckets for chat attachments
 4. Configure authentication providers (Google OAuth)
 5. Get your API keys and add them to your `.env.local` file
-
-### Database Schema
-
-Create the following tables in your Supabase SQL editor:
-
-````sql
--- Users table
-CREATE TABLE users (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT NOT NULL,
-  anonymous BOOLEAN DEFAULT false,
-  daily_message_count INTEGER DEFAULT 0,
-  daily_reset TIMESTAMPTZ,
-  display_name TEXT,
-  message_count INTEGER DEFAULT 0,
-  preferred_model TEXT,
-  premium BOOLEAN DEFAULT false,
-  profile_image TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  last_active_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Chats table
-CREATE TABLE chats (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-  title TEXT,
-  model TEXT,
-  system_prompt TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Messages table
-CREATE TABLE messages (
-  id SERIAL PRIMARY KEY,
-  chat_id UUID REFERENCES chats(id) ON DELETE CASCADE NOT NULL,
-  content TEXT NOT NULL,
-  role TEXT NOT NULL,
-  attachments JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Chat attachments table
-CREATE TABLE chat_attachments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  chat_id UUID REFERENCES chats(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-  file_url TEXT NOT NULL,
-  file_name TEXT,
-  file_type TEXT,
-  file_size INTEGER,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Feedback table
-CREATE TABLE feedback (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-  message TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Set up RLS policies
-RLS setup and policies coming soon.
-For now, make sure to enable RLS on all user-related tables:
-users, chats, messages, chat_attachments, feedback
-
-### Storage Setup
-
-Create a bucket named `chat-attachments` with the following CORS configuration:
-
-```json
-{
-  "cors": [
-    {
-      "origin": "*",
-      "methods": ["GET", "POST", "PUT", "DELETE"],
-      "headers": ["Content-Type"]
-    }
-  ]
-}
-````
 
 ## Docker Installation
 
