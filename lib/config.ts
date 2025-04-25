@@ -90,6 +90,22 @@ export const MODELS_FREE = [
       "Fine-tuned for chat. A lighter, faster option for everyday use.",
     icon: Mistral,
   },
+  // free for now
+  {
+    id: "gpt-4.1-nano",
+    name: "GPT-4.1 Nano",
+    provider: "openai",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    api_sdk: openproviders("gpt-4.1-nano"),
+    description:
+      "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
+    icon: OpenAI,
+  },
 ]
 
 export const MODELS_PRO = [
@@ -123,21 +139,21 @@ export const MODELS_PRO = [
       "Fast and smart — a great balance for most tasks. Outperforms GPT‑4o mini.",
     icon: OpenAI,
   },
-  {
-    id: "gpt-4.1-nano",
-    name: "GPT-4.1 Nano",
-    provider: "openai",
-    features: [
-      {
-        id: "file-upload",
-        enabled: true,
-      },
-    ],
-    api_sdk: openproviders("gpt-4.1-nano"),
-    description:
-      "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
-    icon: OpenAI,
-  },
+  // {
+  //   id: "gpt-4.1-nano",
+  //   name: "GPT-4.1 Nano",
+  //   provider: "openai",
+  //   features: [
+  //     {
+  //       id: "file-upload",
+  //       enabled: true,
+  //     },
+  //   ],
+  //   api_sdk: openproviders("gpt-4.1-nano"),
+  //   description:
+  //     "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
+  //   icon: OpenAI,
+  // },
   {
     id: "gemini-2.5-pro-preview-03-25",
     name: "Gemini 2.5 Pro",
