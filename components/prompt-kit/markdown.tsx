@@ -1,3 +1,4 @@
+import { LinkMarkdown } from "@/app/components/chat/link-markdown"
 import { cn } from "@/lib/utils"
 import { marked } from "marked"
 import { memo, useId, useMemo } from "react"
@@ -64,6 +65,15 @@ const INITIAL_COMPONENTS: Partial<Components> = {
   },
   pre: function PreComponent({ children }) {
     return <>{children}</>
+  },
+  a: function AComponent({ href, children, ...props }) {
+    if (!href) return <span {...props}>{children}</span>
+
+    return (
+      <LinkMarkdown href={href} {...props}>
+        {children}
+      </LinkMarkdown>
+    )
   },
 }
 

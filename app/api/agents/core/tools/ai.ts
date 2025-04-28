@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai"
 import { generateObject } from "ai"
 import { z } from "zod"
 import { ResearchFinding, SufficiencyAnalysis } from "../types"
+import { generateCitationData } from "./utils"
 
 /**
  * Generate a short report title based on prompt
@@ -143,36 +144,39 @@ export async function generateReport(
     .map((f) => f.summary)
     .join("\n\n")
     .slice(0, 8000)
+  const { citationReferenceBlock } = generateCitationData(findings)
 
   const { object } = await generateObject({
     model: openai("gpt-4.1-mini"),
-    prompt: `Write a concise, well-structured markdown report titled "${title}".
-    Use the research notes below. If anything is missing, fill the gaps with your knowledge.
-    
-    <research>
-    ${content}
-    </research>
-    
-    Return only markdown content. No intro or explanation outside the report.`,
+    prompt: `Write a markdown report titled "${title}" using the research notes and citations below.
+
+Inject source links directly into the relevant sentences using this format: [source](zola://src-0)
+
+For example:
+- AI training tools are increasingly popular [source](zola://src-0).
+- Dog health tracking is now possible in real-time [source](zola://src-1).
+
+<citations>
+${citationReferenceBlock}
+</citations>
+
+<research>
+${content}
+</research>
+
+Only return markdown content. Do not include extra text or commentary.`,
     system: `
-    You are a senior technical writer with deep domain knowledge.
-    
-    Write a report in markdown. Keep it:
-    - Structured (H1, H2, H3)
-    - Only capitalize the first word of each sentence
-    - Clear and direct
-    - Based on the provided findings
-    - Filled with real, practical insights
-    - Not AI-generic, sound sharp and human
-    
-    Use:
-    # Title
-    ## Section
-    ### Subsection
-    - Bullet points when useful
-    - Code blocks if relevant
-    
-    Do not explain the task. Just return the markdown. Start immediately with "#".
+You are a senior technical writer with deep domain knowledge.
+
+Write a report in markdown. Follow this format:
+- Use # for title
+- Use ## and ### for sections
+- Only capitalize the first word of each sentence
+- Clear and direct
+- Use bullet points and code blocks where helpful
+- Do not add intro or outro — only the markdown report.
+- Link sources inside the relevant sentences.
+- Do NOT list all sources at the end — they should appear where the information is used
     `,
     schema: z.object({ markdown: z.string() }),
   })
