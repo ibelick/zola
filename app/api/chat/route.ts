@@ -6,8 +6,7 @@ import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { LanguageModelV1, Message as MessageAISDK, streamText } from "ai"
 
-// Maximum allowed duration for streaming (in seconds)
-export const maxDuration = 30
+export const maxDuration = 60
 
 type ChatRequest = {
   messages: MessageAISDK[]
