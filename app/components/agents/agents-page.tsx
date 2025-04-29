@@ -1,7 +1,11 @@
 "use client"
 
 import { AgentSummary } from "@/app/types/agent"
-import { ZOLA_AGENTS_SLUGS, ZOLA_COMING_SOON_AGENTS } from "@/lib/config"
+import {
+  ZOLA_AGENTS_SLUGS,
+  ZOLA_COMING_SOON_AGENTS,
+  ZOLA_SPECIAL_AGENTS_SLUGS,
+} from "@/lib/config"
 import { ArrowUpRight } from "@phosphor-icons/react"
 import { useMemo, useState } from "react"
 import { DialogAgent } from "./dialog-agent"
@@ -24,7 +28,9 @@ export function AgentsPage({ agents }: AgentsPageProps) {
     setOpenAgentId(agentId)
   }
 
-  const researchAgent = agents.find((agent) => agent.slug === "zola-research")
+  const researchAgent = agents.find((agent) =>
+    ZOLA_SPECIAL_AGENTS_SLUGS.includes(agent.slug)
+  )
   const featuredAgents = agents.filter((agent) =>
     ZOLA_AGENTS_SLUGS.includes(agent.slug)
   )
