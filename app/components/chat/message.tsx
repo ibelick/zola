@@ -53,23 +53,9 @@ export function Message({
     )
   }
 
-  if (variant === "assistant" && parts?.[0]?.type === "tool-invocation") {
-    const toolInvocationParts = parts.filter(
-      (part) => part.type === "tool-invocation"
-    )
+  // if (variant === "assistant" && parts?.[0]?.type === "tool-invocation") {
 
-    console.log("toolInvocationParts", toolInvocationParts)
-
-    return (
-      <div className="group mb-16 flex w-full max-w-3xl flex-1 flex-col items-start gap-4 px-6 pb-2">
-        {toolInvocationParts.map((toolInvocation, index) => (
-          <div key={index} className="flex w-full flex-col gap-2">
-            <ToolInvocation data={toolInvocation} />
-          </div>
-        ))}
-      </div>
-    )
-  }
+  // }
 
   if (variant === "assistant") {
     return (

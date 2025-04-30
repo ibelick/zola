@@ -1,6 +1,8 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import { Message as MessageType } from "@ai-sdk/react"
+import type { ToolInvocationUIPart } from "@ai-sdk/ui-utils"
 import { CaretDown } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Code, Loader2 } from "lucide-react"
@@ -30,8 +32,7 @@ interface ToolInvocation {
 }
 
 interface ToolInvocationViewerProps {
-  data: ToolInvocation
-  className?: string
+  data: ToolInvocationUIPart
   defaultOpen?: boolean
 }
 
@@ -43,7 +44,6 @@ const TRANSITION = {
 
 export function ToolInvocation({
   data,
-  className,
   defaultOpen = false,
 }: ToolInvocationViewerProps) {
   const [isExpanded, setIsExpanded] = useState(defaultOpen)
@@ -53,28 +53,37 @@ export function ToolInvocation({
 
   // Get the tool invocation data
   const { toolInvocation } = data
-  const { state, toolName, toolCallId, args, result } = toolInvocation
-  const isRequested = state === "requested"
+  const { state, toolName, toolCallId, args } = toolInvocation
+  const isRequested = state === "partial-call" || state === "call"
   const isCompleted = state === "result"
 
   // Parse the result JSON if available
   useEffect(() => {
-    if (isCompleted && result?.content) {
+    if (isCompleted && "result" in toolInvocation) {
       try {
-        const content = result.content
-        const textContent = content.find((item) => item.type === "text")
-
-        if (textContent && textContent.text) {
-          const parsed = JSON.parse(textContent.text)
-          setParsedResult(parsed)
+        // For ToolResult, the result property contains the result directly
+        const resultData = toolInvocation.result
+        if (typeof resultData === "string") {
+          try {
+            const parsed = JSON.parse(resultData)
+            setParsedResult(parsed)
+            setParseError(null)
+          } catch (e) {
+            // If it's not JSON, just use the string directly
+            setParsedResult(resultData)
+            setParseError(null)
+          }
+        } else {
+          // If it's already an object, use it directly
+          setParsedResult(resultData)
           setParseError(null)
         }
       } catch (error) {
-        setParseError("Failed to parse result JSON")
-        console.error("Failed to parse result JSON:", error)
+        setParseError("Failed to parse result data")
+        console.error("Failed to parse result data:", error)
       }
     }
-  }, [isCompleted, result])
+  }, [isCompleted, toolInvocation])
 
   // Format the arguments for display
   const formattedArgs = args
@@ -103,7 +112,7 @@ export function ToolInvocation({
           className="hover:bg-accent flex w-full flex-row items-center rounded-t-md px-3 py-2 transition-colors"
         >
           <div className="flex flex-1 flex-row items-center gap-2 text-left text-base">
-            <span className="font-medium">{toolName}</span>
+            <span className="text-sm font-medium">{toolName}</span>
             <div
               className={cn(
                 "rounded-full px-1.5 py-0.5 text-xs",
