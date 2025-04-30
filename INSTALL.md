@@ -188,19 +188,7 @@ users, agents, chats, messages, chat_attachments, feedback
 
 ### Storage Setup
 
-Create a bucket named `chat-attachments` with the following CORS configuration:
-
-```json
-{
-  "cors": [
-    {
-      "origin": "*",
-      "methods": ["GET", "POST", "PUT", "DELETE"],
-      "headers": ["Content-Type"]
-    }
-  ]
-}
-```
+Create the buckets `chat-attachments` and `avatars`.
 
 ## Local Installation
 
