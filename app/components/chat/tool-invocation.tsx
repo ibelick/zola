@@ -9,7 +9,6 @@ import { CaretDown, Code, Link, Nut, Spinner } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState } from "react"
 
-// Custom extended ToolInvocation and ToolInvocationUIPart types to handle 'requested' state
 type CustomToolInvocation =
   | BaseToolInvocation
   | ({
@@ -22,7 +21,6 @@ type CustomToolInvocation =
       result?: any
     })
 
-// Extended type for ToolInvocationUIPart to use our custom ToolInvocation
 type CustomToolInvocationUIPart = Omit<
   ToolInvocationUIPart,
   "toolInvocation"
@@ -36,7 +34,6 @@ interface ToolInvocationProps {
   defaultOpen?: boolean
 }
 
-// Type guard to check if a tool invocation has a result
 function hasResult(
   toolInvocation: CustomToolInvocation
 ): toolInvocation is CustomToolInvocation & { result: any } {
@@ -148,7 +145,6 @@ export function ToolInvocation({
   )
 }
 
-// Internal component for rendering a single tool
 function SingleToolView({
   data,
   defaultOpen = false,
@@ -158,11 +154,6 @@ function SingleToolView({
   defaultOpen?: boolean
   className?: string
 }) {
-  const [isExpanded, setIsExpanded] = useState(defaultOpen)
-  const [parsedResult, setParsedResult] = useState<any>(null)
-  const [parseError, setParseError] = useState<string | null>(null)
-
-  // Get the tool invocation data (use the result if available, otherwise use the request)
   const resultTool = data.find((item) => item.toolInvocation.state === "result")
   const requestTool = data.find(
     (item) =>
@@ -171,6 +162,10 @@ function SingleToolView({
   const toolData = resultTool || requestTool
 
   if (!toolData) return null
+
+  const [isExpanded, setIsExpanded] = useState(defaultOpen)
+  const [parsedResult, setParsedResult] = useState<any>(null)
+  const [parseError, setParseError] = useState<string | null>(null)
 
   const { toolInvocation } = toolData
   const { state, toolName, toolCallId, args } =

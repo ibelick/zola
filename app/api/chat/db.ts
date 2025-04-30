@@ -87,7 +87,7 @@ export async function saveFinalAssistantMessage(
   const { error } = await supabase.from("messages").insert({
     chat_id: chatId,
     role: "assistant",
-    content: finalPlainText || "[no plain text]",
+    content: finalPlainText || "",
     parts: parts,
     tool_invocations: toolInvocations,
   })
