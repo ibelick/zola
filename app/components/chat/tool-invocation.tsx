@@ -1,8 +1,9 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
-import { ChevronDown, Code, Loader2 } from "lucide-react"
-import { AnimatePresence, motion } from "motion/react"
+import { cn } from "@/lib/utils"
+import { CaretDown } from "@phosphor-icons/react"
+import { AnimatePresence, motion } from "framer-motion"
+import { Code, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 
 interface ToolInvocationContent {
@@ -30,20 +31,25 @@ interface ToolInvocation {
 
 interface ToolInvocationViewerProps {
   data: ToolInvocation
-  compact?: boolean
+  className?: string
   defaultOpen?: boolean
 }
 
-export function ToolInvocationViewer({
+const TRANSITION = {
+  type: "spring",
+  duration: 0.2,
+  bounce: 0,
+}
+
+export function ToolInvocation({
   data,
-  compact = false,
+  className,
   defaultOpen = false,
 }: ToolInvocationViewerProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen)
+  const [isExpanded, setIsExpanded] = useState(defaultOpen)
+
   const [parsedResult, setParsedResult] = useState<any>(null)
   const [parseError, setParseError] = useState<string | null>(null)
-
-  const toggleOpen = () => setIsOpen(!isOpen)
 
   // Get the tool invocation data
   const { toolInvocation } = data
@@ -89,114 +95,115 @@ export function ToolInvocationViewer({
     : null
 
   return (
-    <div
-      className={`my-2 overflow-hidden rounded-md border bg-slate-50 text-sm ${compact ? "max-w-md" : "w-full"}`}
-    >
-      <div className="flex items-center justify-between p-2">
-        <div className="flex items-center">
-          <Badge
-            variant="outline"
-            className={`mr-2 ${
-              isRequested
-                ? "border-blue-200 bg-blue-50 text-blue-700"
-                : "border-green-200 bg-green-50 text-green-700"
-            }`}
-          >
-            {isRequested ? (
-              <div className="flex items-center">
-                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                Running
-              </div>
-            ) : (
-              "Completed"
-            )}
-          </Badge>
-          <div className="font-medium">{toolName}</div>
-        </div>
-
-        <motion.div
-          initial={false}
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-          onClick={toggleOpen}
-          className="cursor-pointer rounded-full p-1 hover:bg-slate-200"
+    <div className="w-full">
+      <div className="border-border flex flex-col gap-0 overflow-hidden rounded-md border">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          type="button"
+          className="hover:bg-accent flex w-full flex-row items-center rounded-t-md px-3 py-2 transition-colors"
         >
-          <ChevronDown className="h-4 w-4" />
-        </motion.div>
-      </div>
-
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="border-t px-3 py-2">
-              {/* Arguments section */}
-              {args && Object.keys(args).length > 0 && (
-                <div className="mb-3">
-                  <div className="mb-1 text-xs font-medium text-slate-500">
-                    Arguments
-                  </div>
-                  <div className="rounded border bg-white p-2 text-xs">
-                    {formattedArgs}
-                  </div>
-                </div>
+          <div className="flex flex-1 flex-row items-center gap-2 text-left text-base">
+            <span className="font-medium">{toolName}</span>
+            <div
+              className={cn(
+                "rounded-full px-1.5 py-0.5 text-xs",
+                isRequested
+                  ? "border border-blue-200 bg-blue-50 text-blue-700"
+                  : "border border-green-200 bg-green-50 text-green-700"
               )}
-
-              {/* Result section */}
-              {isCompleted && (
-                <div className="mb-3">
-                  <div className="mb-1 text-xs font-medium text-slate-500">
-                    Result
-                  </div>
-                  <div className="max-h-60 overflow-auto rounded border bg-white p-2 text-xs">
-                    {parseError ? (
-                      <div className="text-red-500">{parseError}</div>
-                    ) : parsedResult ? (
-                      <div>
-                        {parsedResult.title && (
-                          <div className="mb-2 font-medium">
-                            {parsedResult.title}
-                          </div>
-                        )}
-                        {parsedResult.html_url && (
-                          <div className="mb-2">
-                            <a
-                              href={parsedResult.html_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
-                            >
-                              {parsedResult.html_url}
-                            </a>
-                          </div>
-                        )}
-                        <div className="mt-2 font-mono">
-                          <pre className="text-xs whitespace-pre-wrap">
-                            {JSON.stringify(parsedResult, null, 2)}
-                          </pre>
-                        </div>
-                      </div>
-                    ) : (
-                      "No result data available"
-                    )}
-                  </div>
+            >
+              {isRequested ? (
+                <div className="flex items-center">
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  Running
                 </div>
+              ) : (
+                "Completed"
               )}
-
-              {/* Tool call ID */}
-              <div className="text-xs text-slate-500">
-                <Code className="mr-1 inline h-3 w-3" />
-                Tool Call ID: {toolCallId}
-              </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+          <CaretDown
+            className={cn(
+              "h-4 w-4 transition-transform",
+              isExpanded ? "rotate-180 transform" : ""
+            )}
+          />
+        </button>
+
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={TRANSITION}
+              className="overflow-hidden"
+            >
+              <div className="space-y-3 px-3 pt-3 pb-3">
+                {/* Arguments section */}
+                {args && Object.keys(args).length > 0 && (
+                  <div>
+                    <div className="text-muted-foreground mb-1 text-xs font-medium">
+                      Arguments
+                    </div>
+                    <div className="rounded border bg-slate-50 p-2 text-sm">
+                      {formattedArgs}
+                    </div>
+                  </div>
+                )}
+
+                {/* Result section */}
+                {isCompleted && (
+                  <div>
+                    <div className="text-muted-foreground mb-1 text-xs font-medium">
+                      Result
+                    </div>
+                    <div className="max-h-60 overflow-auto rounded border bg-slate-50 p-2 text-sm">
+                      {parseError ? (
+                        <div className="text-red-500">{parseError}</div>
+                      ) : parsedResult ? (
+                        <div>
+                          {parsedResult.title && (
+                            <div className="mb-2 font-medium">
+                              {parsedResult.title}
+                            </div>
+                          )}
+                          {parsedResult.html_url && (
+                            <div className="mb-2">
+                              <a
+                                href={parsedResult.html_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary flex items-center gap-1 hover:underline"
+                              >
+                                <span>{parsedResult.html_url}</span>
+                                <Code className="h-3 w-3 opacity-70" />
+                              </a>
+                            </div>
+                          )}
+                          <div className="font-mono text-xs">
+                            <pre className="whitespace-pre-wrap">
+                              {JSON.stringify(parsedResult, null, 2)}
+                            </pre>
+                          </div>
+                        </div>
+                      ) : (
+                        "No result data available"
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tool call ID */}
+                <div className="text-muted-foreground flex items-center text-xs">
+                  <Code className="mr-1 inline h-3 w-3" />
+                  Tool Call ID: {toolCallId}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
