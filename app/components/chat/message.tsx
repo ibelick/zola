@@ -53,10 +53,6 @@ export function Message({
     )
   }
 
-  // if (variant === "assistant" && parts?.[0]?.type === "tool-invocation") {
-
-  // }
-
   if (variant === "assistant") {
     return (
       <MessageAssistant

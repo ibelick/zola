@@ -50,7 +50,7 @@ export function SourcesList({ sources, className }: SourcesListProps) {
           type="button"
           className="hover:bg-accent flex w-full flex-row items-center rounded-t-md px-3 py-2 transition-colors"
         >
-          <div className="flex flex-1 flex-row items-center gap-2 text-left text-base">
+          <div className="flex flex-1 flex-row items-center gap-2 text-left text-sm">
             Sources
             <div className="flex -space-x-1">
               {sources?.map((source, index) => (

@@ -46,6 +46,10 @@ export function MessageAssistant({
       )}
     >
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
+        {toolInvocationParts && toolInvocationParts.length > 0 && (
+          <ToolInvocation data={toolInvocationParts} />
+        )}
+
         {contentNullOrEmpty ? null : (
           <MessageContent
             className={cn(
@@ -57,14 +61,6 @@ export function MessageAssistant({
             {children}
           </MessageContent>
         )}
-
-        <div className="mb-10 flex flex-col gap-2">
-          {toolInvocationParts?.map((toolInvocation, index) => (
-            <div key={index} className="flex w-full flex-col">
-              <ToolInvocation data={toolInvocation} />
-            </div>
-          ))}
-        </div>
 
         {sources && sources.length > 0 && <SourcesList sources={sources} />}
 

@@ -87,6 +87,18 @@ export function Chat() {
     initialMessages,
   })
 
+  const isToolLoading = messages.some((msg) =>
+    msg.parts?.some(
+      (part) =>
+        part.type === "tool-invocation" &&
+        (part.toolInvocation?.state === "call" ||
+          part.toolInvocation?.state === "partial-call")
+    )
+  )
+
+  console.log("status", status)
+  console.log("isToolLoading", isToolLoading)
+
   // Use the custom hook for chat utilities
   const { checkLimitsAndNotify, ensureChatExists } = useChatUtils({
     isAuthenticated,
