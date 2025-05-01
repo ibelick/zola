@@ -87,28 +87,24 @@ export async function POST(req: Request) {
     let effectiveSystemPrompt =
       agentConfig?.systemPrompt || systemPrompt || SYSTEM_PROMPT_DEFAULT
     let effectiveTools = agentConfig?.tools || undefined
+
+    let toolsToUse = undefined
     let effectiveMaxSteps = agentConfig?.maxSteps || 3
 
-    if (effectiveTools && Object.keys(effectiveTools).length > 0) {
+    if (agentConfig?.mcpConfig) {
+      const { tools } = await loadMCPToolsFromURL(agentConfig.mcpConfig.server)
+      toolsToUse = tools
+    } else if (agentConfig?.tools) {
+      toolsToUse = agentConfig.tools
       await checkSpecialAgentUsage(supabase, userId)
       await incrementSpecialAgentUsage(supabase, userId)
     }
-
-    let mcpTools = null
-    if (agentConfig?.mcpConfig) {
-      const { tools } = await loadMCPToolsFromURL(agentConfig.mcpConfig.server)
-      mcpTools = tools
-    }
-
-    console.log("mcpTools", mcpTools)
 
     const result = streamText({
       model: modelInstance as LanguageModelV1,
       system: effectiveSystemPrompt,
       messages,
-      // @todo: merge tools if agent has both MCP and tools
-      tools: mcpTools ? mcpTools : undefined,
-      // tools: effectiveTools,
+      tools: toolsToUse,
       maxSteps: effectiveMaxSteps,
       onError: (err) => {
         console.error("🛑 streamText error:", err)
