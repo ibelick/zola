@@ -31,6 +31,10 @@ export type Database = {
           updated_at: string | null
           tools: string[] | null
           max_steps: number | null
+          mcp_config?: {
+            server: string
+            variables: string[]
+          } | null
         }
         Insert: {
           avatar_url?: string | null
@@ -51,6 +55,10 @@ export type Database = {
           updated_at?: string | null
           tools?: string[] | null
           max_steps?: number | null
+          mcp_config?: {
+            server: string
+            variables: string[]
+          } | null
         }
         Update: {
           avatar_url?: string | null
@@ -71,6 +79,10 @@ export type Database = {
           updated_at?: string | null
           tools?: string[] | null
           max_steps?: number | null
+          mcp_config?: {
+            server: string
+            variables: string[]
+          } | null
         }
         Relationships: [
           {

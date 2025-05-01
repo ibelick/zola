@@ -1,4 +1,3 @@
-import { Agent } from "@/app/types/agent"
 import { createClient } from "@/lib/supabase/server"
 import { Tool } from "ai"
 import { tools } from "./tools"
@@ -33,5 +32,6 @@ export async function loadAgent(agentId: string) {
     systemPrompt: agent.system_prompt,
     tools: activeTools,
     maxSteps: agent.max_steps ?? 5,
+    mcpConfig: agent.mcp_config,
   }
 }

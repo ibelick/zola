@@ -11,6 +11,7 @@ import {
 } from "react"
 import { useChats } from "../chat-store/chats/provider"
 import { createClient } from "../supabase/client"
+import { loadGitHubAgent } from "./load-github-agent"
 
 type AgentMetadata = {
   name: string
@@ -47,6 +48,21 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
     if (!agentSlug && !currentChatAgentId) {
       setAgent(null)
       return
+    }
+
+    // IF first time loading agent, check if it's a github agent
+    // create one if it doesn't exist
+    // @todo: first platform agent, more scalable way coming
+    if (agentSlug?.startsWith("github/")) {
+      setStatus("loading")
+      const specialAgent = await loadGitHubAgent(agentSlug)
+      console.log("specialAgent", specialAgent)
+      setStatus("idle")
+
+      if (specialAgent) {
+        setAgent(specialAgent)
+        return
+      }
     }
 
     const supabase = createClient()
