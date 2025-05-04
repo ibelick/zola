@@ -22,8 +22,7 @@ export default async function Page() {
     .in("slug", ZOLA_ALL_AGENTS_SLUGS)
 
   if (agentsError) {
-    console.error(agentsError)
-    return <div>Error loading agents</div>
+    throw new Error(agentsError.message)
   }
 
   if (!agents || agents.length === 0) {
