@@ -121,7 +121,6 @@ export function GitHubRepoAgent({
           creator_id={creator_id}
           avatar_url={getRepoAvatarUrl()}
           agents={agents}
-          user_id={user_id}
           onAgentClick={onAgentClick}
           randomAgents={randomAgents}
         />

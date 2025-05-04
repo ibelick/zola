@@ -47,10 +47,7 @@ export function CreateGitHubAgentDialog() {
     setIsLoading(true)
 
     try {
-      // 1. Validate GitHub Repo
       const response = await fetch(`https://api.github.com/repos/${repository}`)
-
-      console.log("GitHub API response:", response)
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -62,47 +59,35 @@ export function CreateGitHubAgentDialog() {
             `GitHub API error: ${response.status} ${response.statusText}`
           )
         }
-        // No need to set isLoading false here, finally block handles it
         return
       }
 
-      // 2. Check if agent already exists in Supabase
       const agentSlug = `github/${repository}`
-      console.log("Checking for existing agent with slug:", agentSlug)
 
       const { data: existingAgent, error: dbError } = await supabase
-        .from("agents") // Use your actual table name if different
-        .select("id") // Select minimal data
+        .from("agents")
+        .select("id")
         .eq("slug", agentSlug)
-        .maybeSingle() // Get one or null
+        .maybeSingle()
 
       if (dbError) {
-        console.error("Supabase query error:", dbError)
         setError("Failed to check for existing agent. Please try again.")
-        // No need to set isLoading false here, finally block handles it
         return
       }
 
       if (existingAgent) {
-        console.log("Agent already exists:", existingAgent)
         setError("An agent for this repository already exists.")
-        // No need to set isLoading false here, finally block handles it
         return
       }
 
-      console.log("Agent does not exist. Proceeding to create/redirect.")
-
-      // 3. Proceed to redirect (agent creation might happen implicitly on the target page or needs separate logic)
       setOpen(false)
-      router.push(`/?agent=${agentSlug}`) // Use the constructed slug
+      router.push(`/?agent=${agentSlug}`)
     } catch (error) {
-      // Handle fetch network errors or other unexpected errors
       setError(
         "An unexpected error occurred. Please check your connection and try again."
       )
-      console.error("Agent creation/validation error:", error)
     } finally {
-      setIsLoading(false) // Ensure loading state is always reset
+      setIsLoading(false)
     }
   }
 

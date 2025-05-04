@@ -14,10 +14,9 @@ type DialogAgentProps = {
   description: string
   avatar_url?: string | null
   example_inputs: string[]
-  creator_id: string
+  creator_id?: string
   className?: string
   isAvailable: boolean
-  agents: AgentSummary[]
   slug: string
   onAgentClick?: (agentId: string) => void
   isOpen: boolean

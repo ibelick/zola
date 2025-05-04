@@ -43,6 +43,10 @@ export function AgentsPage({ agents }: AgentsPageProps) {
     ZOLA_GITHUB_AGENTS_SLUGS.includes(agent.slug)
   )
 
+  const otherGithubAgents = agents.filter(
+    (agent) => !ZOLA_GITHUB_AGENTS_SLUGS.includes(agent.slug)
+  )
+
   return (
     <div className="bg-background min-h-screen px-4 pt-20 pb-20 sm:px-6">
       <div className="mx-auto max-w-3xl">
@@ -85,15 +89,13 @@ export function AgentsPage({ agents }: AgentsPageProps) {
                   description={agent.description}
                   avatar_url={agent.avatar_url}
                   example_inputs={agent.example_inputs || []}
-                  creator_id={agent.creator_id || "Zola"}
                   isAvailable={true}
-                  agents={agents}
                   onAgentClick={handleAgentClick}
                   isOpen={openAgentId === agent.id}
                   onOpenChange={(open) =>
                     setOpenAgentId(open ? agent.id : null)
                   }
-                  randomAgents={randomAgents}
+                  randomAgents={otherGithubAgents}
                 />
               ))}
             </div>
@@ -125,10 +127,9 @@ export function AgentsPage({ agents }: AgentsPageProps) {
                 name={agent.name}
                 description={agent.description}
                 avatar_url={agent.avatar_url}
+                creator_id="Zola"
                 example_inputs={agent.example_inputs || []}
-                creator_id={agent.creator_id || "Zola"}
                 isAvailable={true}
-                agents={agents}
                 onAgentClick={handleAgentClick}
                 isOpen={openAgentId === agent.id}
                 onOpenChange={(open) => setOpenAgentId(open ? agent.id : null)}
@@ -151,10 +152,9 @@ export function AgentsPage({ agents }: AgentsPageProps) {
                 description={agent.description}
                 avatar_url={agent?.avatar_url}
                 example_inputs={agent.example_inputs || []}
-                creator_id={agent.creator_id || "Zola"}
+                creator_id="Zola"
                 slug={agent.slug}
                 isAvailable={false}
-                agents={agents}
                 className="pointer-events-none opacity-50 select-none"
                 onAgentClick={handleAgentClick}
                 isOpen={openAgentId === agent.id}

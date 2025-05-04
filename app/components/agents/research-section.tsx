@@ -34,7 +34,6 @@ export function ResearchSection({
         example_inputs={researchAgent.example_inputs || []}
         creator_id={researchAgent.creator_id || "Zola"}
         isAvailable={true}
-        agents={agents}
         onAgentClick={handleAgentClick}
         isOpen={openAgentId === researchAgent.id}
         onOpenChange={(open) => setOpenAgentId(open ? researchAgent.id : null)}
