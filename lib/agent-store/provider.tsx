@@ -56,7 +56,6 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
     if (agentSlug?.startsWith("github/")) {
       setStatus("loading")
       const specialAgent = await loadGitHubAgent(agentSlug)
-      console.log("specialAgent", specialAgent)
       setStatus("idle")
 
       if (specialAgent) {

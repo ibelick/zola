@@ -20,7 +20,10 @@ export function ResearchSection({
 }: ResearchSectionProps) {
   return (
     <div className="mt-12">
-      <h2 className="text-foreground mb-1 text-lg font-medium">Research</h2>
+      <h2 className="text-foreground text-lg font-medium">Research</h2>
+      <p className="text-muted-foreground mb-4">
+        Backed by real-time web search. Ideal for deep, accurate research.
+      </p>
       <DialogAgent
         key={researchAgent.id}
         id={researchAgent.id}
