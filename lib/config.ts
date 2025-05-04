@@ -8,16 +8,10 @@ import OpenRouter from "@/components/icons/openrouter"
 import {
   BookOpenText,
   Brain,
-  ChalkboardTeacher,
-  ChatTeardropText,
   Code,
-  CookingPot,
-  Heartbeat,
   Lightbulb,
-  MagnifyingGlass,
   Notepad,
   PaintBrush,
-  PenNib,
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr"
 import { openproviders, OpenProvidersOptions } from "./openproviders"
@@ -434,29 +428,14 @@ export const ZOLA_AGENTS_SLUGS = [
 
 export const ZOLA_SPECIAL_AGENTS_SLUGS = ["research"]
 
+export const ZOLA_GITHUB_AGENTS_SLUGS = [
+  "github/ibelick/prompt-kit",
+  "github/ibelick/zola-chat",
+  "github/vercel/ai",
+  "github/shadcn/ui",
+]
+
 export const ZOLA_COMING_SOON_AGENTS = [
-  {
-    name: "GitHub Agent",
-    slug: "github-agent",
-    description:
-      "Summarizes PRs, reviews diffs, and writes release notes using the GitHub API.",
-    avatar_url: null,
-    system_prompt: "",
-    model_preference: "gpt-4o-mini",
-    is_public: false,
-    remixable: false,
-    tools_enabled: true,
-    example_inputs: [
-      "Summarize this PR: [paste PR link]",
-      "Generate release notes from these commits",
-    ],
-    tags: ["dev", "github", "tools"],
-    category: "dev",
-    id: "github-agent",
-    creator_id: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
   {
     name: "Linear Agent",
     slug: "linear-agent",
@@ -474,6 +453,27 @@ export const ZOLA_COMING_SOON_AGENTS = [
     tags: ["product", "tools", "linear"],
     category: "b2b",
     id: "linear-agent",
+    creator_id: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    name: "Slack Agent",
+    slug: "slack-agent",
+    description: "Create, search, and prioritize issues using the Slack API.",
+    system_prompt: "",
+    model_preference: "gpt-4o-mini",
+    avatar_url: null,
+    is_public: false,
+    remixable: false,
+    tools_enabled: true,
+    example_inputs: [
+      "Create a bug in project X: login form fails on mobile",
+      "List urgent issues in roadmap",
+    ],
+    tags: ["product", "tools", "slack"],
+    category: "b2b",
+    id: "slack-agent",
     creator_id: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
