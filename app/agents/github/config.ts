@@ -8,9 +8,9 @@ export type AgentConfig = {
 export const agentsConfig: AgentConfig[] = [
   {
     slug: "github",
-    name: "GitHub Repository Agents",
+    name: "GitHub Agents",
     description:
       "Chat with AI agents specialized in GitHub repositories. Get insights, explanations, and assistance with specific codebases.",
     isEnabled: true,
   },
-]
+] as const

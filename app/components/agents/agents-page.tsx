@@ -72,7 +72,16 @@ export function AgentsPage({ agents }: AgentsPageProps) {
                 >
                   View all
                 </Link>
-                <CreateGitHubAgentDialog />
+                <CreateGitHubAgentDialog
+                  trigger={
+                    <button
+                      className="text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2 rounded-md px-2 py-1 text-sm"
+                      type="button"
+                    >
+                      Create GitHub Agent
+                    </button>
+                  }
+                />
               </div>
             </div>
             <p className="text-muted-foreground mb-4">

@@ -20,7 +20,13 @@ import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
 
-export function CreateGitHubAgentDialog() {
+type CreateGitHubAgentDialogProps = {
+  trigger: React.ReactNode
+}
+
+export function CreateGitHubAgentDialog({
+  trigger,
+}: CreateGitHubAgentDialogProps) {
   const [open, setOpen] = useState(false)
   const [repository, setRepository] = useState("")
   const [error, setError] = useState("")
@@ -91,12 +97,6 @@ export function CreateGitHubAgentDialog() {
     }
   }
 
-  const trigger = (
-    <button className="text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2 rounded-md px-2 py-1 text-sm">
-      Create GitHub Agent
-    </button>
-  )
-
   const content = (
     <GitHubAgentContent
       repository={repository}
@@ -164,9 +164,14 @@ function GitHubAgentContent({
       <div className="px-6 py-4">
         <p className="text-muted-foreground mb-4 block text-sm">
           Chat with any public repo using{" "}
-          <Link href="https://github.com/idosal/git-mcp" className="underline">
+          <a
+            href="https://github.com/idosal/git-mcp"
+            className="underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             GitMCP
-          </Link>
+          </a>
           . We'll generate a dedicated agent.
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
