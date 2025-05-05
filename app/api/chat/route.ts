@@ -86,7 +86,6 @@ export async function POST(req: Request) {
 
     let effectiveSystemPrompt =
       agentConfig?.systemPrompt || systemPrompt || SYSTEM_PROMPT_DEFAULT
-    let effectiveTools = agentConfig?.tools || undefined
 
     let toolsToUse = undefined
     let effectiveMaxSteps = agentConfig?.maxSteps || 3

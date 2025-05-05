@@ -43,8 +43,8 @@ export function AgentsPage({ agents }: AgentsPageProps) {
     ZOLA_GITHUB_AGENTS_SLUGS.includes(agent.slug)
   )
 
-  const otherGithubAgents = agents.filter(
-    (agent) => !ZOLA_GITHUB_AGENTS_SLUGS.includes(agent.slug)
+  const otherGithubAgents = githubAgents.filter(
+    (agent) => agent.id !== openAgentId
   )
 
   return (

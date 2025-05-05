@@ -116,7 +116,10 @@ export function DialogAgent({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
-      <DialogContent className="[&>button:last-child]:bg-background max-w-[600px] gap-0 overflow-hidden rounded-3xl p-0 shadow-xs [&>button:last-child]:rounded-full [&>button:last-child]:p-1">
+      <DialogContent
+        className="[&>button:last-child]:bg-background max-w-[600px] gap-0 overflow-hidden rounded-3xl p-0 shadow-xs [&>button:last-child]:rounded-full [&>button:last-child]:p-1"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         {renderContent()}
       </DialogContent>
     </Dialog>
