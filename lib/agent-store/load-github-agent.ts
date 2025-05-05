@@ -1,4 +1,5 @@
 import { Agent } from "@/app/types/agent"
+import { toast } from "@/components/ui/toast"
 import { createClient } from "@/lib/supabase/client"
 
 export async function loadGitHubAgent(
@@ -21,6 +22,23 @@ export async function loadGitHubAgent(
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}`
     )
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        toast({
+          title: "Repository not found",
+          description:
+            "Please check the repository name and try again. It must be a public repository.",
+        })
+      } else {
+        toast({
+          title: "GitHub API error",
+          description: `${response.status} ${response.statusText}`,
+        })
+      }
+      return null
+    }
+
     const repoData = await response.json()
     const repoDescription =
       repoData.description || `Chat with the GitHub repo ${owner}/${repo}`
@@ -65,6 +83,10 @@ export async function loadGitHubAgent(
 
     if (error || !created) {
       console.error("Failed to create GitHub agent", error)
+      toast({
+        title: "Failed to create GitHub agent",
+        description: error?.message,
+      })
       return null
     }
 
