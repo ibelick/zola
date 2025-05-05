@@ -223,17 +223,17 @@ INSERT INTO public.agents (
     NULL -- Defaulting mcp_config
   ),
   (
-    'Zola Chat Repo Agent',
-    'github/ibelick/zola-chat',
-    'Answers questions about the ibelick/zola-chat GitHub repository.',
+    'Zola Repo Agent',
+    'github/ibelick/zola',
+    'Answers questions about the ibelick/zola GitHub repository.',
     '/agents/github.png', -- Assuming a generic GitHub icon
-    'You are an expert on the ibelick/zola-chat GitHub repository. Answer questions based on the repository''s content and structure.',
+    'You are an expert on the ibelick/zola GitHub repository. Answer questions based on the repository''s content and structure.',
     'gpt-4', -- Defaulting model preference
     true,
     false,
     true, -- Assuming tools might be needed
     ARRAY['How is the chat state managed?', 'Where is the Supabase client initialized?', 'Explain the agent creation flow.'],
-    ARRAY['github', 'repository', 'code', 'zola-chat'],
+    ARRAY['github', 'repository', 'code', 'zola'],
     'dev', -- Assuming 'dev' category
     NOW(),
     NOW(),

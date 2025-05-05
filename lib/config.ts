@@ -430,7 +430,7 @@ export const ZOLA_SPECIAL_AGENTS_SLUGS = ["research"]
 
 export const ZOLA_GITHUB_AGENTS_SLUGS = [
   "github/ibelick/prompt-kit",
-  "github/ibelick/zola-chat",
+  "github/ibelick/zola",
   "github/vercel/ai",
   "github/shadcn/ui",
 ]
