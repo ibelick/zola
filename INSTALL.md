@@ -101,90 +101,123 @@ Create the following tables in your Supabase SQL editor:
 ```sql
 -- Users table
 CREATE TABLE users (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY NOT NULL, -- Assuming the PK is from auth.users, typically not nullable
   email TEXT NOT NULL,
-  anonymous BOOLEAN DEFAULT false,
-  daily_message_count INTEGER DEFAULT 0,
+  anonymous BOOLEAN,
+  daily_message_count INTEGER,
   daily_reset TIMESTAMPTZ,
   display_name TEXT,
-  message_count INTEGER DEFAULT 0,
+  message_count INTEGER,
   preferred_model TEXT,
-  premium BOOLEAN DEFAULT false,
+  premium BOOLEAN,
   profile_image TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   last_active_at TIMESTAMPTZ DEFAULT NOW(),
-  daily_pro_message_count INTEGER DEFAULT 0,
-  daily_pro_reset TIMESTAMPTZ
+  daily_pro_message_count INTEGER,
+  daily_pro_reset TIMESTAMPTZ,
+  CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE -- Explicit FK definition
 );
 
 -- Agents table
 CREATE TABLE agents (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
+  slug TEXT NOT NULL,
   description TEXT NOT NULL,
   avatar_url TEXT,
-  creator_id UUID REFERENCES users(id) ON DELETE CASCADE,
   system_prompt TEXT NOT NULL,
-  slug TEXT NOT NULL,
-  is_public BOOLEAN DEFAULT false,
-  remixable BOOLEAN DEFAULT false,
-  tools_enabled BOOLEAN DEFAULT false,
-  category TEXT,
-  tags TEXT[],
-  example_inputs TEXT[],
   model_preference TEXT,
+  is_public BOOLEAN DEFAULT false NOT NULL,
+  remixable BOOLEAN DEFAULT false NOT NULL,
+  tools_enabled BOOLEAN DEFAULT false NOT NULL,
+  example_inputs TEXT[],
+  tags TEXT[],
+  category TEXT,
+  creator_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ
+  updated_at TIMESTAMPTZ,
+  tools TEXT[],
+  max_steps INTEGER,
+  mcp_config JSONB, -- Representing the object structure as JSONB
+  CONSTRAINT agents_creator_id_fkey FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE SET NULL -- Changed to SET NULL based on schema, could also be CASCADE
 );
 
 -- Chats table
 CREATE TABLE chats (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID NOT NULL,
   title TEXT,
   model TEXT,
   system_prompt TEXT,
-  agent_id UUID REFERENCES agents(id),
+  agent_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  public BOOLEAN DEFAULT FALSE
+  public BOOLEAN DEFAULT FALSE NOT NULL, -- Added NOT NULL based on TS type
+  CONSTRAINT chats_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT chats_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE SET NULL -- Assuming SET NULL, adjust if needed
 );
 
 -- Messages table
+-- Note: Supabase types define id as number, typically SERIAL or BIGSERIAL in PG.
+-- role is a string union, best represented as TEXT with potential CHECK constraint.
+-- experimental_attachments and parts are JSONB.
 CREATE TABLE messages (
-  id SERIAL PRIMARY KEY,
-  chat_id UUID REFERENCES chats(id) ON DELETE CASCADE NOT NULL,
-  content TEXT NOT NULL,
-  role TEXT NOT NULL,
-  experimental_attachments JSONB,
+  id SERIAL PRIMARY KEY, -- Using SERIAL for auto-incrementing integer ID
+  chat_id UUID NOT NULL,
+  content TEXT,
+  role TEXT NOT NULL CHECK (role IN ('system', 'user', 'assistant', 'data')), -- Added CHECK constraint
+  experimental_attachments JSONB, -- Storing Attachment[] as JSONB
   parts JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  tool_invocations JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT messages_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
 );
 
 -- Chat attachments table
 CREATE TABLE chat_attachments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  chat_id UUID REFERENCES chats(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  chat_id UUID NOT NULL,
+  user_id UUID NOT NULL,
   file_url TEXT NOT NULL,
   file_name TEXT,
   file_type TEXT,
-  file_size INTEGER,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  file_size INTEGER, -- Assuming INTEGER for file size
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT chat_attachments_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+  CONSTRAINT chat_attachments_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Feedback table
 CREATE TABLE feedback (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID NOT NULL,
   message TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Set up RLS policies
-RLS setup and policies coming soon.
-For now, make sure to enable RLS on all user-related tables:
-users, agents, chats, messages, chat_attachments, feedback
+-- RLS (Row Level Security) Reminder
+-- Ensure RLS is enabled on these tables in your Supabase dashboard
+-- and appropriate policies are created.
+-- Example policies (adapt as needed):
+-- ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "Users can view their own data." ON users FOR SELECT USING (auth.uid() = id);
+-- CREATE POLICY "Users can update their own data." ON users FOR UPDATE USING (auth.uid() = id);
+-- ... add policies for other tables (agents, chats, messages, etc.) ...
 ```
+
+### Seeding Initial Data
+
+After creating the tables, you need to seed the database with initial data, particularly for the `agents` table.
+
+1.  **Prerequisite:** Ensure you have manually created a user in the `auth.users` table (e.g., through Supabase UI or your application's signup) and that a corresponding entry exists in the `public.users` table with the `id` set to `zola`. The seed script currently assumes this user exists to set the `creator_id` for the initial agents.
+2.  **Run the Seed Script:**
+    - Navigate to the SQL Editor in your Supabase project dashboard.
+    - Open the `supabase/seed.sql` file from the Zola project codebase.
+    - Copy the entire content of `seed.sql`.
+    - Paste the content into the Supabase SQL Editor.
+    - Click the "Run" button.
+
+This will insert the default agents provided by Zola.
 
 ### Storage Setup
 
