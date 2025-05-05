@@ -9,26 +9,19 @@ export const dynamic = "force-static"
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ agentSlug: string; chatId: string }>
+  params: Promise<{ agentSlug?: string; chatId: string }>
 }): Promise<Metadata> {
-  const { agentSlug, chatId } = await params
+  const { chatId } = await params
   const supabase = await createClient()
 
   const { data: chat } = await supabase
     .from("chats")
-    .select("title, system_prompt")
+    .select("title, system_prompt, created_at")
     .eq("id", chatId)
     .single()
 
-  const { data: agent } = await supabase
-    .from("agents")
-    .select("name")
-    .eq("slug", agentSlug)
-    .single()
-
-  const title = chat?.title || `Public Zola research`
-  const description =
-    chat?.system_prompt || `A research powered by ${agent?.name}`
+  const title = chat?.title || "Chat"
+  const description = chat?.system_prompt || "A chat in Zola"
 
   return {
     title,
@@ -37,7 +30,7 @@ export async function generateMetadata({
       title,
       description,
       type: "article",
-      url: `${APP_DOMAIN}/agents/${agentSlug}/${chatId}`,
+      url: `${APP_DOMAIN}/p/${chatId}`,
     },
     twitter: {
       card: "summary_large_image",
@@ -50,7 +43,7 @@ export async function generateMetadata({
 export default async function AgentChat({
   params,
 }: {
-  params: Promise<{ agentSlug: string; chatId: string }>
+  params: Promise<{ agentSlug?: string; chatId: string }>
 }) {
   const { agentSlug, chatId } = await params
   const supabase = await createClient()
@@ -75,24 +68,32 @@ export default async function AgentChat({
     redirect("/agents")
   }
 
-  const { data: agentData, error: agentError } = await supabase
-    .from("agents")
-    .select("*")
-    .eq("slug", agentSlug)
-    .single()
+  let agentData = null
 
-  if (agentError || !agentData) {
-    redirect("/agents")
+  if (agentSlug) {
+    const { data, error } = await supabase
+      .from("agents")
+      .select("*")
+      .eq("slug", agentSlug)
+      .single()
+
+    if (!error) {
+      agentData = data
+    }
   }
 
   return (
     <Article
       messages={messagesData}
       date={chatData.created_at || ""}
-      agentSlug={agentSlug}
-      agentName={agentData.name}
+      agentSlug={agentSlug || ""}
+      agentName={agentData?.name || ""}
       title={chatData.title || ""}
-      subtitle={`A conversation with ${agentData.name}, an AI agent built in Zola`}
+      subtitle={
+        agentData
+          ? `A conversation with ${agentData.name}, an AI agent built in Zola`
+          : "A conversation in Zola"
+      }
     />
   )
 }
