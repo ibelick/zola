@@ -6,9 +6,11 @@ import { createClient } from "@/lib/supabase/server"
 export default async function AgentIdPage({
   params,
 }: {
-  params: Promise<{ agentSlug: string }>
+  params: Promise<{ agentSlug: string | string[] }>
 }) {
-  const { agentSlug } = await params
+  const { agentSlug: slugParts } = await params
+  const agentSlug = Array.isArray(slugParts) ? slugParts.join("/") : slugParts
+
   const supabase = await createClient()
 
   const { data: agent, error } = await supabase

@@ -47,7 +47,7 @@ export function DialogPublish({ agent }: DialogPublishProps) {
     return null
   }
 
-  const publicLink = `${APP_DOMAIN}/agents/${agent.slug}/${chatId}`
+  const publicLink = `${APP_DOMAIN}/p/${chatId}`
 
   const openPage = () => {
     setOpenDialog(false)
