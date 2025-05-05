@@ -42,6 +42,12 @@ export async function loadGitHubAgent(
           server: `https://gitmcp.io/${owner}/${repo}`,
           variables: [],
         },
+        example_inputs: [
+          "what does this repository do?",
+          "how to install the project?",
+          "how can I use this project?",
+          "where is the main code located?",
+        ],
         remixable: false,
         is_public: true,
         system_prompt,

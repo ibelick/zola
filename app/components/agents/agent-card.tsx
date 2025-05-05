@@ -56,7 +56,7 @@ export function AgentCard({
             {name}
           </h3>
 
-          <p className="text-foreground mt-1 line-clamp-3 text-sm md:line-clamp-2">
+          <p className="text-foreground line-clamp-3 text-sm md:line-clamp-2">
             {description}
           </p>
 

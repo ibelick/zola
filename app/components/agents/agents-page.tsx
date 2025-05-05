@@ -76,8 +76,7 @@ export function AgentsPage({ agents }: AgentsPageProps) {
               </div>
             </div>
             <p className="text-muted-foreground mb-4">
-              Chat with any GitHub repository. Ask questions, explore code, open
-              issues.
+              Chat with any GitHub repository.
             </p>
             <div className="grid gap-4 md:grid-cols-2">
               {githubAgents.map((agent) => (
