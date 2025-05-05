@@ -4,6 +4,8 @@
 
 **Zola** is a free, open-source AI chat app with multi-model support.
 
+[![Chat with this repo](https://zola.chat/button/github.svg)](https://zola.chat/?agent=github/ibelick/zola)
+
 ![zola screenshot](./public/cover_zola.jpg)
 
 ## Features
