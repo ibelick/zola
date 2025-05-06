@@ -122,7 +122,9 @@ export async function POST(req: Request) {
 
     // Ensure the stream is consumed so onFinish is triggered.
     result.consumeStream()
-    const originalResponse = result.toDataStreamResponse()
+    const originalResponse = result.toDataStreamResponse({
+      sendReasoning: true,
+    })
     // Optionally attach chatId in a custom header.
     const headers = new Headers(originalResponse.headers)
     headers.set("X-Chat-Id", chatId)

@@ -25,7 +25,6 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
-import { useReasoning } from "./use-reasoning"
 
 const FeedbackWidget = dynamic(
   () => import("./feedback-widget").then((mod) => mod.FeedbackWidget),
@@ -99,15 +98,6 @@ export function Chat() {
     createNewChat,
     setHasDialogAuth,
   })
-
-  // @todo: improve
-  const {
-    reasoningInput,
-    reasoningMessages,
-    appendReasoning,
-    setReasoningMessages,
-    reasoningStatus,
-  } = useReasoning()
 
   const {
     handleInputChange,
@@ -377,9 +367,6 @@ export function Chat() {
             onDelete={handleDelete}
             onEdit={handleEdit}
             onReload={handleReload}
-            reasoning={
-              reasoningMessages?.find((m) => m.role === "assistant")?.content
-            }
           />
         )}
       </AnimatePresence>
