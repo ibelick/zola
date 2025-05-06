@@ -68,11 +68,6 @@ export function Conversation({
               <Loader />
             </div>
           )}
-        {/* {reasoning && (
-          <div className="group min-h-scroll-anchor flex w-full max-w-3xl flex-col items-start gap-2 px-6 pb-2">
-            <Reasoning reasoning={reasoning} />
-          </div>
-        )} */}
       </ChatContainer>
       <div className="absolute bottom-0 w-full max-w-3xl">
         <ScrollButton

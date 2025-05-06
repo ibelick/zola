@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
 import { getSources } from "./get-sources"
+import { Reasoning } from "./reasoning"
 import { SourcesList } from "./sources-list"
 import { ToolInvocation } from "./tool-invocation"
 
@@ -35,6 +36,7 @@ export function MessageAssistant({
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"
   )
+  const reasoningParts = parts?.find((part) => part.type === "reasoning")
 
   const contentNullOrEmpty = children === null || children === ""
 
@@ -46,6 +48,10 @@ export function MessageAssistant({
       )}
     >
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
+        {reasoningParts && reasoningParts.reasoning && (
+          <Reasoning reasoning={reasoningParts.reasoning} />
+        )}
+
         {toolInvocationParts && toolInvocationParts.length > 0 && (
           <ToolInvocation toolInvocations={toolInvocationParts} />
         )}
