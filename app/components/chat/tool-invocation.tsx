@@ -2,7 +2,15 @@
 
 import { cn } from "@/lib/utils"
 import type { ToolInvocationUIPart } from "@ai-sdk/ui-utils"
-import { CaretDown, Code, Link, Nut, Spinner } from "@phosphor-icons/react"
+import {
+  CaretDown,
+  CheckCircle,
+  Code,
+  Link,
+  Nut,
+  Spinner,
+  Wrench,
+} from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState } from "react"
 
@@ -90,7 +98,7 @@ export function ToolInvocation({
               className="overflow-hidden"
             >
               <div className="px-3 pt-3 pb-3">
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {uniqueToolIds.map((toolId) => {
                     const toolInvocationsForId = groupedTools[toolId]
 
@@ -99,7 +107,7 @@ export function ToolInvocation({
                     return (
                       <div
                         key={toolId}
-                        className="border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                        className="pb-2 last:border-0 last:pb-0"
                       >
                         <SingleToolView
                           toolInvocations={toolInvocationsForId}
@@ -396,24 +404,37 @@ function SingleToolCard({
         className="hover:bg-accent flex w-full flex-row items-center rounded-t-md px-3 py-2 transition-colors"
       >
         <div className="flex flex-1 flex-row items-center gap-2 text-left text-base">
+          <Wrench className="text-muted-foreground size-4" />
           <span className="font-mono text-sm">{toolName}</span>
-          <div
-            className={cn(
-              "rounded-full px-1.5 py-0.5 text-xs",
-              isLoading
-                ? "border border-blue-200 bg-blue-50 text-blue-700"
-                : "border border-green-200 bg-green-50 text-green-700"
-            )}
-          >
+          <AnimatePresence mode="popLayout" initial={false}>
             {isLoading ? (
-              <div className="flex items-center">
-                <Spinner className="mr-1 h-3 w-3 animate-spin" />
-                Running
-              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, filter: "blur(2px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.9, filter: "blur(2px)" }}
+                transition={{ duration: 0.15 }}
+                key="loading"
+              >
+                <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700">
+                  <Spinner className="mr-1 h-3 w-3 animate-spin" />
+                  Running
+                </div>
+              </motion.div>
             ) : (
-              "Completed"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, filter: "blur(2px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.9, filter: "blur(2px)" }}
+                transition={{ duration: 0.15 }}
+                key="completed"
+              >
+                <div className="inline-flex items-center rounded-full border border-green-200 bg-green-50 px-1.5 py-0.5 text-xs text-green-700">
+                  <CheckCircle className="mr-1 h-3 w-3" />
+                  Completed
+                </div>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
         <CaretDown
           className={cn(
@@ -464,7 +485,7 @@ function SingleToolCard({
               {/* Tool call ID */}
               <div className="text-muted-foreground flex items-center justify-between text-xs">
                 <div className="flex items-center">
-                  <Code className="mr-1 inline h-3 w-3" />
+                  <Code className="mr-1 inline size-3" />
                   Tool Call ID:{" "}
                   <span className="ml-1 font-mono">{toolCallId}</span>
                 </div>
