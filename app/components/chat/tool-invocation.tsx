@@ -1,46 +1,15 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import type {
-  ToolInvocation as BaseToolInvocation,
-  ToolInvocationUIPart,
-} from "@ai-sdk/ui-utils"
+import type { ToolInvocationUIPart } from "@ai-sdk/ui-utils"
 import { CaretDown, Code, Link, Nut, Spinner } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState } from "react"
 
-type CustomToolInvocation =
-  | BaseToolInvocation
-  | ({
-      state: "requested"
-      step?: number
-      toolCallId: string
-      toolName: string
-      args?: any
-    } & {
-      result?: any
-    })
-
-type CustomToolInvocationUIPart = Omit<
-  ToolInvocationUIPart,
-  "toolInvocation"
-> & {
-  toolInvocation: CustomToolInvocation
-}
-
 interface ToolInvocationProps {
-  data: CustomToolInvocationUIPart | CustomToolInvocationUIPart[]
+  toolInvocations: ToolInvocationUIPart[]
   className?: string
   defaultOpen?: boolean
-}
-
-function hasResult(
-  toolInvocation: CustomToolInvocation
-): toolInvocation is CustomToolInvocation & { result: any } {
-  return (
-    toolInvocation.state === "result" ||
-    (toolInvocation as any).result !== undefined
-  )
 }
 
 const TRANSITION = {
@@ -50,22 +19,35 @@ const TRANSITION = {
 }
 
 export function ToolInvocation({
-  data,
+  toolInvocations,
   defaultOpen = false,
 }: ToolInvocationProps) {
   const [isExpanded, setIsExpanded] = useState(defaultOpen)
 
-  const toolInvocations = Array.isArray(data) ? data : [data]
+  const toolInvocationsData = Array.isArray(toolInvocations)
+    ? toolInvocations
+    : [toolInvocations]
 
-  const uniqueToolIds = new Set(
-    toolInvocations.map((item) => item.toolInvocation.toolCallId)
+  // Group tool invocations by toolCallId
+  const groupedTools = toolInvocationsData.reduce(
+    (acc, item) => {
+      const { toolCallId } = item.toolInvocation
+      if (!acc[toolCallId]) {
+        acc[toolCallId] = []
+      }
+      acc[toolCallId].push(item)
+      return acc
+    },
+    {} as Record<string, ToolInvocationUIPart[]>
   )
-  const isSingleTool = uniqueToolIds.size === 1
+
+  const uniqueToolIds = Object.keys(groupedTools)
+  const isSingleTool = uniqueToolIds.length === 1
 
   if (isSingleTool) {
     return (
       <SingleToolView
-        data={toolInvocations}
+        toolInvocations={toolInvocationsData}
         defaultOpen={defaultOpen}
         className="mb-10"
       />
@@ -76,7 +58,10 @@ export function ToolInvocation({
     <div className="mb-10">
       <div className="border-border flex flex-col gap-0 overflow-hidden rounded-md border">
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={(e) => {
+            e.preventDefault()
+            setIsExpanded(!isExpanded)
+          }}
           type="button"
           className="hover:bg-accent flex w-full flex-row items-center rounded-t-md px-3 py-2 transition-colors"
         >
@@ -84,7 +69,7 @@ export function ToolInvocation({
             <Nut className="text-muted-foreground size-4" />
             <span className="text-sm">Tools executed</span>
             <div className="bg-secondary rounded-full px-1.5 py-0.5 font-mono text-xs text-slate-700">
-              {uniqueToolIds.size}
+              {uniqueToolIds.length}
             </div>
           </div>
           <CaretDown
@@ -106,32 +91,19 @@ export function ToolInvocation({
             >
               <div className="px-3 pt-3 pb-3">
                 <div className="space-y-4">
-                  {/* Group tools by toolCallId */}
-                  {Array.from(uniqueToolIds).map((toolId) => {
-                    const requestTool = toolInvocations.find(
-                      (item) =>
-                        item.toolInvocation.toolCallId === toolId &&
-                        (item.toolInvocation as CustomToolInvocation).state ===
-                          "requested"
-                    )
+                  {uniqueToolIds.map((toolId) => {
+                    const toolInvocationsForId = groupedTools[toolId]
 
-                    const resultTool = toolInvocations.find(
-                      (item) =>
-                        item.toolInvocation.toolCallId === toolId &&
-                        item.toolInvocation.state === "result"
-                    )
-
-                    // Show the result tool if available, otherwise show the request
-                    const toolToShow = resultTool || requestTool
-
-                    if (!toolToShow) return null
+                    if (!toolInvocationsForId?.length) return null
 
                     return (
                       <div
                         key={toolId}
                         className="border-b border-gray-100 pb-4 last:border-0 last:pb-0"
                       >
-                        <SingleToolView data={[toolToShow]} />
+                        <SingleToolView
+                          toolInvocations={toolInvocationsForId}
+                        />
                       </div>
                     )
                   })}
@@ -145,34 +117,96 @@ export function ToolInvocation({
   )
 }
 
+type SingleToolViewProps = {
+  toolInvocations: ToolInvocationUIPart[]
+  defaultOpen?: boolean
+  className?: string
+}
+
 function SingleToolView({
-  data,
+  toolInvocations,
+  defaultOpen = false,
+  className,
+}: SingleToolViewProps) {
+  // Group by toolCallId and pick the most informative state
+  const groupedTools = toolInvocations.reduce(
+    (acc, item) => {
+      const { toolCallId } = item.toolInvocation
+      if (!acc[toolCallId]) {
+        acc[toolCallId] = []
+      }
+      acc[toolCallId].push(item)
+      return acc
+    },
+    {} as Record<string, ToolInvocationUIPart[]>
+  )
+
+  // For each toolCallId, get the most informative state (result > call > requested)
+  const toolsToDisplay = Object.values(groupedTools)
+    .map((group) => {
+      const resultTool = group.find(
+        (item) => item.toolInvocation.state === "result"
+      )
+      const callTool = group.find(
+        (item) => item.toolInvocation.state === "call"
+      )
+      const partialCallTool = group.find(
+        (item) => item.toolInvocation.state === "partial-call"
+      )
+
+      // Return the most informative one
+      return resultTool || callTool || partialCallTool
+    })
+    .filter(Boolean) as ToolInvocationUIPart[]
+
+  if (toolsToDisplay.length === 0) return null
+
+  // If there's only one tool, display it directly
+  if (toolsToDisplay.length === 1) {
+    return (
+      <SingleToolCard
+        toolData={toolsToDisplay[0]}
+        defaultOpen={defaultOpen}
+        className={className}
+      />
+    )
+  }
+
+  // If there are multiple tools, show them in a list
+  return (
+    <div className={className}>
+      <div className="space-y-4">
+        {toolsToDisplay.map((tool) => (
+          <SingleToolCard
+            key={tool.toolInvocation.toolCallId}
+            toolData={tool}
+            defaultOpen={defaultOpen}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// New component to handle individual tool cards
+function SingleToolCard({
+  toolData,
   defaultOpen = false,
   className,
 }: {
-  data: CustomToolInvocationUIPart[]
+  toolData: ToolInvocationUIPart
   defaultOpen?: boolean
   className?: string
 }) {
-  const resultTool = data.find((item) => item.toolInvocation.state === "result")
-  const requestTool = data.find(
-    (item) =>
-      (item.toolInvocation as CustomToolInvocation).state === "requested"
-  )
-  const toolData = resultTool || requestTool
-
-  if (!toolData) return null
-
   const [isExpanded, setIsExpanded] = useState(defaultOpen)
   const [parsedResult, setParsedResult] = useState<any>(null)
   const [parseError, setParseError] = useState<string | null>(null)
 
   const { toolInvocation } = toolData
-  const { state, toolName, toolCallId, args } =
-    toolInvocation as CustomToolInvocation
-  const isRequested = state === "requested"
+  const { state, toolName, toolCallId, args } = toolInvocation
+  const isLoading = state === "call"
   const isCompleted = state === "result"
-  const result = hasResult(toolInvocation) ? toolInvocation.result : undefined
+  const result = isCompleted ? toolInvocation.result : undefined
 
   // Parse the result JSON if available
   useEffect(() => {
@@ -221,6 +255,11 @@ function SingleToolView({
             setParseError("Failed to parse result")
           }
           console.error("Failed to parse result:", error)
+        }
+      } else {
+        // Handle direct object results
+        if (!didCancel) {
+          setParsedResult(result)
         }
       }
     }
@@ -349,7 +388,10 @@ function SingleToolView({
       )}
     >
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={(e) => {
+          e.preventDefault()
+          setIsExpanded(!isExpanded)
+        }}
         type="button"
         className="hover:bg-accent flex w-full flex-row items-center rounded-t-md px-3 py-2 transition-colors"
       >
@@ -358,12 +400,12 @@ function SingleToolView({
           <div
             className={cn(
               "rounded-full px-1.5 py-0.5 text-xs",
-              isRequested
+              isLoading
                 ? "border border-blue-200 bg-blue-50 text-blue-700"
                 : "border border-green-200 bg-green-50 text-green-700"
             )}
           >
-            {isRequested ? (
+            {isLoading ? (
               <div className="flex items-center">
                 <Spinner className="mr-1 h-3 w-3 animate-spin" />
                 Running

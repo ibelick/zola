@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 
 // Style constants
 const DOT_SIZE = "size-2"
-const DOT_COLOR = "bg-primary"
+const DOT_COLOR = "bg-primary/60"
 const DOT_SPACING = "gap-1"
 
 // Animation constants

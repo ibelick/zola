@@ -47,7 +47,7 @@ export function MessageAssistant({
     >
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
         {toolInvocationParts && toolInvocationParts.length > 0 && (
-          <ToolInvocation data={toolInvocationParts} />
+          <ToolInvocation toolInvocations={toolInvocationParts} />
         )}
 
         {contentNullOrEmpty ? null : (
