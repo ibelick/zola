@@ -36,15 +36,9 @@ export async function saveFinalAssistantMessage(
   const parts: ContentPart[] = []
   const toolInvocations: any[] = []
   let textParts: string[] = []
-  let reasoning: string | null = null
 
   for (const msg of messages) {
     if (msg.role === "assistant") {
-      // Extract reasoning from top-level if available
-      if (msg.reasoning) {
-        reasoning = msg.reasoning
-      }
-
       if (Array.isArray(msg.content)) {
         for (const part of msg.content) {
           if (part.type === "text") {
@@ -61,11 +55,19 @@ export async function saveFinalAssistantMessage(
                 args: part.args,
               },
             })
-          } else if (part.type === "reasoning" || part.type === "step-start") {
+          } else if (part.type === "reasoning") {
+            parts.push({
+              type: "reasoning",
+              reasoning: part.text || "",
+              details: [
+                {
+                  type: "text",
+                  text: part.text || "",
+                },
+              ],
+            })
+          } else if (part.type === "step-start") {
             parts.push(part)
-            if (part.type === "reasoning" && part.reasoning && !reasoning) {
-              reasoning = part.reasoning
-            }
           }
         }
       }
@@ -104,7 +106,6 @@ export async function saveFinalAssistantMessage(
     content: finalPlainText || "",
     parts: parts,
     tool_invocations: toolInvocations,
-    reasoning: reasoning,
   })
 
   if (error) {
