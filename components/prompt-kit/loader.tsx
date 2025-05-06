@@ -16,6 +16,7 @@ const DELAY_DOT_3 = 0.2
 // Animation settings
 const ANIMATION = {
   y: ["0%", "-60%", "0%"],
+  opacity: [1, 0.7, 1],
 }
 
 const TRANSITION = {
