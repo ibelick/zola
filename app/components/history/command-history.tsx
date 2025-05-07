@@ -383,11 +383,24 @@ export function CommandHistory({
     })
   }, [isOpen, chatHistory, router])
 
+  // Add keyboard shortcut to open dialog with Command+K
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setIsOpen(!isOpen)
+      }
+    }
+
+    document.addEventListener("keydown", down)
+    return () => document.removeEventListener("keydown", down)
+  }, [isOpen, setIsOpen])
+
   return (
     <>
       <Tooltip>
         <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-        <TooltipContent>History</TooltipContent>
+        <TooltipContent>History ⌘+K</TooltipContent>
       </Tooltip>
       <CommandDialog
         open={isOpen}
@@ -445,7 +458,7 @@ export function CommandHistory({
                     <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
                       ⏎
                     </span>
-                    <span>Select</span>
+                    <span>Go to chat</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="flex flex-row items-center gap-0.5">
