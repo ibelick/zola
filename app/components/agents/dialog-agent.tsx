@@ -1,10 +1,8 @@
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
-import { useUser } from "@/app/providers/user-provider"
 import { AgentSummary } from "@/app/types/agent"
+import type { Tables } from "@/app/types/database.types"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
-import { Popover, PopoverTrigger } from "@/components/ui/popover"
-import { PopoverContentAuth } from "../chat-input/popover-content-auth"
 import { AgentCard } from "./agent-card"
 import { AgentDetail } from "./agent-detail"
 
@@ -14,26 +12,28 @@ type DialogAgentProps = {
   description: string
   avatar_url?: string | null
   example_inputs: string[]
-  creator_id: string
   className?: string
   isAvailable: boolean
-  agents: AgentSummary[]
   slug: string
   onAgentClick?: (agentId: string) => void
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   randomAgents: AgentSummary[]
   trigger?: React.ReactNode
+  system_prompt?: string
+  tools?: string[]
+  mcp_config?: Tables<"agents">["mcp_config"]
+  isCardLight?: boolean
 }
 
 export function DialogAgent({
   id,
   name,
   description,
-  creator_id,
   avatar_url,
   example_inputs,
   slug,
+  system_prompt,
   className,
   isAvailable,
   onAgentClick,
@@ -41,9 +41,11 @@ export function DialogAgent({
   onOpenChange,
   randomAgents,
   trigger = null,
+  tools,
+  mcp_config,
+  isCardLight = false,
 }: DialogAgentProps) {
   const isMobile = useBreakpoint(768)
-  const { user } = useUser()
 
   const handleOpenChange = (open: boolean) => {
     if (!isAvailable) {
@@ -59,47 +61,29 @@ export function DialogAgent({
       id={id}
       name={name}
       description={description}
-      creator_id={creator_id}
       avatar_url={avatar_url}
       className={className}
       isAvailable={isAvailable}
+      system_prompt={system_prompt}
       onClick={() => handleOpenChange(true)}
+      tools={tools}
+      mcp_config={mcp_config}
+      isLight={isCardLight}
     />
   )
 
-  if (!user) {
-    return (
-      <Popover>
-        <PopoverTrigger className="flex w-full">
-          {trigger || (
-            <AgentCard
-              id={id}
-              name={name}
-              description={description}
-              creator_id={creator_id}
-              avatar_url={avatar_url}
-              className={className}
-              isAvailable={isAvailable}
-            />
-          )}
-        </PopoverTrigger>
-        <PopoverContentAuth />
-      </Popover>
-    )
-  }
-
   const renderContent = (isMobile?: boolean) => (
     <AgentDetail
-      id={id}
       slug={slug}
       name={name}
       description={description}
       example_inputs={example_inputs}
-      creator_id={creator_id}
       avatar_url={avatar_url}
+      system_prompt={system_prompt}
+      tools={tools}
+      mcp_config={mcp_config}
       onAgentClick={onAgentClick}
       randomAgents={randomAgents}
-      isMobile={isMobile}
     />
   )
 
@@ -117,7 +101,10 @@ export function DialogAgent({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
-      <DialogContent className="[&>button:last-child]:bg-background max-w-[600px] gap-0 overflow-hidden rounded-3xl p-0 shadow-xs [&>button:last-child]:rounded-full [&>button:last-child]:p-1">
+      <DialogContent
+        className="[&>button:last-child]:bg-background flex gap-0 overflow-hidden rounded-3xl p-0 shadow-xs [&>button:last-child]:rounded-full [&>button:last-child]:p-1"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         {renderContent()}
       </DialogContent>
     </Dialog>

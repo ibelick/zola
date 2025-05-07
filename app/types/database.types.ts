@@ -29,6 +29,12 @@ export type Database = {
           tags: string[] | null
           tools_enabled: boolean
           updated_at: string | null
+          tools: string[] | null
+          max_steps: number | null
+          mcp_config?: {
+            server: string
+            variables: string[]
+          } | null
         }
         Insert: {
           avatar_url?: string | null
@@ -47,6 +53,12 @@ export type Database = {
           tags?: string[] | null
           tools_enabled?: boolean
           updated_at?: string | null
+          tools?: string[] | null
+          max_steps?: number | null
+          mcp_config?: {
+            server: string
+            variables: string[]
+          } | null
         }
         Update: {
           avatar_url?: string | null
@@ -65,6 +77,12 @@ export type Database = {
           tags?: string[] | null
           tools_enabled?: boolean
           updated_at?: string | null
+          tools?: string[] | null
+          max_steps?: number | null
+          mcp_config?: {
+            server: string
+            variables: string[]
+          } | null
         }
         Relationships: [
           {
@@ -176,29 +194,32 @@ export type Database = {
         Row: {
           experimental_attachments: Attachment[]
           chat_id: string
-          content: string
+          content: string | null
           created_at: string | null
           id: number
           role: "system" | "user" | "assistant" | "data"
           parts: Json | null
+          tool_invocations: Json | null
         }
         Insert: {
           experimental_attachments?: Attachment[]
           chat_id: string
-          content: string
+          content: string | null
           created_at?: string | null
           id?: number
           role: "system" | "user" | "assistant" | "data"
           parts?: Json
+          tool_invocations?: Json | null
         }
         Update: {
           experimental_attachments?: Attachment[]
           chat_id?: string
-          content?: string
+          content?: string | null
           created_at?: string | null
           id?: number
           role?: "system" | "user" | "assistant" | "data"
           parts?: Json
+          tool_invocations?: Json | null
         }
         Relationships: []
       }

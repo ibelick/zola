@@ -11,6 +11,9 @@ export type AgentSummary = Pick<
   | "example_inputs"
   | "creator_id"
   | "slug"
+  | "system_prompt"
+  | "tools"
+  | "mcp_config"
 >
 
 export type AgentsSuggestions = Pick<

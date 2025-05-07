@@ -1,4 +1,4 @@
-import { ModelSelector } from "@/components/common/model-selector"
+import { ModelSelector } from "@/components/common/model-selector/base"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import {

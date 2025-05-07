@@ -1,10 +1,17 @@
 "use client"
 
 import { AgentSummary } from "@/app/types/agent"
-import { ZOLA_AGENTS_SLUGS, ZOLA_COMING_SOON_AGENTS } from "@/lib/config"
-import { ArrowUpRight } from "@phosphor-icons/react"
+import {
+  ZOLA_AGENTS_SLUGS,
+  ZOLA_COMING_SOON_AGENTS,
+  ZOLA_GITHUB_AGENTS_SLUGS,
+  ZOLA_SPECIAL_AGENTS_SLUGS,
+} from "@/lib/config"
+import Link from "next/link"
 import { useMemo, useState } from "react"
 import { DialogAgent } from "./dialog-agent"
+import { CreateGitHubAgentDialog } from "./dialog-create-github-agent"
+import { ResearchSection } from "./research-section"
 
 type AgentsPageProps = {
   agents: AgentSummary[]
@@ -24,15 +31,26 @@ export function AgentsPage({ agents }: AgentsPageProps) {
     setOpenAgentId(agentId)
   }
 
-  const researchAgent = agents.find((agent) => agent.slug === "zola-research")
+  const researchAgent = agents.find((agent) =>
+    ZOLA_SPECIAL_AGENTS_SLUGS.includes(agent.slug)
+  )
+
   const featuredAgents = agents.filter((agent) =>
     ZOLA_AGENTS_SLUGS.includes(agent.slug)
+  )
+
+  const githubAgents = agents.filter((agent) =>
+    ZOLA_GITHUB_AGENTS_SLUGS.includes(agent.slug)
+  )
+
+  const otherGithubAgents = githubAgents.filter(
+    (agent) => agent.id !== openAgentId
   )
 
   return (
     <div className="bg-background min-h-screen px-4 pt-20 pb-20 sm:px-6">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-12 text-center">
+        <div className="mb-20 text-center">
           <h1 className="text-foreground text-sm font-medium">Agents</h1>
           <div className="text-foreground mx-auto my-4 max-w-2xl text-3xl font-medium tracking-tight md:text-5xl">
             Your every day AI assistant
@@ -43,74 +61,73 @@ export function AgentsPage({ agents }: AgentsPageProps) {
           </p>
         </div>
 
-        {researchAgent && (
+        {githubAgents.length > 0 && (
           <div className="mt-12">
-            <h2 className="text-foreground mb-1 text-lg font-medium">
-              Research
-            </h2>
-            <DialogAgent
-              key={researchAgent.id}
-              id={researchAgent.id}
-              slug={researchAgent.slug}
-              name={researchAgent.name}
-              description={researchAgent.description}
-              avatar_url={researchAgent.avatar_url}
-              example_inputs={researchAgent.example_inputs || []}
-              creator_id={researchAgent.creator_id || "Zola"}
-              isAvailable={true}
-              agents={agents}
-              onAgentClick={handleAgentClick}
-              isOpen={openAgentId === researchAgent.id}
-              onOpenChange={(open) =>
-                setOpenAgentId(open ? researchAgent.id : null)
-              }
-              randomAgents={randomAgents}
-              trigger={
-                <button
-                  className="group w-full items-end justify-start"
-                  type="button"
+            <div className="flex items-center justify-between">
+              <h2 className="text-foreground text-lg font-medium">GitHub</h2>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/agents/github"
+                  className="text-muted-foreground hover:text-foreground text-sm"
                 >
-                  <div className="relative min-h-[140px] w-full overflow-hidden rounded-2xl shadow-lg md:aspect-[4/1]">
-                    <div className="absolute inset-0">
-                      <img
-                        src="/banner_cloud.jpg"
-                        alt="Cloud background"
-                        className="h-full w-full object-cover transition-all duration-300 group-hover:scale-105"
-                      />
-                    </div>
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent dark:from-black/70 dark:via-black/20" />
-
-                    <div className="relative flex h-full min-h-[140px] flex-col p-5">
-                      {/* <div className="self-start rounded-full bg-black/70 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
-                  Research
-                </div> */}
-
-                      <div className="mt-auto flex flex-row items-end justify-between gap-2">
-                        <div className="flex flex-col items-start gap-0.5 text-left">
-                          <h3 className="text-2xl leading-tight font-medium text-white">
-                            Zola Research
-                          </h3>
-
-                          <p className="text-sm text-white/80">
-                            Summarizes sources, finds answers. Helps you explore
-                            any topic, fast, focused, and clear.
-                          </p>
-                        </div>
-                        <div className="rounded-full bg-white/20 p-2 backdrop-blur-sm">
-                          <ArrowUpRight className="h-4 w-4 text-white" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              }
-            />
+                  View all
+                </Link>
+                <CreateGitHubAgentDialog
+                  trigger={
+                    <button
+                      className="text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2 rounded-md px-2 py-1 text-sm"
+                      type="button"
+                    >
+                      Create GitHub Agent
+                    </button>
+                  }
+                />
+              </div>
+            </div>
+            <p className="text-muted-foreground mb-4">
+              Chat with any GitHub repository.
+            </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              {githubAgents.map((agent) => (
+                <DialogAgent
+                  key={agent.id}
+                  id={agent.id}
+                  slug={agent.slug}
+                  name={agent.name}
+                  description={agent.description}
+                  avatar_url={agent.avatar_url}
+                  example_inputs={agent.example_inputs || []}
+                  isAvailable={true}
+                  onAgentClick={handleAgentClick}
+                  isOpen={openAgentId === agent.id}
+                  onOpenChange={(open) =>
+                    setOpenAgentId(open ? agent.id : null)
+                  }
+                  randomAgents={otherGithubAgents}
+                  tools={agent.tools || []}
+                  mcp_config={agent.mcp_config}
+                  system_prompt={agent.system_prompt}
+                />
+              ))}
+            </div>
           </div>
         )}
 
+        {researchAgent && (
+          <ResearchSection
+            researchAgent={researchAgent}
+            handleAgentClick={handleAgentClick}
+            openAgentId={openAgentId}
+            setOpenAgentId={setOpenAgentId}
+            randomAgents={randomAgents}
+          />
+        )}
+
         <div className="mt-12">
-          <h2 className="text-foreground mb-1 text-lg font-medium">Featured</h2>
+          <h2 className="text-foreground text-lg font-medium">More</h2>
+          <p className="text-muted-foreground mb-4">
+            Simple, useful agents, with custom system prompts.
+          </p>
           <div className="grid gap-4 md:grid-cols-2">
             {featuredAgents.map((agent) => (
               <DialogAgent
@@ -121,13 +138,14 @@ export function AgentsPage({ agents }: AgentsPageProps) {
                 description={agent.description}
                 avatar_url={agent.avatar_url}
                 example_inputs={agent.example_inputs || []}
-                creator_id={agent.creator_id || "Zola"}
                 isAvailable={true}
-                agents={agents}
                 onAgentClick={handleAgentClick}
                 isOpen={openAgentId === agent.id}
                 onOpenChange={(open) => setOpenAgentId(open ? agent.id : null)}
                 randomAgents={randomAgents}
+                system_prompt={agent.system_prompt}
+                tools={agent.tools || []}
+                mcp_config={agent.mcp_config}
               />
             ))}
           </div>
@@ -146,10 +164,8 @@ export function AgentsPage({ agents }: AgentsPageProps) {
                 description={agent.description}
                 avatar_url={agent?.avatar_url}
                 example_inputs={agent.example_inputs || []}
-                creator_id={agent.creator_id || "Zola"}
                 slug={agent.slug}
                 isAvailable={false}
-                agents={agents}
                 className="pointer-events-none opacity-50 select-none"
                 onAgentClick={handleAgentClick}
                 isOpen={openAgentId === agent.id}

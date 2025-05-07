@@ -1,7 +1,11 @@
 "use client"
 
 import type { AgentsSuggestions } from "@/app/types/agent"
-import { ZOLA_AGENTS_SLUGS } from "@/lib/config"
+import {
+  ZOLA_AGENTS_SLUGS,
+  ZOLA_GITHUB_AGENTS_SLUGS,
+  ZOLA_SPECIAL_AGENTS_SLUGS,
+} from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
@@ -29,26 +33,34 @@ export const PromptSystem = memo(function PromptSystem({
     AgentsSuggestions[] | null
   >(null)
 
+  const AGENTS_SLUGS = useMemo(() => {
+    return [
+      ZOLA_AGENTS_SLUGS,
+      ZOLA_GITHUB_AGENTS_SLUGS,
+      ZOLA_SPECIAL_AGENTS_SLUGS,
+    ].flat()
+  }, [])
+
   useEffect(() => {
     const fetchAgents = async () => {
+      const randomSlugs = [...AGENTS_SLUGS]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 8)
+
       const supabase = createClient()
       const { data, error } = await supabase
         .from("agents")
         .select("id, name, description, avatar_url, slug")
-        .in("slug", ZOLA_AGENTS_SLUGS)
+        .in("slug", randomSlugs)
 
       if (error) {
         throw new Error("Error fetching agents: " + error.message)
       }
 
-      const randomAgents = data
-        ?.sort(() => Math.random() - 0.5)
-        .slice(0, 8) as AgentsSuggestions[]
-
-      setSugestedAgents(randomAgents)
+      setSugestedAgents((data as AgentsSuggestions[]) || [])
     }
     fetchAgents()
-  }, [])
+  }, [AGENTS_SLUGS])
 
   const tabs = useMemo(
     () => [

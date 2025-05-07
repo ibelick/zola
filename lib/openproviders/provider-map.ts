@@ -86,6 +86,27 @@ const MODEL_PROVIDER_MAP: Record<SupportedModel, Provider> = {
   "claude-3-opus-20240229": "anthropic",
   "claude-3-sonnet-20240229": "anthropic",
   "claude-3-haiku-20240307": "anthropic",
+
+  // XAI
+  "grok-3": "xai",
+  "grok-3-latest": "xai",
+  "grok-3-fast": "xai",
+  "grok-3-fast-latest": "xai",
+  "grok-3-mini": "xai",
+  "grok-3-mini-latest": "xai",
+  "grok-3-mini-fast": "xai",
+  "grok-3-mini-fast-latest": "xai",
+  "grok-2-vision-1212": "xai",
+  "grok-2-vision": "xai",
+  "grok-2-vision-latest": "xai",
+  "grok-2-image-1212": "xai",
+  "grok-2-image": "xai",
+  "grok-2-image-latest": "xai",
+  "grok-2-1212": "xai",
+  "grok-2": "xai",
+  "grok-2-latest": "xai",
+  "grok-vision-beta": "xai",
+  "grok-beta": "xai",
 }
 
 export function getProviderForModel(model: SupportedModel): Provider {

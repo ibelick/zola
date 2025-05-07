@@ -6,9 +6,11 @@ import { createClient } from "@/lib/supabase/server"
 export default async function AgentIdPage({
   params,
 }: {
-  params: Promise<{ agentSlug: string }>
+  params: Promise<{ agentSlug: string | string[] }>
 }) {
-  const { agentSlug } = await params
+  const { agentSlug: slugParts } = await params
+  const agentSlug = Array.isArray(slugParts) ? slugParts.join("/") : slugParts
+
   const supabase = await createClient()
 
   const { data: agent, error } = await supabase
@@ -18,8 +20,7 @@ export default async function AgentIdPage({
     .single()
 
   if (error) {
-    console.error("Error fetching agent", error)
-    return <div>Error: {error.message}</div>
+    throw new Error(error.message)
   }
 
   const { data: agents, error: agentsError } = await supabase
@@ -29,7 +30,7 @@ export default async function AgentIdPage({
     .limit(4)
 
   if (agentsError) {
-    console.error("Error fetching agents", agentsError)
+    throw new Error(agentsError.message)
   }
 
   return (
@@ -37,15 +38,17 @@ export default async function AgentIdPage({
       <LayoutApp>
         <div className="bg-background mx-auto max-w-3xl pt-20">
           <AgentDetail
-            id={agent.id}
             slug={agent.slug}
             name={agent.name}
             description={agent.description}
             example_inputs={agent.example_inputs || []}
-            creator_id={agent.creator_id || "Zola"}
+            creator_id={agent.creator_id}
             avatar_url={agent.avatar_url}
             randomAgents={agents || []}
             isFullPage
+            system_prompt={agent.system_prompt}
+            tools={agent.tools || []}
+            mcp_config={agent.mcp_config}
           />
         </div>
       </LayoutApp>

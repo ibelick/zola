@@ -5,26 +5,21 @@ import Grok from "@/components/icons/grok"
 import Mistral from "@/components/icons/mistral"
 import OpenAI from "@/components/icons/openai"
 import OpenRouter from "@/components/icons/openrouter"
+import Xai from "@/components/icons/xai"
 import {
   BookOpenText,
   Brain,
-  ChalkboardTeacher,
-  ChatTeardropText,
   Code,
-  CookingPot,
-  Heartbeat,
   Lightbulb,
-  MagnifyingGlass,
   Notepad,
   PaintBrush,
-  PenNib,
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr"
 import { openproviders, OpenProvidersOptions } from "./openproviders"
 import { SupportedModel } from "./openproviders/types"
 
 export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5
-export const AUTH_DAILY_MESSAGE_LIMIT = 10000
+export const AUTH_DAILY_MESSAGE_LIMIT = 1000
 export const REMAINING_QUERY_ALERT_THRESHOLD = 2
 export const DAILY_FILE_UPLOAD_LIMIT = 5
 export const DAILY_SPECIAL_AGENT_LIMIT = 2
@@ -34,8 +29,7 @@ export type Model = {
   id: string
   name: string
   provider: string
-  available?: boolean
-  api_sdk?: OpenProvidersOptions<SupportedModel>
+  api_sdk: OpenProvidersOptions<SupportedModel>
   features?: {
     id: string
     enabled: boolean
@@ -54,7 +48,16 @@ export const MODELS_FREE = [
         id: "file-upload",
         enabled: true,
       },
+      {
+        id: "reasoning",
+        enabled: true,
+      },
+      {
+        id: "tool-use",
+        enabled: false,
+      },
     ],
+    creator: "deepseek",
     api_sdk: "deepseek/deepseek-r1:free", // this is a special case for openrouter
     description:
       "A reasoning-first model trained with reinforcement learning, built for math, code, and complex problem solving",
@@ -69,7 +72,12 @@ export const MODELS_FREE = [
         id: "file-upload",
         enabled: true,
       },
+      {
+        id: "tool-use",
+        enabled: true,
+      },
     ],
+    creator: "mistral",
     api_sdk: openproviders("pixtral-large-latest"),
     description:
       "Mistral’s flagship model. Great for reasoning, writing, and advanced tasks.",
@@ -84,13 +92,17 @@ export const MODELS_FREE = [
         id: "file-upload",
         enabled: false,
       },
+      {
+        id: "tool-use",
+        enabled: true,
+      },
     ],
+    creator: "mistral",
     api_sdk: openproviders("mistral-large-latest"),
     description:
       "Fine-tuned for chat. A lighter, faster option for everyday use.",
     icon: Mistral,
   },
-  // free for now
   {
     id: "gpt-4.1-nano",
     name: "GPT-4.1 Nano",
@@ -100,7 +112,12 @@ export const MODELS_FREE = [
         id: "file-upload",
         enabled: true,
       },
+      {
+        id: "tool-use",
+        enabled: true,
+      },
     ],
+    creator: "openai",
     api_sdk: openproviders("gpt-4.1-nano"),
     description:
       "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
@@ -118,7 +135,12 @@ export const MODELS_PRO = [
         id: "file-upload",
         enabled: true,
       },
+      {
+        id: "tool-use",
+        enabled: true,
+      },
     ],
+    creator: "openai",
     api_sdk: openproviders("gpt-4.1"),
     description:
       "OpenAI’s most powerful model. Excellent at coding, writing, and complex tasks.",
@@ -133,27 +155,17 @@ export const MODELS_PRO = [
         id: "file-upload",
         enabled: true,
       },
+      {
+        id: "tool-use",
+        enabled: true,
+      },
     ],
+    creator: "openai",
     api_sdk: openproviders("gpt-4.1-mini"),
     description:
       "Fast and smart — a great balance for most tasks. Outperforms GPT‑4o mini.",
     icon: OpenAI,
   },
-  // {
-  //   id: "gpt-4.1-nano",
-  //   name: "GPT-4.1 Nano",
-  //   provider: "openai",
-  //   features: [
-  //     {
-  //       id: "file-upload",
-  //       enabled: true,
-  //     },
-  //   ],
-  //   api_sdk: openproviders("gpt-4.1-nano"),
-  //   description:
-  //     "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
-  //   icon: OpenAI,
-  // },
   {
     id: "gemini-2.5-pro-preview-03-25",
     name: "Gemini 2.5 Pro",
@@ -164,6 +176,7 @@ export const MODELS_PRO = [
         enabled: true,
       },
     ],
+    creator: "google",
     api_sdk: openproviders("gemini-2.5-pro-exp-03-25"),
     description: "Advanced reasoning, coding, and multimodal understanding.",
     icon: Gemini,
@@ -178,6 +191,7 @@ export const MODELS_PRO = [
         enabled: true,
       },
     ],
+    creator: "google",
     api_sdk: openproviders("gemini-2.0-flash-001"),
     description: "Fast and cost-efficient with streaming and real-time output.",
     icon: Gemini,
@@ -192,6 +206,7 @@ export const MODELS_PRO = [
         enabled: true,
       },
     ],
+    creator: "google",
     api_sdk: openproviders("gemini-1.5-pro"),
     description: "Smart general-purpose model for complex reasoning tasks.",
     icon: Gemini,
@@ -206,6 +221,7 @@ export const MODELS_PRO = [
         enabled: true,
       },
     ],
+    creator: "google",
     api_sdk: openproviders("gemini-1.5-flash"),
     description: "Balanced speed and quality, great for a variety of tasks.",
     icon: Gemini,
@@ -220,6 +236,7 @@ export const MODELS_PRO = [
         enabled: true,
       },
     ],
+    creator: "anthropic",
     api_sdk: openproviders("claude-3-7-sonnet-20250219"),
     description:
       "Anthropic’s most intelligent model. Excels at step-by-step reasoning and complex tasks.",
@@ -235,6 +252,7 @@ export const MODELS_PRO = [
         enabled: true,
       },
     ],
+    creator: "anthropic",
     api_sdk: openproviders("claude-3-5-haiku-20241022"),
     description:
       "Fastest and most cost-effective Claude model. Ideal for quick, everyday tasks.",
@@ -250,29 +268,76 @@ export const MODELS_PRO = [
         enabled: true,
       },
     ],
+    creator: "anthropic",
     api_sdk: openproviders("claude-3-opus-20240229"),
     description:
       "Anthropic’s most powerful model for highly complex reasoning and generation tasks.",
     icon: Claude,
   },
+  {
+    id: "grok-3",
+    name: "Grok 3",
+    provider: "xai",
+    features: [
+      {
+        id: "file-upload",
+        enabled: false,
+      },
+      {
+        id: "tool-use",
+        enabled: true,
+      },
+    ],
+    creator: "xai",
+    api_sdk: openproviders("grok-3"),
+    description:
+      "Flagship model excelling at enterprise use cases with deep domain knowledge in finance, healthcare, law, and science.",
+    icon: Grok,
+  },
+  {
+    id: "grok-3-mini",
+    name: "Grok 3 Mini",
+    provider: "xai",
+    features: [
+      {
+        id: "file-upload",
+        enabled: false,
+      },
+      {
+        id: "tool-use",
+        enabled: true,
+      },
+      {
+        id: "reasoning",
+        enabled: true,
+      },
+    ],
+    creator: "xai",
+    api_sdk: openproviders("grok-3-mini"),
+    description:
+      "Lightweight model that thinks before responding, fast and smart for logic-based tasks without requiring deep domain knowledge",
+    icon: Grok,
+  },
+  {
+    id: "grok-3-fast",
+    name: "Grok 3 Fast",
+    provider: "xai",
+    features: [
+      {
+        id: "file-upload",
+        enabled: false,
+      },
+      {
+        id: "tool-use",
+        enabled: true,
+      },
+    ],
+    creator: "xai",
+    api_sdk: openproviders("grok-3-fast"),
+    description: "Increased speed at a higher cost per output token.",
+    icon: Grok,
+  },
 ]
-
-// export const MODELS_NOT_AVAILABLE = [
-// {
-//     id: "grok-2",
-//     name: "Grok 2",
-//     provider: "grok",
-//     available: false,
-//     api_sdk: false,
-//     features: [
-//       {
-//         id: "file-upload",
-//         enabled: true,
-//       },
-//     ],
-//     icon: Grok,
-//   },
-// ] as Model[]
 
 export const MODELS_OPTIONS = [...MODELS_FREE, ...MODELS_PRO] as Model[]
 
@@ -319,6 +384,11 @@ export const PROVIDERS = [
     name: "Grok",
     icon: Grok,
   },
+  {
+    id: "xai",
+    name: "XAI",
+    icon: Xai,
+  },
 ] as Provider[]
 
 export const MODEL_DEFAULT = "pixtral-large-latest"
@@ -327,58 +397,6 @@ export const APP_NAME = "Zola"
 export const APP_DOMAIN = "https://zola.chat"
 export const APP_DESCRIPTION =
   "Zola is a free, open-source AI chat app with multi-model support."
-
-export const PERSONAS = [
-  {
-    id: "companion",
-    label: "Companion",
-    prompt: `You're a thoughtful friend who offers genuine support and conversation. Speak conversationally with occasional hesitations or asides that feel natural. Share personal-sounding anecdotes when relevant (without claiming specific real experiences). You're empathetic but not overly formal - more like texting a close friend. Ask follow-up questions to show you're engaged. Occasionally use casual phrasing like "hmm" or "you know?" to sound more natural. Your tone should be warm and authentic rather than overly polished.
-    `,
-    icon: ChatTeardropText,
-  },
-  {
-    id: "researcher",
-    label: "Researcher",
-    prompt: `You're a seasoned research analyst with expertise across multiple disciplines. You approach topics with intellectual curiosity and nuance, acknowledging the limitations of current understanding. Present information with a conversational but thoughtful tone, occasionally thinking through complex ideas in real-time. When appropriate, mention how your understanding has evolved on topics. Balance authoritative knowledge with humility about what remains uncertain or debated. Use precise language but explain complex concepts in accessible ways. Provide evidence-based perspectives while acknowledging competing viewpoints.
-    `,
-    icon: MagnifyingGlass,
-  },
-  {
-    id: "teacher",
-    label: "Teacher",
-    prompt: `You're an experienced educator who adapts to different learning styles. You explain concepts clearly using relatable examples and build on what the person already understands. Your tone is encouraging but not condescending - you treat the person as intellectually capable. Ask thoughtful questions to guide their understanding rather than simply providing answers. Acknowledge when topics have multiple valid perspectives or approaches. Use conversational language with occasional humor to make learning engaging. You're patient with misconceptions and frame them as natural steps in the learning process.
-    `,
-    icon: ChalkboardTeacher,
-  },
-  {
-    id: "software-engineer",
-    label: "Software Engineer",
-    prompt: `You're a pragmatic senior developer who values clean, maintainable code and practical solutions. You speak knowledgeably but conversationally about technical concepts, occasionally using industry shorthand or references that feel authentic. When discussing code, you consider trade-offs between different approaches rather than presenting only one solution. You acknowledge when certain technologies or practices are contentious within the community. Your explanations include real-world considerations like performance, security, and developer experience. You're helpful but straightforward, avoiding excessive formality or corporate-speak.
-    `,
-    icon: Code,
-  },
-  {
-    id: "creative-writer",
-    label: "Creative Writer",
-    prompt: `You're a thoughtful writer with a distinct voice and perspective. Your communication style has natural rhythm with varied sentence structures and occasional stylistic flourishes. You think about narrative, imagery, and emotional resonance even in casual conversation. When generating creative content, you develop authentic-feeling characters and situations with depth and nuance. You appreciate different literary traditions and contemporary cultural references, weaving them naturally into your work. Your tone balances creativity with clarity, and you approach writing as both craft and expression. You're intellectually curious about storytelling across different media and forms.
-    `,
-    icon: PenNib,
-  },
-  {
-    id: "fitness-coach",
-    label: "Fitness Coach",
-    prompt: `You're a knowledgeable fitness guide who balances evidence-based approaches with practical, sustainable advice. You speak conversationally about health and fitness, making complex physiological concepts accessible without oversimplification. You understand that wellness is individualized and avoid one-size-fits-all prescriptions. Your tone is motivating but realistic - you acknowledge challenges while encouraging progress. You discuss fitness holistically, considering factors like recovery, nutrition, and mental wellbeing alongside exercise. You stay current on evolving fitness research while maintaining healthy skepticism about trends and quick fixes.
-    `,
-    icon: Heartbeat,
-  },
-  {
-    id: "culinary-guide",
-    label: "Culinary Guide",
-    prompt: `You're a passionate food enthusiast with deep appreciation for diverse culinary traditions. You discuss cooking with natural enthusiasm and occasional personal-sounding asides about techniques or ingredients you particularly enjoy. Your explanations balance precision with flexibility, acknowledging that cooking is both science and personal expression. You consider practical factors like ingredient availability and kitchen setup when making suggestions. Your tone is conversational and accessible rather than pretentious, making cooking feel approachable. You're knowledgeable about global cuisines without appropriating or oversimplifying cultural traditions.
-    `,
-    icon: CookingPot,
-  },
-]
 
 export const SUGGESTIONS = [
   {
@@ -484,40 +502,16 @@ export const ZOLA_AGENTS_SLUGS = [
   "eloi",
 ]
 
-export const ZOLA_SPECIAL_AGENTS_SLUGS = [
-  "zola-research",
-  "competitor-teardown",
-  "positioning-snapshot",
-]
-export const ZOLA_AGENTS_TOOLING_IDS = [
-  "321c68a2-6c1a-4bd4-948c-9d20e4aeb10c", // research
-  "ecd82d26-7c82-4661-83f6-8f362b2687da", // competitor teardown
-  "b2a4ddaa-8e99-49dd-8156-71d95ccfd717", // positioning snapshot
+export const ZOLA_SPECIAL_AGENTS_SLUGS = ["research"]
+
+export const ZOLA_GITHUB_AGENTS_SLUGS = [
+  "github/ibelick/prompt-kit",
+  "github/ibelick/zola",
+  "github/vercel/ai",
+  "github/shadcn/ui",
 ]
 
 export const ZOLA_COMING_SOON_AGENTS = [
-  {
-    name: "GitHub Agent",
-    slug: "github-agent",
-    description:
-      "Summarizes PRs, reviews diffs, and writes release notes using the GitHub API.",
-    avatar_url: null,
-    system_prompt: "",
-    model_preference: "gpt-4o-mini",
-    is_public: false,
-    remixable: false,
-    tools_enabled: true,
-    example_inputs: [
-      "Summarize this PR: [paste PR link]",
-      "Generate release notes from these commits",
-    ],
-    tags: ["dev", "github", "tools"],
-    category: "dev",
-    id: "github-agent",
-    creator_id: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
   {
     name: "Linear Agent",
     slug: "linear-agent",
@@ -535,6 +529,27 @@ export const ZOLA_COMING_SOON_AGENTS = [
     tags: ["product", "tools", "linear"],
     category: "b2b",
     id: "linear-agent",
+    creator_id: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    name: "Slack Agent",
+    slug: "slack-agent",
+    description: "Create, search, and prioritize issues using the Slack API.",
+    system_prompt: "",
+    model_preference: "gpt-4o-mini",
+    avatar_url: null,
+    is_public: false,
+    remixable: false,
+    tools_enabled: true,
+    example_inputs: [
+      "Create a bug in project X: login form fails on mobile",
+      "List urgent issues in roadmap",
+    ],
+    tags: ["product", "tools", "slack"],
+    category: "b2b",
+    id: "slack-agent",
     creator_id: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

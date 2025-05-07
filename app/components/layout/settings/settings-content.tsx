@@ -1,7 +1,7 @@
 "use client"
 
 import { useUser } from "@/app/providers/user-provider"
-import { ModelSelector } from "@/components/common/model-selector"
+import { ModelSelector } from "@/components/common/model-selector/base"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
 import { useChats } from "@/lib/chat-store/chats/provider"
@@ -85,7 +85,6 @@ export function SettingsContent({
           </Button>
         </div>
       )}
-
       {/* User Info */}
       <div className="px-6 py-4">
         <div className="flex items-center space-x-4">
@@ -106,9 +105,8 @@ export function SettingsContent({
           </div>
         </div>
       </div>
-
       {/* Message Usage */}
-      <div className="border-border border-t">
+      {/* <div className="border-border border-t">
         <div className="px-6 py-4">
           <h3 className="mb-3 text-sm font-medium">Standard usage</h3>
           <div className="bg-secondary rounded-lg p-3">
@@ -136,9 +134,8 @@ export function SettingsContent({
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Pro Message Usage */}
+      </div> */}
+      {/* Pro Message Usage
       <div className="border-border border-t">
         <div className="px-6 py-4">
           <h3 className="mb-3 text-sm font-medium">Advanced model usage</h3>
@@ -167,8 +164,7 @@ export function SettingsContent({
             </p>
           </div>
         </div>
-      </div>
-
+      </div> */}
       {/* Theme Selection */}
       <div className="border-border border-t">
         <div className="px-6 py-4">
@@ -205,7 +201,6 @@ export function SettingsContent({
           </div>
         </div>
       </div>
-
       {/* Model Selection */}
       <div className="border-border border-t">
         <div className="px-6 py-4">
@@ -222,7 +217,6 @@ export function SettingsContent({
           </p>
         </div>
       </div>
-
       {/* Sign Out */}
       <div className="border-border border-t">
         <div className="px-6 py-4">

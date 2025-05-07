@@ -1,5 +1,6 @@
 import { useUser } from "@/app/providers/user-provider"
 import { AgentSummary } from "@/app/types/agent"
+import { Tables } from "@/app/types/database.types"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { User } from "@phosphor-icons/react"
@@ -9,35 +10,48 @@ type AgentCardProps = {
   name: string
   description: string
   avatar_url?: string | null
-  creator_id: string
   className?: string
   isAvailable: boolean
   onClick?: () => void
+  system_prompt?: string
+  tools?: string[]
+  mcp_config?: Tables<"agents">["mcp_config"] | null
+  isLight?: boolean
 }
 
 export function AgentCard({
   name,
   description,
-  creator_id,
   avatar_url,
   className,
   isAvailable,
   onClick,
+  system_prompt,
+  tools,
+  mcp_config,
+  isLight = false,
 }: AgentCardProps) {
   return (
     <button
       className={cn(
+        "flex items-start justify-start",
         "bg-secondary hover:bg-accent cursor-pointer rounded-xl p-4 transition-colors",
         className,
         !isAvailable && "cursor-not-allowed opacity-50"
       )}
       type="button"
-      onClick={() => isAvailable && onClick?.()}
+      onClick={(e) => {
+        e.preventDefault()
+
+        if (!isAvailable) return
+
+        onClick?.()
+      }}
     >
-      <div className="flex items-center space-x-4">
-        <div className="flex-shrink-0">
-          <div className="bg-muted size-16 overflow-hidden rounded-full">
-            {avatar_url ? (
+      <div className="flex flex-col items-start space-y-2">
+        <div className="flex items-center space-x-2">
+          {avatar_url ? (
+            <div className="bg-muted size-4 overflow-hidden rounded-full">
               <Avatar className="h-full w-full object-cover">
                 <AvatarImage
                   src={avatar_url}
@@ -45,23 +59,36 @@ export function AgentCard({
                   className="h-full w-full object-cover"
                 />
               </Avatar>
+            </div>
+          ) : null}
+          <h3 className="text-foreground text-base font-medium">{name}</h3>
+        </div>
+
+        <p className="text-foreground line-clamp-2 text-left text-sm">
+          {description}
+        </p>
+
+        {!isLight && system_prompt && (
+          <p className="text-muted-foreground line-clamp-2 text-left font-mono text-sm">
+            {system_prompt}
+          </p>
+        )}
+
+        {!isLight && (
+          <div className="flex flex-wrap gap-2 text-xs">
+            {tools && tools.length > 0 ? (
+              <span className="text-muted-foreground">
+                tools: {tools.join(", ")}
+              </span>
+            ) : mcp_config ? (
+              <span className="text-muted-foreground">
+                mcp: {mcp_config.server}
+              </span>
             ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-full" />
+              <span className="text-muted-foreground">tools: none</span>
             )}
           </div>
-        </div>
-
-        <div className="min-w-0 flex-1 text-left">
-          <h3 className="text-foreground truncate text-base font-medium">
-            {name}
-          </h3>
-
-          <p className="text-foreground mt-1 line-clamp-3 text-sm md:line-clamp-2">
-            {description}
-          </p>
-
-          <p className="text-muted-foreground mt-2 text-xs">By {creator_id}</p>
-        </div>
+        )}
       </div>
     </button>
   )
