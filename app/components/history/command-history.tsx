@@ -1,6 +1,7 @@
 "use client"
 
 import { useChatSession } from "@/app/providers/chat-session-provider"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -84,23 +85,35 @@ function CommandItemEdit({
         }}
       />
       <div className="ml-2 flex gap-1">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground size-8"
-          type="submit"
-        >
-          <Check className="size-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground size-8"
-          type="button"
-          onClick={onCancel}
-        >
-          <X className="size-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="group/edit-confirm text-muted-foreground hover:bg-primary/10 size-8 transition-colors duration-150"
+              type="submit"
+              aria-label="Confirm"
+            >
+              <Check className="group-hover/edit-confirm:text-primary size-4 transition-colors duration-150" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Confirm</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="group/edit-cancel text-muted-foreground hover:bg-primary/10 size-8 transition-colors duration-150"
+              type="button"
+              onClick={onCancel}
+              aria-label="Cancel"
+            >
+              <X className="group-hover/edit-cancel:text-primary size-4 transition-colors duration-150" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Cancel</TooltipContent>
+        </Tooltip>
       </div>
     </form>
   )
@@ -138,23 +151,35 @@ function CommandItemDelete({
         />
       </div>
       <div className="ml-2 flex gap-1">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-muted-foreground hover:text-destructive-foreground hover:bg-destructive-foreground/10 size-8"
-          type="submit"
-        >
-          <Check className="size-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground size-8"
-          onClick={onCancel}
-          type="button"
-        >
-          <X className="size-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="group/delete-confirm text-muted-foreground hover:text-destructive-foreground hover:bg-primary/10 size-8 transition-colors duration-150"
+              type="submit"
+              aria-label="Confirm"
+            >
+              <Check className="group-hover/delete-confirm:text-primary size-4 transition-colors duration-150" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Confirm</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="group/delete-cancel text-muted-foreground hover:text-foreground hover:bg-primary/10 size-8 transition-colors duration-150"
+              onClick={onCancel}
+              type="button"
+              aria-label="Cancel"
+            >
+              <X className="group-hover/delete-cancel:text-primary size-4 transition-colors duration-150" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Cancel</TooltipContent>
+        </Tooltip>
       </div>
     </form>
   )
@@ -168,12 +193,16 @@ function CommandItemRow({
   editingId,
   deletingId,
 }: CommandItemRowProps) {
+  const { chatId } = useChatSession()
+  const isCurrentChat = chat.id === chatId
+
   return (
     <>
-      <div className="min-w-0 flex-1">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <span className="line-clamp-1 text-base font-normal">
           {chat?.title || "Untitled Chat"}
         </span>
+        {isCurrentChat && <Badge variant="outline">current</Badge>}
       </div>
 
       {/* Date and actions container */}
@@ -199,30 +228,38 @@ function CommandItemRow({
               "group-data-[selected=true]:opacity-0"
           )}
         >
-          <Button
-            size="icon"
-            variant="ghost"
-            className="text-muted-foreground hover:text-foreground size-8"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (chat) onEdit(chat)
-            }}
-            type="button"
-          >
-            <PencilSimple className="size-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="text-muted-foreground hover:text-destructive size-8"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (chat?.id) onDelete(chat.id)
-            }}
-            type="button"
-          >
-            <TrashSimple className="size-4" />
-          </Button>
+          <Tooltip>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="group/edit hover:bg-primary/10 size-8 transition-colors duration-150"
+              onClick={(e) => {
+                e.stopPropagation()
+                if (chat) onEdit(chat)
+              }}
+              type="button"
+              aria-label="Edit"
+            >
+              <PencilSimple className="text-muted-foreground group-hover/edit:text-primary size-4 transition-colors duration-150" />
+            </Button>
+            <TooltipContent>Edit</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="group/delete text-muted-foreground hover:text-destructive hover:bg-destructive-foreground/10 size-8 transition-colors duration-150"
+              onClick={(e) => {
+                e.stopPropagation()
+                if (chat?.id) onDelete(chat.id)
+              }}
+              type="button"
+              aria-label="Delete"
+            >
+              <TrashSimple className="text-muted-foreground group-hover/delete:text-destructive size-4 transition-colors duration-150" />
+            </Button>
+            <TooltipContent>Delete</TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </>
