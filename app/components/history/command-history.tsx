@@ -19,8 +19,16 @@ import {
 } from "@/components/ui/tooltip"
 import type { Chats } from "@/lib/chat-store/types"
 import { cn } from "@/lib/utils"
-import { Check, PencilSimple, TrashSimple, X } from "@phosphor-icons/react"
-import { useParams, useRouter } from "next/navigation"
+import {
+  ArrowsClockwise,
+  Check,
+  PencilSimple,
+  Plus,
+  Trash,
+  TrashSimple,
+  X,
+} from "@phosphor-icons/react"
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { formatDate, groupChatsByDate } from "./utils"
 
@@ -395,7 +403,7 @@ export function CommandHistory({
         title="Chat History"
         description="Search through your past conversations"
       >
-        <Command shouldFilter={false}>
+        <Command shouldFilter={false} className="border-none">
           <CommandInput
             placeholder="Search history..."
             value={searchQuery}
@@ -424,6 +432,46 @@ export function CommandHistory({
               ))
             )}
           </CommandList>
+
+          {/* indicator command bar */}
+          <div className="bg-card border-input right-0 bottom-0 left-0 flex items-center justify-between border-t px-4 py-3">
+            <div className="text-muted-foreground flex w-full items-center gap-2 text-xs">
+              <div className="flex w-full flex-row items-center justify-between gap-1">
+                <div className="flex w-full flex-1 flex-row items-center gap-4">
+                  <div className="flex flex-row items-center gap-1">
+                    <span className="border-border bg-muted inline-flex h-5 items-center justify-center rounded border px-1">
+                      ↑
+                    </span>
+                    <span className="border-border bg-muted inline-flex h-5 items-center justify-center rounded border px-1">
+                      ↓
+                    </span>
+                  </div>
+                  <span>Navigate</span>
+                  <div className="flex items-center gap-1">
+                    <span className="border-border bg-muted inline-flex h-5 items-center justify-center rounded border px-1">
+                      ⏎
+                    </span>
+                    <span>Select</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="border-border bg-muted inline-flex h-5 items-center justify-center rounded border px-1">
+                      ⌘
+                    </span>
+                    <span className="border-border bg-muted inline-flex h-5 items-center justify-center rounded border px-1">
+                      K
+                    </span>
+                    <span>Toggle</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="border-border bg-muted inline-flex h-5 items-center justify-center rounded border px-1">
+                  Esc
+                </span>
+                <span>Close</span>
+              </div>
+            </div>
+          </div>
         </Command>
       </CommandDialog>
     </>
