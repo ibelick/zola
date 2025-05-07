@@ -14,7 +14,7 @@ export function HistoryTrigger() {
   const isMobile = useBreakpoint(768)
   const router = useRouter()
   const { chats, updateTitle, deleteChat } = useChats()
-  const { deleteMessages } = useMessages()
+  const { messages: currentChatMessages, deleteMessages } = useMessages()
   const [isOpen, setIsOpen] = useState(false)
   const { chatId } = useChatSession()
 
@@ -27,7 +27,7 @@ export function HistoryTrigger() {
       setIsOpen(false)
     }
     await deleteMessages()
-    await deleteChat(id, chatId!, () => router.push("/"))
+    await deleteChat(id, chatId ?? undefined, () => router.push("/"))
   }
 
   const trigger = (
@@ -56,6 +56,8 @@ export function HistoryTrigger() {
   return (
     <CommandHistory
       chatHistory={chats}
+      currentChatMessages={currentChatMessages}
+      activeChatId={chatId}
       onSaveEdit={handleSaveEdit}
       onConfirmDelete={handleConfirmDelete}
       trigger={trigger}

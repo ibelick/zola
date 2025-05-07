@@ -51,6 +51,7 @@ export type MistralModel =
   | "open-mixtral-8x22b"
 
 export type GeminiModel =
+  |  "gemini-2.5-flash-preview-04-17"
   | "gemini-2.0-flash-001"
   | "gemini-1.5-flash"
   | "gemini-1.5-flash-latest"
@@ -64,6 +65,7 @@ export type GeminiModel =
   | "gemini-1.5-pro-001"
   | "gemini-1.5-pro-002"
   | "gemini-2.5-pro-exp-03-25"
+  | "gemini-2.5-pro-preview-05-06"
   | "gemini-2.0-flash-lite-preview-02-05"
   | "gemini-2.0-pro-exp-02-05"
   | "gemini-2.0-flash-thinking-exp-01-21"
