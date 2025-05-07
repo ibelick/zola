@@ -167,7 +167,22 @@ export const MODELS_PRO = [
     icon: OpenAI,
   },
   {
-    id: "gemini-2.5-pro-preview-03-25",
+    id: "gemini-2.5-flash-preview-04-17",
+    name: "Gemini 2.5 Flash",
+    provider: "gemini",
+    features: [
+      {
+        id: "file-upload",
+        enabled: true,
+      },
+    ],
+    creator: "google",
+    api_sdk: openproviders("gemini-2.5-flash-preview-04-17"),
+    description: "Fast and cost-efficient with streaming and real-time output.",
+    icon: Gemini,
+  },
+  {
+    id: "gemini-2.5-pro-preview-05-06",
     name: "Gemini 2.5 Pro",
     provider: "gemini",
     features: [
@@ -177,7 +192,7 @@ export const MODELS_PRO = [
       },
     ],
     creator: "google",
-    api_sdk: openproviders("gemini-2.5-pro-exp-03-25"),
+    api_sdk: openproviders("gemini-2.5-pro-preview-05-06"),
     description: "Advanced reasoning, coding, and multimodal understanding.",
     icon: Gemini,
   },
