@@ -99,17 +99,6 @@ export function ProModelDialog({
               </>
             )}
           </div>
-
-          <p className="text-muted-foreground mt-5 text-center text-xs">
-            Teams:{" "}
-            <a
-              className="text-blue-600 hover:underline"
-              href="mailto:julien.thibeaut@gmail.com"
-            >
-              Contact us
-            </a>{" "}
-            to sponsor Pro access
-          </p>
         </div>
       </div>
     </div>

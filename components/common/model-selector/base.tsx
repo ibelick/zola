@@ -16,12 +16,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import type { Model } from "@/lib/config"
 import { MODELS_FREE, MODELS_OPTIONS, MODELS_PRO } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import { CaretDown, MagnifyingGlass, Star } from "@phosphor-icons/react"
 import { useEffect, useRef, useState } from "react"
-import { createPortal } from "react-dom"
 import { ProModelDialog } from "./pro-dialog"
 import { SubMenu } from "./sub-menu"
 
@@ -42,49 +46,32 @@ export function ModelSelector({
   const isMobile = useBreakpoint(768)
 
   const [hoveredModel, setHoveredModel] = useState<string | null>(null)
-  const [dropdownRect, setDropdownRect] = useState<DOMRect | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isProDialogOpen, setIsProDialogOpen] = useState(false)
   const [selectedProModel, setSelectedProModel] = useState<string | null>(null)
-  // Use ref instead of state for portal element
-  const portalRef = useRef<HTMLElement | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
 
   // Ref for input to maintain focus
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Setup portal element on mount
+  // Add keyboard shortcut for ⌘⇧P to open model selector
   useEffect(() => {
-    portalRef.current = document.body
-
-    return () => {
-      // Force cleanup on unmount
-      setHoveredModel(null)
-    }
-  }, [])
-
-  // Find dropdown content and track its position
-  useEffect(() => {
-    const updateDropdownRect = () => {
-      const dropdownEl = document.querySelector(
-        "[data-radix-popper-content-wrapper]"
-      )
-      if (dropdownEl) {
-        setDropdownRect(dropdownEl.getBoundingClientRect())
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Using lowercase comparison to ensure it works regardless of case
+      if ((e.key === "p" || e.key === "P") && e.metaKey && e.shiftKey) {
+        e.preventDefault()
+        if (isMobile) {
+          setIsDrawerOpen((prev) => !prev)
+        } else {
+          setIsDropdownOpen((prev) => !prev)
+        }
       }
     }
 
-    if (hoveredModel && isDropdownOpen) {
-      updateDropdownRect()
-
-      // Add listener for window resize to update position
-      window.addEventListener("resize", updateDropdownRect)
-      return () => {
-        window.removeEventListener("resize", updateDropdownRect)
-      }
-    }
-  }, [hoveredModel, isDropdownOpen])
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [isMobile])
 
   // Close submenu when dropdown closes
   useEffect(() => {
@@ -93,24 +80,10 @@ export function ModelSelector({
     }
   }, [isDropdownOpen])
 
-  // Add this effect after the existing useEffect hooks
   // This will show the submenu for the current model when the dropdown opens
   useEffect(() => {
     if (isDropdownOpen && selectedModelId) {
-      // Small delay to ensure dropdown is rendered
-      const timer = setTimeout(() => {
-        setHoveredModel(selectedModelId)
-
-        // Update rectangle position
-        const dropdownEl = document.querySelector(
-          "[data-radix-popper-content-wrapper]"
-        )
-        if (dropdownEl) {
-          setDropdownRect(dropdownEl.getBoundingClientRect())
-        }
-      }, 50)
-
-      return () => clearTimeout(timer)
+      setHoveredModel(selectedModelId)
     }
   }, [isDropdownOpen, selectedModelId])
 
@@ -193,7 +166,12 @@ export function ModelSelector({
           currentModel={selectedProModel || ""}
         />
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+          <DrawerTrigger asChild>
+            <Tooltip>
+              <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+              <TooltipContent>Switch model (⌘⇧M)</TooltipContent>
+            </Tooltip>
+          </DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
               <DrawerTitle>Select Model</DrawerTitle>
@@ -243,120 +221,119 @@ export function ModelSelector({
         setIsOpen={setIsProDialogOpen}
         currentModel={selectedProModel || ""}
       />
-      <DropdownMenu
-        open={isDropdownOpen}
-        onOpenChange={(open) => {
-          setIsDropdownOpen(open)
-          if (!open) {
-            setHoveredModel(null)
-            setSearchQuery("")
-          }
-        }}
-      >
-        <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="flex h-[320px] w-[300px] flex-col space-y-0.5 overflow-y-auto px-0 pt-0"
-          align="start"
-          sideOffset={4}
-          forceMount
-          side="top"
+      <Tooltip>
+        <DropdownMenu
+          open={isDropdownOpen}
+          onOpenChange={(open) => {
+            setIsDropdownOpen(open)
+            if (!open) {
+              setHoveredModel(null)
+              setSearchQuery("")
+            }
+          }}
         >
-          <div className="bg-background sticky top-0 z-10 border-b px-0 pt-0 pb-0">
-            <div className="relative">
-              <MagnifyingGlass className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-              <Input
-                ref={searchInputRef}
-                placeholder="Search models..."
-                className="border border-none pl-8 shadow-none focus-visible:ring-0"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onClick={(e) => e.stopPropagation()}
-                onFocus={(e) => e.stopPropagation()}
-                onKeyDown={(e) => e.stopPropagation()}
-              />
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Switch model ⌘⇧P</TooltipContent>
+          <DropdownMenuContent
+            className="flex h-[320px] w-[300px] flex-col space-y-0.5 overflow-visible px-0 pt-0"
+            align="start"
+            sideOffset={4}
+            forceMount
+            side="top"
+          >
+            <div className="bg-background sticky top-0 z-10 border-b px-0 pt-0 pb-0">
+              <div className="relative">
+                <MagnifyingGlass className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                <Input
+                  ref={searchInputRef}
+                  placeholder="Search models..."
+                  className="border border-none pl-8 shadow-none focus-visible:ring-0"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onClick={(e) => e.stopPropagation()}
+                  onFocus={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex h-full flex-col space-y-0.5 overflow-y-auto px-1 pt-1 pb-0">
-            {filteredModels.length > 0 ? (
-              filteredModels.map((model) => {
-                const isPro = MODELS_PRO.some(
-                  (proModel) => proModel.id === model.id
-                )
+            <div className="flex h-full flex-col space-y-0.5 overflow-y-auto px-1 pt-1 pb-0">
+              {filteredModels.length > 0 ? (
+                filteredModels.map((model) => {
+                  const isPro = MODELS_PRO.some(
+                    (proModel) => proModel.id === model.id
+                  )
 
-                return (
-                  <DropdownMenuItem
-                    key={model.id}
-                    className={cn(
-                      "flex w-full items-center justify-between px-3 py-2",
-                      selectedModelId === model.id && "bg-accent"
-                    )}
-                    onSelect={(e) => {
-                      if (isPro) {
-                        setSelectedProModel(model.id)
-                        setIsProDialogOpen(true)
-                        return
-                      }
+                  return (
+                    <DropdownMenuItem
+                      key={model.id}
+                      className={cn(
+                        "flex w-full items-center justify-between px-3 py-2",
+                        selectedModelId === model.id && "bg-accent"
+                      )}
+                      onSelect={(e) => {
+                        if (isPro) {
+                          setSelectedProModel(model.id)
+                          setIsProDialogOpen(true)
+                          return
+                        }
 
-                      setSelectedModelId(model.id)
-                      setIsDropdownOpen(false)
-                    }}
-                    onFocus={() => {
-                      if (isDropdownOpen) {
-                        setHoveredModel(model.id)
-                      }
-                    }}
-                    onMouseEnter={() => {
-                      if (isDropdownOpen) {
-                        setHoveredModel(model.id)
-                      }
-                    }}
+                        setSelectedModelId(model.id)
+                        setIsDropdownOpen(false)
+                      }}
+                      onFocus={() => {
+                        if (isDropdownOpen) {
+                          setHoveredModel(model.id)
+                        }
+                      }}
+                      onMouseEnter={() => {
+                        if (isDropdownOpen) {
+                          setHoveredModel(model.id)
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        {model?.icon && <model.icon className="size-5" />}
+                        <div className="flex flex-col gap-0">
+                          <span className="text-sm">{model.name}</span>
+                        </div>
+                      </div>
+                      {isPro && (
+                        <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
+                          <Star className="size-2" />
+                          <span>Pro</span>
+                        </div>
+                      )}
+                    </DropdownMenuItem>
+                  )
+                })
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center p-6 text-center">
+                  <p className="text-muted-foreground mb-1 text-sm">
+                    No results found.
+                  </p>
+                  <a
+                    href="https://github.com/ibelick/zola/issues/new?title=Model%20Request%3A%20"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground text-sm underline"
                   >
-                    <div className="flex items-center gap-3">
-                      {model?.icon && <model.icon className="size-5" />}
-                      <div className="flex flex-col gap-0">
-                        <span className="text-sm">{model.name}</span>
-                      </div>
-                    </div>
-                    {isPro && (
-                      <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
-                        <Star className="size-2" />
-                        <span>Pro</span>
-                      </div>
-                    )}
-                  </DropdownMenuItem>
-                )
-              })
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                <p className="text-muted-foreground mb-1 text-sm">
-                  No results found.
-                </p>
-                <a
-                  href="https://github.com/ibelick/zola/issues/new?title=Model%20Request%3A%20"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground text-sm underline"
-                >
-                  Request a new model
-                </a>
+                    Request a new model
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Submenu positioned absolutely */}
+            {hoveredModelData && (
+              <div className="absolute top-0 left-[calc(100%+8px)]">
+                <SubMenu hoveredModelData={hoveredModelData} />
               </div>
             )}
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {portalRef.current &&
-        hoveredModel &&
-        hoveredModelData &&
-        dropdownRect &&
-        isDropdownOpen &&
-        createPortal(
-          <SubMenu
-            hoveredModelData={hoveredModelData}
-            dropdownRect={dropdownRect}
-          />,
-          portalRef.current
-        )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </Tooltip>
     </div>
   )
 }
