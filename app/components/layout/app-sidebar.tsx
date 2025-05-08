@@ -1,18 +1,15 @@
 "use client"
 
-import { useUser } from "@/app/providers/user-provider"
-import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import { SignOut } from "@phosphor-icons/react"
+import { GithubLogo } from "@phosphor-icons/react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useId } from "react"
 
 // Mock data for sidebar items
 const todayItems = [
@@ -38,17 +35,29 @@ const previousWeekItems = [
   "Ultra Shoe Recommendations",
 ]
 
-export function AppSidebar() {
-  const pathname = usePathname()
-  const { user } = useUser()
+const lastMonthItems = [
+  "Zola Agent Setup",
+  "AI App Naming Ideas",
+  "Zola talk to users",
+  "Climats de Bourgogne expliqué",
+  "Ultra Shoe Recommendations",
+  "Zola Agent Setup",
+  "AI App Naming Ideas",
+  "Zola talk to users",
+  "Climats de Bourgogne expliqué",
+  "Ultra Shoe Recommendations",
+]
 
-  const SidebarSection = ({
-    title,
-    items,
-  }: {
-    title: string
-    items: string[]
-  }) => (
+const SidebarSection = ({
+  title,
+  items,
+}: {
+  title: string
+  items: string[]
+}) => {
+  const uniqueId = useId()
+
+  return (
     <div>
       <h3 className="overflow-hidden px-2 pt-3 pb-2 text-xs font-semibold break-all text-ellipsis">
         {title}
@@ -56,7 +65,7 @@ export function AppSidebar() {
       <div className="space-y-0.5">
         {items.map((item, index) => (
           <Link
-            key={item}
+            key={`${uniqueId}-${item}-${index}`}
             href="#"
             className={cn(
               "text-muted-foreground hover:bg-muted hover:text-foreground block w-full rounded-md p-2 text-sm transition-colors",
@@ -69,37 +78,40 @@ export function AppSidebar() {
       </div>
     </div>
   )
+}
 
+export function AppSidebar() {
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" className="border-none">
       <SidebarHeader className="h-14 pl-3"></SidebarHeader>
-      <SidebarContent className="px-3 py-4">
+      <SidebarContent className="px-3 pt-0 pb-4">
         <div className="space-y-5">
           <SidebarSection title="Today" items={todayItems} />
           <SidebarSection title="Yesterday" items={yesterdayItems} />
           <SidebarSection title="Previous 7 Days" items={previousWeekItems} />
+          <SidebarSection title="Last Month" items={lastMonthItems} />
         </div>
       </SidebarContent>
-
-      {user && (
-        <SidebarFooter className="p-4">
+      <SidebarFooter className="mb-2 p-3">
+        <a
+          href="https://github.com/ibelick/zola"
+          className="hover:bg-muted flex items-center gap-2 rounded-md p-2"
+          target="_blank"
+          aria-label="Star the repo on GitHub"
+        >
+          <div className="rounded-full border p-1">
+            <GithubLogo className="size-4" />
+          </div>
           <div className="flex flex-col">
             <div className="text-sidebar-foreground text-sm font-medium">
-              {user.display_name}
+              Zola is open source
             </div>
             <div className="text-sidebar-foreground/70 text-xs">
-              {user.email}
+              Star the repo on GitHub!
             </div>
-            <SidebarSeparator className="my-2" />
-            <Button variant="ghost" size="sm" className="justify-start">
-              <Link href="/auth/logout" className="flex items-center">
-                <SignOut className="mr-2 size-4" />
-                Sign out
-              </Link>
-            </Button>
           </div>
-        </SidebarFooter>
-      )}
+        </a>
+      </SidebarFooter>
     </Sidebar>
   )
 }
