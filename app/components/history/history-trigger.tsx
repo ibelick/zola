@@ -4,13 +4,18 @@ import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
+import { cn } from "@/lib/utils"
 import { ListMagnifyingGlass } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { CommandHistory } from "./command-history"
 import { DrawerHistory } from "./drawer-history"
 
-export function HistoryTrigger() {
+type HistoryTriggerProps = {
+  hasSidebar: boolean
+}
+
+export function HistoryTrigger({ hasSidebar }: HistoryTriggerProps) {
   const isMobile = useBreakpoint(768)
   const router = useRouter()
   const { chats, updateTitle, deleteChat } = useChats()
@@ -32,7 +37,10 @@ export function HistoryTrigger() {
 
   const trigger = (
     <button
-      className="text-muted-foreground hover:text-foreground hover:bg-muted bg-background rounded-full p-1.5 transition-colors"
+      className={cn(
+        "text-muted-foreground hover:text-foreground hover:bg-muted bg-background rounded-full p-1.5 transition-colors",
+        hasSidebar ? "hidden" : "block"
+      )}
       type="button"
       onClick={() => setIsOpen(true)}
     >

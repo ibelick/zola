@@ -15,7 +15,7 @@ export function HeaderSidebarTrigger({
   className,
   ...props
 }: HeaderSidebarTriggerProps) {
-  const { toggleSidebar, open } = useSidebar()
+  const { toggleSidebar, open, isMobile } = useSidebar()
 
   return (
     <Tooltip>
@@ -26,6 +26,7 @@ export function HeaderSidebarTrigger({
           className={cn(
             "text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors",
             "-ml-5 inline-flex size-9 items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+            isMobile ? "ml-0" : "-ml-5",
             className
           )}
           {...props}

@@ -14,7 +14,6 @@ import { Info } from "@phosphor-icons/react"
 import Link from "next/link"
 import { AgentLink } from "./agent-link"
 import { DialogPublish } from "./dialog-publish"
-import { HeaderAgent } from "./header-agent"
 import { HeaderSidebarTrigger } from "./header-sidebar-trigger"
 
 export type AgentHeader = Pick<
@@ -72,7 +71,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
               {agent && <DialogPublish agent={agent} />}
               <ButtonNewChat />
               <AgentLink />
-              <HistoryTrigger />
+              <HistoryTrigger hasSidebar={hasSidebar} />
               <UserMenu />
             </div>
           )}
