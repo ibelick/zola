@@ -2,6 +2,7 @@
 
 import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
+import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import { toast } from "@/components/ui/toast"
@@ -22,6 +23,8 @@ import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { AgentSuggestionTab } from "../suggestions/agent-suggestion-tab"
+import { PromptSystem } from "../suggestions/prompt-system"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
@@ -67,7 +70,9 @@ export function Chat() {
   const [hydrated, setHydrated] = useState(false)
   const searchParams = useSearchParams()
   const hasSentFirstMessageRef = useRef(false)
-  const { isTooling, agent } = useAgent()
+  const { agent } = useAgent()
+  const isMobile = useBreakpoint(768)
+  const [isAgentMode, setIsAgentMode] = useState(false)
 
   const isAuthenticated = !!user?.id
   const {
@@ -382,6 +387,15 @@ export function Chat() {
           },
         }}
       >
+        {isMobile && (
+          <div className="relative right-0 bottom-0 left-0 mx-auto mb-8 flex h-8 w-auto items-center justify-center rounded-lg p-1">
+            <AgentSuggestionTab
+              isAgentMode={isAgentMode}
+              setIsAgentMode={setIsAgentMode}
+              onSelectSystemPrompt={handleSelectSystemPrompt}
+            />
+          </div>
+        )}
         <ChatInput
           value={input}
           onSuggestion={handleSuggestion}
@@ -393,15 +407,24 @@ export function Chat() {
           onFileRemove={handleFileRemove}
           hasSuggestions={!chatId && messages.length === 0}
           onSelectModel={handleModelChange}
-          onSelectSystemPrompt={handleSelectSystemPrompt}
           selectedModel={selectedModel}
           isUserAuthenticated={isAuthenticated}
           systemPrompt={systemPrompt}
           stop={stop}
           status={status}
           placeholder={"Ask Zola anything"}
+          isAgentMode={isAgentMode}
         />
       </motion.div>
+      {!isMobile && (
+        <div className="absolute right-0 bottom-0 left-0 z-50 mx-auto mb-4 flex w-full justify-center">
+          <AgentSuggestionTab
+            isAgentMode={isAgentMode}
+            setIsAgentMode={setIsAgentMode}
+            onSelectSystemPrompt={handleSelectSystemPrompt}
+          />
+        </div>
+      )}
       <FeedbackWidget authUserId={user?.id} />
     </div>
   )
