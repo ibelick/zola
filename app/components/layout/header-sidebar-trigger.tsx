@@ -18,7 +18,7 @@ export function HeaderSidebarTrigger({
       type="button"
       onClick={toggleSidebar}
       className={cn(
-        "hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+        "hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring -ml-5 inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
         className
       )}
       {...props}

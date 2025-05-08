@@ -35,7 +35,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
       <div className="bg-background relative mx-auto flex h-full max-w-full items-center justify-between px-4 sm:px-6 lg:bg-transparent lg:px-8">
         <div className="flex flex-1 items-center justify-between">
           {hasSidebar && <HeaderSidebarTrigger />}
-          {Boolean(!agent || !isMobile) && (
+          {Boolean((!agent || !isMobile) && !hasSidebar) && (
             <div className="flex-1">
               <Link href="/" className="text-xl font-medium tracking-tight">
                 {APP_NAME}

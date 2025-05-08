@@ -50,17 +50,17 @@ export function AppSidebar() {
     items: string[]
   }) => (
     <div>
-      <h3 className="mb-3 px-1 text-base font-semibold">{title}</h3>
-      <div className="space-y-1">
+      <h3 className="overflow-hidden px-2 pt-3 pb-2 text-xs font-semibold break-all text-ellipsis">
+        {title}
+      </h3>
+      <div className="space-y-0.5">
         {items.map((item, index) => (
           <Link
             key={item}
             href="#"
             className={cn(
-              "text-muted-foreground hover:bg-muted hover:text-foreground block w-full rounded-md px-3 py-2 text-sm transition-colors",
-              title === "Today" &&
-                index === 0 &&
-                "bg-muted text-foreground font-medium"
+              "text-muted-foreground hover:bg-muted hover:text-foreground block w-full rounded-md p-2 text-sm transition-colors",
+              title === "Today" && index === 0 && "bg-accent text-foreground"
             )}
           >
             {item}
@@ -71,31 +71,10 @@ export function AppSidebar() {
   )
 
   return (
-    <Sidebar
-      collapsible="offcanvas"
-      variant="sidebar"
-      className="w-64 border-r-0"
-    >
-      <SidebarHeader className="border-sidebar-border h-14 border-b p-4">
-        <div className="flex items-center justify-between">
-          <svg
-            className="h-7 w-7"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect width="24" height="24" rx="4" fill="#f5f5f5" />
-            <path
-              d="M12 6v12M6 12h12"
-              stroke="#666"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-      </SidebarHeader>
+    <Sidebar collapsible="offcanvas" variant="sidebar" className="border-none">
+      <SidebarHeader className="h-14 pl-3"></SidebarHeader>
       <SidebarContent className="px-3 py-4">
-        <div className="space-y-7">
+        <div className="space-y-5">
           <SidebarSection title="Today" items={todayItems} />
           <SidebarSection title="Yesterday" items={yesterdayItems} />
           <SidebarSection title="Previous 7 Days" items={previousWeekItems} />
@@ -103,7 +82,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {user && (
-        <SidebarFooter className="border-sidebar-border border-t p-4">
+        <SidebarFooter className="p-4">
           <div className="flex flex-col">
             <div className="text-sidebar-foreground text-sm font-medium">
               {user.display_name}
