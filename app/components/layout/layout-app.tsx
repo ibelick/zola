@@ -13,13 +13,10 @@ export function LayoutApp({ children }: { children: React.ReactNode }) {
     <SidebarProvider defaultOpen={false}>
       <div className="bg-background flex h-screen w-full overflow-hidden">
         {hasSidebar && <AppSidebar />}
-        <div className="flex flex-1 flex-col">
-          <div className="flex items-center">
-            {hasSidebar && <HeaderSidebarTrigger className="mr-2" />}
-            <Header />
-          </div>
-          <main className="flex-1 overflow-auto p-4">{children}</main>
-        </div>
+        <main className="@container relative h-dvh w-0 flex-shrink flex-grow">
+          <Header hasSidebar={hasSidebar} />
+          {children}
+        </main>
       </div>
     </SidebarProvider>
   )
