@@ -33,7 +33,7 @@ export function HeaderAgent({ agent }: HeaderAgentProps) {
             duration: 0.15,
             ease: "easeOut",
           }}
-          className="bg-background/40 flex items-center justify-center gap-2 rounded-t-none rounded-b-md px-0 py-0 backdrop-blur-2xl md:px-3 md:py-3"
+          className="bg-background/40 pointer-events-auto flex max-w-[240px] items-center justify-center gap-2 rounded-t-none rounded-b-md px-3 py-3 backdrop-blur-2xl"
         >
           <Avatar className="size-10">
             <AvatarImage

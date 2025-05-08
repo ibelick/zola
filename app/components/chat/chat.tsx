@@ -23,8 +23,8 @@ import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { HeaderAgent } from "../layout/header-agent"
 import { AgentSuggestionTab } from "../suggestions/agent-suggestion-tab"
-import { PromptSystem } from "../suggestions/prompt-system"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
@@ -343,6 +343,11 @@ export function Chat() {
         "@container/main relative flex h-full flex-col items-center justify-end md:justify-center"
       )}
     >
+      {!isMobile && (
+        <div className="pointer-events-none absolute top-0 right-0 left-0 z-50 mx-auto flex w-full justify-center">
+          <HeaderAgent agent={agent} />
+        </div>
+      )}
       <DialogAuth open={hasDialogAuth} setOpen={setHasDialogAuth} />
       <AnimatePresence initial={false} mode="popLayout">
         {!chatId && messages.length === 0 ? (
@@ -416,7 +421,7 @@ export function Chat() {
           isAgentMode={isAgentMode}
         />
       </motion.div>
-      {!isMobile && (
+      {!chatId && messages.length === 0 && !isMobile && (
         <div className="absolute right-0 bottom-0 left-0 z-50 mx-auto mb-4 flex w-full justify-center">
           <AgentSuggestionTab
             isAgentMode={isAgentMode}

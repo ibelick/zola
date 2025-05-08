@@ -44,7 +44,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
               </div>
             )}
           </div>
-          <HeaderAgent agent={agent} />
+          <div />
           {!isLoggedIn ? (
             <div className="flex flex-1 items-center justify-end gap-4">
               <AppInfoTrigger
