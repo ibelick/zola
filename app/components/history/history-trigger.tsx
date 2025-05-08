@@ -32,7 +32,7 @@ export function HistoryTrigger() {
 
   const trigger = (
     <button
-      className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-full p-1.5 transition-colors"
+      className="text-muted-foreground hover:text-foreground hover:bg-muted bg-background rounded-full p-1.5 transition-colors"
       type="button"
       onClick={() => setIsOpen(true)}
     >
