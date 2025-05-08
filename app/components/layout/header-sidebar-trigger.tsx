@@ -1,30 +1,40 @@
 "use client"
 
 import { useSidebar } from "@/components/ui/sidebar"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { List } from "@phosphor-icons/react"
+import { SidebarSimple } from "@phosphor-icons/react"
 
-interface HeaderSidebarTriggerProps
-  extends React.HTMLAttributes<HTMLButtonElement> {}
+type HeaderSidebarTriggerProps = React.HTMLAttributes<HTMLButtonElement>
 
 export function HeaderSidebarTrigger({
   className,
   ...props
 }: HeaderSidebarTriggerProps) {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, open } = useSidebar()
 
   return (
-    <button
-      type="button"
-      onClick={toggleSidebar}
-      className={cn(
-        "hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring -ml-5 inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
-        className
-      )}
-      {...props}
-    >
-      <List className="size-5" />
-      <span className="sr-only">Toggle sidebar</span>
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          className={cn(
+            "text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors",
+            "-ml-5 inline-flex size-9 items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+            className
+          )}
+          {...props}
+        >
+          <SidebarSimple size={24} />
+          <span className="sr-only">Toggle sidebar</span>
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{open ? "Close sidebar" : "Open sidebar"}</TooltipContent>
+    </Tooltip>
   )
 }
