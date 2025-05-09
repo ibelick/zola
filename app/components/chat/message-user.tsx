@@ -156,12 +156,8 @@ export function MessageUser({
           {children}
         </MessageContent>
       )}
-      <MessageActions className="flex gap-0 opacity-0 transition-opacity group-hover:opacity-100">
-        <MessageAction
-          tooltip={copied ? "Copied!" : "Copy text"}
-          side="bottom"
-          delayDuration={0}
-        >
+      <MessageActions className="flex gap-0 opacity-0 transition-opacity duration-0 group-hover:opacity-100">
+        <MessageAction tooltip={copied ? "Copied!" : "Copy text"} side="bottom">
           <button
             className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
             aria-label="Copy text"
@@ -190,7 +186,7 @@ export function MessageUser({
             <PencilSimple className="size-4" />
           </button>
         </MessageAction> */}
-        <MessageAction tooltip="Delete" side="bottom" delayDuration={0}>
+        <MessageAction tooltip="Delete" side="bottom">
           <button
             className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
             aria-label="Delete"
