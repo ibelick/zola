@@ -4,7 +4,6 @@ import { Loader } from "@/components/prompt-kit/loader"
 import { Message as MessageType } from "@ai-sdk/react"
 import { useRef } from "react"
 import { Message } from "./message"
-import { Reasoning } from "./reasoning"
 
 type ConversationProps = {
   messages: MessageType[]
@@ -24,6 +23,8 @@ export function Conversation({
   const initialMessageCount = useRef(messages.length)
   const scrollRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  console.log("status", status)
 
   if (!messages || messages.length === 0)
     return <div className="h-full w-full"></div>
@@ -56,6 +57,7 @@ export function Conversation({
               onReload={onReload}
               hasScrollAnchor={hasScrollAnchor}
               parts={message.parts}
+              status={status}
             >
               {message.content}
             </Message>

@@ -2,7 +2,6 @@ import { Message as MessageType } from "@ai-sdk/react"
 import React, { useState } from "react"
 import { MessageAssistant } from "./message-assistant"
 import { MessageUser } from "./message-user"
-import { ToolInvocation } from "./tool-invocation"
 
 type MessageProps = {
   variant: MessageType["role"]
@@ -15,6 +14,7 @@ type MessageProps = {
   onReload: () => void
   hasScrollAnchor?: boolean
   parts?: MessageType["parts"]
+  status?: "streaming" | "ready" | "submitted" | "error"
 }
 
 export function Message({
@@ -28,6 +28,7 @@ export function Message({
   onReload,
   hasScrollAnchor,
   parts,
+  status,
 }: MessageProps) {
   const [copied, setCopied] = useState(false)
 
@@ -63,6 +64,7 @@ export function Message({
         isLast={isLast}
         hasScrollAnchor={hasScrollAnchor}
         parts={parts}
+        status={status}
       />
     )
   }

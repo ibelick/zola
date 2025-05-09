@@ -20,6 +20,7 @@ type MessageAssistantProps = {
   copyToClipboard?: () => void
   onReload?: () => void
   parts?: MessageAISDK["parts"]
+  status?: "streaming" | "ready" | "submitted" | "error"
 }
 
 export function MessageAssistant({
@@ -30,6 +31,7 @@ export function MessageAssistant({
   copyToClipboard,
   onReload,
   parts,
+  status,
 }: MessageAssistantProps) {
   const sources = getSources(parts)
 
@@ -39,6 +41,8 @@ export function MessageAssistant({
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
 
   const contentNullOrEmpty = children === null || children === ""
+
+  const isLastStreaming = status === "streaming" && isLast
 
   return (
     <Message
@@ -70,7 +74,7 @@ export function MessageAssistant({
 
         {sources && sources.length > 0 && <SourcesList sources={sources} />}
 
-        {contentNullOrEmpty ? null : (
+        {Boolean(isLastStreaming || contentNullOrEmpty) ? null : (
           <MessageActions
             className={cn(
               "-ml-2 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100"
