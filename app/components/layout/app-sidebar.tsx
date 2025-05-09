@@ -6,15 +6,19 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { cn } from "@/lib/utils"
-import { GithubLogo } from "@phosphor-icons/react"
+import { GithubLogo, MagnifyingGlass } from "@phosphor-icons/react"
+import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useMemo } from "react"
+import { HistoryTrigger } from "../history/history-trigger"
 
 export function AppSidebar() {
+  const { open } = useSidebar()
   const { chats } = useChats()
   const params = useParams<{ chatId: string }>()
   const currentChatId = params.chatId
@@ -24,7 +28,28 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" className="border-none">
-      <SidebarHeader className="h-14 pl-3"></SidebarHeader>
+      <SidebarHeader className="h-14 pl-3">
+        <div className="flex justify-between">
+          <div className="bg-sidebar flex-1" />
+          <AnimatePresence mode="sync">
+            {open && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.4 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.4 }}
+                transition={{ duration: 0.15, delay: 0.1, ease: "easeOut" }}
+                className="pt-0"
+              >
+                <HistoryTrigger
+                  hasSidebar={false}
+                  classNameTrigger="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-9 items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none bg-transparent"
+                  icon={<MagnifyingGlass size={24} />}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </SidebarHeader>
       <SidebarContent className="mask-t-from-98% mask-t-to-100% mask-b-from-98% mask-b-to-100% px-3 pt-0 pb-4">
         <div className="space-y-5">
           {groupedChats?.map((group) => (

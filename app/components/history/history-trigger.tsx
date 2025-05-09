@@ -13,9 +13,15 @@ import { DrawerHistory } from "./drawer-history"
 
 type HistoryTriggerProps = {
   hasSidebar: boolean
+  classNameTrigger?: string
+  icon?: React.ReactNode
 }
 
-export function HistoryTrigger({ hasSidebar }: HistoryTriggerProps) {
+export function HistoryTrigger({
+  hasSidebar,
+  classNameTrigger,
+  icon,
+}: HistoryTriggerProps) {
   const isMobile = useBreakpoint(768)
   const router = useRouter()
   const { chats, updateTitle, deleteChat } = useChats()
@@ -35,16 +41,18 @@ export function HistoryTrigger({ hasSidebar }: HistoryTriggerProps) {
     await deleteChat(id, chatId!, () => router.push("/"))
   }
 
-  const trigger = (
+  const defaultTrigger = (
     <button
       className={cn(
         "text-muted-foreground hover:text-foreground hover:bg-muted bg-background rounded-full p-1.5 transition-colors",
-        hasSidebar ? "hidden" : "block"
+        hasSidebar ? "hidden" : "block",
+        classNameTrigger
       )}
       type="button"
       onClick={() => setIsOpen(true)}
+      aria-label="Search"
     >
-      <ListMagnifyingGlass size={24} />
+      {icon || <ListMagnifyingGlass size={24} />}
     </button>
   )
 
@@ -54,7 +62,7 @@ export function HistoryTrigger({ hasSidebar }: HistoryTriggerProps) {
         chatHistory={chats}
         onSaveEdit={handleSaveEdit}
         onConfirmDelete={handleConfirmDelete}
-        trigger={trigger}
+        trigger={defaultTrigger}
         isOpen={isOpen}
         setIsOpen={setIsOpen}
       />
@@ -66,7 +74,7 @@ export function HistoryTrigger({ hasSidebar }: HistoryTriggerProps) {
       chatHistory={chats}
       onSaveEdit={handleSaveEdit}
       onConfirmDelete={handleConfirmDelete}
-      trigger={trigger}
+      trigger={defaultTrigger}
       isOpen={isOpen}
       setIsOpen={setIsOpen}
     />
