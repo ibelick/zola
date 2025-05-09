@@ -24,8 +24,6 @@ export function Conversation({
   const scrollRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  console.log("status", status)
-
   if (!messages || messages.length === 0)
     return <div className="h-full w-full"></div>
 
