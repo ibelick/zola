@@ -25,7 +25,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" className="border-none">
       <SidebarHeader className="h-14 pl-3"></SidebarHeader>
-      <SidebarContent className="px-3 pt-0 pb-4">
+      <SidebarContent className="mask-t-from-98% mask-t-to-100% mask-b-from-98% mask-b-to-100% px-3 pt-0 pb-4">
         <div className="space-y-5">
           {groupedChats?.map((group) => (
             <SidebarSection
@@ -92,7 +92,7 @@ const SidebarSection = ({
             )}
           >
             <div
-              className="text-muted-foreground relative line-clamp-1 [mask-image:linear-gradient(to_right,#000,#000_84%,transparent_90%,transparent_100%)] px-2 py-2 text-sm text-ellipsis whitespace-nowrap"
+              className="text-muted-foreground relative line-clamp-1 mask-r-from-85% mask-r-to-90% px-2 py-2 text-sm text-ellipsis whitespace-nowrap"
               title={chat.title || "Untitled Chat"}
             >
               {chat.title || "Untitled Chat"}

@@ -30,8 +30,8 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
 
   return (
     <header className="h-app-header fixed top-0 right-0 left-0 z-50">
-      <div className="h-app-header top-app-header bg-background pointer-events-none absolute left-0 z-50 mx-auto w-full to-transparent backdrop-blur-xl [-webkit-mask-image:linear-gradient(to_bottom,black,transparent)] lg:hidden"></div>
-      <div className="bg-background relative mx-auto flex h-full max-w-full items-center justify-between px-4 sm:px-6 lg:bg-transparent lg:px-8">
+      {/* <div className="h-app-header top-app-header bg-background pointer-events-none absolute left-0 z-50 mx-auto w-full to-transparent backdrop-blur-xl [-webkit-mask-image:linear-gradient(to_bottom,black,transparent)] lg:hidden"></div> */}
+      <div className="relative mx-auto flex h-full max-w-full items-center justify-between bg-transparent px-4 sm:px-6 lg:bg-transparent lg:px-8">
         <div className="flex flex-1 items-center justify-between">
           <div className="flex flex-1 items-center gap-2">
             {hasSidebar && <HeaderSidebarTrigger />}

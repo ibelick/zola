@@ -71,7 +71,7 @@
     "eslint-config-next": "15.2.2",
     "prettier": "^3.5.1",
     "prettier-plugin-tailwindcss": "^0.6.11",
-    "tailwindcss": "^4",
+    "tailwindcss": "^4.1.5",
     "tw-animate-css": "^1.2.9",
     "typescript": "^5"
   }
