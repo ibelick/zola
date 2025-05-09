@@ -1,4 +1,7 @@
-import { LayoutType, useLayout } from "@/app/hooks/use-layout"
+import {
+  LayoutType,
+  useUserPreferences,
+} from "@/app/providers/user-preferences-provider"
 import { cn } from "@/lib/utils"
 import * as React from "react"
 import type { SVGProps } from "react"
@@ -235,7 +238,8 @@ const LayoutFullscreen = (props: SVGProps<SVGSVGElement>) => {
 const OPTIONS: LayoutType[] = ["sidebar", "fullscreen"]
 
 export function LayoutSection() {
-  const { layout: selectedLayout, setLayout: setSelectedLayout } = useLayout()
+  const { preferences, setLayout } = useUserPreferences()
+  const selectedLayout = preferences.layout
 
   return (
     <div className="border-border border-t">
@@ -251,7 +255,7 @@ export function LayoutSection() {
                 selectedLayout === option &&
                   "border-primary ring-primary/30 ring-2"
               )}
-              onClick={() => setSelectedLayout(option)}
+              onClick={() => setLayout(option)}
             >
               {option === "sidebar" && (
                 <LayoutSidebar className="h-full w-full" />

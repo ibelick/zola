@@ -2,12 +2,11 @@
 
 import { AppSidebar } from "@/app/components/layout/app-sidebar"
 import { Header } from "@/app/components/layout/header"
-import { useLayout } from "@/app/hooks/use-layout"
+import { useUserPreferences } from "@/app/providers/user-preferences-provider"
 
 export function LayoutApp({ children }: { children: React.ReactNode }) {
-  const { layout: selectedLayout } = useLayout()
-
-  const hasSidebar = selectedLayout === "sidebar"
+  const { preferences } = useUserPreferences()
+  const hasSidebar = preferences.layout === "sidebar"
 
   return (
     <div className="bg-background flex h-screen w-full overflow-hidden">

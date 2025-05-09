@@ -12,6 +12,7 @@ import Script from "next/script"
 import { createClient } from "../lib/supabase/server"
 import { LayoutClient } from "./layout-client"
 import { ChatSessionProvider } from "./providers/chat-session-provider"
+import { UserPreferencesProvider } from "./providers/user-preferences-provider"
 import { UserProvider } from "./providers/user-provider"
 import { UserProfile } from "./types/user"
 
