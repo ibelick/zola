@@ -1,7 +1,7 @@
+import { LayoutType, useLayout } from "@/app/hooks/use-layout"
 import { cn } from "@/lib/utils"
 import * as React from "react"
 import type { SVGProps } from "react"
-import { useState } from "react"
 
 const LayoutSidebar = (props: SVGProps<SVGSVGElement>) => {
   return (
@@ -232,12 +232,10 @@ const LayoutFullscreen = (props: SVGProps<SVGSVGElement>) => {
   )
 }
 
-type LayoutType = "sidebar" | "fullscreen"
-
 const OPTIONS: LayoutType[] = ["sidebar", "fullscreen"]
 
 export function LayoutSection() {
-  const [selectedLayout, setSelectedLayout] = useState<LayoutType>("sidebar")
+  const { layout: selectedLayout, setLayout: setSelectedLayout } = useLayout()
 
   return (
     <div className="border-border border-t">

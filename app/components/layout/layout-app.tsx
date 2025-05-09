@@ -2,11 +2,13 @@
 
 import { AppSidebar } from "@/app/components/layout/app-sidebar"
 import { Header } from "@/app/components/layout/header"
-
-// You can change this to control whether the sidebar is shown by default
-const hasSidebar = true
+import { useLayout } from "@/app/hooks/use-layout"
 
 export function LayoutApp({ children }: { children: React.ReactNode }) {
+  const { layout: selectedLayout } = useLayout()
+
+  const hasSidebar = selectedLayout === "sidebar"
+
   return (
     <div className="bg-background flex h-screen w-full overflow-hidden">
       {hasSidebar && <AppSidebar />}
