@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
+import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AgentProvider } from "@/lib/agent-store/provider"
@@ -77,8 +78,10 @@ export default async function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                   >
-                    <Toaster position="top-center" />
-                    {children}
+                    <SidebarProvider defaultOpen={false}>
+                      <Toaster position="top-center" />
+                      {children}
+                    </SidebarProvider>
                   </ThemeProvider>
                 </TooltipProvider>
               </AgentProvider>
