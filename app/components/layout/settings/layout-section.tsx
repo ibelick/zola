@@ -130,7 +130,7 @@ const LayoutFullscreen = (props: SVGProps<SVGSVGElement>) => {
     >
       <g clipPath="url(#a)">
         {/* Main background */}
-        <path fill="var(--background)" d="M0 0h1028v578H0z" />
+        <path d="M0 0h1028v578H0z" strokeWidth={1} />
         <mask id="b" fill="var(--background)">
           <path
             d="M177 86c0-8.836 7.163-16 16-16h638c8.837 0 16 7.163 16 16v405c0 8.837-7.163 16-16 16H193c-8.837 0-16-7.163-16-16z"
@@ -140,16 +140,15 @@ const LayoutFullscreen = (props: SVGProps<SVGSVGElement>) => {
         </mask>
         {/* Main content area */}
         <path
-          fill="var(--background)"
           d="M177 86c0-8.836 7.163-16 16-16h638c8.837 0 16 7.163 16 16v405c0 8.837-7.163 16-16 16H193c-8.837 0-16-7.163-16-16z"
+          stroke="var(--border)"
+          strokeWidth={2}
         />
         {/* Border details for main content area */}
         <path
-          fill="var(--secondary)"
+          fill="var(--background)"
           d="M193 70v1h638v-2H193zm654 16h-1v405h2V86zm-16 421v-1H193v2h638zm-654-16h1V86h-2v405zm16 16v-1c-8.284 0-15-6.716-15-15h-2c0 9.389 7.611 17 17 17zm654-16h-1c0 8.284-6.716 15-15 15v2c9.389 0 17-7.611 17-17zM831 70v1c8.284 0 15 6.716 15 15h2c0-9.389-7.611-17-17-17zm-638 0v-1c-9.389 0-17 7.611-17 17h2c0-8.284 6.716-15 15-15z"
           mask="url(#b)"
-          stroke="var(--border)"
-          strokeWidth={1}
         />
         {/* Bottom content box */}
         <rect
@@ -157,7 +156,9 @@ const LayoutFullscreen = (props: SVGProps<SVGSVGElement>) => {
           height={72}
           x={305}
           y={411}
-          fill="var(--muted)"
+          fill="var(--secondary)"
+          stroke="var(--border)"
+          strokeWidth={1}
           rx={16}
         />
         {/* Middle content box */}
@@ -166,17 +167,21 @@ const LayoutFullscreen = (props: SVGProps<SVGSVGElement>) => {
           height={69}
           x={305}
           y={294}
-          fill="var(--muted)"
+          fill="var(--secondary)"
+          stroke="var(--border)"
+          strokeWidth={1}
           rx={8}
         />
         {/* Text content in middle box */}
         <path
-          fill="var(--muted-foreground)"
+          fill="var(--border)"
           d="M525.418 318H332.582c-1.978 0-3.582 1.791-3.582 4s1.604 4 3.582 4h192.836c1.978 0 3.582-1.791 3.582-4s-1.604-4-3.582-4M501.848 330H332.152c-1.741 0-3.152 2.015-3.152 4.5s1.411 4.5 3.152 4.5h169.696c1.741 0 3.152-2.015 3.152-4.5s-1.411-4.5-3.152-4.5"
         />
         {/* Top content box */}
         <path
-          fill="var(--muted)"
+          fill="var(--secondary)"
+          stroke="var(--border)"
+          strokeWidth={1}
           d="M305 104h248v65a8 8 0 0 1-8 8H313a8 8 0 0 1-8-8z"
         />
         {/* Text content in top box */}
@@ -190,27 +195,25 @@ const LayoutFullscreen = (props: SVGProps<SVGSVGElement>) => {
           height={69}
           x={471}
           y={201}
-          fill="var(--muted)"
+          fill="var(--secondary)"
+          stroke="var(--border)"
+          strokeWidth={1}
           rx={8}
         />
         {/* Text content in right box */}
         <path
-          fill="var(--muted-foreground)"
+          fill="var(--border)"
           d="M691.418 225H498.582c-1.978 0-3.582 1.791-3.582 4s1.604 4 3.582 4h192.836c1.978 0 3.582-1.791 3.582-4s-1.604-4-3.582-4M667.848 236H498.152c-1.741 0-3.152 2.015-3.152 4.5s1.411 4.5 3.152 4.5h169.696c1.741 0 3.152-2.015 3.152-4.5s-1.411-4.5-3.152-4.5"
         />
         {/* Toolbar/header at top */}
-        <mask id="c" fill="#fff">
-          <path d="M177 86c0-8.837 7.163-16 16-16h638c8.837 0 16 7.163 16 16v24H177z" />
-        </mask>
         <path
-          fill="var(--background)"
+          fill="var(--secondary)"
           d="M177 86c0-8.837 7.163-16 16-16h638c8.837 0 16 7.163 16 16v24H177z"
         />
         {/* Border details for toolbar/header */}
         <path
           fill="var(--border)"
           d="M847 110v1h1v-1zm-670 0h-1v1h1zm16-40v1h638v-2H193zm654 16h-1v24h2V86zm0 24v-1H177v2h670zm-670 0h1V86h-2v24zm654-40v1c8.284 0 15 6.716 15 15h2c0-9.389-7.611-17-17-17zm-638 0v-1c-9.389 0-17 7.611-17 17h2c0-8.284 6.716-15 15-15z"
-          mask="url(#c)"
         />
         {/* Window controls (dots) */}
         <path
