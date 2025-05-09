@@ -249,7 +249,7 @@ export function ModelSelector({
                 <Input
                   ref={searchInputRef}
                   placeholder="Search models..."
-                  className="border border-none pl-8 shadow-none focus-visible:ring-0"
+                  className="dark:bg-popover rounded-b-none border border-none pl-8 shadow-none focus-visible:ring-0"
                   value={searchQuery}
                   onChange={handleSearchChange}
                   onClick={(e) => e.stopPropagation()}
