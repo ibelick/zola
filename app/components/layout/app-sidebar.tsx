@@ -93,7 +93,7 @@ const SidebarSection = ({
             prefetch
           >
             <div
-              className="text-muted-foreground relative line-clamp-1 mask-r-from-85% mask-r-to-90% px-2 py-2 text-sm text-ellipsis whitespace-nowrap"
+              className="text-primary relative line-clamp-1 mask-r-from-85% mask-r-to-90% px-2 py-2 text-sm text-ellipsis whitespace-nowrap"
               title={chat.title || "Untitled Chat"}
             >
               {chat.title || "Untitled Chat"}

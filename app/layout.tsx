@@ -72,19 +72,21 @@ export default async function RootLayout({
           <ChatsProvider userId={userProfile?.id}>
             <ChatSessionProvider>
               <AgentProvider>
-                <TooltipProvider delayDuration={200} skipDelayDuration={500}>
-                  <ThemeProvider
-                    attribute="class"
-                    defaultTheme="light"
-                    enableSystem
-                    disableTransitionOnChange
-                  >
-                    <SidebarProvider defaultOpen={false}>
-                      <Toaster position="top-center" />
-                      {children}
-                    </SidebarProvider>
-                  </ThemeProvider>
-                </TooltipProvider>
+                <UserPreferencesProvider>
+                  <TooltipProvider delayDuration={200} skipDelayDuration={500}>
+                    <ThemeProvider
+                      attribute="class"
+                      defaultTheme="light"
+                      enableSystem
+                      disableTransitionOnChange
+                    >
+                      <SidebarProvider defaultOpen={false}>
+                        <Toaster position="top-center" />
+                        {children}
+                      </SidebarProvider>
+                    </ThemeProvider>
+                  </TooltipProvider>
+                </UserPreferencesProvider>
               </AgentProvider>
             </ChatSessionProvider>
           </ChatsProvider>
