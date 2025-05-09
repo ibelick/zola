@@ -90,6 +90,7 @@ const SidebarSection = ({
               "hover:bg-muted hover:text-foreground relative block w-full rounded-md transition-colors",
               chat.id === currentChatId && "bg-accent text-foreground"
             )}
+            prefetch
           >
             <div
               className="text-muted-foreground relative line-clamp-1 mask-r-from-85% mask-r-to-90% px-2 py-2 text-sm text-ellipsis whitespace-nowrap"
