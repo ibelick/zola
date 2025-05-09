@@ -9,6 +9,7 @@ const hasSidebar = true
 
 export function LayoutApp({ children }: { children: React.ReactNode }) {
   return (
+    // move SidebarProvider to layout.tsx
     <SidebarProvider defaultOpen={false}>
       <div className="bg-background flex h-screen w-full overflow-hidden">
         {hasSidebar && <AppSidebar />}

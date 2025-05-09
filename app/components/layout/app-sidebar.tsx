@@ -1,95 +1,46 @@
 "use client"
 
+import { groupChatsByDate } from "@/app/components/history/utils"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar"
+import { useChats } from "@/lib/chat-store/chats/provider"
 import { cn } from "@/lib/utils"
 import { GithubLogo } from "@phosphor-icons/react"
 import Link from "next/link"
-import { useId } from "react"
-
-// Mock data for sidebar items
-const todayItems = [
-  "PC and Software History",
-  "zola.chat product design",
-  "social media",
-  "AI Demo Ideas",
-  "Muscle Gain and Endurance",
-  "full vision",
-]
-
-const yesterdayItems = [
-  "zola.chat vision + strategy",
-  "code fix",
-  "Zola research archive",
-]
-
-const previousWeekItems = [
-  "Zola Agent Setup",
-  "AI App Naming Ideas",
-  "Zola talk to users",
-  "Climats de Bourgogne expliqué",
-  "Ultra Shoe Recommendations",
-]
-
-const lastMonthItems = [
-  "Zola Agent Setup",
-  "AI App Naming Ideas",
-  "Zola talk to users",
-  "Climats de Bourgogne expliqué",
-  "Ultra Shoe Recommendations",
-  "Zola Agent Setup",
-  "AI App Naming Ideas",
-  "Zola talk to users",
-  "Climats de Bourgogne expliqué",
-  "Ultra Shoe Recommendations",
-]
-
-const SidebarSection = ({
-  title,
-  items,
-}: {
-  title: string
-  items: string[]
-}) => {
-  const uniqueId = useId()
-
-  return (
-    <div>
-      <h3 className="overflow-hidden px-2 pt-3 pb-2 text-xs font-semibold break-all text-ellipsis">
-        {title}
-      </h3>
-      <div className="space-y-0.5">
-        {items.map((item, index) => (
-          <Link
-            key={`${uniqueId}-${item}-${index}`}
-            href="#"
-            className={cn(
-              "text-muted-foreground hover:bg-muted hover:text-foreground block w-full rounded-md p-2 text-sm transition-colors",
-              title === "Today" && index === 0 && "bg-accent text-foreground"
-            )}
-          >
-            {item}
-          </Link>
-        ))}
-      </div>
-    </div>
-  )
-}
+import { useParams } from "next/navigation"
+import { useMemo } from "react"
 
 export function AppSidebar() {
+  const { chats } = useChats()
+  const params = useParams<{ chatId: string }>()
+  const currentChatId = params.chatId
+
+  // Group chats by time periods - memoized to avoid recalculation
+  const groupedChats = useMemo(() => groupChatsByDate(chats, ""), [chats])
+
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" className="border-none">
       <SidebarHeader className="h-14 pl-3"></SidebarHeader>
       <SidebarContent className="px-3 pt-0 pb-4">
         <div className="space-y-5">
-          <SidebarSection title="Today" items={todayItems} />
-          <SidebarSection title="Yesterday" items={yesterdayItems} />
-          <SidebarSection title="Previous 7 Days" items={previousWeekItems} />
-          <SidebarSection title="Last Month" items={lastMonthItems} />
+          {groupedChats?.map((group) => (
+            <SidebarSection
+              key={group.name}
+              title={group.name}
+              items={group.chats}
+              currentChatId={currentChatId}
+            />
+          ))}
+
+          {!groupedChats?.length && (
+            <div className="text-muted-foreground py-4 text-center text-sm">
+              No chat history found.
+            </div>
+          )}
         </div>
       </SidebarContent>
       <SidebarFooter className="mb-2 p-3">
@@ -113,5 +64,42 @@ export function AppSidebar() {
         </a>
       </SidebarFooter>
     </Sidebar>
+  )
+}
+
+const SidebarSection = ({
+  title,
+  items,
+  currentChatId,
+}: {
+  title: string
+  items: any[]
+  currentChatId: string
+}) => {
+  return (
+    <div>
+      <h3 className="overflow-hidden px-2 pt-3 pb-2 text-xs font-semibold break-all text-ellipsis">
+        {title}
+      </h3>
+      <div className="space-y-0.5">
+        {items.map((chat) => (
+          <Link
+            key={chat.id}
+            href={`/c/${chat.id}`}
+            className={cn(
+              "hover:bg-muted hover:text-foreground relative block w-full rounded-md transition-colors",
+              chat.id === currentChatId && "bg-accent text-foreground"
+            )}
+          >
+            <div
+              className="text-muted-foreground relative line-clamp-1 [mask-image:linear-gradient(to_right,#000,#000_84%,transparent_90%,transparent_100%)] px-2 py-2 text-sm text-ellipsis whitespace-nowrap"
+              title={chat.title || "Untitled Chat"}
+            >
+              {chat.title || "Untitled Chat"}
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
   )
 }
