@@ -18,6 +18,7 @@ import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
+import { LayoutSection } from "./layout-section"
 
 type SettingsContentProps = {
   onClose: () => void
@@ -201,6 +202,8 @@ export function SettingsContent({
           </div>
         </div>
       </div>
+      {/* Layout */}
+      <LayoutSection />
       {/* Model Selection */}
       <div className="border-border border-t">
         <div className="px-6 py-4">
