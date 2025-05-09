@@ -392,7 +392,7 @@ export function Chat() {
           },
         }}
       >
-        {isMobile && (
+        {!chatId && messages.length === 0 && isMobile && (
           <div className="relative right-0 bottom-0 left-0 mx-auto mb-8 flex h-8 w-auto items-center justify-center rounded-lg p-1">
             <AgentSuggestionTab
               isAgentMode={isAgentMode}
