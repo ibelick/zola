@@ -73,16 +73,15 @@ export function MessageAssistant({
         {contentNullOrEmpty ? null : (
           <MessageActions
             className={cn(
-              "flex gap-0 opacity-0 transition-opacity group-hover:opacity-100"
+              "-ml-2 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100"
             )}
           >
             <MessageAction
               tooltip={copied ? "Copied!" : "Copy text"}
               side="bottom"
-              delayDuration={0}
             >
               <button
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
+                className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
                 aria-label="Copy text"
                 onClick={copyToClipboard}
                 type="button"
@@ -96,7 +95,7 @@ export function MessageAssistant({
             </MessageAction>
             <MessageAction tooltip="Regenerate" side="bottom" delayDuration={0}>
               <button
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
+                className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
                 aria-label="Regenerate"
                 onClick={onReload}
                 type="button"

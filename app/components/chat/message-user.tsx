@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Message as MessageType } from "@ai-sdk/react"
-import { Check, Copy, PencilSimple, Trash } from "@phosphor-icons/react"
+import { Check, Copy, Trash } from "@phosphor-icons/react"
 import { useRef, useState } from "react"
 
 const getTextFromDataUrl = (dataUrl: string) => {
@@ -72,7 +72,7 @@ export function MessageUser({
   return (
     <MessageContainer
       className={cn(
-        "group flex w-full max-w-3xl flex-col items-end gap-2 px-6 pb-2",
+        "group flex w-full max-w-3xl flex-col items-end gap-0.5 px-6 pb-2",
         hasScrollAnchor && "min-h-scroll-anchor"
       )}
     >
@@ -159,7 +159,7 @@ export function MessageUser({
       <MessageActions className="flex gap-0 opacity-0 transition-opacity duration-0 group-hover:opacity-100">
         <MessageAction tooltip={copied ? "Copied!" : "Copy text"} side="bottom">
           <button
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
+            className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
             aria-label="Copy text"
             onClick={copyToClipboard}
             type="button"
@@ -188,7 +188,7 @@ export function MessageUser({
         </MessageAction> */}
         <MessageAction tooltip="Delete" side="bottom">
           <button
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
+            className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
             aria-label="Delete"
             onClick={handleDelete}
             type="button"
