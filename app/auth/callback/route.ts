@@ -52,12 +52,16 @@ export async function GET(request: Request) {
 
   const forwardedHost = request.headers.get("x-forwarded-host")
   const isLocal = process.env.NODE_ENV === "development"
+  const host = forwardedHost || new URL(request.url).hostname
 
-  const redirectUrl = isLocal
-    ? `${origin}${next}`
-    : forwardedHost
-      ? `https://${forwardedHost}${next}`
-      : `${origin}${next}`
+  let baseUrl = ""
+  if (isLocal) {
+    baseUrl = origin
+  } else {
+    baseUrl = `https://${host}`
+  }
+
+  const redirectUrl = `${baseUrl}${next}`
 
   return NextResponse.redirect(redirectUrl)
 }
