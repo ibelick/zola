@@ -8,7 +8,7 @@ type SubMenuProps = {
 
 export function SubMenu({ hoveredModelData }: SubMenuProps) {
   return (
-    <div className="bg-popover w-[280px] rounded-md border p-3 shadow-md">
+    <div className="bg-popover border-border w-[280px] rounded-md border p-3 shadow-md">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">
           {hoveredModelData?.icon && (

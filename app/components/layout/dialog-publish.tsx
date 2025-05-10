@@ -124,16 +124,11 @@ export function DialogPublish({ agent }: DialogPublishProps) {
         <div className="grid gap-2">
           <div className="flex items-center gap-1">
             <div className="relative flex-1">
-              <Input
-                id="slug"
-                value={publicLink}
-                readOnly
-                className="flex-1 bg-gray-50"
-              />
+              <Input id="slug" value={publicLink} readOnly className="flex-1" />
               <Button
                 variant="outline"
                 onClick={copyLink}
-                className="bg-background absolute top-0 right-0 rounded-l-none"
+                className="bg-background hover:bg-background absolute top-0 right-0 rounded-l-none transition-colors"
               >
                 {copied ? (
                   <Check className="size-4" />
