@@ -17,11 +17,10 @@ import {
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { cn } from "@/lib/utils"
 import {
-  DotsThreeVertical,
+  DotsThree,
   GithubLogo,
   MagnifyingGlass,
   PencilSimple,
-  Share,
   Trash,
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -105,6 +104,34 @@ export function AppSidebar() {
   )
 }
 
+function LinkChatMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="hover:bg-secondary flex size-7 items-center justify-center rounded-md p-1 transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DotsThree size={18} className="text-primary" weight="bold" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuItem className="cursor-pointer">
+          <PencilSimple size={16} className="mr-2" />
+          Rename
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="text-destructive cursor-pointer"
+          variant="destructive"
+        >
+          <Trash size={16} className="mr-2" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 function LinkChat({
   chat,
   currentChatId,
@@ -134,32 +161,10 @@ function LinkChat({
       </Link>
 
       <div
-        className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 transition-opacity group-hover/chat:opacity-100"
+        className="absolute top-0 right-1 flex h-full items-center justify-center opacity-0 transition-opacity group-hover/chat:opacity-100"
         key={chat.id}
       >
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className="hover:bg-secondary rounded-md p-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <DotsThreeVertical size={16} className="text-muted-foreground" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem className="cursor-pointer">
-              <PencilSimple size={16} className="mr-2" />
-              Rename
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-destructive cursor-pointer"
-              variant="destructive"
-            >
-              <Trash size={16} className="mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <LinkChatMenu />
       </div>
     </div>
   )
