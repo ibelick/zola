@@ -24,7 +24,6 @@ import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { HeaderAgent } from "../layout/header-agent"
-import { AgentSuggestionTab } from "../suggestions/agent-suggestion-tab"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
@@ -392,15 +391,6 @@ export function Chat() {
           },
         }}
       >
-        {!chatId && messages.length === 0 && isMobile && (
-          <div className="relative right-0 bottom-0 left-0 mx-auto mb-8 flex h-8 w-auto items-center justify-center rounded-lg p-1">
-            <AgentSuggestionTab
-              isAgentMode={isAgentMode}
-              setIsAgentMode={setIsAgentMode}
-              onSelectSystemPrompt={handleSelectSystemPrompt}
-            />
-          </div>
-        )}
         <ChatInput
           value={input}
           onSuggestion={handleSuggestion}
@@ -421,15 +411,7 @@ export function Chat() {
           isAgentMode={isAgentMode}
         />
       </motion.div>
-      {!chatId && messages.length === 0 && !isMobile && (
-        <div className="absolute right-0 bottom-0 left-0 z-50 mx-auto mb-4 flex w-full justify-center">
-          <AgentSuggestionTab
-            isAgentMode={isAgentMode}
-            setIsAgentMode={setIsAgentMode}
-            onSelectSystemPrompt={handleSelectSystemPrompt}
-          />
-        </div>
-      )}
+
       <FeedbackWidget authUserId={user?.id} />
     </div>
   )
