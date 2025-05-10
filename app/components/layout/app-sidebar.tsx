@@ -2,6 +2,12 @@
 
 import { groupChatsByDate } from "@/app/components/history/utils"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -10,7 +16,14 @@ import {
 } from "@/components/ui/sidebar"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { cn } from "@/lib/utils"
-import { GithubLogo, MagnifyingGlass } from "@phosphor-icons/react"
+import {
+  DotsThreeVertical,
+  GithubLogo,
+  MagnifyingGlass,
+  PencilSimple,
+  Share,
+  Trash,
+} from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
@@ -92,6 +105,66 @@ export function AppSidebar() {
   )
 }
 
+function LinkChat({
+  chat,
+  currentChatId,
+}: {
+  chat: any
+  currentChatId: string
+}) {
+  return (
+    <div
+      className={cn(
+        "hover:bg-accent/80 hover:text-foreground group/chat relative w-full rounded-md transition-colors",
+        chat.id === currentChatId && "bg-accent hover:bg-accent text-foreground"
+      )}
+    >
+      <Link
+        href={`/c/${chat.id}`}
+        className="block w-full"
+        prefetch
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="text-primary relative line-clamp-1 mask-r-from-85% mask-r-to-90% px-2 py-2 text-sm text-ellipsis whitespace-nowrap"
+          title={chat.title || "Untitled Chat"}
+        >
+          {chat.title || "Untitled Chat"}
+        </div>
+      </Link>
+
+      <div
+        className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 transition-opacity group-hover/chat:opacity-100"
+        key={chat.id}
+      >
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="hover:bg-secondary rounded-md p-1"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DotsThreeVertical size={16} className="text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem className="cursor-pointer">
+              <PencilSimple size={16} className="mr-2" />
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive cursor-pointer"
+              variant="destructive"
+            >
+              <Trash size={16} className="mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  )
+}
+
 const SidebarSection = ({
   title,
   items,
@@ -108,22 +181,7 @@ const SidebarSection = ({
       </h3>
       <div className="space-y-0.5">
         {items.map((chat) => (
-          <Link
-            key={chat.id}
-            href={`/c/${chat.id}`}
-            className={cn(
-              "hover:bg-muted hover:text-foreground relative block w-full rounded-md transition-colors",
-              chat.id === currentChatId && "bg-accent text-foreground"
-            )}
-            prefetch
-          >
-            <div
-              className="text-primary relative line-clamp-1 mask-r-from-85% mask-r-to-90% px-2 py-2 text-sm text-ellipsis whitespace-nowrap"
-              title={chat.title || "Untitled Chat"}
-            >
-              {chat.title || "Untitled Chat"}
-            </div>
-          </Link>
+          <LinkChat key={chat.id} chat={chat} currentChatId={currentChatId} />
         ))}
       </div>
     </div>
