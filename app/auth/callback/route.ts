@@ -52,12 +52,14 @@ export async function GET(request: Request) {
 
   const forwardedHost = request.headers.get("x-forwarded-host")
   const isLocal = process.env.NODE_ENV === "development"
+  const isPreview = process.env.VERCEL_ENV === "preview"
 
-  const redirectUrl = isLocal
-    ? `${origin}${next}`
-    : forwardedHost
-      ? `https://${forwardedHost}${next}`
-      : `${origin}${next}`
+  const redirectUrl =
+    isLocal || isPreview
+      ? `${origin}${next}`
+      : forwardedHost
+        ? `https://${forwardedHost}${next}`
+        : `${origin}${next}`
 
   return NextResponse.redirect(redirectUrl)
 }
