@@ -64,7 +64,7 @@ export function SidebarItemMenu({
             Rename
           </DropdownMenuItem>
           <DropdownMenuItem
-            className="text-destructive cursor-pointer"
+            className="text-destructive"
             variant="destructive"
             onClick={(e) => {
               e.preventDefault()

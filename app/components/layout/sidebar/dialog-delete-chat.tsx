@@ -37,10 +37,9 @@ export function DialogDeleteChat({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={async () => {
-              await onConfirmDelete()
               setIsOpen(false)
+              await onConfirmDelete()
             }}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             Delete
           </AlertDialogAction>
