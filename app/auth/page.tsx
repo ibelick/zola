@@ -33,7 +33,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-background flex h-dvh flex-col">
+    <div className="bg-background flex h-dvh w-full flex-col">
       <HeaderGoBack href="/" />
 
       <main className="flex flex-1 flex-col items-center justify-center px-4 sm:px-6">
