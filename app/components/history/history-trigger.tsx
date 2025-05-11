@@ -51,6 +51,7 @@ export function HistoryTrigger({
       type="button"
       onClick={() => setIsOpen(true)}
       aria-label="Search"
+      tabIndex={isMobile ? -1 : 0}
     >
       {icon || <ListMagnifyingGlass size={24} />}
     </button>

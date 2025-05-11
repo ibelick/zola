@@ -93,6 +93,7 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
                 handleSave()
               }}
               className="hover:bg-secondary text-muted-foreground hover:text-primary flex size-7 items-center justify-center rounded-md p-1 transition-colors duration-150"
+              type="button"
             >
               <Check size={16} weight="bold" />
             </button>
@@ -102,6 +103,7 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
                 handleCancel()
               }}
               className="hover:bg-secondary text-muted-foreground hover:text-primary flex size-7 items-center justify-center rounded-md p-1 transition-colors duration-150"
+              type="button"
             >
               <X size={16} weight="bold" />
             </button>

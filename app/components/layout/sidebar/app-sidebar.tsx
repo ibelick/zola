@@ -1,6 +1,7 @@
 "use client"
 
 import { groupChatsByDate } from "@/app/components/history/utils"
+import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import {
   Sidebar,
   SidebarContent,
@@ -9,7 +10,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useChats } from "@/lib/chat-store/chats/provider"
-import { GithubLogo, MagnifyingGlass } from "@phosphor-icons/react"
+import { GithubLogo, MagnifyingGlass, X } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useParams } from "next/navigation"
 import { useMemo } from "react"
@@ -17,7 +18,8 @@ import { HistoryTrigger } from "../../history/history-trigger"
 import { SidebarList } from "./sidebar-list"
 
 export function AppSidebar() {
-  const { open } = useSidebar()
+  const isMobile = useBreakpoint(768)
+  const { open, setOpenMobile } = useSidebar()
   const { chats } = useChats()
   const params = useParams<{ chatId: string }>()
   const currentChatId = params.chatId
@@ -29,7 +31,15 @@ export function AppSidebar() {
     <Sidebar collapsible="offcanvas" variant="sidebar" className="border-none">
       <SidebarHeader className="h-14 pl-3">
         <div className="flex justify-between">
-          <div className="bg-sidebar flex-1" />
+          {isMobile && (
+            <button
+              type="button"
+              onClick={() => setOpenMobile(false)}
+              className="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-9 items-center justify-center rounded-md bg-transparent transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              <X size={24} />
+            </button>
+          )}
           <AnimatePresence mode="sync">
             {open && (
               <motion.div
