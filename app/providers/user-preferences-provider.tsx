@@ -9,7 +9,7 @@ type UserPreferences = {
 }
 
 const defaultPreferences: UserPreferences = {
-  layout: "sidebar",
+  layout: "fullscreen",
 }
 
 const PREFERENCES_STORAGE_KEY = "user-preferences"
@@ -26,14 +26,23 @@ const UserPreferencesContext = createContext<
 
 export function UserPreferencesProvider({
   children,
+  userId,
 }: {
   children: React.ReactNode
+  userId?: string
 }) {
   const [preferences, setPreferences] =
     useState<UserPreferences>(defaultPreferences)
   const [isInitialized, setIsInitialized] = useState(false)
+  const isAuthenticated = !!userId
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setPreferences((prev) => ({ ...prev, layout: "fullscreen" }))
+      setIsInitialized(true)
+      return
+    }
+
     try {
       const storedPrefs = localStorage.getItem(PREFERENCES_STORAGE_KEY)
 
@@ -52,10 +61,10 @@ export function UserPreferencesProvider({
     } finally {
       setIsInitialized(true)
     }
-  }, [])
+  }, [isAuthenticated])
 
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && isAuthenticated) {
       try {
         localStorage.setItem(
           PREFERENCES_STORAGE_KEY,
@@ -66,10 +75,12 @@ export function UserPreferencesProvider({
         console.error("Failed to save user preferences:", error)
       }
     }
-  }, [preferences, isInitialized])
+  }, [preferences, isInitialized, isAuthenticated])
 
   const setLayout = (layout: LayoutType) => {
-    setPreferences((prev) => ({ ...prev, layout }))
+    if (isAuthenticated || layout === "fullscreen") {
+      setPreferences((prev) => ({ ...prev, layout }))
+    }
   }
 
   return (
