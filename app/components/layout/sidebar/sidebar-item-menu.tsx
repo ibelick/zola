@@ -1,3 +1,4 @@
+import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import {
   DropdownMenu,
@@ -28,6 +29,7 @@ export function SidebarItemMenu({
   const { deleteMessages } = useMessages()
   const { deleteChat } = useChats()
   const { chatId } = useChatSession()
+  const isMobile = useBreakpoint(768)
 
   const handleConfirmDelete = async () => {
     await deleteMessages()
@@ -37,7 +39,8 @@ export function SidebarItemMenu({
   return (
     <>
       <DropdownMenu
-        // modal={false}
+        // shadcn/ui / radix pointer-events-none issue
+        modal={isMobile ? true : false}
         onOpenChange={onMenuOpenChange}
       >
         <DropdownMenuTrigger asChild>
