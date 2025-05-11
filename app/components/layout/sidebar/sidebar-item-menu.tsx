@@ -14,9 +14,13 @@ import { DialogDeleteChat } from "./dialog-delete-chat"
 
 type SidebarItemMenuProps = {
   chat: any
+  onStartEditing: () => void
 }
 
-export function SidebarItemMenu({ chat }: SidebarItemMenuProps) {
+export function SidebarItemMenu({
+  chat,
+  onStartEditing,
+}: SidebarItemMenuProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const router = useRouter()
   const { deleteMessages } = useMessages()
@@ -40,7 +44,14 @@ export function SidebarItemMenu({ chat }: SidebarItemMenuProps) {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">
-          <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onStartEditing()
+            }}
+          >
             <PencilSimple size={16} className="mr-2" />
             Rename
           </DropdownMenuItem>
