@@ -1,0 +1,62 @@
+/* scrollbar.css */
+
+/* Webkit browsers (Chrome, Safari) */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 20px;
+  }
+  
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+  
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+  }
+  
+  /* Hide scrollbar arrows in Firefox */
+  * {
+    scrollbar-arrow-color: transparent;
+  }
+  
+  /* For textarea specifically */
+  textarea {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+    overflow-y: auto !important;
+    max-height: 64rem !important;
+  }
+  
+  textarea::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  textarea::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  textarea::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 20px;
+  }
+  
+  textarea::-webkit-scrollbar-button {
+    display: none;
+  }
+  
+  /* Make sure textarea grows with content up to a point */
+  textarea {
+    min-height: 1.5rem;
+    transition: height 0.1s ease;
+  }
