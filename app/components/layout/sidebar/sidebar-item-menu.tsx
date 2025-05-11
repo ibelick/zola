@@ -36,7 +36,10 @@ export function SidebarItemMenu({
 
   return (
     <>
-      <DropdownMenu modal={false} onOpenChange={onMenuOpenChange}>
+      <DropdownMenu
+        // modal={false}
+        onOpenChange={onMenuOpenChange}
+      >
         <DropdownMenuTrigger asChild>
           <button
             className="hover:bg-secondary flex size-7 items-center justify-center rounded-md p-1 transition-colors duration-150"

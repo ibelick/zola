@@ -1,3 +1,4 @@
+import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { cn } from "@/lib/utils"
 import { Check, X } from "@phosphor-icons/react"
@@ -16,6 +17,7 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateTitle } = useChats()
+  const isMobile = useBreakpoint(768)
 
   // Reset edit title when chat changes
   useEffect(() => {
@@ -126,8 +128,10 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
           </Link>
 
           <div
-            className="absolute top-0 right-1 flex h-full items-center justify-center opacity-0 transition-opacity group-hover/chat:opacity-100"
-            key={chat.id}
+            className={cn(
+              "absolute top-0 right-1 flex h-full items-center justify-center opacity-0 transition-opacity group-hover/chat:opacity-100",
+              isMobile && "opacity-100 group-hover/chat:opacity-100"
+            )}
           >
             <SidebarItemMenu
               chat={chat}

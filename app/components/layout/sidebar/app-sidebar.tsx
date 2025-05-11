@@ -10,28 +10,34 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useChats } from "@/lib/chat-store/chats/provider"
-import { GithubLogo, MagnifyingGlass, X } from "@phosphor-icons/react"
+import {
+  ChatTeardropText,
+  GithubLogo,
+  MagnifyingGlass,
+  X,
+} from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useParams } from "next/navigation"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { HistoryTrigger } from "../../history/history-trigger"
 import { SidebarList } from "./sidebar-list"
 
 export function AppSidebar() {
   const isMobile = useBreakpoint(768)
   const { open, setOpenMobile } = useSidebar()
-  const { chats } = useChats()
+  const { chats, isLoading } = useChats()
   const params = useParams<{ chatId: string }>()
   const currentChatId = params.chatId
 
   // Group chats by time periods - memoized to avoid recalculation
   const groupedChats = useMemo(() => groupChatsByDate(chats, ""), [chats])
+  const hasChats = chats.length > 0
 
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" className="border-none">
       <SidebarHeader className="h-14 pl-3">
         <div className="flex justify-between">
-          {isMobile && (
+          {isMobile ? (
             <button
               type="button"
               onClick={() => setOpenMobile(false)}
@@ -39,6 +45,8 @@ export function AppSidebar() {
             >
               <X size={24} />
             </button>
+          ) : (
+            <div className="h-full" />
           )}
           <AnimatePresence mode="sync">
             {open && (
@@ -60,22 +68,31 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent className="mask-t-from-98% mask-t-to-100% mask-b-from-98% mask-b-to-100% px-3 pt-0 pb-4">
-        <div className="space-y-5">
-          {groupedChats?.map((group) => (
-            <SidebarList
-              key={group.name}
-              title={group.name}
-              items={group.chats}
-              currentChatId={currentChatId}
+        {isLoading ? (
+          <div className="h-full" />
+        ) : hasChats ? (
+          <div className="space-y-5">
+            {groupedChats?.map((group) => (
+              <SidebarList
+                key={group.name}
+                title={group.name}
+                items={group.chats}
+                currentChatId={currentChatId}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex h-[calc(100vh-160px)] flex-col items-center justify-center">
+            <ChatTeardropText
+              size={24}
+              className="text-muted-foreground mb-1 opacity-40"
             />
-          ))}
-
-          {!groupedChats?.length && (
-            <div className="text-muted-foreground py-4 text-center text-sm">
-              No chat history found.
+            <div className="text-muted-foreground text-center">
+              <p className="mb-1 text-base font-medium">No chats yet</p>
+              <p className="text-sm opacity-70">Start a new conversation</p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </SidebarContent>
       <SidebarFooter className="mb-2 p-3">
         <a
