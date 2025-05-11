@@ -1,7 +1,7 @@
 "use client"
 
-import { AppSidebar } from "@/app/components/layout/app-sidebar"
 import { Header } from "@/app/components/layout/header"
+import { AppSidebar } from "@/app/components/layout/sidebar/app-sidebar"
 import { useUserPreferences } from "@/app/providers/user-preferences-provider"
 
 export function LayoutApp({ children }: { children: React.ReactNode }) {
