@@ -13,6 +13,7 @@ type SidebarItemProps = {
 export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(chat.title || "Untitled Chat")
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateTitle } = useChats()
 
@@ -36,22 +37,28 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
   const handleSave = async () => {
     await updateTitle(chat.id, editTitle)
     setIsEditing(false)
+    setIsMenuOpen(false)
   }
 
   const handleCancel = () => {
     setEditTitle(chat.title || "Untitled Chat")
     setIsEditing(false)
+    setIsMenuOpen(false)
   }
 
   const handleClickOutside = () => {
     handleCancel()
   }
 
+  const handleMenuOpenChange = (open: boolean) => {
+    setIsMenuOpen(open)
+  }
+
   return (
     <div
       className={cn(
         "hover:bg-accent/80 hover:text-foreground group/chat relative w-full rounded-md transition-colors",
-        (chat.id === currentChatId || isEditing) &&
+        (chat.id === currentChatId || isEditing || isMenuOpen) &&
           "bg-accent hover:bg-accent text-foreground"
       )}
       onClick={(e) => {
@@ -61,7 +68,7 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
       }}
     >
       {isEditing ? (
-        <div className="bg-accent flex items-center rounded-md px-2 py-1.5">
+        <div className="bg-accent flex items-center rounded-md py-1 pr-1 pl-2">
           <input
             ref={inputRef}
             value={editTitle}
@@ -85,18 +92,18 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
                 e.stopPropagation()
                 handleSave()
               }}
-              className="text-muted-foreground hover:text-primary flex size-6 items-center justify-center"
+              className="hover:bg-secondary text-muted-foreground hover:text-primary flex size-7 items-center justify-center rounded-md p-1 transition-colors duration-150"
             >
-              <Check size={16} />
+              <Check size={16} weight="bold" />
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 handleCancel()
               }}
-              className="text-muted-foreground hover:text-primary flex size-6 items-center justify-center"
+              className="hover:bg-secondary text-muted-foreground hover:text-primary flex size-7 items-center justify-center rounded-md p-1 transition-colors duration-150"
             >
-              <X size={16} />
+              <X size={16} weight="bold" />
             </button>
           </div>
         </div>
@@ -120,7 +127,11 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
             className="absolute top-0 right-1 flex h-full items-center justify-center opacity-0 transition-opacity group-hover/chat:opacity-100"
             key={chat.id}
           >
-            <SidebarItemMenu chat={chat} onStartEditing={handleStartEditing} />
+            <SidebarItemMenu
+              chat={chat}
+              onStartEditing={handleStartEditing}
+              onMenuOpenChange={handleMenuOpenChange}
+            />
           </div>
         </>
       )}

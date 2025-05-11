@@ -15,11 +15,13 @@ import { DialogDeleteChat } from "./dialog-delete-chat"
 type SidebarItemMenuProps = {
   chat: any
   onStartEditing: () => void
+  onMenuOpenChange?: (open: boolean) => void
 }
 
 export function SidebarItemMenu({
   chat,
   onStartEditing,
+  onMenuOpenChange,
 }: SidebarItemMenuProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const router = useRouter()
@@ -34,10 +36,10 @@ export function SidebarItemMenu({
 
   return (
     <>
-      <DropdownMenu modal={false}>
+      <DropdownMenu modal={false} onOpenChange={onMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button
-            className="hover:bg-secondary flex size-7 items-center justify-center rounded-md p-1 transition-colors"
+            className="hover:bg-secondary flex size-7 items-center justify-center rounded-md p-1 transition-colors duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             <DotsThree size={18} className="text-primary" weight="bold" />
