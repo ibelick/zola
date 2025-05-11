@@ -1,4 +1,5 @@
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
+import useClickOutside from "@/app/hooks/use-click-outside"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { cn } from "@/lib/utils"
 import { Check, X } from "@phosphor-icons/react"
@@ -13,18 +14,23 @@ type SidebarItemProps = {
 
 export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [editTitle, setEditTitle] = useState(chat.title || "Untitled Chat")
+  const [editTitle, setEditTitle] = useState(chat.title)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateTitle } = useChats()
   const isMobile = useBreakpoint(768)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
-  // Reset edit title when chat changes
+  useClickOutside(containerRef, () => {
+    if (isEditing) {
+      handleSave()
+    }
+  })
+
   useEffect(() => {
-    setEditTitle(chat.title || "Untitled Chat")
+    setEditTitle(chat.title)
   }, [chat.title])
 
-  // Focus input when entering edit mode
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus()
@@ -37,19 +43,15 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
   }
 
   const handleSave = async () => {
-    await updateTitle(chat.id, editTitle)
     setIsEditing(false)
     setIsMenuOpen(false)
+    await updateTitle(chat.id, editTitle)
   }
 
   const handleCancel = () => {
-    setEditTitle(chat.title || "Untitled Chat")
+    setEditTitle(chat.title)
     setIsEditing(false)
     setIsMenuOpen(false)
-  }
-
-  const handleClickOutside = () => {
-    handleCancel()
   }
 
   const handleMenuOpenChange = (open: boolean) => {
@@ -68,6 +70,7 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
           e.stopPropagation()
         }
       }}
+      ref={containerRef}
     >
       {isEditing ? (
         <div className="bg-accent flex items-center rounded-md py-1 pr-1 pl-2">
@@ -85,7 +88,6 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
                 handleCancel()
               }
             }}
-            onBlur={handleClickOutside}
             autoFocus
           />
           <div className="flex gap-0.5">

@@ -19,7 +19,7 @@ import {
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useParams } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo } from "react"
 import { HistoryTrigger } from "../../history/history-trigger"
 import { SidebarList } from "./sidebar-list"
 
