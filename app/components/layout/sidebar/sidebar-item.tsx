@@ -132,6 +132,7 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
               "absolute top-0 right-1 flex h-full items-center justify-center opacity-0 transition-opacity group-hover/chat:opacity-100",
               isMobile && "opacity-100 group-hover/chat:opacity-100"
             )}
+            key={chat.id}
           >
             <SidebarItemMenu
               chat={chat}

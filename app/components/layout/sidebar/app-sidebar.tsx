@@ -2,6 +2,7 @@
 
 import { groupChatsByDate } from "@/app/components/history/utils"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Sidebar,
   SidebarContent,
@@ -68,31 +69,33 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent className="mask-t-from-98% mask-t-to-100% mask-b-from-98% mask-b-to-100% px-3 pt-0 pb-4">
-        {isLoading ? (
-          <div className="h-full" />
-        ) : hasChats ? (
-          <div className="space-y-5">
-            {groupedChats?.map((group) => (
-              <SidebarList
-                key={group.name}
-                title={group.name}
-                items={group.chats}
-                currentChatId={currentChatId}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex h-[calc(100vh-160px)] flex-col items-center justify-center">
-            <ChatTeardropText
-              size={24}
-              className="text-muted-foreground mb-1 opacity-40"
-            />
-            <div className="text-muted-foreground text-center">
-              <p className="mb-1 text-base font-medium">No chats yet</p>
-              <p className="text-sm opacity-70">Start a new conversation</p>
+        <ScrollArea className="flex h-full [&>div>div]:!block">
+          {isLoading ? (
+            <div className="h-full" />
+          ) : hasChats ? (
+            <div className="space-y-5">
+              {groupedChats?.map((group) => (
+                <SidebarList
+                  key={group.name}
+                  title={group.name}
+                  items={group.chats}
+                  currentChatId={currentChatId}
+                />
+              ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="flex h-[calc(100vh-160px)] flex-col items-center justify-center">
+              <ChatTeardropText
+                size={24}
+                className="text-muted-foreground mb-1 opacity-40"
+              />
+              <div className="text-muted-foreground text-center">
+                <p className="mb-1 text-base font-medium">No chats yet</p>
+                <p className="text-sm opacity-70">Start a new conversation</p>
+              </div>
+            </div>
+          )}
+        </ScrollArea>
       </SidebarContent>
       <SidebarFooter className="mb-2 p-3">
         <a
