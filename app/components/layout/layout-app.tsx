@@ -9,7 +9,7 @@ export function LayoutApp({ children }: { children: React.ReactNode }) {
   const hasSidebar = preferences.layout === "sidebar"
 
   return (
-    <div className="bg-background flex h-screen w-full overflow-hidden">
+    <div className="bg-background flex h-dvh w-full overflow-hidden">
       {hasSidebar && <AppSidebar />}
       <main className="@container relative h-dvh w-0 flex-shrink flex-grow overflow-y-auto">
         <Header hasSidebar={hasSidebar} />
