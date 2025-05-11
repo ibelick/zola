@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Message,
   MessageAction,
@@ -6,11 +8,12 @@ import {
 } from "@/components/prompt-kit/message"
 import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
-import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
+import { ArrowClockwise, Check, Copy, SpeakerHigh, StopCircle } from "@phosphor-icons/react"
 import { getSources } from "./get-sources"
-import { Reasoning } from "./reasoning"
 import { SourcesList } from "./sources-list"
 import { ToolInvocation } from "./tool-invocation"
+import { useSpeech } from 'react-text-to-speech'
+import { Volume2 } from "lucide-react"
 
 type MessageAssistantProps = {
   children: string
@@ -20,7 +23,6 @@ type MessageAssistantProps = {
   copyToClipboard?: () => void
   onReload?: () => void
   parts?: MessageAISDK["parts"]
-  status?: "streaming" | "ready" | "submitted" | "error"
 }
 
 export function MessageAssistant({
@@ -31,18 +33,15 @@ export function MessageAssistant({
   copyToClipboard,
   onReload,
   parts,
-  status,
 }: MessageAssistantProps) {
   const sources = getSources(parts)
-
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"
   )
-  const reasoningParts = parts?.find((part) => part.type === "reasoning")
-
   const contentNullOrEmpty = children === null || children === ""
 
-  const isLastStreaming = status === "streaming" && isLast
+  // Use react-text-to-speech for reading the message content
+  const { speechStatus, start, stop } = useSpeech({ text: children })
 
   return (
     <Message
@@ -52,15 +51,11 @@ export function MessageAssistant({
       )}
     >
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
-        {reasoningParts && reasoningParts.reasoning && (
-          <Reasoning reasoning={reasoningParts.reasoning} />
-        )}
-
         {toolInvocationParts && toolInvocationParts.length > 0 && (
           <ToolInvocation toolInvocations={toolInvocationParts} />
         )}
 
-        {contentNullOrEmpty ? null : (
+        {!contentNullOrEmpty && (
           <MessageContent
             className={cn(
               "prose dark:prose-invert relative min-w-full bg-transparent p-0",
@@ -74,18 +69,19 @@ export function MessageAssistant({
 
         {sources && sources.length > 0 && <SourcesList sources={sources} />}
 
-        {Boolean(isLastStreaming || contentNullOrEmpty) ? null : (
+        {!contentNullOrEmpty && (
           <MessageActions
             className={cn(
-              "-ml-2 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100"
+              "flex gap-0 opacity-0 transition-opacity group-hover:opacity-100"
             )}
           >
             <MessageAction
               tooltip={copied ? "Copied!" : "Copy text"}
               side="bottom"
+              delayDuration={0}
             >
               <button
-                className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
                 aria-label="Copy text"
                 onClick={copyToClipboard}
                 type="button"
@@ -99,12 +95,30 @@ export function MessageAssistant({
             </MessageAction>
             <MessageAction tooltip="Regenerate" side="bottom" delayDuration={0}>
               <button
-                className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
                 aria-label="Regenerate"
                 onClick={onReload}
                 type="button"
               >
                 <ArrowClockwise className="size-4" />
+              </button>
+            </MessageAction>
+            <MessageAction
+              tooltip={speechStatus === 'started' ? "Stop Reading" : "Read Aloud"}
+              side="bottom"
+              delayDuration={0}
+            >
+              <button
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
+                aria-label="Text to Speech"
+                onClick={() => (speechStatus === 'started' ? stop() : start())}
+                type="button"
+              >
+                {speechStatus === 'started' ? (
+                  <StopCircle className="size-4 text-red-500" />
+                ) : (
+                  <Volume2 className="size-4 text-green-500" />
+                )}
               </button>
             </MessageAction>
           </MessageActions>
