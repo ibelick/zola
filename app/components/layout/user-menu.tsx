@@ -24,7 +24,7 @@ export function UserMenu() {
   if (!user) return null
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger>

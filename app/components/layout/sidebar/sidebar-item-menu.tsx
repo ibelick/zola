@@ -30,7 +30,7 @@ export function SidebarItemMenu({ chat }: SidebarItemMenuProps) {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <button
             className="hover:bg-secondary flex size-7 items-center justify-center rounded-md p-1 transition-colors"
