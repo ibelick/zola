@@ -460,7 +460,7 @@ function SingleToolCard({
                   <div className="text-muted-foreground mb-1 text-xs font-medium">
                     Arguments
                   </div>
-                  <div className="rounded border bg-slate-50 p-2 text-sm">
+                  <div className="bg-background rounded border p-2 text-sm">
                     {formattedArgs}
                   </div>
                 </div>
@@ -472,7 +472,7 @@ function SingleToolCard({
                   <div className="text-muted-foreground mb-1 text-xs font-medium">
                     Result
                   </div>
-                  <div className="max-h-60 overflow-auto rounded border bg-slate-50 p-2 text-sm">
+                  <div className="bg-background max-h-60 overflow-auto rounded border p-2 text-sm">
                     {parseError ? (
                       <div className="text-red-500">{parseError}</div>
                     ) : (
