@@ -64,7 +64,7 @@ export function Chat() {
     currentChat?.model || user?.preferred_model || MODEL_DEFAULT
   )
   const [systemPrompt, setSystemPrompt] = useState(
-    currentChat?.system_prompt || SYSTEM_PROMPT_DEFAULT
+    currentChat?.system_prompt || user?.system_prompt || SYSTEM_PROMPT_DEFAULT
   )
   const [hydrated, setHydrated] = useState(false)
   const searchParams = useSearchParams()
@@ -102,23 +102,17 @@ export function Chat() {
     setHasDialogAuth,
   })
 
-  const {
-    handleInputChange,
-    handleSelectSystemPrompt,
-    handleModelChange,
-    handleDelete,
-    handleEdit,
-  } = useChatHandlers({
-    messages,
-    setMessages,
-    setInput,
-    setSystemPrompt,
-    setSelectedModel,
-    selectedModel,
-    chatId,
-    updateChatModel,
-    user,
-  })
+  const { handleInputChange, handleModelChange, handleDelete, handleEdit } =
+    useChatHandlers({
+      messages,
+      setMessages,
+      setInput,
+      setSelectedModel,
+      selectedModel,
+      chatId,
+      updateChatModel,
+      user,
+    })
 
   // when chatId is null, set messages to an empty array
   useEffect(() => {

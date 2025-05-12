@@ -9,7 +9,6 @@ type UseChatHandlersProps = {
     messages: Message[] | ((messages: Message[]) => Message[])
   ) => void
   setInput: (input: string) => void
-  setSystemPrompt: (systemPrompt: string) => void
   setSelectedModel: (model: string) => void
   selectedModel: string
   chatId: string | null
@@ -21,7 +20,6 @@ export function useChatHandlers({
   messages,
   setMessages,
   setInput,
-  setSystemPrompt,
   setSelectedModel,
   selectedModel,
   chatId,
@@ -33,13 +31,6 @@ export function useChatHandlers({
       setInput(value)
     },
     [setInput]
-  )
-
-  const handleSelectSystemPrompt = useCallback(
-    (newSystemPrompt: string) => {
-      setSystemPrompt(newSystemPrompt)
-    },
-    [setSystemPrompt]
   )
 
   const handleModelChange = useCallback(
@@ -91,7 +82,6 @@ export function useChatHandlers({
 
   return {
     handleInputChange,
-    handleSelectSystemPrompt,
     handleModelChange,
     handleDelete,
     handleEdit,
