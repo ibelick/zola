@@ -71,7 +71,6 @@ export function Chat() {
   const hasSentFirstMessageRef = useRef(false)
   const { agent } = useAgent()
   const isMobile = useBreakpoint(768)
-  const [isAgentMode, setIsAgentMode] = useState(false)
 
   const isAuthenticated = !!user?.id
   const {
@@ -408,7 +407,6 @@ export function Chat() {
           stop={stop}
           status={status}
           placeholder={"Ask Zola anything"}
-          isAgentMode={isAgentMode}
         />
       </motion.div>
 

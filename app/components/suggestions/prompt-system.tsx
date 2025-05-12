@@ -8,22 +8,18 @@ import {
 } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
 import { AnimatePresence } from "motion/react"
-import { useRouter } from "next/navigation"
 import React, { memo, useEffect, useMemo, useState } from "react"
-import { Agents } from "../chat-input/agents"
 import { Suggestions } from "../chat-input/suggestions"
 
 type PromptSystemProps = {
   onValueChange: (value: string) => void
   onSuggestion: (suggestion: string) => void
-  isAgentMode: boolean
   value: string
 }
 
 export const PromptSystem = memo(function PromptSystem({
   onValueChange,
   onSuggestion,
-  isAgentMode,
   value,
 }: PromptSystemProps) {
   const [sugestedAgents, setSugestedAgents] = useState<
@@ -63,15 +59,11 @@ export const PromptSystem = memo(function PromptSystem({
     <>
       <div className="relative order-1 w-full md:absolute md:bottom-[-70px] md:order-2 md:h-[70px]">
         <AnimatePresence mode="popLayout">
-          {isAgentMode ? (
-            <Agents sugestedAgents={sugestedAgents || []} />
-          ) : (
-            <Suggestions
-              onValueChange={onValueChange}
-              onSuggestion={onSuggestion}
-              value={value}
-            />
-          )}
+          <Suggestions
+            onValueChange={onValueChange}
+            onSuggestion={onSuggestion}
+            value={value}
+          />
         </AnimatePresence>
       </div>
     </>

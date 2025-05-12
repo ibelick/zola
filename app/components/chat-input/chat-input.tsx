@@ -34,7 +34,6 @@ type ChatInputProps = {
   stop: () => void
   status?: "submitted" | "streaming" | "ready" | "error"
   placeholder?: string
-  isAgentMode: boolean
 }
 
 export function ChatInput({
@@ -53,7 +52,6 @@ export function ChatInput({
   stop,
   status,
   placeholder,
-  isAgentMode,
 }: ChatInputProps) {
   const { agent } = useAgent()
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
@@ -148,7 +146,6 @@ export function ChatInput({
     <div className="relative flex w-full flex-col gap-4">
       {hasSuggestions && (
         <PromptSystem
-          isAgentMode={isAgentMode}
           onValueChange={onValueChange}
           onSuggestion={onSuggestion}
           value={value}
