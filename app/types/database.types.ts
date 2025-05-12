@@ -239,6 +239,7 @@ export type Database = {
           last_active_at: string | null
           daily_pro_message_count: number | null
           daily_pro_reset: string | null
+          system_prompt: string | null
         }
         Insert: {
           anonymous?: boolean | null
@@ -255,6 +256,7 @@ export type Database = {
           last_active_at?: string | null
           daily_pro_message_count?: number | null
           daily_pro_reset?: string | null
+          system_prompt?: string | null
         }
         Update: {
           anonymous?: boolean | null
@@ -271,6 +273,7 @@ export type Database = {
           last_active_at?: string | null
           daily_pro_message_count?: number | null
           daily_pro_reset?: string | null
+          system_prompt?: string | null
         }
         Relationships: []
       }

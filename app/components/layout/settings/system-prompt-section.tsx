@@ -1,27 +1,46 @@
 "use client"
 
+import { useUser } from "@/app/providers/user-provider"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
 import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export function SystemPromptSection() {
+  const { user, updateUser } = useUser()
   const [prompt, setPrompt] = useState("")
-  const [savedPrompt, setSavedPrompt] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const savePrompt = () => {
-    // TODO: Replace with actual API call
-    console.log("Saving prompt to API:", prompt)
+  useEffect(() => {
+    if (user?.system_prompt) {
+      setPrompt(user.system_prompt)
+    }
+  }, [user?.system_prompt])
 
-    setSavedPrompt(prompt)
+  const savePrompt = async () => {
+    if (!user?.id) return
 
-    toast({
-      title: "Prompt saved",
-      description: "It’ll be used for new chats unless you select an agent.",
-      status: "success",
-    })
+    setIsLoading(true)
+    try {
+      await updateUser({ system_prompt: prompt })
+
+      toast({
+        title: "Prompt saved",
+        description: "It'll be used for new chats unless you select an agent.",
+        status: "success",
+      })
+    } catch (error) {
+      console.error("Error saving system prompt:", error)
+      toast({
+        title: "Failed to save",
+        description: "Couldn't save your system prompt. Please try again.",
+        status: "error",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -30,7 +49,7 @@ export function SystemPromptSection() {
   }
 
   // Show save button only when prompt differs from saved prompt
-  const hasChanges = prompt !== savedPrompt
+  const hasChanges = prompt !== (user?.system_prompt || "")
 
   return (
     <div className="border-border border-t">
@@ -56,8 +75,13 @@ export function SystemPromptSection() {
                 transition={{ duration: 0.2 }}
                 className="absolute right-3 bottom-3"
               >
-                <Button size="sm" onClick={savePrompt} className="shadow-sm">
-                  Save prompt
+                <Button
+                  size="sm"
+                  onClick={savePrompt}
+                  className="shadow-sm"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Saving..." : "Save prompt"}
                 </Button>
               </motion.div>
             )}
