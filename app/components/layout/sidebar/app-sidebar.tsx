@@ -30,7 +30,6 @@ export function AppSidebar() {
   const params = useParams<{ chatId: string }>()
   const currentChatId = params.chatId
 
-  // Group chats by time periods - memoized to avoid recalculation
   const groupedChats = useMemo(() => groupChatsByDate(chats, ""), [chats])
   const hasChats = chats.length > 0
 
@@ -49,12 +48,12 @@ export function AppSidebar() {
           ) : (
             <div className="h-full" />
           )}
-          <AnimatePresence mode="sync">
+          <AnimatePresence mode="sync" initial={false}>
             {open && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.4 }}
+                initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.4 }}
+                exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.15, delay: 0.1, ease: "easeOut" }}
                 className="pt-0"
               >
