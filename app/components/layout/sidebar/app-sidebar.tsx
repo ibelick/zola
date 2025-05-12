@@ -67,7 +67,7 @@ export function AppSidebar() {
           </AnimatePresence>
         </div>
       </SidebarHeader>
-      <SidebarContent className="mask-t-from-98% mask-t-to-100% mask-b-from-98% mask-b-to-100% px-3 pt-0 pb-4">
+      <SidebarContent className="mask-t-from-98% mask-t-to-100% mask-b-from-98% mask-b-to-100% px-3">
         <ScrollArea className="flex h-full [&>div>div]:!block">
           {isLoading ? (
             <div className="h-full" />
