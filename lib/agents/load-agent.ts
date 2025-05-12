@@ -18,15 +18,20 @@ export async function loadAgent(agentId: string) {
     throw new Error("Agent not found")
   }
 
-  const activeTools = (agent.tools || []).reduce<Record<ToolName, ToolType>>(
-    (acc, toolName) => {
-      if (tools[toolName as ToolName]) {
-        acc[toolName as ToolName] = tools[toolName as ToolName] as ToolType
-      }
-      return acc
-    },
-    {} as Record<ToolName, ToolType>
-  )
+  const activeTools =
+    !agent.tools || agent.tools.length === 0
+      ? null
+      : agent.tools.reduce<Record<ToolName, ToolType>>(
+          (acc, toolName) => {
+            if (tools[toolName as ToolName]) {
+              acc[toolName as ToolName] = tools[
+                toolName as ToolName
+              ] as ToolType
+            }
+            return acc
+          },
+          {} as Record<ToolName, ToolType>
+        )
 
   return {
     systemPrompt: agent.system_prompt,
