@@ -160,3 +160,32 @@ code {
 [data-sonner-toaster] > li {
   width: 100%;
 }
+
+/* Custom scrollbar styles for Command History */
+.command-history-scrollbar-target::-webkit-scrollbar {
+  width: 6px;
+}
+
+.command-history-scrollbar-target::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Default (Light mode) scrollbar thumb */
+.command-history-scrollbar-target::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+.command-history-scrollbar-target {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent; /* thumb track */
+}
+
+/* Dark mode scrollbar thumb */
+html.dark .command-history-scrollbar-target::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.25);
+}
+
+html.dark .command-history-scrollbar-target {
+  scrollbar-color: rgba(255,255,255,0.25) transparent; /* thumb track */
+}

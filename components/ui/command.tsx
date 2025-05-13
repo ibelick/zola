@@ -12,6 +12,15 @@ import { MagnifyingGlass } from "@phosphor-icons/react"
 import { Command as CommandPrimitive } from "cmdk"
 import * as React from "react"
 
+interface CommandDialogPropsExternal extends React.ComponentProps<typeof Dialog> {
+  title?: string
+  description?: string
+  dialogContentClassName?: string
+  className?: string
+  hasCloseButton?: boolean
+  commandProps?: React.ComponentProps<typeof CommandPrimitive>
+}
+
 function Command({
   className,
   ...props
@@ -32,19 +41,29 @@ function CommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
   children,
+  dialogContentClassName,
+  className,
+  hasCloseButton,
+  commandProps,
   ...props
-}: React.ComponentProps<typeof Dialog> & {
-  title?: string
-  description?: string
-}) {
+}: CommandDialogPropsExternal) {
   return (
     <Dialog {...props}>
       <DialogHeader className="sr-only">
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
-      <DialogContent className="overflow-hidden border-none p-0 sm:max-w-3xl">
-        <Command className="[&_[cmdk-group-heading]]:text-muted-foreground border-none **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 [&_[cmdk-item]_svg]:border-none">
+      <DialogContent
+        hasCloseButton={hasCloseButton}
+        className={cn("overflow-hidden p-0 h-3/4 border-none", dialogContentClassName)}
+      >
+        <Command
+          className={cn(
+            "[&_[cmdk-group-heading]]:text-muted-foreground border-none [&_div[data-slot='command-input-wrapper']]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 [&_[cmdk-item]_svg]:border-none",
+            className
+          )}
+          {...commandProps}
+        >
           {children}
         </Command>
       </DialogContent>
@@ -59,9 +78,8 @@ function CommandInput({
   return (
     <div
       data-slot="command-input-wrapper"
-      className="flex h-9 items-center gap-2 border-b px-3"
+      className="flex h-12 items-center gap-2 border-b pl-3 pr-10"
     >
-      <MagnifyingGlass className="size-4 shrink-0 opacity-50" />
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
@@ -70,6 +88,7 @@ function CommandInput({
         )}
         {...props}
       />
+      <MagnifyingGlass className="size-5 shrink-0 opacity-50" />
     </div>
   )
 }
