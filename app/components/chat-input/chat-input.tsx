@@ -20,73 +20,6 @@ import { FileList } from "./file-list"
 import { SelectModel } from "./select-model"
 import { SelectedAgent } from "./selected-agent"
 
-// Mock agents for testing - remove or replace with actual data source
-const BASE_AGENTS: Agent[] = [
-  {
-    id: "agent-linear",
-    name: "Linear",
-    slug: "linear",
-    avatar_url: null,
-    creator_id: "system",
-    category: "product",
-    is_public: true,
-    remixable: true,
-    model_preference: null,
-    tags: ["product", "planning", "clean-ui"],
-    description:
-      "Create issues, structure roadmaps, and plan product sprints. Built for fast, focused teams",
-    system_prompt:
-      "You are a precise product assistant. When given context, you generate clear, structured tasks and product docs. Always suggest the next concrete step and format outputs for async work.",
-    example_inputs: [
-      "Plan a sprint for Q2",
-      "Create tasks from this meeting summary",
-    ],
-    tools: null,
-    max_steps: null,
-    tools_enabled: false,
-    created_at: new Date().toISOString(),
-    updated_at: null,
-    mcp_config: null,
-  },
-]
-
-const LIST_OF_AGENTS = Array.from({ length: 10 }, (_, index) => ({
-  ...BASE_AGENTS[0],
-  id: `agent-${index}`,
-  slug: `agent-${index}`,
-}))
-
-const MOCK_AGENTS: Agent[] = [
-  {
-    id: "agent-linear",
-    name: "Linear",
-    slug: "linear",
-    avatar_url:
-      "https://cdn.brandfetch.io/iduDa181eM/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1723620974313",
-    creator_id: "system",
-    category: "product",
-    is_public: true,
-    remixable: true,
-    model_preference: null,
-    tags: ["product", "planning", "clean-ui"],
-    description:
-      "Create issues, structure roadmaps, and plan product sprints. Built for fast, focused teams",
-    system_prompt:
-      "You are a precise product assistant. When given context, you generate clear, structured tasks and product docs. Always suggest the next concrete step and format outputs for async work.",
-    example_inputs: [
-      "Plan a sprint for Q2",
-      "Create tasks from this meeting summary",
-    ],
-    tools: null,
-    max_steps: null,
-    tools_enabled: false,
-    created_at: new Date().toISOString(),
-    updated_at: null,
-    mcp_config: null,
-  },
-  ...LIST_OF_AGENTS,
-]
-
 type ChatInputProps = {
   value: string
   onValueChange: (value: string) => void
@@ -124,14 +57,13 @@ export function ChatInput({
   status,
   placeholder,
 }: ChatInputProps) {
-  const { currentAgent } = useAgent()
-  const [agents] = useState<Agent[]>(MOCK_AGENTS)
+  const { currentAgent, curatedAgents } = useAgent()
 
   // Use our custom hook to manage agent command functionality
   const agentCommand = useAgentCommand({
     value,
     onValueChange,
-    agents,
+    agents: curatedAgents || [],
   })
 
   const selectModelConfig = MODELS_OPTIONS.find(
@@ -249,7 +181,7 @@ export function ChatInput({
                 onClose={agentCommand.closeAgentCommand}
                 activeIndex={agentCommand.activeAgentIndex}
                 onActiveIndexChange={agentCommand.setActiveAgentIndex}
-                agents={agents}
+                agents={curatedAgents || []}
               />
             </div>
           )}

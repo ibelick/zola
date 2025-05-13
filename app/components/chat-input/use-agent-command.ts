@@ -59,7 +59,6 @@ export function useAgentCommand({
       // Check for @ character
       if (newValue.includes("@")) {
         const match = newValue.match(/@([^@\s]*)$/)
-        console.log("@ detected in handleValueChange, match:", match)
 
         if (match) {
           setShowAgentCommand(true)

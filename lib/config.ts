@@ -511,6 +511,15 @@ export const ZOLA_GITHUB_AGENTS_SLUGS = [
   "github/shadcn/ui",
 ]
 
+export const CURATED_AGENTS_SLUGS = [
+  "github/ibelick/prompt-kit",
+  "github/ibelick/zola",
+  "github/shadcn/ui",
+  "research",
+  "tweet-vibe-checker",
+  "blog-draft",
+]
+
 export const ZOLA_COMING_SOON_AGENTS = [
   {
     name: "Linear Agent",

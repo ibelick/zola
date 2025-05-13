@@ -11,11 +11,13 @@ import {
   useState,
 } from "react"
 import { useChats } from "../chat-store/chats/provider"
+import { CURATED_AGENTS_SLUGS } from "../config"
 import { createClient } from "../supabase/client"
 import { loadGitHubAgent } from "./load-github-agent"
 
 type AgentContextType = {
   currentAgent: Agent | null
+  curatedAgents: Agent[] | null
 }
 
 const AgentContext = createContext<AgentContextType | undefined>(undefined)
@@ -29,8 +31,24 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
   const currentChat = chatId ? getChatById(chatId) : null
   const [currentAgent, setCurrentAgent] = useState<Agent | null>(null)
   const currentChatAgentId = currentChat?.agent_id || null
+  const [curatedAgents, setCuratedAgents] = useState<Agent[] | null>(null)
 
-  const fetchAgent = useCallback(async () => {
+  const fetchCuratedAgents = useCallback(async () => {
+    const supabase = createClient()
+    console.log("fetching curated agents")
+    const { data, error } = await supabase
+      .from("agents")
+      .select("*")
+      .in("slug", CURATED_AGENTS_SLUGS)
+
+    if (error) {
+      console.error("Error fetching curated agents:", error)
+    } else {
+      setCuratedAgents(data)
+    }
+  }, [])
+
+  const fetchCurrentAgent = useCallback(async () => {
     if (!agentSlug && !currentChatAgentId) {
       setCurrentAgent(null)
       return
@@ -73,11 +91,15 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
       return
     }
 
-    fetchAgent()
-  }, [pathname, agentSlug, currentChatAgentId, fetchAgent])
+    fetchCurrentAgent()
+  }, [pathname, agentSlug, currentChatAgentId, fetchCurrentAgent])
+
+  useEffect(() => {
+    fetchCuratedAgents()
+  }, [fetchCuratedAgents])
 
   return (
-    <AgentContext.Provider value={{ currentAgent }}>
+    <AgentContext.Provider value={{ currentAgent, curatedAgents }}>
       {children}
     </AgentContext.Provider>
   )
