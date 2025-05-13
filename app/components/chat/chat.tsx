@@ -335,11 +335,11 @@ export function Chat() {
         "@container/main relative flex h-full flex-col items-center justify-end md:justify-center"
       )}
     >
-      {!isMobile && (
+      {/* {!isMobile && (
         <div className="pointer-events-none absolute top-0 right-0 left-0 z-50 mx-auto flex w-full justify-center">
           <HeaderAgent agent={currentAgent} />
         </div>
-      )}
+      )} */}
       <DialogAuth open={hasDialogAuth} setOpen={setHasDialogAuth} />
       <AnimatePresence initial={false} mode="popLayout">
         {!chatId && messages.length === 0 ? (
@@ -400,7 +400,6 @@ export function Chat() {
           systemPrompt={systemPrompt}
           stop={stop}
           status={status}
-          placeholder={"Ask Zola anything"}
         />
       </motion.div>
 

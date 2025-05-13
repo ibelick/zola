@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/dialog"
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
 import { toast } from "@/components/ui/toast"
+import { fetchClient } from "@/lib/fetch"
+import { API_ROUTE_CREATE_AGENT } from "@/lib/routes"
 import { nanoid } from "nanoid"
 import { useRouter } from "next/navigation"
 import type React from "react"
@@ -185,13 +187,9 @@ Never invent answers. Use tools and return what you find.`
       const owner = repository ? repository.split("/")[0] : null
       const repo = repository ? repository.split("/")[1] : null
 
-      // Create the agent using the API endpoint
-      // @todo: when go zola repo remove /chat
-      const apiResponse = await fetch("/chat/api/create-agent", {
+      const apiResponse = await fetchClient(API_ROUTE_CREATE_AGENT, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
           description: formData.description,

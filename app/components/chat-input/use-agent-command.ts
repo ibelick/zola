@@ -1,12 +1,14 @@
 "use client"
 
 import { Agent } from "@/app/types/agent"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 type UseAgentCommandProps = {
   value: string
   onValueChange: (value: string) => void
   agents: Agent[]
+  defaultAgent?: Agent | null
 }
 
 type UseAgentCommandReturn = {
@@ -29,14 +31,47 @@ export function useAgentCommand({
   value,
   onValueChange,
   agents,
+  defaultAgent = null,
 }: UseAgentCommandProps): UseAgentCommandReturn {
+  // Next.js navigation hooks
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   // State for agent command UI
   const [showAgentCommand, setShowAgentCommand] = useState(false)
   const [agentSearchTerm, setAgentSearchTerm] = useState("")
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(defaultAgent)
   const mentionStartPosRef = useRef<number | null>(null)
   const [activeAgentIndex, setActiveAgentIndex] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+  // Update selectedAgent when defaultAgent changes
+  useEffect(() => {
+    if (defaultAgent) {
+      setSelectedAgent(defaultAgent)
+    }
+  }, [defaultAgent])
+
+  // Helper function to update URL without reload
+  const updateAgentInUrl = useCallback(
+    (agent: Agent | null) => {
+      // Create a new URLSearchParams instance from the current params
+      const params = new URLSearchParams(searchParams.toString())
+
+      if (agent) {
+        // Set agent slug in URL
+        params.set("agent", agent.slug)
+      } else {
+        // Remove agent param if no agent is selected
+        params.delete("agent")
+      }
+
+      // Update URL without reloading the page
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    },
+    [pathname, router, searchParams]
+  )
 
   // Filter agents based on search term
   const filteredAgents = agentSearchTerm
@@ -136,6 +171,9 @@ export function useAgentCommand({
     (agent: Agent) => {
       setSelectedAgent(agent)
 
+      // Update URL with selected agent slug
+      updateAgentInUrl(agent)
+
       // Remove the @searchterm from the input
       if (mentionStartPosRef.current !== null) {
         const beforeMention = value.substring(0, mentionStartPosRef.current)
@@ -154,13 +192,16 @@ export function useAgentCommand({
       // Focus back on textarea after selection
       textareaRef.current?.focus()
     },
-    [value, onValueChange]
+    [value, onValueChange, updateAgentInUrl]
   )
 
   // Remove selected agent
   const removeSelectedAgent = useCallback(() => {
     setSelectedAgent(null)
-  }, [])
+
+    // Remove agent from URL
+    updateAgentInUrl(null)
+  }, [updateAgentInUrl])
 
   // Close the agent command menu
   const closeAgentCommand = useCallback(() => {

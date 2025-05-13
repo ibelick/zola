@@ -40,14 +40,6 @@ export function AgentCommand({
       )
     : [...curatedAgents, ...userAgents]
 
-  const filteredCuratedAgents = curatedAgents.filter((agent) =>
-    agent.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  const filteredUserAgents = userAgents.filter((agent) =>
-    agent.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
   // Handle clicks outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -82,80 +74,41 @@ export function AgentCommand({
       ref={containerRef}
       className="bg-popover absolute bottom-full z-50 mb-2 flex w-full max-w-sm flex-col rounded-lg border shadow-md"
     >
+      <div className="text-muted-foreground px-3 py-2 text-xs font-medium">
+        Agents
+      </div>
       {filteredAgents.length === 0 ? (
         <div className="py-6 text-center text-sm">No agent found.</div>
       ) : (
         <ul className="max-h-[176px] overflow-auto mask-t-from-96% mask-t-to-100% p-1">
-          {filteredCuratedAgents.length > 0 && (
-            <>
-              <div className="text-muted-foreground px-3 py-2 text-xs font-medium">
-                Featured agents
+          {filteredAgents.map((agent, index) => (
+            <li
+              key={agent.id}
+              ref={index === activeIndex ? activeItemRef : null}
+              className={cn(
+                "flex cursor-pointer flex-col rounded-lg px-2 py-1.5",
+                "hover:bg-accent hover:text-accent-foreground",
+                activeIndex === index && "bg-accent text-accent-foreground"
+              )}
+              onMouseEnter={() => onActiveIndexChange(index)}
+              onClick={() => onSelect(agent)}
+            >
+              <div className="flex items-center gap-2">
+                <Avatar className="size-9">
+                  <AvatarImage src={agent.avatar_url ?? undefined} />
+                  <AvatarFallback>
+                    {agent.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{agent.name}</span>
+                  <span className="text-muted-foreground line-clamp-1 text-xs">
+                    {agent.description}
+                  </span>
+                </div>
               </div>
-              {filteredCuratedAgents.map((agent, index) => (
-                <li
-                  key={agent.id}
-                  ref={index === activeIndex ? activeItemRef : null}
-                  className={cn(
-                    "flex cursor-pointer flex-col rounded-lg px-2 py-1.5",
-                    "hover:bg-accent hover:text-accent-foreground",
-                    activeIndex === index && "bg-accent text-accent-foreground"
-                  )}
-                  onMouseEnter={() => onActiveIndexChange(index)}
-                  onClick={() => onSelect(agent)}
-                >
-                  <div className="flex items-center gap-2">
-                    <Avatar className="size-9">
-                      <AvatarImage src={agent.avatar_url ?? undefined} />
-                      <AvatarFallback>
-                        {agent.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">{agent.name}</span>
-                      <span className="text-muted-foreground line-clamp-1 text-xs">
-                        {agent.description}
-                      </span>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </>
-          )}
-          {filteredUserAgents.length > 0 && (
-            <>
-              <div className="text-muted-foreground px-3 py-2 text-xs font-medium">
-                Your agents
-              </div>
-              {filteredUserAgents.map((agent, index) => (
-                <li
-                  key={agent.id}
-                  ref={index === activeIndex ? activeItemRef : null}
-                  className={cn(
-                    "flex cursor-pointer flex-col rounded-lg px-2 py-1.5",
-                    "hover:bg-accent hover:text-accent-foreground",
-                    activeIndex === index && "bg-accent text-accent-foreground"
-                  )}
-                  onMouseEnter={() => onActiveIndexChange(index)}
-                  onClick={() => onSelect(agent)}
-                >
-                  <div className="flex items-center gap-2">
-                    <Avatar className="size-9">
-                      <AvatarImage src={agent.avatar_url ?? undefined} />
-                      <AvatarFallback>
-                        {agent.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">{agent.name}</span>
-                      <span className="text-muted-foreground line-clamp-1 text-xs">
-                        {agent.description}
-                      </span>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </>
-          )}
+            </li>
+          ))}
         </ul>
       )}
       <DialogCreateAgentTrigger

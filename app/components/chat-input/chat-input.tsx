@@ -37,7 +37,6 @@ type ChatInputProps = {
   systemPrompt?: string
   stop: () => void
   status?: "submitted" | "streaming" | "ready" | "error"
-  placeholder?: string
 }
 
 export function ChatInput({
@@ -55,15 +54,17 @@ export function ChatInput({
   isUserAuthenticated,
   stop,
   status,
-  placeholder,
 }: ChatInputProps) {
   const { currentAgent, curatedAgents, userAgents } = useAgent()
 
-  // Use our custom hook to manage agent command functionality
+  console.log("curated agents", curatedAgents)
+  console.log("user agents", userAgents)
+
   const agentCommand = useAgentCommand({
     value,
     onValueChange,
-    agents: curatedAgents || [],
+    agents: [...(curatedAgents || []), ...(userAgents || [])],
+    defaultAgent: currentAgent,
   })
 
   const selectModelConfig = MODELS_OPTIONS.find(
@@ -192,7 +193,7 @@ export function ChatInput({
           />
           <FileList files={files} onFileRemove={onFileRemove} />
           <PromptInputTextarea
-            placeholder={placeholder || "Ask Zola or @mention an agent"}
+            placeholder={"Ask Zola or @mention an agent"}
             onKeyDown={handleKeyDown}
             className="mt-2 ml-2 min-h-[44px] text-base leading-[1.3] sm:text-base md:text-base"
             ref={agentCommand.textareaRef}
