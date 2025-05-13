@@ -25,8 +25,8 @@ export type AgentHeader = Pick<
 export function Header({ hasSidebar }: { hasSidebar: boolean }) {
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
-  const { agent } = useAgent()
   const { open: isSidebarOpen } = useSidebar()
+  const { currentAgent } = useAgent()
 
   const isLoggedIn = !!user
 
@@ -36,7 +36,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
         <div className="flex flex-1 items-center justify-between">
           <div className="flex flex-1 items-center gap-2">
             {hasSidebar && <HeaderSidebarTrigger />}
-            {Boolean(!agent || !isMobile) && (
+            {Boolean(!currentAgent || !isMobile) && (
               <div className="flex-1">
                 <Link
                   href="/"
@@ -72,7 +72,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
             </div>
           ) : (
             <div className="pointer-events-auto flex flex-1 items-center justify-end gap-2">
-              {agent && <DialogPublish agent={agent} />}
+              {currentAgent && <DialogPublish agent={currentAgent} />}
               <ButtonNewChat />
               <AgentLink />
               {!isSidebarOpen && <HistoryTrigger hasSidebar={hasSidebar} />}

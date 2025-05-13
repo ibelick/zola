@@ -124,7 +124,7 @@ export function ChatInput({
   status,
   placeholder,
 }: ChatInputProps) {
-  const { agent } = useAgent()
+  const { currentAgent } = useAgent()
   const [agents] = useState<Agent[]>(MOCK_AGENTS)
 
   // Use our custom hook to manage agent command functionality
@@ -276,7 +276,7 @@ export function ChatInput({
                 onSelectModel={onSelectModel}
                 isUserAuthenticated={isUserAuthenticated}
               />
-              {agent && noToolSupport && (
+              {currentAgent && noToolSupport && (
                 <div className="flex items-center gap-1">
                   <Warning className="size-4" />
                   <p className="line-clamp-2 text-xs">

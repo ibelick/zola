@@ -69,7 +69,7 @@ export function Chat() {
   const [hydrated, setHydrated] = useState(false)
   const searchParams = useSearchParams()
   const hasSentFirstMessageRef = useRef(false)
-  const { agent } = useAgent()
+  const { currentAgent } = useAgent()
   const isMobile = useBreakpoint(768)
 
   const isAuthenticated = !!user?.id
@@ -97,7 +97,7 @@ export function Chat() {
     input,
     selectedModel,
     systemPrompt,
-    selectedAgentId: agent?.id || null,
+    selectedAgentId: currentAgent?.id || null,
     createNewChat,
     setHasDialogAuth,
   })
@@ -225,7 +225,7 @@ export function Chat() {
         model: selectedModel,
         isAuthenticated,
         systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-        ...(agent?.id && { agentId: agent.id }),
+        ...(currentAgent?.id && { agentId: currentAgent.id }),
       },
       experimental_attachments: attachments || undefined,
     }
@@ -337,7 +337,7 @@ export function Chat() {
     >
       {!isMobile && (
         <div className="pointer-events-none absolute top-0 right-0 left-0 z-50 mx-auto flex w-full justify-center">
-          <HeaderAgent agent={agent} />
+          <HeaderAgent agent={currentAgent} />
         </div>
       )}
       <DialogAuth open={hasDialogAuth} setOpen={setHasDialogAuth} />
