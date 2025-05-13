@@ -57,7 +57,7 @@ export function ChatInput({
   status,
   placeholder,
 }: ChatInputProps) {
-  const { currentAgent, curatedAgents } = useAgent()
+  const { currentAgent, curatedAgents, userAgents } = useAgent()
 
   // Use our custom hook to manage agent command functionality
   const agentCommand = useAgentCommand({
@@ -181,7 +181,8 @@ export function ChatInput({
                 onClose={agentCommand.closeAgentCommand}
                 activeIndex={agentCommand.activeAgentIndex}
                 onActiveIndexChange={agentCommand.setActiveAgentIndex}
-                agents={curatedAgents || []}
+                curatedAgents={curatedAgents || []}
+                userAgents={userAgents || []}
               />
             </div>
           )}

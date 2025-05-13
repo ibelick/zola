@@ -71,7 +71,7 @@ export default async function RootLayout({
         <UserProvider initialUser={userProfile}>
           <ChatsProvider userId={userProfile?.id}>
             <ChatSessionProvider>
-              <AgentProvider>
+              <AgentProvider userId={userProfile?.id}>
                 <UserPreferencesProvider userId={userProfile?.id}>
                   <TooltipProvider delayDuration={200} skipDelayDuration={500}>
                     <ThemeProvider

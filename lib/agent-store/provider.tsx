@@ -1,5 +1,6 @@
 "use client"
 
+import { log } from "node:console"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { Agent } from "@/app/types/agent"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -18,11 +19,17 @@ import { loadGitHubAgent } from "./load-github-agent"
 type AgentContextType = {
   currentAgent: Agent | null
   curatedAgents: Agent[] | null
+  userAgents: Agent[] | null
 }
 
 const AgentContext = createContext<AgentContextType | undefined>(undefined)
 
-export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
+type AgentProviderProps = {
+  children: React.ReactNode
+  userId?: string | null
+}
+
+export const AgentProvider = ({ children, userId }: AgentProviderProps) => {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const agentSlug = searchParams.get("agent")
@@ -32,6 +39,7 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentAgent, setCurrentAgent] = useState<Agent | null>(null)
   const currentChatAgentId = currentChat?.agent_id || null
   const [curatedAgents, setCuratedAgents] = useState<Agent[] | null>(null)
+  const [userAgents, setUserAgents] = useState<Agent[] | null>(null)
 
   const fetchCuratedAgents = useCallback(async () => {
     const supabase = createClient()
@@ -48,6 +56,26 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [])
 
+  const fetchUserAgents = useCallback(async () => {
+    if (!userId) {
+      return
+    }
+
+    const supabase = createClient()
+    console.log("fetching user agents")
+
+    const { data, error } = await supabase
+      .from("agents")
+      .select("*")
+      .eq("creator_id", userId)
+
+    if (error) {
+      console.error("Error fetching user agents:", error)
+    } else {
+      setUserAgents(data)
+    }
+  }, [userId])
+
   const fetchCurrentAgent = useCallback(async () => {
     if (!agentSlug && !currentChatAgentId) {
       setCurrentAgent(null)
@@ -56,7 +84,8 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
 
     // IF first time loading agent, check if it's a github agent
     // create one if it doesn't exist
-    // @todo: first platform agent, more scalable way coming
+    // @todo:
+    // remove it
     if (agentSlug?.startsWith("github/")) {
       const specialAgent = await loadGitHubAgent(agentSlug)
 
@@ -98,8 +127,16 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
     fetchCuratedAgents()
   }, [fetchCuratedAgents])
 
+  useEffect(() => {
+    if (!userId) {
+      return
+    }
+
+    fetchUserAgents()
+  }, [fetchUserAgents])
+
   return (
-    <AgentContext.Provider value={{ currentAgent, curatedAgents }}>
+    <AgentContext.Provider value={{ currentAgent, curatedAgents, userAgents }}>
       {children}
     </AgentContext.Provider>
   )
