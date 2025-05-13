@@ -12,6 +12,7 @@ import { MODELS_OPTIONS } from "@/lib/config"
 import { ArrowUp, Stop, Warning } from "@phosphor-icons/react"
 import React, { useCallback, useEffect, useRef } from "react"
 import { PromptSystem } from "../suggestions/prompt-system"
+import { AgentCommand } from "./agent-command"
 import { ButtonFileUpload } from "./button-file-upload"
 import { FileList } from "./file-list"
 import { SelectModel } from "./select-model"
@@ -158,6 +159,17 @@ export function ChatInput({
           value={value}
           onValueChange={onValueChange}
         >
+          {/* {showAgentCommand && (
+            <AgentCommand
+              isOpen={showAgentCommand}
+              searchTerm={agentSearchTerm}
+              onSelect={handleAgentSelect}
+              onClose={closeAgentCommand}
+              activeIndex={activeAgentIndex}
+              onActiveIndexChange={setActiveAgentIndex}
+              agents={agents}
+            />
+          )} */}
           <FileList files={files} onFileRemove={onFileRemove} />
           <PromptInputTextarea
             placeholder={placeholder}
