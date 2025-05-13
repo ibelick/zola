@@ -9,7 +9,7 @@ import {
   PromptInputTextarea,
 } from "@/components/prompt-kit/prompt-input"
 import { Button } from "@/components/ui/button"
-import { useAgent } from "@/lib/agent-store/hooks"
+import { useAgent } from "@/lib/agent-store/provider"
 import { MODELS_OPTIONS } from "@/lib/config"
 import { ArrowUp, Stop, Warning } from "@phosphor-icons/react"
 import React, { useCallback, useEffect, useRef, useState } from "react"

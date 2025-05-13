@@ -105,7 +105,7 @@ export const AgentProvider = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-export const useAgentContext = () => {
+export const useAgent = () => {
   const context = useContext(AgentContext)
   if (!context)
     throw new Error("useAgentContext must be used within AgentProvider")
