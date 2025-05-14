@@ -485,7 +485,21 @@ export const SUGGESTIONS = [
   },
 ]
 
-export const SYSTEM_PROMPT_DEFAULT = `You are Zola, a thoughtful and clear assistant. Your tone is calm, minimal, and human. You write with intention—never too much, never too little. You avoid clichés, speak simply, and offer helpful, grounded answers. When needed, you ask good questions. You don’t try to impress—you aim to clarify. You may use metaphors if they bring clarity, but you stay sharp and sincere. You're here to help the user think clearly and move forward, not to overwhelm or overperform.`
+export const LATEX_MATH_INSTRUCTIONS = `
+
+### LaTeX and Currency Formatting:
+- ⚠️ MANDATORY: Use '$' for ALL inline equations without exception. Ensure there is no space between the dollar sign and the equation. For example: $E=mc^2$ is correct, but $ E=mc^2 $ is incorrect.
+- ⚠️ MANDATORY: Use '$$' for ALL block equations without exception. For block equations, the '$$' delimiters must be on their own lines, with the equation on new line(s) in between. Also leave a blank line before and after the entire block equation. Example:
+
+$$
+L = \\frac{1}{2} \rho v^2 S C_L
+$$
+- ⚠️ NEVER use '$' symbol for currency. Always use currency codes like "USD", "EUR", etc.
+- Mathematical expressions must always be properly delimited.
+- THESE INSTRUCTIONS ARE MANDATORY AND MUST BE FOLLOWED AT ALL COSTS.
+`;
+
+export const SYSTEM_PROMPT_DEFAULT = `You are Zola, a thoughtful and clear assistant. Your tone is calm, minimal, and human. You write with intention—never too much, never too little. You avoid clichés, speak simply, and offer helpful, grounded answers. When needed, you ask good questions. You don’t try to impress—you aim to clarify. You may use metaphors if they bring clarity, but you stay sharp and sincere. You're here to help the user think clearly and move forward, not to overwhelm or overperform.${LATEX_MATH_INSTRUCTIONS}`
 
 export const MESSAGE_MAX_LENGTH = 4000
 
@@ -516,7 +530,7 @@ export const ZOLA_COMING_SOON_AGENTS = [
     name: "Linear Agent",
     slug: "linear-agent",
     description: "Create, search, and prioritize issues using the Linear API.",
-    system_prompt: "",
+    system_prompt: `PLACEHOLDER_PROMPT_FOR_LINEAR_AGENT${LATEX_MATH_INSTRUCTIONS}`,
     model_preference: "gpt-4o-mini",
     avatar_url: null,
     is_public: false,
@@ -537,7 +551,7 @@ export const ZOLA_COMING_SOON_AGENTS = [
     name: "Slack Agent",
     slug: "slack-agent",
     description: "Create, search, and prioritize issues using the Slack API.",
-    system_prompt: "",
+    system_prompt: `PLACEHOLDER_PROMPT_FOR_SLACK_AGENT${LATEX_MATH_INSTRUCTIONS}`,
     model_preference: "gpt-4o-mini",
     avatar_url: null,
     is_public: false,
@@ -559,7 +573,7 @@ export const ZOLA_COMING_SOON_AGENTS = [
     slug: "changelog-writer",
     description:
       "Turns PRs or issue lists into structured changelogs and release notes.",
-    system_prompt: "",
+    system_prompt: `PLACEHOLDER_PROMPT_FOR_CHANGELOG_WRITER${LATEX_MATH_INSTRUCTIONS}`,
     model_preference: "gpt-4o-mini",
     avatar_url: null,
     is_public: false,
@@ -581,7 +595,7 @@ export const ZOLA_COMING_SOON_AGENTS = [
     slug: "growth-analyst",
     description:
       "Answers product and growth questions by analyzing metrics and user behavior.",
-    system_prompt: "",
+    system_prompt: `PLACEHOLDER_PROMPT_FOR_GROWTH_ANALYST${LATEX_MATH_INSTRUCTIONS}`,
     model_preference: "gpt-4o-mini",
     avatar_url: null,
     is_public: false,

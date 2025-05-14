@@ -61,7 +61,7 @@ export function SystemPromptSection() {
           <Textarea
             id="system-prompt"
             className="min-h-24 w-full"
-            placeholder="Enter a default system prompt for new conversations"
+            placeholder="Enter a default system prompt for new conversations. To include math, use LaTeX: $inline_math$ or $$\block_math$$"
             value={prompt}
             onChange={handlePromptChange}
           />
