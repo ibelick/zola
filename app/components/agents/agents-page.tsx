@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useMemo, useState } from "react"
 import { AgentFeaturedSection } from "./agent-featured-section"
 import { DialogCreateAgentTrigger } from "./dialog-create-agent/dialog-trigger-create-agent"
+import { UserAgentsSection } from "./user-agent-section"
 
 type AgentsPageProps = {
   curatedAgents: Agent[]
@@ -58,14 +59,14 @@ export function AgentsPage({
           openAgentId={openAgentId}
           setOpenAgentId={setOpenAgentId}
         />
-        {/* <UserAgentsSection
+        <UserAgentsSection
           agents={userAgents || null}
           moreAgents={randomAgents}
-          user_id={user_id}
+          userId={userId || null}
           handleAgentClick={handleAgentClick}
           openAgentId={openAgentId}
           setOpenAgentId={setOpenAgentId}
-        /> */}
+        />
       </div>
     </div>
   )

@@ -72,7 +72,7 @@ export function DialogAgent({
     />
   )
 
-  const renderContent = (isMobile?: boolean) => (
+  const renderContent = () => (
     <AgentDetail
       slug={slug}
       name={name}
@@ -92,7 +92,7 @@ export function DialogAgent({
       <Drawer open={isOpen} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>{trigger || defaultTrigger}</DrawerTrigger>
         <DrawerContent className="bg-background border-border">
-          {renderContent(isMobile)}
+          {renderContent()}
         </DrawerContent>
       </Drawer>
     )
