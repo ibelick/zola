@@ -2,6 +2,7 @@
 
 import { useUser } from "@/app/providers/user-provider"
 import { ModelSelector } from "@/components/common/model-selector/base"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
 import { useChats } from "@/lib/chat-store/chats/provider"
@@ -68,6 +69,8 @@ export function SettingsContent({
 
   if (!user) return null
 
+  console.log(user.profile_image)
+
   return (
     <div
       className={cn(
@@ -88,11 +91,10 @@ export function SettingsContent({
         <div className="flex items-center space-x-4">
           <div className="bg-muted flex h-16 w-16 items-center justify-center overflow-hidden rounded-full">
             {user?.profile_image ? (
-              <img
-                src={user.profile_image || "/placeholder.svg"}
-                alt="Profile"
-                className="h-full w-full object-cover"
-              />
+              <Avatar>
+                <AvatarImage src={user.profile_image} />
+                <AvatarFallback>{user?.display_name?.charAt(0)}</AvatarFallback>
+              </Avatar>
             ) : (
               <User className="text-muted-foreground size-8" />
             )}
@@ -229,7 +231,7 @@ export function SettingsContent({
               </p>
             </div>
             <Button
-              variant="secondary"
+              variant="default"
               size="sm"
               className="flex items-center gap-2"
               onClick={handleSignOut}
