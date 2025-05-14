@@ -124,7 +124,7 @@
   --destructive: oklch(0.6 0.18 15);
   --destructive-foreground: oklch(0.95 0.01 20);
   --border: oklch(100% 0 0 / 8%);
-  --input: oklch(0.274 0.006 286.033);
+  --input: oklch(0.35 0.006 286.033);
   --ring: oklch(0.442 0.017 285.786);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);

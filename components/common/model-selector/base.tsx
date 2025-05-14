@@ -139,10 +139,7 @@ export function ModelSelector({
   )
 
   const trigger = (
-    <Button
-      variant="outline"
-      className={cn("dark:bg-secondary justify-between", className)}
-    >
+    <Button variant="secondary" className={cn("justify-between", className)}>
       <div className="flex items-center gap-2">
         {currentModel?.icon && <currentModel.icon className="size-5" />}
         <span>{currentModel?.name}</span>
