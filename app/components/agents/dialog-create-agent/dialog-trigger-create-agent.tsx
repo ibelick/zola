@@ -238,8 +238,6 @@ Never invent answers. Use tools and return what you find.`
 
       const { agent } = await apiResponse.json()
 
-      console.log("Agent created successfully:", agent)
-
       // Close the dialog and redirect
       setOpen(false)
       router.push(`/?agent=${agent.slug}`)

@@ -43,7 +43,6 @@ export const AgentProvider = ({ children, userId }: AgentProviderProps) => {
 
   const fetchCuratedAgents = useCallback(async () => {
     const supabase = createClient()
-    console.log("fetching curated agents")
     const { data, error } = await supabase
       .from("agents")
       .select("*")
@@ -62,7 +61,6 @@ export const AgentProvider = ({ children, userId }: AgentProviderProps) => {
     }
 
     const supabase = createClient()
-    console.log("fetching user agents")
 
     const { data, error } = await supabase
       .from("agents")

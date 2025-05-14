@@ -77,13 +77,6 @@ export function useAgentCommand({
   const updateChatAgentFn = useCallback(
     (agent: Agent | null) => {
       if (chatId && user) {
-        console.log("Updating agent for chat:", {
-          userId: user.id,
-          chatId,
-          agentId: agent ? agent.id : null,
-          isAuthenticated: !user.anonymous,
-        })
-
         updateChatAgent(
           user.id,
           chatId,
@@ -246,12 +239,8 @@ export function useAgentCommand({
     [value, onValueChange, updateAgentInUrl, debouncedUpdateChatAgent]
   )
 
-  console.log("selectedAgent", selectedAgent)
-
   // Remove selected agent
   const removeSelectedAgent = useCallback(() => {
-    console.log("Removing selected agent")
-
     setSelectedAgent(null)
 
     // Remove agent from URL
@@ -267,7 +256,6 @@ export function useAgentCommand({
         console.error("Failed to remove chat agent:", error)
       })
     }
-    console.log("after removing selected agent")
   }, [updateAgentInUrl, user, chatId, updateChatAgent])
 
   // Close the agent command menu
