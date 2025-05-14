@@ -56,7 +56,7 @@ export function CreateAgentForm({
     >
       {isDrawer && (
         <div className="border-border mb-2 flex items-center justify-between border-b px-4 pb-2">
-          <h2 className="text-lg font-medium">Create Agent</h2>
+          <h2 className="text-lg font-medium">Create agent (experimental)</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
@@ -66,9 +66,8 @@ export function CreateAgentForm({
       <div className="px-6 py-4">
         <div className="bg-muted/50 mb-6 rounded-lg p-3">
           <p className="text-sm">
-            Early version. Agents can use a system prompt and optionally connect
-            to GitHub repos via git-mcp. More tools and MCP integrations are
-            coming soon.
+            Agents can use a system prompt and optionally connect to GitHub
+            repos via git-mcp. More tools and MCP integrations are coming soon.
           </p>
         </div>
 
