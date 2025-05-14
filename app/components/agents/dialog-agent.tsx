@@ -20,7 +20,7 @@ type DialogAgentProps = {
   onOpenChange: (open: boolean) => void
   randomAgents: AgentSummary[]
   trigger?: React.ReactNode
-  system_prompt: string
+  system_prompt?: string | null
   tools?: string[] | null
   mcp_config?: Tables<"agents">["mcp_config"] | null
   isCardLight?: boolean

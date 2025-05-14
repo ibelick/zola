@@ -60,7 +60,7 @@ type AgentDetailProps = {
   onAgentClick?: (agentId: string) => void
   randomAgents: AgentSummary[]
   isFullPage?: boolean
-  system_prompt?: string
+  system_prompt?: string | null
   tools?: string[] | null
   mcp_config?: Tables<"agents">["mcp_config"] | null
 }
@@ -111,13 +111,11 @@ export function AgentDetail({
     router.push(`/?agent=${slug}`)
   }
 
-  console.log("avatar_url", avatar_url)
-
   return (
     <div
       className={cn(
         "bg-background relative flex w-full flex-col",
-        isFullPage ? "h-full max-h-[80vh]" : "h-full"
+        !isFullPage ? "h-full max-h-[80vh]" : "h-full"
       )}
     >
       <div
