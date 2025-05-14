@@ -2,7 +2,7 @@ import type { Provider, SupportedModel } from "./types"
 
 // map each model ID to its provider
 const MODEL_PROVIDER_MAP: Record<SupportedModel, Provider> = {
-  o1: "openai",
+  "o1": "openai",
   "o1-2024-12-17": "openai",
   "o1-mini": "openai",
   "o1-mini-2024-09-12": "openai",
