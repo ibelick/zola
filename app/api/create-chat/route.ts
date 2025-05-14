@@ -1,11 +1,9 @@
-import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { validateUserIdentity } from "@/lib/server/api"
 import { checkUsageByModel } from "@/lib/usage"
 
 export async function POST(request: Request) {
   try {
-    const { userId, title, model, isAuthenticated, systemPrompt } =
-      await request.json()
+    const { userId, title, model, isAuthenticated } = await request.json()
     if (!userId) {
       return new Response(JSON.stringify({ error: "Missing userId" }), {
         status: 400,
@@ -23,7 +21,6 @@ export async function POST(request: Request) {
         user_id: userId,
         title: title || "New Chat",
         model: model,
-        system_prompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
       })
       .select("*")
       .single()

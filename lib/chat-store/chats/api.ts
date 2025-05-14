@@ -1,7 +1,7 @@
 import { readFromIndexedDB, writeToIndexedDB } from "@/lib/chat-store/persist"
 import type { Chat, Chats } from "@/lib/chat-store/types"
 import { createClient } from "@/lib/supabase/client"
-import { MODEL_DEFAULT, SYSTEM_PROMPT_DEFAULT } from "../../config"
+import { MODEL_DEFAULT } from "../../config"
 import { fetchClient } from "../../fetch"
 import {
   API_ROUTE_CREATE_CHAT,
@@ -21,7 +21,7 @@ export async function fetchAndCacheChats(userId: string): Promise<Chats[]> {
 
   const { data, error } = await supabase
     .from("chats")
-    .select("id, title, created_at, model, system_prompt, agent_id")
+    .select("id, title, created_at, model, agent_id")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
 
@@ -141,10 +141,10 @@ export async function createNewChat(
   title?: string,
   model?: string,
   isAuthenticated?: boolean,
-  systemPrompt?: string,
   agentId?: string
 ): Promise<Chats> {
   try {
+    // @todo: can keep only one route for create chat
     const apiRoute = agentId
       ? API_ROUTE_CREATE_CHAT_WITH_AGENT
       : API_ROUTE_CREATE_CHAT
@@ -162,7 +162,6 @@ export async function createNewChat(
           title,
           model: model || MODEL_DEFAULT,
           isAuthenticated,
-          systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
         }
 
     const res = await fetchClient(apiRoute, {
@@ -182,7 +181,6 @@ export async function createNewChat(
       title: responseData.chat.title,
       created_at: responseData.chat.created_at,
       model: responseData.chat.model,
-      system_prompt: responseData.chat.system_prompt,
       agent_id: responseData.chat.agent_id,
     }
 

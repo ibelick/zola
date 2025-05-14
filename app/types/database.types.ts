@@ -150,7 +150,6 @@ export type Database = {
           model: string | null
           title: string | null
           user_id: string
-          system_prompt: string | null
           public: boolean
         }
         Insert: {
@@ -160,7 +159,6 @@ export type Database = {
           model?: string | null
           title?: string | null
           user_id: string
-          system_prompt?: string | null
           public?: boolean
         }
         Update: {
@@ -170,7 +168,6 @@ export type Database = {
           model?: string | null
           title?: string | null
           user_id?: string
-          system_prompt?: string | null
           public?: boolean
         }
         Relationships: [

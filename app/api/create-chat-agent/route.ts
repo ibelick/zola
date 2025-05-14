@@ -17,25 +17,12 @@ export async function POST(request: Request) {
 
     await checkUsageByModel(supabase, userId, model, isAuthenticated)
 
-    const { data: agent, error: agentError } = await supabase
-      .from("agents")
-      .select("system_prompt")
-      .eq("id", agentId)
-      .single()
-
-    if (agentError || !agent) {
-      return new Response(JSON.stringify({ error: "Agent not found" }), {
-        status: 404,
-      })
-    }
-
     const { data: chatData, error: chatError } = await supabase
       .from("chats")
       .insert({
         user_id: userId,
         title: title || "New Chat",
         model,
-        system_prompt: agent.system_prompt,
         agent_id: agentId,
       })
       .select("*")
@@ -59,7 +46,6 @@ export async function POST(request: Request) {
           title: chatData.title,
           created_at: chatData.created_at,
           model: chatData.model,
-          system_prompt: chatData.system_prompt,
           agent_id: chatData.agent_id,
         },
       }),

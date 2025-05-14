@@ -136,7 +136,6 @@ export function ChatsProvider({
         title,
         model,
         isAuthenticated,
-        systemPrompt,
         agentId
       )
       setChats((prev) =>

@@ -2,7 +2,6 @@
 
 import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
-import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import { toast } from "@/components/ui/toast"
@@ -23,7 +22,6 @@ import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { HeaderAgent } from "../layout/header-agent"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
@@ -63,14 +61,13 @@ export function Chat() {
   const [selectedModel, setSelectedModel] = useState(
     currentChat?.model || user?.preferred_model || MODEL_DEFAULT
   )
-  const [systemPrompt, setSystemPrompt] = useState(
-    currentChat?.system_prompt || user?.system_prompt || SYSTEM_PROMPT_DEFAULT
-  )
+  const { currentAgent } = useAgent()
+  const systemPrompt =
+    currentAgent?.system_prompt || user?.system_prompt || SYSTEM_PROMPT_DEFAULT
+
   const [hydrated, setHydrated] = useState(false)
   const searchParams = useSearchParams()
   const hasSentFirstMessageRef = useRef(false)
-  const { currentAgent } = useAgent()
-  const isMobile = useBreakpoint(768)
 
   const isAuthenticated = !!user?.id
   const {
@@ -120,12 +117,6 @@ export function Chat() {
       setMessages([])
     }
   }, [chatId])
-
-  useEffect(() => {
-    if (currentChat?.system_prompt) {
-      setSystemPrompt(currentChat?.system_prompt)
-    }
-  }, [currentChat])
 
   useEffect(() => {
     setHydrated(true)
@@ -335,11 +326,6 @@ export function Chat() {
         "@container/main relative flex h-full flex-col items-center justify-end md:justify-center"
       )}
     >
-      {/* {!isMobile && (
-        <div className="pointer-events-none absolute top-0 right-0 left-0 z-50 mx-auto flex w-full justify-center">
-          <HeaderAgent agent={currentAgent} />
-        </div>
-      )} */}
       <DialogAuth open={hasDialogAuth} setOpen={setHasDialogAuth} />
       <AnimatePresence initial={false} mode="popLayout">
         {!chatId && messages.length === 0 ? (
