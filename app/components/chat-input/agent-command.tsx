@@ -40,6 +40,11 @@ export function AgentCommand({
       )
     : [...curatedAgents, ...userAgents]
 
+  // Helper function to check if an agent is curated
+  const isCuratedAgent = (agentId: string) => {
+    return curatedAgents.some((curatedAgent) => curatedAgent.id === agentId)
+  }
+
   // Handle clicks outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -81,40 +86,50 @@ export function AgentCommand({
         <div className="py-6 text-center text-sm">No agent found.</div>
       ) : (
         <ul className="max-h-[176px] overflow-auto mask-t-from-96% mask-t-to-100% p-1">
-          {filteredAgents.map((agent, index) => (
-            <li
-              key={agent.id}
-              ref={index === activeIndex ? activeItemRef : null}
-              className={cn(
-                "flex cursor-pointer flex-col rounded-lg px-2 py-1.5",
-                "hover:bg-accent hover:text-accent-foreground",
-                activeIndex === index && "bg-accent text-accent-foreground"
-              )}
-              onMouseEnter={() => onActiveIndexChange(index)}
-              onClick={() => onSelect(agent)}
-            >
-              <div className="flex items-center gap-2">
-                {agent.avatar_url ? (
-                  <Avatar className="size-9">
-                    <AvatarImage src={agent.avatar_url ?? undefined} />
-                    <AvatarFallback>
-                      {agent.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <div className="flex size-9 items-center justify-center overflow-hidden rounded-full border border-dashed">
-                    <Cube className="text-muted-foreground size-6" />
-                  </div>
+          {filteredAgents.map((agent, index) => {
+            return (
+              <li
+                key={agent.id}
+                ref={index === activeIndex ? activeItemRef : null}
+                className={cn(
+                  "relative flex cursor-pointer flex-col rounded-lg px-2 py-1.5",
+                  "hover:bg-accent hover:text-accent-foreground",
+                  activeIndex === index && "bg-accent text-accent-foreground"
                 )}
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">{agent.name}</span>
-                  <span className="text-muted-foreground line-clamp-1 text-xs">
-                    {agent.description}
-                  </span>
+                onMouseEnter={() => onActiveIndexChange(index)}
+                onClick={() => onSelect(agent)}
+              >
+                <div className="flex items-center gap-2">
+                  {agent.avatar_url ? (
+                    <Avatar className="size-9">
+                      <AvatarImage
+                        src={agent.avatar_url}
+                        className="object-cover"
+                      />
+                      <AvatarFallback>
+                        {agent.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <div className="flex size-9 items-center justify-center overflow-hidden rounded-full border border-dashed">
+                      <Cube className="text-muted-foreground size-6" />
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{agent.name}</span>
+                    <span className="text-muted-foreground line-clamp-1 text-xs">
+                      {agent.description}
+                    </span>
+                  </div>
+                  {isCuratedAgent(agent.id) && (
+                    <span className="bg-primary/10 text-primary absolute top-4 right-2 -translate-y-1/2 rounded-full px-1.5 py-0.5 text-[9px] font-medium">
+                      Zola
+                    </span>
+                  )}
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            )
+          })}
         </ul>
       )}
       <DialogCreateAgentTrigger
