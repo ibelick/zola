@@ -1,6 +1,10 @@
 "use client"
 
+import { useChatSession } from "@/app/providers/chat-session-provider"
+import { useUser } from "@/app/providers/user-provider"
 import { Agent } from "@/app/types/agent"
+import { useChats } from "@/lib/chat-store/chats/provider"
+import { debounce } from "@/lib/utils"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 
@@ -37,6 +41,9 @@ export function useAgentCommand({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { chatId } = useChatSession()
+  const { user } = useUser()
+  const { updateChatAgent } = useChats()
 
   // State for agent command UI
   const [showAgentCommand, setShowAgentCommand] = useState(false)
@@ -45,13 +52,6 @@ export function useAgentCommand({
   const mentionStartPosRef = useRef<number | null>(null)
   const [activeAgentIndex, setActiveAgentIndex] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
-
-  // Update selectedAgent when defaultAgent changes
-  useEffect(() => {
-    if (defaultAgent) {
-      setSelectedAgent(defaultAgent)
-    }
-  }, [defaultAgent])
 
   // Helper function to update URL without reload
   const updateAgentInUrl = useCallback(
@@ -72,6 +72,41 @@ export function useAgentCommand({
     },
     [pathname, router, searchParams]
   )
+
+  // Function to update the chat agent (will be debounced)
+  const updateChatAgentFn = useCallback(
+    (agent: Agent | null) => {
+      if (chatId && user) {
+        updateChatAgent(
+          user.id,
+          chatId,
+          agent?.id || null,
+          !user.anonymous
+        ).catch((error) => {
+          console.error("Failed to update chat agent:", error)
+        })
+      }
+    },
+    [chatId, user, updateChatAgent]
+  )
+
+  // Create debounced version of the update function
+  const debouncedUpdateChatAgent = useCallback(
+    debounce(updateChatAgentFn, 500),
+    [updateChatAgentFn]
+  )
+
+  // Update selectedAgent when defaultAgent changes
+  useEffect(() => {
+    if (defaultAgent && selectedAgent?.id !== defaultAgent.id) {
+      setSelectedAgent(defaultAgent)
+
+      // If chatId and user exist, update the chat agent
+      if (chatId && user && defaultAgent !== selectedAgent) {
+        debouncedUpdateChatAgent(defaultAgent)
+      }
+    }
+  }, [defaultAgent, chatId, user, debouncedUpdateChatAgent, selectedAgent])
 
   // Filter agents based on search term
   const filteredAgents = agentSearchTerm
@@ -174,6 +209,9 @@ export function useAgentCommand({
       // Update URL with selected agent slug
       updateAgentInUrl(agent)
 
+      // Update the agent in the chat with debounce
+      debouncedUpdateChatAgent(agent)
+
       // Remove the @searchterm from the input
       if (mentionStartPosRef.current !== null) {
         const beforeMention = value.substring(0, mentionStartPosRef.current)
@@ -192,7 +230,7 @@ export function useAgentCommand({
       // Focus back on textarea after selection
       textareaRef.current?.focus()
     },
-    [value, onValueChange, updateAgentInUrl]
+    [value, onValueChange, updateAgentInUrl, debouncedUpdateChatAgent]
   )
 
   // Remove selected agent
@@ -201,7 +239,10 @@ export function useAgentCommand({
 
     // Remove agent from URL
     updateAgentInUrl(null)
-  }, [updateAgentInUrl])
+
+    // Update the agent in the chat with debounce
+    debouncedUpdateChatAgent(null)
+  }, [updateAgentInUrl, debouncedUpdateChatAgent])
 
   // Close the agent command menu
   const closeAgentCommand = useCallback(() => {

@@ -9,6 +9,7 @@ import {
   deleteChat as deleteChatFromDb,
   fetchAndCacheChats,
   getCachedChats,
+  updateChatAgent as updateChatAgentFromDb,
   updateChatModel as updateChatModelFromDb,
   updateChatTitle,
 } from "./api"
@@ -35,6 +36,12 @@ interface ChatsContextType {
   resetChats: () => Promise<void>
   getChatById: (id: string) => Chats | undefined
   updateChatModel: (id: string, model: string) => Promise<void>
+  updateChatAgent: (
+    userId: string,
+    chatId: string,
+    agentId: string | null,
+    isAuthenticated: boolean
+  ) => Promise<void>
 }
 const ChatsContext = createContext<ChatsContextType | null>(null)
 
@@ -166,6 +173,15 @@ export function ChatsProvider({
     await updateChatModelFromDb(id, model)
   }
 
+  const updateChatAgent = async (
+    userId: string,
+    chatId: string,
+    agentId: string | null,
+    isAuthenticated: boolean
+  ) => {
+    await updateChatAgentFromDb(userId, chatId, agentId, isAuthenticated)
+  }
+
   return (
     <ChatsContext.Provider
       value={{
@@ -178,6 +194,7 @@ export function ChatsProvider({
         resetChats,
         getChatById,
         updateChatModel,
+        updateChatAgent,
         isLoading,
       }}
     >

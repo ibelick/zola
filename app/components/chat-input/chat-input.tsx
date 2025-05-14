@@ -1,7 +1,6 @@
 "use client"
 
 import { useAgentCommand } from "@/app/components/chat-input/use-agent-command"
-import { Agent } from "@/app/types/agent"
 import {
   PromptInput,
   PromptInputAction,
@@ -12,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { useAgent } from "@/lib/agent-store/provider"
 import { MODELS_OPTIONS } from "@/lib/config"
 import { ArrowUp, Stop, Warning } from "@phosphor-icons/react"
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect } from "react"
 import { PromptSystem } from "../suggestions/prompt-system"
 import { AgentCommand } from "./agent-command"
 import { ButtonFileUpload } from "./button-file-upload"
@@ -56,9 +55,6 @@ export function ChatInput({
   status,
 }: ChatInputProps) {
   const { currentAgent, curatedAgents, userAgents } = useAgent()
-
-  console.log("curated agents", curatedAgents)
-  console.log("user agents", userAgents)
 
   const agentCommand = useAgentCommand({
     value,

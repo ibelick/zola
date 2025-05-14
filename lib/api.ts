@@ -2,7 +2,11 @@ import { UserProfile } from "@/app/types/user"
 import { APP_DOMAIN, DAILY_SPECIAL_AGENT_LIMIT } from "@/lib/config"
 import { SupabaseClient } from "@supabase/supabase-js"
 import { fetchClient } from "./fetch"
-import { API_ROUTE_CREATE_GUEST, API_ROUTE_UPDATE_CHAT_MODEL } from "./routes"
+import {
+  API_ROUTE_CREATE_GUEST,
+  API_ROUTE_UPDATE_CHAT_AGENT,
+  API_ROUTE_UPDATE_CHAT_MODEL,
+} from "./routes"
 import { createClient } from "./supabase/client"
 
 /**
@@ -146,25 +150,34 @@ export const getOrCreateGuestUserId = async (
   const supabase = createClient()
 
   const existingGuestSessionUser = await supabase.auth.getUser()
-  if (existingGuestSessionUser.data?.user && existingGuestSessionUser.data.user.is_anonymous) {
+  if (
+    existingGuestSessionUser.data?.user &&
+    existingGuestSessionUser.data.user.is_anonymous
+  ) {
     const anonUserId = existingGuestSessionUser.data.user.id
 
-    const profileCreationAttempted = localStorage.getItem(`guestProfileAttempted_${anonUserId}`)
+    const profileCreationAttempted = localStorage.getItem(
+      `guestProfileAttempted_${anonUserId}`
+    )
 
     if (!profileCreationAttempted) {
       try {
         await createGuestUser(anonUserId)
         localStorage.setItem(`guestProfileAttempted_${anonUserId}`, "true")
       } catch (error) {
-        console.error("Failed to ensure guest user profile exists for existing anonymous auth user:", error)
+        console.error(
+          "Failed to ensure guest user profile exists for existing anonymous auth user:",
+          error
+        )
         return null
       }
     }
     return anonUserId
   }
-  
+
   try {
-    const { data: anonAuthData, error: anonAuthError } = await supabase.auth.signInAnonymously()
+    const { data: anonAuthData, error: anonAuthError } =
+      await supabase.auth.signInAnonymously()
 
     if (anonAuthError) {
       console.error("Error during anonymous sign-in:", anonAuthError)
@@ -181,7 +194,10 @@ export const getOrCreateGuestUserId = async (
     localStorage.setItem(`guestProfileAttempted_${guestIdFromAuth}`, "true")
     return guestIdFromAuth
   } catch (error) {
-    console.error("Error in getOrCreateGuestUserId during anonymous sign-in or profile creation:", error)
+    console.error(
+      "Error in getOrCreateGuestUserId during anonymous sign-in or profile creation:",
+      error
+    )
     return null
   }
 }
@@ -288,5 +304,36 @@ export async function incrementSpecialAgentUsage(
     throw new Error(
       "Failed to increment special agent count: " + updateError.message
     )
+  }
+}
+
+/**
+ * Updates the agent for an existing chat
+ */
+export async function updateChatAgent(
+  userId: string,
+  chatId: string,
+  agentId: string | null,
+  isAuthenticated: boolean
+) {
+  try {
+    const res = await fetchClient(API_ROUTE_UPDATE_CHAT_AGENT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, chatId, agentId, isAuthenticated }),
+    })
+    const responseData = await res.json()
+
+    if (!res.ok) {
+      throw new Error(
+        responseData.error ||
+          `Failed to update chat agent: ${res.status} ${res.statusText}`
+      )
+    }
+
+    return responseData
+  } catch (error) {
+    console.error("Error updating chat agent:", error)
+    throw error
   }
 }
