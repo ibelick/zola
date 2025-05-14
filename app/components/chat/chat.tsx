@@ -383,7 +383,6 @@ export function Chat() {
           onSelectModel={handleModelChange}
           selectedModel={selectedModel}
           isUserAuthenticated={isAuthenticated}
-          systemPrompt={systemPrompt}
           stop={stop}
           status={status}
         />

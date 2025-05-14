@@ -36,7 +36,7 @@ export function UserAgentsSection({
             Sign in to create and manage custom AI agents
           </p>
           <Button asChild>
-            <Link href="/login">Sign in to get started</Link>
+            <Link href="/auth">Sign in to get started</Link>
           </Button>
         </CardContent>
       </Card>

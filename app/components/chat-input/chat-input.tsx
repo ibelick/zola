@@ -33,7 +33,6 @@ type ChatInputProps = {
   onSelectModel: (model: string) => void
   selectedModel: string
   isUserAuthenticated: boolean
-  systemPrompt?: string
   stop: () => void
   status?: "submitted" | "streaming" | "ready" | "error"
 }

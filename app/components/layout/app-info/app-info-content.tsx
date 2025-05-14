@@ -18,15 +18,6 @@ export function AppInfoContent() {
         >
           GitHub
         </a>
-        . Made by{" "}
-        <a
-          href="https://twitter.com/ibelick"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline"
-        >
-          @ibelick
-        </a>
         .
       </p>
     </div>

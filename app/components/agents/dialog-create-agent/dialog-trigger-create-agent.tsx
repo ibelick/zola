@@ -1,5 +1,8 @@
 "use client"
 
+import { PopoverContentAuth } from "@/app/components/chat-input/popover-content-auth"
+import { useUser } from "@/app/providers/user-provider"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -8,9 +11,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { toast } from "@/components/ui/toast"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { fetchClient } from "@/lib/fetch"
 import { API_ROUTE_CREATE_AGENT } from "@/lib/routes"
+import { Paperclip } from "lucide-react"
 import { nanoid } from "nanoid"
 import { useRouter } from "next/navigation"
 import type React from "react"
@@ -41,6 +55,8 @@ type DialogCreateAgentTrigger = {
 export function DialogCreateAgentTrigger({
   trigger,
 }: DialogCreateAgentTrigger) {
+  const { user } = useUser()
+  const isAuthenticated = !!user?.id
   const [open, setOpen] = useState(false)
   const [formData, setFormData] = useState<AgentFormData>({
     name: "",
@@ -255,6 +271,15 @@ Never invent answers. Use tools and return what you find.`
     />
   )
 
+  if (!isAuthenticated) {
+    return (
+      <Popover>
+        <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+        <PopoverContentAuth />
+      </Popover>
+    )
+  }
+
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
@@ -275,7 +300,7 @@ Never invent answers. Use tools and return what you find.`
           onMouseDown={(e) => e.stopPropagation()}
         >
           <DialogHeader className="border-border border-b px-6 py-4">
-            <DialogTitle>Create Agent</DialogTitle>
+            <DialogTitle>Create agent (experimental)</DialogTitle>
           </DialogHeader>
           {content}
         </div>
