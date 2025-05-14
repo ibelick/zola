@@ -11,7 +11,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { ChatCircle, Check, CopySimple, User } from "@phosphor-icons/react"
+import {
+  ChatCircle,
+  Check,
+  CopySimple,
+  Cube,
+  User,
+} from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -55,8 +61,8 @@ type AgentDetailProps = {
   randomAgents: AgentSummary[]
   isFullPage?: boolean
   system_prompt?: string
-  tools?: string[]
-  mcp_config?: Tables<"agents">["mcp_config"]
+  tools?: string[] | null
+  mcp_config?: Tables<"agents">["mcp_config"] | null
 }
 
 export function AgentDetail({
@@ -105,11 +111,13 @@ export function AgentDetail({
     router.push(`/?agent=${slug}`)
   }
 
+  console.log("avatar_url", avatar_url)
+
   return (
     <div
       className={cn(
         "bg-background relative flex w-full flex-col",
-        "h-full max-h-[80vh]"
+        isFullPage ? "h-full max-h-[80vh]" : "h-full"
       )}
     >
       <div
@@ -119,13 +127,19 @@ export function AgentDetail({
         )}
       >
         <div className="mb-6 flex items-center gap-4 pt-8 pl-8">
-          <div className="bg-muted h-16 w-16 flex-shrink-0 overflow-hidden rounded-full">
-            <img
-              src={avatar_url || "/placeholder.svg"}
-              alt={name}
-              className="h-full w-full object-cover"
-            />
-          </div>
+          {avatar_url ? (
+            <Avatar className="size-16">
+              <AvatarImage
+                src={avatar_url}
+                alt={name}
+                className="h-full w-full object-cover"
+              />
+            </Avatar>
+          ) : (
+            <div className="bg-background flex size-16 items-center justify-center rounded-full border border-dashed">
+              <Cube className="size-8" />
+            </div>
+          )}
           <h1 className="text-2xl font-medium">{name}</h1>
         </div>
 
@@ -140,38 +154,44 @@ export function AgentDetail({
           </div>
         )}
 
-        <div className="mb-8 grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 md:px-8">
-          <div className="rounded-md border p-2">
-            <h3 className="mb-2 text-xs font-medium">Tools</h3>
-            <p className="text-muted-foreground text-xs">
-              {tools?.length ? tools.join(", ") : "search"}
-            </p>
+        {(tools || mcp_config) && (
+          <div className="mb-8 grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 md:px-8">
+            {tools && (
+              <div className="rounded-md border p-2">
+                <h3 className="mb-2 text-xs font-medium">Tools</h3>
+                <p className="text-muted-foreground text-xs">{tools}</p>
+              </div>
+            )}
+            {mcp_config && (
+              <div className="rounded-md border p-2">
+                <h3 className="mb-2 text-xs font-medium">MCP</h3>
+                <p className="text-muted-foreground truncate text-xs">
+                  {JSON.stringify(mcp_config)}
+                </p>
+              </div>
+            )}
           </div>
-          <div className="rounded-md border p-2">
-            <h3 className="mb-2 text-xs font-medium">MCP</h3>
-            <p className="text-muted-foreground truncate text-xs">
-              {mcp_config ? JSON.stringify(mcp_config) : "none"}
-            </p>
-          </div>
-        </div>
+        )}
 
-        <div className="mb-8 px-4 md:px-8">
-          <h2 className="mb-4 text-lg font-medium">What can I ask?</h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {example_inputs.map((example_input) => (
-              <Button
-                key={example_input}
-                type="button"
-                className="flex h-auto w-full items-center justify-start px-2 py-1 text-left text-xs break-words whitespace-normal"
-                variant="outline"
-                size="sm"
-                onClick={() => tryAgentWithPrompt(example_input)}
-              >
-                {example_input}
-              </Button>
-            ))}
+        {example_inputs && example_inputs.length > 0 && (
+          <div className="mb-8 px-4 md:px-8">
+            <h2 className="mb-4 text-lg font-medium">What can I ask?</h2>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {example_inputs.map((example_input) => (
+                <Button
+                  key={example_input}
+                  type="button"
+                  className="flex h-auto w-full items-center justify-start px-2 py-1 text-left text-xs break-words whitespace-normal"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => tryAgentWithPrompt(example_input)}
+                >
+                  {example_input}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {randomAgents && randomAgents.length > 0 && (
           <div className="mt-8 pb-8">
@@ -200,15 +220,21 @@ export function AgentDetail({
                 >
                   <div className="flex items-start space-x-4">
                     <div className="flex-shrink-0">
-                      <div className="bg-muted h-12 w-12 overflow-hidden rounded-full">
-                        <Avatar className="h-full w-full object-cover">
-                          <AvatarImage
-                            src={agent.avatar_url || "/placeholder.svg"}
-                            alt={agent.name}
-                            className="h-full w-full object-cover"
-                          />
-                        </Avatar>
-                      </div>
+                      {agent.avatar_url ? (
+                        <div className="bg-muted size-12 overflow-hidden rounded-full">
+                          <Avatar className="size-12 object-cover">
+                            <AvatarImage
+                              src={agent.avatar_url}
+                              alt={agent.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </Avatar>
+                        </div>
+                      ) : (
+                        <div className="bg-muted size-12 overflow-hidden rounded-full">
+                          <Cube className="size-8" />
+                        </div>
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-foreground truncate text-base font-medium">
@@ -228,7 +254,8 @@ export function AgentDetail({
 
       <div
         className={cn(
-          "bg-background fixed right-0 bottom-0 left-0 z-10 flex flex-row gap-2 border-t px-4 py-4 md:px-8"
+          "bg-background right-0 bottom-0 left-0 z-10 flex flex-row gap-2 border-t px-4 py-4 md:px-8",
+          !isFullPage ? "fixed" : "relative"
         )}
       >
         <Tooltip>

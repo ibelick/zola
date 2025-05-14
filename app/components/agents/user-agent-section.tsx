@@ -73,7 +73,7 @@ export function UserAgentsSection({
             id={agent.id}
             name={agent.name}
             description={agent.description}
-            avatar_url={agent.avatar_url || "/placeholder.svg"}
+            avatar_url={agent.avatar_url}
             example_inputs={agent.example_inputs || []}
             isAvailable={true}
             onAgentClick={handleAgentClick}
@@ -81,6 +81,9 @@ export function UserAgentsSection({
             onOpenChange={(open) => setOpenAgentId(open ? agent.id : null)}
             randomAgents={moreAgents}
             slug={agent.slug}
+            system_prompt={agent.system_prompt}
+            tools={agent.tools}
+            mcp_config={agent.mcp_config}
           />
         ))}
       </div>

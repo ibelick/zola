@@ -47,7 +47,7 @@ export default async function AgentIdPage({
             randomAgents={agents || []}
             isFullPage
             system_prompt={agent.system_prompt}
-            tools={agent.tools || []}
+            tools={agent.tools}
             mcp_config={agent.mcp_config}
           />
         </div>

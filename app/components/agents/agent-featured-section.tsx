@@ -27,7 +27,7 @@ export function AgentFeaturedSection({
             id={agent.id}
             name={agent.name}
             description={agent.description}
-            avatar_url={agent.avatar_url || "/placeholder.svg"}
+            avatar_url={agent.avatar_url}
             example_inputs={agent.example_inputs || []}
             isAvailable={true}
             slug={agent.slug}

@@ -14,7 +14,7 @@ type AgentCardProps = {
   isAvailable: boolean
   onClick?: () => void
   system_prompt?: string
-  tools?: string[]
+  tools?: string[] | null
   mcp_config?: Tables<"agents">["mcp_config"] | null
   isLight?: boolean
 }
