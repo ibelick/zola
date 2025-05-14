@@ -1,9 +1,10 @@
-import { LinkMarkdown } from "@/app/components/chat/link-markdown"
 import { cn } from "@/lib/utils"
 import { marked } from "marked"
 import { memo, useId, useMemo } from "react"
 import ReactMarkdown, { Components } from "react-markdown"
+import remarkBreaks from "remark-breaks"
 import remarkGfm from "remark-gfm"
+import { CodeBlock, CodeBlockCode } from "../prompt-kit/code-block"
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
@@ -52,31 +53,12 @@ const INITIAL_COMPONENTS: Partial<Components> = {
 
     return (
       <CodeBlock className={className}>
-        <CodeBlockGroup className="flex h-9 items-center justify-between px-4">
-          <div className="text-muted-foreground py-1 pr-2 font-mono text-xs">
-            {language}
-          </div>
-        </CodeBlockGroup>
-        <div className="sticky top-16 lg:top-0">
-          <div className="absolute right-0 bottom-0 flex h-9 items-center pr-1.5">
-            <ButtonCopy code={children as string} />
-          </div>
-        </div>
         <CodeBlockCode code={children as string} language={language} />
       </CodeBlock>
     )
   },
   pre: function PreComponent({ children }) {
     return <>{children}</>
-  },
-  a: function AComponent({ href, children, ...props }) {
-    if (!href) return <span {...props}>{children}</span>
-
-    return (
-      <LinkMarkdown href={href} {...props}>
-        {children}
-      </LinkMarkdown>
-    )
   },
 }
 
@@ -89,9 +71,9 @@ const MemoizedMarkdownBlock = memo(
     components?: Partial<Components>
   }) {
     return (
-      <ReactMarkdown 
-        remarkPlugins={[remarkGfm, remarkMath]} 
-        rehypePlugins={[rehypeKatex]} 
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
+        rehypePlugins={[rehypeKatex]}
         components={components}
       >
         {content}
