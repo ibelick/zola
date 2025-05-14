@@ -1,6 +1,6 @@
 import type { Chats } from "@/lib/chat-store/types"
 
-type TimeGroup = {
+export type TimeGroup = { // Add export here
   name: string
   chats: Chats[]
 }
