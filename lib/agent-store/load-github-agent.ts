@@ -13,7 +13,7 @@ export async function loadGitHubAgent(
 
     const { data: existing } = await supabase
       .from("agents")
-      .select("id, name, description, avatar_url, slug, tools_enabled")
+      .select("*")
       .eq("slug", slug)
       .single()
 

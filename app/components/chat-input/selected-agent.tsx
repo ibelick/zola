@@ -2,6 +2,7 @@
 
 import { Agent } from "@/app/types/agent"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   HoverCard as HoverCardComponent,
   HoverCardContent,
@@ -12,7 +13,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Cube, FireSimple, Toolbox, Wrench } from "@phosphor-icons/react"
+import {
+  ArrowRight,
+  Cube,
+  Eye,
+  FireSimple,
+  Toolbox,
+  Wrench,
+} from "@phosphor-icons/react"
 import { X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import React, { useState } from "react"
@@ -64,13 +72,18 @@ function HoverCard({
             </Avatar>
             <h3 className="text-base font-medium">{selectedAgent.name}</h3>
           </div>
+
           <p className="text-muted-foreground mt-1 line-clamp-2 font-mono text-xs">
             {selectedAgent.system_prompt}
           </p>
 
           <hr className="border-border my-2 border-dashed" />
 
-          <div className="flex flex-wrap gap-4">
+          <Button variant="outline" className="h-7 w-full text-xs" size="sm">
+            See agent page <Eye className="size-3" />
+          </Button>
+
+          {/* <div className="flex flex-wrap gap-4">
             <div className="flex items-center gap-1">
               <Wrench className="text-muted-foreground size-4" />
               <span className="text-muted-foreground text-sm leading-1">
@@ -89,7 +102,7 @@ function HoverCard({
                 1.3k used
               </span>
             </div>
-          </div>
+          </div> */}
 
           {/* {selectedAgent.tags && selectedAgent.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
