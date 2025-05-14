@@ -1,7 +1,6 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { useTheme } from "next-themes"
 import React, { useEffect, useState } from "react"
 import { codeToHtml } from "shiki"
 
@@ -39,22 +38,23 @@ function CodeBlockCode({
   className,
   ...props
 }: CodeBlockCodeProps) {
-  const { theme: appTheme } = useTheme()
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null)
 
   useEffect(() => {
     async function highlight() {
-      const html = await codeToHtml(code, {
-        lang: language,
-        theme: appTheme === "dark" ? "github-dark" : "github-light",
-      })
+      if (!code) {
+        setHighlightedHtml("<pre><code></code></pre>")
+        return
+      }
+
+      const html = await codeToHtml(code, { lang: language, theme })
       setHighlightedHtml(html)
     }
     highlight()
-  }, [code, language, theme, appTheme])
+  }, [code, language, theme])
 
   const classNames = cn(
-    "w-full overflow-x-auto text-[13px] [&>pre]:px-4 [&>pre]:py-4 [&>pre]:!bg-background",
+    "w-full overflow-x-auto text-[13px] [&>pre]:px-4 [&>pre]:py-4",
     className
   )
 
