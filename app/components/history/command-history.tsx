@@ -278,7 +278,7 @@ export function CommandHistory({
 
   const dialogBaseClasses = "flex flex-col transition-all duration-300 ease-in-out overflow-hidden";
   const widthClassesWithPreview = "w-[85vw] max-w-[1200px] lg:max-w-6xl";
-  const widthClassesWithoutPreview = "w-[30vw] !max-w-[900px]"; // Original: w-[30vw] !max-w-[900px]
+  const widthClassesWithoutPreview = "w-[50vw] !max-w-[800px]"; // Original: w-[30vw] !max-w-[900px]
 
   const commandDialogProps = useMemo(() => ({
     shouldFilter: false,
