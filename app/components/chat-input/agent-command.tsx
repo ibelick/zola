@@ -3,7 +3,7 @@
 import { Agent } from "@/app/types/agent"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
-import { Plus } from "@phosphor-icons/react"
+import { Cube, Plus } from "@phosphor-icons/react"
 import { useEffect, useRef } from "react"
 import { DialogCreateAgentTrigger } from "../agents/dialog-create-agent/dialog-trigger-create-agent"
 
@@ -94,12 +94,18 @@ export function AgentCommand({
               onClick={() => onSelect(agent)}
             >
               <div className="flex items-center gap-2">
-                <Avatar className="size-9">
-                  <AvatarImage src={agent.avatar_url ?? undefined} />
-                  <AvatarFallback>
-                    {agent.name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                {agent.avatar_url ? (
+                  <Avatar className="size-9">
+                    <AvatarImage src={agent.avatar_url ?? undefined} />
+                    <AvatarFallback>
+                      {agent.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <div className="flex size-9 items-center justify-center overflow-hidden rounded-full border border-dashed">
+                    <Cube className="text-muted-foreground size-6" />
+                  </div>
+                )}
                 <div className="flex flex-col">
                   <span className="text-sm font-medium">{agent.name}</span>
                   <span className="text-muted-foreground line-clamp-1 text-xs">

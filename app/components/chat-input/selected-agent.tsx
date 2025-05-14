@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { FireSimple, Toolbox, Wrench } from "@phosphor-icons/react"
+import { Cube, FireSimple, Toolbox, Wrench } from "@phosphor-icons/react"
 import { X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import React, { useState } from "react"
@@ -37,12 +37,18 @@ function HoverCard({
       <HoverCardTrigger className="w-full">
         <div className="bg-background hover:bg-accent border-input mr-2 mb-0 flex max-w-56 cursor-default items-center gap-2 rounded-2xl border p-2 pr-3 transition-colors">
           <div className="flex items-center gap-1.5">
-            <Avatar className="size-5">
-              <AvatarImage src={selectedAgent.avatar_url ?? undefined} />
-              <AvatarFallback>
-                {selectedAgent.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            {selectedAgent.avatar_url ? (
+              <Avatar className="size-5">
+                <AvatarImage src={selectedAgent.avatar_url ?? undefined} />
+                <AvatarFallback>
+                  {selectedAgent.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <div className="flex size-5 items-center justify-center overflow-hidden rounded-full border border-dashed">
+                <Cube className="text-muted-foreground size-3" />
+              </div>
+            )}
             <span className="text-sm font-medium">{selectedAgent.name}</span>
           </div>
         </div>
