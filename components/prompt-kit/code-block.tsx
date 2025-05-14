@@ -44,7 +44,8 @@ function CodeBlockCode({
 
   useEffect(() => {
     async function highlight() {
-      const html = await codeToHtml(code, {
+      const codeContent = typeof code === 'string' ? code : '';
+      const html = await codeToHtml(codeContent, {
         lang: language,
         theme: appTheme === "dark" ? "github-dark" : "github-light",
       })
@@ -68,7 +69,7 @@ function CodeBlockCode({
   ) : (
     <div className={classNames} {...props}>
       <pre>
-        <code>{code}</code>
+        <code>{typeof code === 'string' ? code : ''}</code>
       </pre>
     </div>
   )

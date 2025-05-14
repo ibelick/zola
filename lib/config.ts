@@ -16,6 +16,7 @@ import {
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr"
 import { openproviders, OpenProvidersOptions } from "./openproviders"
+import { LanguageModelV1 } from "ai"; // Or from "@ai-sdk/provider" if that's where it's re-exported
 import { SupportedModel } from "./openproviders/types"
 
 export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5
@@ -29,13 +30,14 @@ export type Model = {
   id: string
   name: string
   provider: string
-  api_sdk: OpenProvidersOptions<SupportedModel>
+  api_sdk: LanguageModelV1 | string; // Corrected type
   features?: {
     id: string
     enabled: boolean
   }[]
   description?: string
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  creator?: string; // Added missing property
 }
 
 export const MODELS_FREE = [

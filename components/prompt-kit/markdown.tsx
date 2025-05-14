@@ -92,7 +92,7 @@ const MemoizedMarkdownBlock = memo(
     return (
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-        rehypePlugins={[rehypeKatex]}
+        rehypePlugins={[[rehypeKatex, { strict: false }]]}
         components={components}
       >
         {content}
