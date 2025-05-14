@@ -77,10 +77,17 @@ export function useAgentCommand({
   const updateChatAgentFn = useCallback(
     (agent: Agent | null) => {
       if (chatId && user) {
+        console.log("Updating agent for chat:", {
+          userId: user.id,
+          chatId,
+          agentId: agent ? agent.id : null,
+          isAuthenticated: !user.anonymous,
+        })
+
         updateChatAgent(
           user.id,
           chatId,
-          agent?.id || null,
+          agent ? agent.id : null,
           !user.anonymous
         ).catch((error) => {
           console.error("Failed to update chat agent:", error)
@@ -98,7 +105,13 @@ export function useAgentCommand({
 
   // Update selectedAgent when defaultAgent changes
   useEffect(() => {
-    if (defaultAgent && selectedAgent?.id !== defaultAgent.id) {
+    // Only sync with defaultAgent if we don't have a local override
+    // This prevents the effect from re-adding the agent after removal
+    if (
+      defaultAgent &&
+      selectedAgent !== null &&
+      selectedAgent?.id !== defaultAgent.id
+    ) {
       setSelectedAgent(defaultAgent)
 
       // If chatId and user exist, update the chat agent
@@ -233,16 +246,29 @@ export function useAgentCommand({
     [value, onValueChange, updateAgentInUrl, debouncedUpdateChatAgent]
   )
 
+  console.log("selectedAgent", selectedAgent)
+
   // Remove selected agent
   const removeSelectedAgent = useCallback(() => {
+    console.log("Removing selected agent")
+
     setSelectedAgent(null)
 
     // Remove agent from URL
     updateAgentInUrl(null)
 
-    // Update the agent in the chat with debounce
-    debouncedUpdateChatAgent(null)
-  }, [updateAgentInUrl, debouncedUpdateChatAgent])
+    if (user && chatId) {
+      updateChatAgent(
+        user.id,
+        chatId,
+        null, // Explicitly null
+        !user.anonymous
+      ).catch((error) => {
+        console.error("Failed to remove chat agent:", error)
+      })
+    }
+    console.log("after removing selected agent")
+  }, [updateAgentInUrl, user, chatId, updateChatAgent])
 
   // Close the agent command menu
   const closeAgentCommand = useCallback(() => {

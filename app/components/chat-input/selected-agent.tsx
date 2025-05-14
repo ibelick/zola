@@ -124,7 +124,7 @@ export function SelectedAgent({
     <AnimatePresence initial={false}>
       {selectedAgent && (
         <motion.div
-          key="selected-agent-container"
+          key={selectedAgent.id}
           initial={{ height: 0 }}
           animate={{ height: "auto" }}
           exit={{ height: 0 }}
