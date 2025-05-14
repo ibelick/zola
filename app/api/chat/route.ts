@@ -53,7 +53,6 @@ export async function POST(req: Request) {
         content: sanitizeUserInput(userMessage.content),
         experimental_attachments:
           userMessage.experimental_attachments as unknown as Attachment[],
-        user_id: userId,
       })
       if (msgError) {
         console.error("Error saving user message:", msgError)
