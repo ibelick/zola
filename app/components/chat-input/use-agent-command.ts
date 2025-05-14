@@ -37,7 +37,6 @@ export function useAgentCommand({
   agents,
   defaultAgent = null,
 }: UseAgentCommandProps): UseAgentCommandReturn {
-  // Next.js navigation hooks
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -49,6 +48,7 @@ export function useAgentCommand({
   const [showAgentCommand, setShowAgentCommand] = useState(false)
   const [agentSearchTerm, setAgentSearchTerm] = useState("")
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(defaultAgent)
+  const [localOverride, setLocalOverride] = useState(false)
   const mentionStartPosRef = useRef<number | null>(null)
   const [activeAgentIndex, setActiveAgentIndex] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
@@ -98,21 +98,16 @@ export function useAgentCommand({
 
   // Update selectedAgent when defaultAgent changes
   useEffect(() => {
-    // Only sync with defaultAgent if we don't have a local override
-    // This prevents the effect from re-adding the agent after removal
-    if (
-      defaultAgent &&
-      selectedAgent !== null &&
-      selectedAgent?.id !== defaultAgent.id
-    ) {
+    // Only update from defaultAgent if we haven't manually set an override
+    if (defaultAgent && !localOverride) {
       setSelectedAgent(defaultAgent)
 
       // If chatId and user exist, update the chat agent
-      if (chatId && user && defaultAgent !== selectedAgent) {
+      if (chatId && user) {
         debouncedUpdateChatAgent(defaultAgent)
       }
     }
-  }, [defaultAgent, chatId, user, debouncedUpdateChatAgent, selectedAgent])
+  }, [defaultAgent, chatId, user, debouncedUpdateChatAgent, localOverride])
 
   // Filter agents based on search term
   const filteredAgents = agentSearchTerm
@@ -211,6 +206,7 @@ export function useAgentCommand({
   const handleAgentSelect = useCallback(
     (agent: Agent) => {
       setSelectedAgent(agent)
+      setLocalOverride(true)
 
       // Update URL with selected agent slug
       updateAgentInUrl(agent)
@@ -241,11 +237,14 @@ export function useAgentCommand({
 
   // Remove selected agent
   const removeSelectedAgent = useCallback(() => {
+    // Set local override and clear selected agent in one go
+    setLocalOverride(true)
     setSelectedAgent(null)
 
     // Remove agent from URL
     updateAgentInUrl(null)
 
+    // Update the backend immediately without debounce
     if (user && chatId) {
       updateChatAgent(
         user.id,
@@ -256,6 +255,9 @@ export function useAgentCommand({
         console.error("Failed to remove chat agent:", error)
       })
     }
+
+    // Focus back on textarea
+    textareaRef.current?.focus()
   }, [updateAgentInUrl, user, chatId, updateChatAgent])
 
   // Close the agent command menu
