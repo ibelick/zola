@@ -19,9 +19,47 @@ import {
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useParams } from "next/navigation"
-import { useMemo } from "react"
+import { useMemo, useEffect, useRef } from "react"
 import { HistoryTrigger } from "../../history/history-trigger"
 import { SidebarList } from "./sidebar-list"
+
+
+//Key used in `sessionStorage` to persist the scroll position of the sidebar.
+const SCROLL_STORAGE_KEY = "zola.sidebar.scrollTop"
+
+function usePersistentScroll() {
+  const rootRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+
+    // The element that actually scrolls is the viewport inside the root.
+    const viewport = root.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    ) as HTMLElement | null
+    if (!viewport) return
+
+    // Restore the previous position on the very next frame *after* layout so
+    // the scroll happens once all sizes are known.
+    const stored = sessionStorage.getItem(SCROLL_STORAGE_KEY)
+    if (stored) {
+      requestAnimationFrame(() => {
+        viewport.scrollTop = Number(stored)
+      })
+    }
+
+    // Persist future changes
+    const handleScroll = () => {
+      sessionStorage.setItem(SCROLL_STORAGE_KEY, viewport.scrollTop.toString())
+    }
+
+    viewport.addEventListener("scroll", handleScroll)
+    return () => viewport.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  return rootRef
+}
 
 export function AppSidebar() {
   const isMobile = useBreakpoint(768)
@@ -32,6 +70,10 @@ export function AppSidebar() {
 
   const groupedChats = useMemo(() => groupChatsByDate(chats, ""), [chats])
   const hasChats = chats.length > 0
+
+  // Attach the persistent ref to the ScrollArea *root*; the hook will find the
+  // correct viewport element internally.
+  const scrollRef = usePersistentScroll()
 
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" className="border-none">
@@ -68,7 +110,11 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent className="mask-t-from-98% mask-t-to-100% mask-b-from-98% mask-b-to-100% px-3">
-        <ScrollArea className="flex h-full [&>div>div]:!block">
+        {/* The ref makes the scroll position sticky across page changes */}
+        <ScrollArea
+          ref={scrollRef as unknown as React.Ref<HTMLDivElement>}
+          className="flex h-full [&>div>div]:!block"
+        >
           {isLoading ? (
             <div className="h-full" />
           ) : hasChats ? (
