@@ -108,6 +108,14 @@ Here are the detailed steps to set up Google OAuth:
 10. Paste the Client ID and Client Secret in the Google provider settings
 11. Save the changes
 
+#### Guest user setup
+
+1. Go to your Supabase project dashboard
+2. Navigate to Authentication > Providers
+3. Toggle on "Allow anonymous sign-ins"
+
+This allows users limited access to try the product before properly creating an account.
+
 ### Database Schema
 
 Create the following tables in your Supabase SQL editor:

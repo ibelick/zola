@@ -3,6 +3,7 @@ import { APP_DOMAIN, DAILY_SPECIAL_AGENT_LIMIT } from "@/lib/config"
 import { SupabaseClient } from "@supabase/supabase-js"
 import { fetchClient } from "./fetch"
 import { API_ROUTE_CREATE_GUEST, API_ROUTE_UPDATE_CHAT_MODEL } from "./routes"
+import { createClient } from "./supabase/client"
 
 /**
  * Creates a guest user record on the server
@@ -142,13 +143,47 @@ export const getOrCreateGuestUserId = async (
 ): Promise<string | null> => {
   if (user?.id) return user.id
 
-  const stored = localStorage.getItem("guestId")
-  if (stored) return stored
+  const supabase = createClient()
 
-  const guestId = crypto.randomUUID()
-  localStorage.setItem("guestId", guestId)
-  await createGuestUser(guestId)
-  return guestId
+  const existingGuestSessionUser = await supabase.auth.getUser()
+  if (existingGuestSessionUser.data?.user && existingGuestSessionUser.data.user.is_anonymous) {
+    const anonUserId = existingGuestSessionUser.data.user.id
+
+    const profileCreationAttempted = localStorage.getItem(`guestProfileAttempted_${anonUserId}`)
+
+    if (!profileCreationAttempted) {
+      try {
+        await createGuestUser(anonUserId)
+        localStorage.setItem(`guestProfileAttempted_${anonUserId}`, "true")
+      } catch (error) {
+        console.error("Failed to ensure guest user profile exists for existing anonymous auth user:", error)
+        return null
+      }
+    }
+    return anonUserId
+  }
+  
+  try {
+    const { data: anonAuthData, error: anonAuthError } = await supabase.auth.signInAnonymously()
+
+    if (anonAuthError) {
+      console.error("Error during anonymous sign-in:", anonAuthError)
+      return null
+    }
+
+    if (!anonAuthData || !anonAuthData.user) {
+      console.error("Anonymous sign-in did not return a user.")
+      return null
+    }
+
+    const guestIdFromAuth = anonAuthData.user.id
+    await createGuestUser(guestIdFromAuth)
+    localStorage.setItem(`guestProfileAttempted_${guestIdFromAuth}`, "true")
+    return guestIdFromAuth
+  } catch (error) {
+    console.error("Error in getOrCreateGuestUserId during anonymous sign-in or profile creation:", error)
+    return null
+  }
 }
 
 export class SpecialAgentLimitError extends Error {
