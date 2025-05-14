@@ -8,6 +8,7 @@ import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useUser } from "@/app/providers/user-provider"
 import type { Agent } from "@/app/types/agent"
 import { Button } from "@/components/ui/button"
+import { useSidebar } from "@/components/ui/sidebar"
 import { useAgent } from "@/lib/agent-store/hooks"
 import { APP_NAME } from "@/lib/config"
 import { Info } from "@phosphor-icons/react"
@@ -25,6 +26,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
   const { agent } = useAgent()
+  const { open: isSidebarOpen } = useSidebar()
 
   const isLoggedIn = !!user
 
@@ -74,7 +76,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
               {agent && <DialogPublish agent={agent} />}
               <ButtonNewChat />
               <AgentLink />
-              <HistoryTrigger hasSidebar={hasSidebar} />
+              {!isSidebarOpen && <HistoryTrigger hasSidebar={hasSidebar} />}
               <UserMenu />
             </div>
           )}
