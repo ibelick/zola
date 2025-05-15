@@ -53,6 +53,13 @@ export function useAgentCommand({
   const [activeAgentIndex, setActiveAgentIndex] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
+  // If the user is on the home page, remove the selected agent
+  useEffect(() => {
+    if (pathname === "/") {
+      setSelectedAgent(null)
+    }
+  }, [pathname])
+
   // Helper function to update URL without reload
   const updateAgentInUrl = useCallback(
     (agent: Agent | null) => {
