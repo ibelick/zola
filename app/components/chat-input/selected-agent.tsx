@@ -58,12 +58,18 @@ function HoverCard({
       <HoverCardContent className="w-80 px-3 py-2.5" side="top" align="start">
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <Avatar className="size-5">
-              <AvatarImage src={selectedAgent.avatar_url ?? undefined} />
-              <AvatarFallback>
-                {selectedAgent.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            {selectedAgent.avatar_url ? (
+              <Avatar className="size-5">
+                <AvatarImage src={selectedAgent.avatar_url ?? undefined} />
+                <AvatarFallback>
+                  {selectedAgent.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <div className="flex size-5 items-center justify-center overflow-hidden rounded-full border border-dashed">
+                <Cube className="text-muted-foreground size-3" />
+              </div>
+            )}
             <h3 className="text-base font-medium">{selectedAgent.name}</h3>
           </div>
 
