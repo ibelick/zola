@@ -72,7 +72,9 @@ function HoverCard({
             )}
             <h3 className="text-base font-medium">{selectedAgent.name}</h3>
           </div>
-
+          <span className="text-muted-foreground mt-0.5 mb-1 text-xs">
+            experimental (early version)
+          </span>
           <p className="text-muted-foreground mt-1 line-clamp-2 font-mono text-xs">
             {selectedAgent.system_prompt}
           </p>
