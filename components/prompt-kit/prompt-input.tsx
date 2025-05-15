@@ -132,11 +132,11 @@ function PromptInputTextarea({
       onKeyDown={handleKeyDown}
       className={cn(
         "text-primary min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
-        "overflow-y-auto", // Add overflow-y-auto to ensure scrollbar appears when needed
+        "overflow-y-auto",
         className
       )}
       style={{
-        maxHeight: maxHeightStyle, // Apply maxHeight as a CSS style property
+        maxHeight: maxHeightStyle,
       }}
       rows={1}
       disabled={disabled}

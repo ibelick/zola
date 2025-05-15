@@ -163,7 +163,7 @@ export function ChatInput({
       )}
       <div className="relative order-2 px-2 pb-3 sm:pb-4 md:order-1">
         <PromptInput
-          className="bg-popover relative z-10 p-0 pb-2 shadow-xs backdrop-blur-xl"
+          className="bg-popover relative z-10 p-0 pt-1 shadow-xs backdrop-blur-xl"
           maxHeight={200}
           value={value}
           onValueChange={agentCommand.handleValueChange}
@@ -190,10 +190,10 @@ export function ChatInput({
           <PromptInputTextarea
             placeholder={"Ask Zola or @mention an agent"}
             onKeyDown={handleKeyDown}
-            className="mt-2 ml-2 min-h-[44px] text-base leading-[1.3] sm:text-base md:text-base"
+            className="min-h-[44px] pt-3 pl-4 text-base leading-[1.3] sm:text-base md:text-base"
             ref={agentCommand.textareaRef}
           />
-          <PromptInputActions className="mt-5 w-full justify-between px-2">
+          <PromptInputActions className="mt-5 w-full justify-between px-3 pb-3">
             <div className="flex gap-2">
               <ButtonFileUpload
                 onFileUpload={onFileUpload}

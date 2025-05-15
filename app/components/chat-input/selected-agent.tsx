@@ -146,7 +146,7 @@ export function SelectedAgent({
           transition={TRANSITION}
           className="overflow-hidden"
         >
-          <div className="flex flex-row px-2">
+          <div className="flex flex-row px-3 pt-0">
             <motion.div key="selected-agent-item" className="relative pt-2">
               <HoverCard
                 selectedAgent={selectedAgent}
