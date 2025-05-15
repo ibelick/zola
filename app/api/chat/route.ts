@@ -104,7 +104,9 @@ export async function POST(req: Request) {
       system: effectiveSystemPrompt,
       messages,
       tools: toolsToUse,
-      maxSteps: effectiveMaxSteps,
+      // @todo: remove this
+      // hardcoded for now
+      maxSteps: 10,
       onError: (err) => {
         console.error("🛑 streamText error:", err)
       },
