@@ -16,12 +16,12 @@ export async function generateMetadata({
 
   const { data: chat } = await supabase
     .from("chats")
-    .select("title, system_prompt, created_at")
+    .select("title, created_at")
     .eq("id", chatId)
     .single()
 
   const title = chat?.title || "Chat"
-  const description = chat?.system_prompt || "A chat in Zola"
+  const description = "A chat in Zola"
 
   return {
     title,
@@ -50,7 +50,7 @@ export default async function AgentChat({
 
   const { data: chatData, error: chatError } = await supabase
     .from("chats")
-    .select("id, title, model, system_prompt, agent_id, created_at")
+    .select("id, title, agent_id, created_at")
     .eq("id", chatId)
     .single()
 
