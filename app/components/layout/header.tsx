@@ -30,6 +30,8 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
 
   const isLoggedIn = !!user
 
+  const showHeaderHistoryTrigger = !isMobile && (!hasSidebar || !isSidebarOpen);
+
   return (
     <header className="h-app-header pointer-events-none fixed top-0 right-0 left-0 z-50">
       {/* <div className="h-app-header top-app-header bg-background pointer-events-none absolute left-0 z-50 mx-auto w-full to-transparent backdrop-blur-xl [-webkit-mask-image:linear-gradient(to_bottom,black,transparent)] lg:hidden"></div> */}
@@ -76,7 +78,11 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
               {agent && <DialogPublish agent={agent} />}
               <ButtonNewChat />
               <AgentLink />
-              {!isSidebarOpen && <HistoryTrigger hasSidebar={hasSidebar} />}
+              {showHeaderHistoryTrigger && (
+                <HistoryTrigger
+                  hasSidebar={false}
+                />
+              )}
               <UserMenu />
             </div>
           )}
