@@ -189,7 +189,6 @@ CREATE TABLE messages (
   role TEXT NOT NULL CHECK (role IN ('system', 'user', 'assistant', 'data')), -- Added CHECK constraint
   experimental_attachments JSONB, -- Storing Attachment[] as JSONB
   parts JSONB,
-  tool_invocations JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT messages_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
 );

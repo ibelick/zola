@@ -34,7 +34,6 @@ export async function saveFinalAssistantMessage(
   messages: Message[]
 ) {
   const parts: ContentPart[] = []
-  const toolInvocations: any[] = []
   let textParts: string[] = []
 
   for (const msg of messages) {
@@ -85,13 +84,6 @@ export async function saveFinalAssistantMessage(
                 result: part.result,
               },
             })
-            toolInvocations.push({
-              state: "result",
-              step: DEFAULT_STEP,
-              toolCallId: part.toolCallId || "",
-              toolName: part.toolName || "",
-              result: part.result,
-            })
           }
         }
       }
@@ -105,7 +97,6 @@ export async function saveFinalAssistantMessage(
     role: "assistant",
     content: finalPlainText || "",
     parts: parts,
-    tool_invocations: toolInvocations,
   })
 
   if (error) {
