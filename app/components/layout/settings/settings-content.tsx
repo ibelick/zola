@@ -69,8 +69,6 @@ export function SettingsContent({
 
   if (!user) return null
 
-  console.log(user.profile_image)
-
   return (
     <div
       className={cn(

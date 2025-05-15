@@ -1,6 +1,5 @@
 "use client"
 
-import { log } from "node:console"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { Agent } from "@/app/types/agent"
 import { usePathname, useSearchParams } from "next/navigation"

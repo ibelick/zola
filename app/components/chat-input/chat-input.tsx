@@ -163,7 +163,7 @@ export function ChatInput({
       )}
       <div className="relative order-2 px-2 pb-3 sm:pb-4 md:order-1">
         <PromptInput
-          className="bg-popover relative z-10 overflow-hidden p-0 pb-2 shadow-xs backdrop-blur-xl"
+          className="bg-popover relative z-10 p-0 pb-2 shadow-xs backdrop-blur-xl"
           maxHeight={200}
           value={value}
           onValueChange={agentCommand.handleValueChange}
