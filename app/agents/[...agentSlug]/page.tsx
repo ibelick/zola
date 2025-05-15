@@ -13,14 +13,14 @@ export default async function AgentIdPage({
 
   const supabase = await createClient()
 
-  const { data: agent, error } = await supabase
+  const { data: agent, error: agentError } = await supabase
     .from("agents")
     .select("*")
     .eq("slug", agentSlug)
     .single()
 
-  if (error) {
-    throw new Error(error.message)
+  if (agentError) {
+    throw new Error(agentError.message)
   }
 
   const { data: agents, error: agentsError } = await supabase

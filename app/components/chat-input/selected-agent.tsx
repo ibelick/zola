@@ -13,16 +13,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import {
-  ArrowRight,
-  Cube,
-  Eye,
-  FireSimple,
-  Toolbox,
-  Wrench,
-} from "@phosphor-icons/react"
+import { Cube, Eye } from "@phosphor-icons/react"
 import { X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
+import Link from "next/link"
 import React, { useState } from "react"
 
 const TRANSITION = {
@@ -79,9 +73,11 @@ function HoverCard({
 
           <hr className="border-border my-2 border-dashed" />
 
-          <Button variant="outline" className="h-7 w-full text-xs" size="sm">
-            See agent page <Eye className="size-3" />
-          </Button>
+          <Link href={`/agents/${selectedAgent.slug}`}>
+            <Button variant="outline" className="h-7 w-full text-xs" size="sm">
+              See agent page <Eye className="size-3" />
+            </Button>
+          </Link>
 
           {/* <div className="flex flex-wrap gap-4">
             <div className="flex items-center gap-1">
