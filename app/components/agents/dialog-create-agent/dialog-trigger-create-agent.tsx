@@ -2,7 +2,6 @@
 
 import { PopoverContentAuth } from "@/app/components/chat-input/popover-content-auth"
 import { useUser } from "@/app/providers/user-provider"
-import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -17,27 +16,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { toast } from "@/components/ui/toast"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { fetchClient } from "@/lib/fetch"
 import { API_ROUTE_CREATE_AGENT } from "@/lib/routes"
-import { Paperclip } from "lucide-react"
-import { nanoid } from "nanoid"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
-import slugify from "slugify"
 import { useBreakpoint } from "../../../hooks/use-breakpoint"
 import { CreateAgentForm } from "./create-agent-form"
-
-export function generateAgentSlug(title: string) {
-  const base = slugify(title, { lower: true, strict: true, trim: true })
-  const id = nanoid(6)
-  return `${base}-${id}`
-}
 
 type AgentFormData = {
   name: string

@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { nanoid } from "nanoid"
 import slugify from "slugify"
 
-export function generateAgentSlug(title: string) {
+function generateAgentSlug(title: string) {
   const base = slugify(title, { lower: true, strict: true, trim: true })
   const id = nanoid(6)
   return `${base}-${id}`
