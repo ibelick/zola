@@ -318,15 +318,7 @@ export type Database = {
     Functions: {
       [_ in never]: never
     }
-    Enums: {
-      orderstatus:
-        | "UNPAID"
-        | "PAID"
-        | "SHIPPED"
-        | "OUT"
-        | "CANCELLED"
-        | "PENDING"
-    }
+    Enums: {}
     CompositeTypes: {
       [_ in never]: never
     }

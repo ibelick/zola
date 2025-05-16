@@ -137,6 +137,7 @@ CREATE TABLE users (
   last_active_at TIMESTAMPTZ DEFAULT NOW(),
   daily_pro_message_count INTEGER,
   daily_pro_reset TIMESTAMPTZ,
+  system_prompt TEXT,
   CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE -- Explicit FK definition
 );
 
@@ -179,18 +180,17 @@ CREATE TABLE chats (
 );
 
 -- Messages table
--- Note: Supabase types define id as number, typically SERIAL or BIGSERIAL in PG.
--- role is a string union, best represented as TEXT with potential CHECK constraint.
--- experimental_attachments and parts are JSONB.
 CREATE TABLE messages (
   id SERIAL PRIMARY KEY, -- Using SERIAL for auto-incrementing integer ID
   chat_id UUID NOT NULL,
+  user_id UUID NOT NULL,
   content TEXT,
   role TEXT NOT NULL CHECK (role IN ('system', 'user', 'assistant', 'data')), -- Added CHECK constraint
   experimental_attachments JSONB, -- Storing Attachment[] as JSONB
   parts JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  CONSTRAINT messages_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
+  CONSTRAINT messages_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+  CONSTRAINT messages_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Chat attachments table
@@ -203,8 +203,8 @@ CREATE TABLE chat_attachments (
   file_type TEXT,
   file_size INTEGER, -- Assuming INTEGER for file size
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  CONSTRAINT chat_attachments_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
-  CONSTRAINT chat_attachments_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  CONSTRAINT fk_chat FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Feedback table
@@ -215,7 +215,6 @@ CREATE TABLE feedback (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
 -- RLS (Row Level Security) Reminder
 -- Ensure RLS is enabled on these tables in your Supabase dashboard
 -- and appropriate policies are created.
