@@ -183,7 +183,7 @@ CREATE TABLE chats (
 CREATE TABLE messages (
   id SERIAL PRIMARY KEY, -- Using SERIAL for auto-incrementing integer ID
   chat_id UUID NOT NULL,
-  user_id UUID NOT NULL,
+  user_id UUID,
   content TEXT,
   role TEXT NOT NULL CHECK (role IN ('system', 'user', 'assistant', 'data')), -- Added CHECK constraint
   experimental_attachments JSONB, -- Storing Attachment[] as JSONB
