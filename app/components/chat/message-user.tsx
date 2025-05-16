@@ -1,24 +1,18 @@
 "use client"
 
 import {
-  MorphingDialog,
-  MorphingDialogClose,
-  MorphingDialogContainer,
-  MorphingDialogContent,
-  MorphingDialogImage,
-  MorphingDialogTrigger,
-} from "@/components/motion-primitives/morphing-dialog"
-import {
   MessageAction,
   MessageActions,
   Message as MessageContainer,
   MessageContent,
 } from "@/components/prompt-kit/message"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Message as MessageType } from "@ai-sdk/react"
-import { Check, Copy, Trash } from "@phosphor-icons/react"
+import type { Message as MessageType } from "@ai-sdk/react"
+import { Check, Copy, PencilSimple, Trash } from "@phosphor-icons/react"
+import Image from "next/image"
 import { useRef, useState } from "react"
+
+import './scrollbar.css'
 
 const getTextFromDataUrl = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1]
@@ -48,9 +42,15 @@ export function MessageUser({
   onDelete,
   id,
 }: MessageUserProps) {
-  const [editInput, setEditInput] = useState(children)
+   const [editInput, setEditInput] = useState(children)
   const [isEditing, setIsEditing] = useState(false)
+ 
   const contentRef = useRef<HTMLDivElement>(null)
+ 
+  const [expandedImage, setExpandedImage] = useState<string | null>(null)
+
+
+
 
   const handleEditCancel = () => {
     setIsEditing(false)
@@ -68,47 +68,27 @@ export function MessageUser({
   const handleDelete = () => {
     onDelete(id)
   }
+  
 
   return (
     <MessageContainer
       className={cn(
-        "group flex w-full max-w-3xl flex-col items-end gap-0.5 px-6 pb-2",
-        hasScrollAnchor && "min-h-scroll-anchor"
+        "group flex w-full max-w-3xl flex-col items-end gap-2 px-6 pb-2",
+        hasScrollAnchor && "min-h-scroll-anchor",
       )}
     >
       {attachments?.map((attachment, index) => (
-        <div
-          className="flex flex-row gap-2"
-          key={`${attachment.name}-${index}`}
-        >
+        <div className="flex flex-row gap-2" key={`${attachment.name}-${index}`}>
           {attachment.contentType?.startsWith("image") ? (
-            <MorphingDialog
-              transition={{
-                type: "spring",
-                stiffness: 280,
-                damping: 18,
-                mass: 0.3,
-              }}
-            >
-              <MorphingDialogTrigger className="z-10">
-                <img
-                  className="mb-1 w-40 rounded-md"
-                  key={attachment.name}
-                  src={attachment.url}
-                  alt={attachment.name}
-                />
-              </MorphingDialogTrigger>
-              <MorphingDialogContainer>
-                <MorphingDialogContent className="relative rounded-lg">
-                  <MorphingDialogImage
-                    src={attachment.url}
-                    alt={attachment.name || ""}
-                    className="max-h-[90vh] max-w-[90vw] object-contain"
-                  />
-                </MorphingDialogContent>
-                <MorphingDialogClose className="text-primary" />
-              </MorphingDialogContainer>
-            </MorphingDialog>
+            <div className="relative">
+              <Image
+                className="mb-1 w-40 rounded-md cursor-pointer"
+                key={attachment.name}
+                src={attachment.url || "/placeholder.svg"}
+                alt={attachment.name || "Attachment"}
+                onClick={() => setExpandedImage(attachment.url)}
+              />
+            </div>
           ) : attachment.contentType?.startsWith("text") ? (
             <div className="text-primary mb-3 h-24 w-40 overflow-hidden rounded-md border p-2 text-xs">
               {getTextFromDataUrl(attachment.url)}
@@ -116,93 +96,115 @@ export function MessageUser({
           ) : null}
         </div>
       ))}
+
+      {expandedImage && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setExpandedImage(null)}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh]">
+            <Image
+              src={expandedImage || "/placeholder.svg"}
+              alt="Expanded image"
+              className="max-h-[90vh] max-w-[90vw] object-contain"
+            />
+            <button
+              className="absolute top-4 right-4 bg-black/50 text-white rounded-full p-2"
+              onClick={() => setExpandedImage(null)}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {isEditing ? (
         <div
-          className="bg-accent relative flex min-w-[180px] flex-col gap-2 rounded-3xl px-5 py-2.5"
-          style={{
-            width: contentRef.current?.offsetWidth,
-          }}
+          className="flex flex-col w-full max-w-3xl mx-auto bg-gray-100 rounded-lg p-4"
+          // style={{
+          //   width: contentRef.current?.offsetWidth,
+          // }}
         >
-          <textarea
-            className="w-full resize-none bg-transparent outline-none"
-            value={editInput}
-            onChange={(e) => setEditInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault()
-                handleSave()
-              }
-              if (e.key === "Escape") {
-                handleEditCancel()
-              }
-            }}
-            autoFocus
-          />
-          <div className="flex justify-end gap-2">
-            <Button size="sm" variant="ghost" onClick={handleEditCancel}>
+           <div className="relative min-h-16">
+
+                <textarea
+                className="w-full bg-transparent resize-none outline-none text-black placeholder-gray-500 py-2  max-h-64 scrollable "
+                value={editInput}
+                        onChange={(e) => {
+                  setEditInput(e.target.value)
+                  const el = e.target
+                  el.style.height = "auto"
+                  el.style.height = `${Math.min(el.scrollHeight, 26 * 24)}px`
+                }}
+                rows={1}
+                style={{
+                    lineHeight: "1.5rem",
+                    maxHeight: `${1.5 * 26}rem`, // 26 rows
+                    overflowY: "auto",
+                    scrollbarWidth: "none", // Hide scrollbar in Firefox
+                    msOverflowStyle: "none", // Hide scrollbar in IE/Edge
+                  }}
+                            onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSave()
+                  }
+                  if (e.key === "Escape") {
+                    handleEditCancel()
+                  }
+                }}
+                autoFocus
+              />
+           </div>
+         
+          <div className="flex justify-end gap-2 mt-2">
+            <button
+              onClick={handleEditCancel}
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-sm font-medium"
+            >
               Cancel
-            </Button>
-            <Button size="sm" onClick={handleSave}>
+            </button>
+            <button
+              onClick={handleSave}
+              className="bg-black dark:bg-white text-white dark:text-black rounded-full px-4 py-1 text-sm font-medium"
+            >
               Save
-            </Button>
+            </button>
           </div>
         </div>
       ) : (
         <MessageContent
           className="bg-accent relative max-w-[70%] rounded-3xl px-5 py-2.5"
-          markdown={true}
+          markdown={false}
           ref={contentRef}
-          components={{
-            code: ({ children }) => <>{children}</>,
-            pre: ({ children }) => <>{children}</>,
-            h1: ({ children }) => <p>{children}</p>,
-            h2: ({ children }) => <p>{children}</p>,
-            h3: ({ children }) => <p>{children}</p>,
-            h4: ({ children }) => <p>{children}</p>,
-            h5: ({ children }) => <p>{children}</p>,
-            h6: ({ children }) => <p>{children}</p>,
-            p: ({ children }) => <p>{children}</p>,
-            li: ({ children }) => <p>- {children}</p>,
-            ul: ({ children }) => <>{children}</>,
-            ol: ({ children }) => <>{children}</>,
-          }}
         >
           {children}
         </MessageContent>
       )}
-      <MessageActions className="flex gap-0 opacity-0 transition-opacity duration-0 group-hover:opacity-100">
-        <MessageAction tooltip={copied ? "Copied!" : "Copy text"} side="bottom">
+      <MessageActions className="flex gap-0 opacity-0 transition-opacity group-hover:opacity-100 bg-token-main-surface-tertiary rounded-3xl px-3 py-3">
+        <MessageAction tooltip={copied ? "Copied!" : "Copy text"} side="bottom" delayDuration={0}>
           <button
-            className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
             aria-label="Copy text"
             onClick={copyToClipboard}
             type="button"
           >
-            {copied ? (
-              <Check className="size-4" />
-            ) : (
-              <Copy className="size-4" />
-            )}
+            {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
           </button>
         </MessageAction>
-        {/* @todo: add when ready */}
-        {/* <MessageAction
-          tooltip={isEditing ? "Save" : "Edit"}
-          side="bottom"
-          delayDuration={0}
-        >
+        <MessageAction tooltip={isEditing ? "Save" : "Edit"} side="bottom" delayDuration={0}>
           <button
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
+            className="flex h-8 w-13 items-center justify-center rounded-full bg-transparent transition"
             aria-label="Edit"
             onClick={() => setIsEditing(!isEditing)}
             type="button"
           >
             <PencilSimple className="size-4" />
           </button>
-        </MessageAction> */}
-        <MessageAction tooltip="Delete" side="bottom">
+        </MessageAction>
+        <MessageAction tooltip="Delete" side="bottom" delayDuration={0}>
           <button
-            className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent transition"
             aria-label="Delete"
             onClick={handleDelete}
             type="button"
