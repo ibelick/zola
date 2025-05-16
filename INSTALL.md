@@ -226,18 +226,6 @@ CREATE TABLE feedback (
 -- ... add policies for other tables (agents, chats, messages, etc.) ...
 ```
 
-### Seeding Initial Data
-
-After creating the tables, you can seed the database with the default agents provided by Zola.
-
-To run the seed script:
-
-- Navigate to the SQL Editor in your Supabase project dashboard.
-- Open the `supabase/seed.sql` file from the Zola project codebase.
-- Copy the entire content of `seed.sql`.
-- Paste the content into the Supabase SQL Editor.
-- Click the "Run" button.
-
 ### Storage Setup
 
 Create the buckets `chat-attachments` and `avatars` in your Supabase dashboard:
