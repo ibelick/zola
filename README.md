@@ -6,7 +6,7 @@
 
 [![Chat with this repo](https://zola.chat/button/github.svg)](https://zola.chat/?agent=github/ibelick/zola)
 
-![zola screenshot](./public/cover_zola.jpg)
+![zola screenshot](./public/cover_zola.webp)
 
 ## Features
 

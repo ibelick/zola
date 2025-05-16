@@ -2,7 +2,7 @@
 
 Zola is a free, open-source AI chat app with multi-model support. This guide covers how to install and run Zola on different platforms, including Docker deployment options.
 
-![Zola screenshot](./public/cover_zola.jpg)
+![Zola screenshot](./public/cover_zola.webp)
 
 ## Prerequisites
 
