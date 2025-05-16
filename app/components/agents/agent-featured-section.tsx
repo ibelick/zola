@@ -17,6 +17,10 @@ export function AgentFeaturedSection({
   openAgentId,
   setOpenAgentId,
 }: AgentFeaturedSectionProps) {
+  if (!agents || agents.length === 0) {
+    return null
+  }
+
   return (
     <div className="mt-12">
       <h2 className="text-foreground mb-4 text-lg font-medium">Featured</h2>

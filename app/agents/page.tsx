@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic"
 export default async function Page() {
   const supabase = await createClient()
 
-  const { data: userData, error: userError } = await supabase.auth.getUser()
+  const { data: userData } = await supabase.auth.getUser()
 
   const { data: curatedAgents, error: agentsError } = await supabase
     .from("agents")
@@ -33,9 +33,6 @@ export default async function Page() {
     return <div>Error loading user agents</div>
   }
 
-  if (!curatedAgents || curatedAgents.length === 0) {
-    return <div>No agents found</div>
-  }
   return (
     <MessagesProvider>
       <LayoutApp>
