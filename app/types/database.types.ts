@@ -196,6 +196,7 @@ export type Database = {
           id: number
           role: "system" | "user" | "assistant" | "data"
           parts: Json | null
+          user_id: string
         }
         Insert: {
           experimental_attachments?: Attachment[]
@@ -205,6 +206,7 @@ export type Database = {
           id?: number
           role: "system" | "user" | "assistant" | "data"
           parts?: Json
+          user_id: string
         }
         Update: {
           experimental_attachments?: Attachment[]
@@ -214,8 +216,17 @@ export type Database = {
           id?: number
           role?: "system" | "user" | "assistant" | "data"
           parts?: Json
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {
