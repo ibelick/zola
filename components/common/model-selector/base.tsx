@@ -167,10 +167,7 @@ export function ModelSelector({
         />
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerTrigger asChild>
-            <Tooltip>
-              <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-              <TooltipContent>Switch model (⌘⇧M)</TooltipContent>
-            </Tooltip>
+            {trigger}
           </DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
