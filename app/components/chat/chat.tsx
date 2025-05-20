@@ -25,6 +25,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
+import { useChatDraft } from '@/app/hooks/use-chat-draft'
 
 const FeedbackWidget = dynamic(
   () => import("./feedback-widget").then((mod) => mod.FeedbackWidget),
@@ -70,6 +71,11 @@ export function Chat() {
   const hasSentFirstMessageRef = useRef(false)
 
   const isAuthenticated = !!user?.id
+
+  // Add the chat draft hook
+  const { draftValue, setDraftValue, clearDraft } = useChatDraft(chatId)
+
+  // Update the useChat hook to use draftValue as initial input
   const {
     messages,
     input,
@@ -84,6 +90,7 @@ export function Chat() {
   } = useChat({
     api: API_ROUTE_CHAT,
     initialMessages,
+    initialInput: draftValue,
   })
 
   // Use the custom hook for chat utilities
@@ -99,11 +106,15 @@ export function Chat() {
     setHasDialogAuth,
   })
 
+  // Modify handleInputChange to update draft
   const { handleInputChange, handleModelChange, handleDelete, handleEdit } =
     useChatHandlers({
       messages,
       setMessages,
-      setInput,
+      setInput: (value: string) => {
+        setInput(value)
+        setDraftValue(value)
+      },
       setSelectedModel,
       selectedModel,
       chatId,
@@ -226,7 +237,7 @@ export function Chat() {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
-
+      clearDraft() // Clear the draft after successful submission
       hasSentFirstMessageRef.current = true
     } catch (error) {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
