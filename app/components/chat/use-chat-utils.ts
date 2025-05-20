@@ -44,7 +44,7 @@ export function useChatUtils({
 
       if (rateData.remaining === REMAINING_QUERY_ALERT_THRESHOLD) {
         toast({
-          title: `Only ${rateData.remaining} query${
+          title: `Only ${rateData.remaining} quer${
             rateData.remaining === 1 ? "y" : "ies"
           } remaining today.`,
           status: "info",
