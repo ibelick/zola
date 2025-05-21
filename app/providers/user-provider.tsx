@@ -4,7 +4,14 @@
 import { createClient } from "@/lib/supabase/client"
 import { createContext, useContext, useEffect, useState } from "react"
 import { UserProfile } from "../types/user"
+import {
+  fetchUserProfile,
+  signOutUser,
+  subscribeToUserUpdates,
+  updateUserProfile,
+} from "./user-api"
 
+// @todo: move in /lib/user/provider.tsx
 type UserContextType = {
   user: UserProfile | null
   isLoading: boolean
@@ -26,65 +33,37 @@ export function UserProvider({
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
-  // Refresh user data from the server
   const refreshUser = async () => {
     if (!user?.id) return
 
     setIsLoading(true)
     try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", user.id)
-        .single()
-
-      if (error) throw error
-      if (data)
-        setUser({
-          ...data,
-          profile_image: data.profile_image || "",
-          display_name: data.display_name || "",
-        })
-    } catch (err) {
-      console.error("Failed to refresh user data:", err)
+      const updatedUser = await fetchUserProfile(user.id)
+      if (updatedUser) setUser(updatedUser)
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Update user data both in DB and local state
   const updateUser = async (updates: Partial<UserProfile>) => {
     if (!user?.id) return
 
     setIsLoading(true)
     try {
-      const { error } = await supabase
-        .from("users")
-        .update(updates)
-        .eq("id", user.id)
-
-      if (error) throw error
-
-      // Update local state optimistically
-      setUser((prev) => (prev ? { ...prev, ...updates } : null))
-    } catch (err) {
-      console.error("Failed to update user:", err)
+      const success = await updateUserProfile(user.id, updates)
+      if (success) {
+        setUser((prev) => (prev ? { ...prev, ...updates } : null))
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Sign out and reset user state
   const signOut = async () => {
     setIsLoading(true)
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-
-      // Reset user state
-      setUser(null)
-    } catch (err) {
-      console.error("Failed to sign out:", err)
+      const success = await signOutUser()
+      if (success) setUser(null)
     } finally {
       setIsLoading(false)
     }
@@ -94,29 +73,14 @@ export function UserProvider({
   useEffect(() => {
     if (!user?.id) return
 
-    const channel = supabase
-      .channel(`public:users:id=eq.${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "users",
-          filter: `id=eq.${user.id}`,
-        },
-        (payload) => {
-          setUser((previous) => ({
-            ...previous,
-            ...(payload.new as UserProfile),
-          }))
-        }
-      )
-      .subscribe()
+    const unsubscribe = subscribeToUserUpdates(user.id, (newData) => {
+      setUser((prev) => (prev ? { ...prev, ...newData } : null))
+    })
 
     return () => {
-      supabase.removeChannel(channel)
+      unsubscribe()
     }
-  }, [user?.id, supabase])
+  }, [user?.id])
 
   return (
     <UserContext.Provider
