@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { signInWithGoogle } from "@/lib/api"
 import { createClient } from "@/lib/supabase/client"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { useState } from "react"
 
 type DialogAuthProps = {
@@ -19,10 +20,18 @@ type DialogAuthProps = {
 }
 
 export function DialogAuth({ open, setOpen }: DialogAuthProps) {
+  if (!isSupabaseEnabled) {
+    return null
+  }
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const supabase = createClient()
+
+  if (!supabase) {
+    return null
+  }
 
   const handleSignInWithGoogle = async () => {
     try {

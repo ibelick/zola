@@ -3,17 +3,27 @@
 import { Button } from "@/components/ui/button"
 import { signInWithGoogle } from "@/lib/api"
 import { createClient } from "@/lib/supabase/client"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import Link from "next/link"
+import { notFound } from "next/navigation"
 import { useState } from "react"
 import { HeaderGoBack } from "../components/header-go-back"
 
 export default function LoginPage() {
+  if (!isSupabaseEnabled) {
+    return notFound()
+  }
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClient()
-
   async function handleSignInWithGoogle() {
+    const supabase = createClient()
+
+    if (!supabase) {
+      throw new Error("Supabase is not configured")
+    }
+
     try {
       setIsLoading(true)
       setError(null)

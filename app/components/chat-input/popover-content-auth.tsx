@@ -6,14 +6,23 @@ import React, { useState } from "react"
 import { signInWithGoogle } from "../../../lib/api"
 import { APP_NAME } from "../../../lib/config"
 import { createClient } from "../../../lib/supabase/client"
+import { isSupabaseEnabled } from "../../../lib/supabase/config"
 
 export function PopoverContentAuth() {
+  if (!isSupabaseEnabled) {
+    return null
+  }
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClient()
-
   const handleSignInWithGoogle = async () => {
+    const supabase = createClient()
+
+    if (!supabase) {
+      throw new Error("Supabase is not configured")
+    }
+
     try {
       setIsLoading(true)
       setError(null)
