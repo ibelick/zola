@@ -1,10 +1,17 @@
 import { createClient } from "@/lib/supabase/client"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import type { Message as MessageAISDK } from "ai"
 import { readFromIndexedDB, writeToIndexedDB } from "../persist"
 
 export async function getMessagesFromDb(
   chatId: string
 ): Promise<MessageAISDK[]> {
+  // fallback to local cache only
+  if (!isSupabaseEnabled) {
+    const cached = await getCachedMessages(chatId)
+    return cached
+  }
+
   const supabase = createClient()
   if (!supabase) return []
 
@@ -100,7 +107,12 @@ export async function addMessage(
 ): Promise<void> {
   await insertMessageToDb(chatId, message)
   const current = await getCachedMessages(chatId)
+
+  console.log("current", current)
+
   const updated = [...current, message]
+  console.log("updated", updated)
+
   await writeToIndexedDB("messages", { id: chatId, messages: updated })
 }
 
