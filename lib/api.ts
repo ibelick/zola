@@ -149,6 +149,11 @@ export const getOrCreateGuestUserId = async (
 
   const supabase = createClient()
 
+  if (!supabase) {
+    console.warn("Supabase is not available in this deployment.")
+    return null
+  }
+
   const existingGuestSessionUser = await supabase.auth.getUser()
   if (
     existingGuestSessionUser.data?.user &&
