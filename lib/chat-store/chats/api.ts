@@ -1,6 +1,7 @@
 import { readFromIndexedDB, writeToIndexedDB } from "@/lib/chat-store/persist"
 import type { Chat, Chats } from "@/lib/chat-store/types"
 import { createClient } from "@/lib/supabase/client"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { MODEL_DEFAULT } from "../../config"
 import { fetchClient } from "../../fetch"
 import {
@@ -78,8 +79,16 @@ export async function createChatInDb(
 }
 
 export async function fetchAndCacheChats(userId: string): Promise<Chats[]> {
+  if (!isSupabaseEnabled) {
+    return await getCachedChats()
+  }
+
   const data = await getChatsForUserInDb(userId)
-  await writeToIndexedDB("chats", data)
+
+  if (data.length > 0) {
+    await writeToIndexedDB("chats", data)
+  }
+
   return data
 }
 

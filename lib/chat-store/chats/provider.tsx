@@ -61,6 +61,8 @@ export function ChatsProvider({
   const [isLoading, setIsLoading] = useState(false)
   const [chats, setChats] = useState<Chats[]>([])
 
+  console.log("chats", chats)
+
   useEffect(() => {
     if (!userId) return
 
@@ -167,6 +169,9 @@ export function ChatsProvider({
   }
 
   const getChatById = (id: string) => {
+    console.log("chats", chats)
+    console.log("id", id)
+
     const chat = chats.find((c) => c.id === id)
     return chat
   }
