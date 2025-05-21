@@ -1,8 +1,13 @@
 import { Database } from "@/app/types/database.types"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
+import { isSupabaseEnabled } from "./config"
 
 export const createClient = async () => {
+  if (!isSupabaseEnabled) {
+    return null
+  }
+
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
