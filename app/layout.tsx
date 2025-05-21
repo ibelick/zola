@@ -7,14 +7,13 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { AgentProvider } from "@/lib/agent-store/provider"
 import { ChatsProvider } from "@/lib/chat-store/chats/provider"
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/config"
+import { getUserProfile } from "@/lib/user/api"
 import { ThemeProvider } from "next-themes"
 import Script from "next/script"
-import { createClient } from "../lib/supabase/server"
 import { LayoutClient } from "./layout-client"
 import { ChatSessionProvider } from "./providers/chat-session-provider"
 import { UserPreferencesProvider } from "./providers/user-preferences-provider"
 import { UserProvider } from "./providers/user-provider"
-import { UserProfile } from "./types/user"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,23 +36,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const isDev = process.env.NODE_ENV === "development"
-  const supabase = await createClient()
-  const { data } = await supabase.auth.getUser()
-
-  let userProfile = null
-  if (data.user) {
-    const { data: userProfileData } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", data.user?.id)
-      .single()
-
-    userProfile = {
-      ...userProfileData,
-      profile_image: data.user?.user_metadata.avatar_url,
-      display_name: data.user?.user_metadata.name,
-    } as UserProfile
-  }
+  const userProfile = await getUserProfile()
 
   return (
     <html lang="en" suppressHydrationWarning>
