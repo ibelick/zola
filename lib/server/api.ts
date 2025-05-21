@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { createGuestServerClient } from "@/lib/supabase/server-guest"
+import { isSupabaseEnabled } from "../supabase/config"
 
 /**
  * Validates the user's identity
@@ -11,9 +12,17 @@ export async function validateUserIdentity(
   userId: string,
   isAuthenticated: boolean
 ) {
+  if (!isSupabaseEnabled) {
+    return null
+  }
+
   const supabase = isAuthenticated
     ? await createClient()
     : await createGuestServerClient()
+
+  if (!supabase) {
+    throw new Error("Failed to initialize Supabase client")
+  }
 
   if (isAuthenticated) {
     const { data: authData, error: authError } = await supabase.auth.getUser()

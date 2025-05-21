@@ -1,9 +1,4 @@
-import {
-  AUTH_DAILY_MESSAGE_LIMIT,
-  DAILY_LIMIT_PRO_MODELS,
-  NON_AUTH_DAILY_MESSAGE_LIMIT,
-} from "@/lib/config"
-import { validateUserIdentity } from "../../../lib/server/api"
+import { getMessageUsage } from "./api"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -16,39 +11,18 @@ export async function GET(req: Request) {
     })
   }
 
-  const supabase = await validateUserIdentity(userId, isAuthenticated)
+  try {
+    const usage = await getMessageUsage(userId, isAuthenticated)
 
-  const { data, error } = await supabase
-    .from("users")
-    .select("daily_message_count, daily_pro_message_count")
-    .eq("id", userId)
-    .maybeSingle()
-
-  if (error || !data) {
-    return new Response(JSON.stringify({ error: error?.message }), {
-      status: 500,
-    })
-  }
-
-  const dailyLimit = isAuthenticated
-    ? AUTH_DAILY_MESSAGE_LIMIT
-    : NON_AUTH_DAILY_MESSAGE_LIMIT
-  const proDailyLimit = DAILY_LIMIT_PRO_MODELS
-  const dailyCount = data.daily_message_count || 0
-  const dailyProCount = data.daily_pro_message_count || 0
-  const remaining = dailyLimit - dailyCount
-  const remainingPro = proDailyLimit - dailyProCount
-
-  return new Response(
-    JSON.stringify({
-      dailyCount,
-      dailyLimit,
-      remaining,
-      dailyProCount,
-      remainingPro,
-    }),
-    {
-      status: 200,
+    if (!usage) {
+      return new Response(
+        JSON.stringify({ error: "Supabase not available in this deployment." }),
+        { status: 200 }
+      )
     }
-  )
+
+    return new Response(JSON.stringify(usage), { status: 200 })
+  } catch (err: any) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 })
+  }
 }
