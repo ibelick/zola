@@ -8,6 +8,10 @@ type ToolType = Tool<any, any>
 export async function loadAgent(agentId: string) {
   const supabase = await createClient()
 
+  if (!supabase) {
+    throw new Error("Supabase is not configured")
+  }
+
   const { data: agent, error } = await supabase
     .from("agents")
     .select("*")
