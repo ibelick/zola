@@ -3,8 +3,17 @@
 import { PromptSuggestion } from "@/components/prompt-kit/prompt-suggestion"
 import { TRANSITION_SUGGESTIONS } from "@/lib/motion"
 import { AnimatePresence, motion } from "motion/react"
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react"
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { SUGGESTIONS as SUGGESTIONS_CONFIG } from "../../../lib/config"
+
+const MotionPromptSuggestion = motion.create(PromptSuggestion)
 
 type SuggestionsProps = {
   onValueChange: (value: string) => void
@@ -17,8 +26,16 @@ export const Suggestions = memo(function Suggestions({
   onSuggestion,
   value,
 }: SuggestionsProps) {
-  const MotionPromptSuggestion = motion.create(PromptSuggestion)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  // Use refs to maintain stable function references
+  const valueChangeRef = useRef(onValueChange)
+  const suggestionRef = useRef(onSuggestion)
+
+  // Update refs when props change
+  useEffect(() => {
+    valueChangeRef.current = onValueChange
+    suggestionRef.current = onSuggestion
+  }, [onValueChange, onSuggestion])
 
   const activeCategoryData = SUGGESTIONS_CONFIG.find(
     (group) => group.label === activeCategory
@@ -33,23 +50,21 @@ export const Suggestions = memo(function Suggestions({
     }
   }, [value])
 
-  const handleSuggestionClick = useCallback(
-    (suggestion: string) => {
-      setActiveCategory(null)
-      onSuggestion(suggestion)
-      onValueChange("")
-    },
-    [onSuggestion, onValueChange]
-  )
+  const handleSuggestionClick = useCallback((suggestion: string) => {
+    setActiveCategory(null)
+    suggestionRef.current(suggestion)
+    valueChangeRef.current("")
+  }, [])
 
   const handleCategoryClick = useCallback(
     (suggestion: { label: string; prompt: string }) => {
       setActiveCategory(suggestion.label)
-      onValueChange(suggestion.prompt)
+      valueChangeRef.current(suggestion.prompt)
     },
-    [onValueChange]
+    []
   )
 
+  // Render the grid once and cache it
   const suggestionsGrid = useMemo(
     () => (
       <motion.div
@@ -64,9 +79,7 @@ export const Suggestions = memo(function Suggestions({
           exit: { opacity: 0, y: -10, filter: "blur(4px)" },
         }}
         transition={TRANSITION_SUGGESTIONS}
-        style={{
-          scrollbarWidth: "none",
-        }}
+        style={{ scrollbarWidth: "none" }}
       >
         {SUGGESTIONS_CONFIG.map((suggestion, index) => (
           <MotionPromptSuggestion
@@ -76,14 +89,14 @@ export const Suggestions = memo(function Suggestions({
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{
-              ...TRANSITION_SUGGESTIONS,
-              delay: index * 0.02,
-            }}
             variants={{
               initial: { opacity: 0, scale: 0.8 },
               animate: { opacity: 1, scale: 1 },
               exit: { opacity: 0, scale: 0.8 },
+            }}
+            transition={{
+              ...TRANSITION_SUGGESTIONS,
+              delay: index * 0.02,
             }}
           >
             <suggestion.icon className="size-4" />
@@ -95,11 +108,13 @@ export const Suggestions = memo(function Suggestions({
     [handleCategoryClick]
   )
 
-  const suggestionsList = useMemo(
-    () => (
+  const suggestionsList = useMemo(() => {
+    if (!activeCategoryData) return null
+
+    return (
       <motion.div
         className="flex w-full flex-col space-y-1 px-2"
-        key={activeCategoryData?.label}
+        key="suggestions-list"
         initial="initial"
         animate="animate"
         exit="exit"
@@ -110,10 +125,9 @@ export const Suggestions = memo(function Suggestions({
         }}
         transition={TRANSITION_SUGGESTIONS}
       >
-        {activeCategoryData?.items.map((suggestion: string, index: number) => (
+        {activeCategoryData.items.map((suggestion: string, index: number) => (
           <MotionPromptSuggestion
-            key={`${activeCategoryData?.label}-${suggestion}-${index}`}
-            highlight={activeCategoryData.highlight}
+            key={`${activeCategory}-${suggestion}`}
             type="button"
             onClick={() => handleSuggestionClick(suggestion)}
             className="block h-full text-left"
@@ -134,13 +148,14 @@ export const Suggestions = memo(function Suggestions({
           </MotionPromptSuggestion>
         ))}
       </motion.div>
-    ),
-    [handleSuggestionClick]
-  )
+    )
+  }, [activeCategoryData, activeCategory, handleSuggestionClick])
 
   return (
-    <AnimatePresence mode="popLayout">
-      {showCategorySuggestions ? suggestionsList : suggestionsGrid}
-    </AnimatePresence>
+    <div className="suggestions-container">
+      <AnimatePresence mode="wait">
+        {showCategorySuggestions ? suggestionsList : suggestionsGrid}
+      </AnimatePresence>
+    </div>
   )
 })
