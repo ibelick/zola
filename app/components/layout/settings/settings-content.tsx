@@ -10,6 +10,7 @@ import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import { clearAllIndexedDBStores } from "@/lib/chat-store/persist"
 import { MODEL_DEFAULT } from "@/lib/config"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { cn } from "@/lib/utils"
 import {
   GearSix,
@@ -159,44 +160,47 @@ export function SettingsContent({
                 </div>
               </div>
 
-              {/* Model Selection */}
-              <div className="py-4">
-                <h3 className="mb-3 text-sm font-medium">Preferred model</h3>
-                <div className="relative">
-                  <ModelSelector
-                    selectedModelId={selectedModelId}
-                    setSelectedModelId={handleModelSelection}
-                    className="w-full"
-                  />
-                </div>
-                <p className="text-muted-foreground mt-2 text-xs">
-                  This model will be used by default for new conversations.
-                </p>
-              </div>
-
-              {/* System Prompt */}
-              <SystemPromptSection />
-
-              {/* Sign Out */}
-              <div className="py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Account</h3>
-                    <p className="text-muted-foreground text-xs">
-                      Log out on this device
+              {isSupabaseEnabled && (
+                <>
+                  <div className="py-4">
+                    <h3 className="mb-3 text-sm font-medium">
+                      Preferred model
+                    </h3>
+                    <div className="relative">
+                      <ModelSelector
+                        selectedModelId={selectedModelId}
+                        setSelectedModelId={handleModelSelection}
+                        className="w-full"
+                      />
+                    </div>
+                    <p className="text-muted-foreground mt-2 text-xs">
+                      This model will be used by default for new conversations.
                     </p>
                   </div>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="flex items-center gap-2"
-                    onClick={handleSignOut}
-                  >
-                    <SignOut className="size-4" />
-                    <span>Sign out</span>
-                  </Button>
-                </div>
-              </div>
+
+                  <SystemPromptSection />
+
+                  <div className="py-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-medium">Account</h3>
+                        <p className="text-muted-foreground text-xs">
+                          Log out on this device
+                        </p>
+                      </div>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="flex items-center gap-2"
+                        onClick={handleSignOut}
+                      >
+                        <SignOut className="size-4" />
+                        <span>Sign out</span>
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
             </TabsContent>
 
             <TabsContent value="appearance" className="space-y-0">
@@ -322,44 +326,48 @@ export function SettingsContent({
                   </div>
                 </div>
 
-                {/* Model Selection */}
-                <div>
-                  <h3 className="mb-3 text-sm font-medium">Preferred model</h3>
-                  <div className="relative">
-                    <ModelSelector
-                      selectedModelId={selectedModelId}
-                      setSelectedModelId={handleModelSelection}
-                      className="w-full"
-                    />
-                  </div>
-                  <p className="text-muted-foreground mt-2 text-xs">
-                    This model will be used by default for new conversations.
-                  </p>
-                </div>
+                {isSupabaseEnabled && (
+                  <>
+                    <div>
+                      <h3 className="mb-3 text-sm font-medium">
+                        Preferred model
+                      </h3>
+                      <div className="relative">
+                        <ModelSelector
+                          selectedModelId={selectedModelId}
+                          setSelectedModelId={handleModelSelection}
+                          className="w-full"
+                        />
+                      </div>
+                      <p className="text-muted-foreground mt-2 text-xs">
+                        This model will be used by default for new
+                        conversations.
+                      </p>
+                    </div>
 
-                {/* System Prompt */}
-                <div>
-                  <SystemPromptSection />
-                </div>
+                    <div>
+                      <SystemPromptSection />
+                    </div>
 
-                {/* Sign Out */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Sign out</h3>
-                    <p className="text-muted-foreground text-xs">
-                      Log out on this device
-                    </p>
-                  </div>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="flex items-center gap-2"
-                    onClick={handleSignOut}
-                  >
-                    <SignOut className="size-4" />
-                    <span>Sign out</span>
-                  </Button>
-                </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-medium">Sign out</h3>
+                        <p className="text-muted-foreground text-xs">
+                          Log out on this device
+                        </p>
+                      </div>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="flex items-center gap-2"
+                        onClick={handleSignOut}
+                      >
+                        <SignOut className="size-4" />
+                        <span>Sign out</span>
+                      </Button>
+                    </div>
+                  </>
+                )}
               </TabsContent>
 
               <TabsContent value="appearance" className="mt-0 space-y-6">
