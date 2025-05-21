@@ -1,3 +1,4 @@
+import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { UserProfile } from "@/app/types/user"
 import { toast } from "@/components/ui/toast"
 import { Message } from "@ai-sdk/react"
@@ -26,11 +27,14 @@ export function useChatHandlers({
   updateChatModel,
   user,
 }: UseChatHandlersProps) {
+  const { setDraftValue } = useChatDraft(chatId)
+
   const handleInputChange = useCallback(
     (value: string) => {
       setInput(value)
+      setDraftValue(value)
     },
-    [setInput]
+    [setInput, setDraftValue]
   )
 
   const handleModelChange = useCallback(

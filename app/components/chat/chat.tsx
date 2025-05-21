@@ -2,6 +2,7 @@
 
 import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
+import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import { toast } from "@/components/ui/toast"
@@ -25,7 +26,6 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
-import { useChatDraft } from '@/app/hooks/use-chat-draft'
 
 const FeedbackWidget = dynamic(
   () => import("./feedback-widget").then((mod) => mod.FeedbackWidget),
@@ -72,10 +72,8 @@ export function Chat() {
 
   const isAuthenticated = !!user?.id
 
-  // Add the chat draft hook
-  const { draftValue, setDraftValue, clearDraft } = useChatDraft(chatId)
+  const { draftValue, clearDraft } = useChatDraft(chatId)
 
-  // Update the useChat hook to use draftValue as initial input
   const {
     messages,
     input,
@@ -93,7 +91,6 @@ export function Chat() {
     initialInput: draftValue,
   })
 
-  // Use the custom hook for chat utilities
   const { checkLimitsAndNotify, ensureChatExists } = useChatUtils({
     isAuthenticated,
     chatId,
@@ -106,15 +103,11 @@ export function Chat() {
     setHasDialogAuth,
   })
 
-  // Modify handleInputChange to update draft
   const { handleInputChange, handleModelChange, handleDelete, handleEdit } =
     useChatHandlers({
       messages,
       setMessages,
-      setInput: (value: string) => {
-        setInput(value)
-        setDraftValue(value)
-      },
+      setInput,
       setSelectedModel,
       selectedModel,
       chatId,

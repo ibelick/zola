@@ -69,13 +69,6 @@ export function ChatInput({
     (feature) => feature.id === "tool-use" && !feature.enabled
   )
 
-  const handleValueChange = useCallback(
-    (newValue: string) => {
-      onValueChange(newValue)
-    },
-    [onValueChange]
-  )
-
   const handleSend = useCallback(() => {
     if (isSubmitting) {
       return
