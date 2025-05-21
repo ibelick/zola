@@ -1,5 +1,6 @@
 // @todo: move in /lib/user/api.ts
 import { UserProfile } from "@/app/types/user"
+import { toast } from "@/components/ui/toast"
 import { createClient } from "@/lib/supabase/client"
 
 export async function fetchUserProfile(
@@ -45,7 +46,13 @@ export async function updateUserProfile(
 
 export async function signOutUser(): Promise<boolean> {
   const supabase = createClient()
-  if (!supabase) return false
+  if (!supabase) {
+    toast({
+      title: "Sign out is not supported in this deployment",
+      status: "info",
+    })
+    return false
+  }
 
   const { error } = await supabase.auth.signOut()
   if (error) {

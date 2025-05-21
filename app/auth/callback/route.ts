@@ -1,4 +1,5 @@
 import { MODEL_DEFAULT } from "@/lib/config"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { createClient } from "@/lib/supabase/server"
 import { createGuestServerClient } from "@/lib/supabase/server-guest"
 import { NextResponse } from "next/server"
@@ -8,6 +9,12 @@ export async function GET(request: Request) {
   const code = searchParams.get("code")
   const next = searchParams.get("next") ?? "/"
 
+  if (!isSupabaseEnabled) {
+    return NextResponse.redirect(
+      `${origin}/auth/error?message=${encodeURIComponent("Supabase is not enabled in this deployment.")}`
+    )
+  }
+
   if (!code) {
     return NextResponse.redirect(
       `${origin}/auth/error?message=${encodeURIComponent("Missing authentication code")}`
@@ -16,6 +23,13 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
   const supabaseAdmin = await createGuestServerClient()
+
+  if (!supabase || !supabaseAdmin) {
+    return NextResponse.redirect(
+      `${origin}/auth/error?message=${encodeURIComponent("Supabase is not enabled in this deployment.")}`
+    )
+  }
+
   const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
