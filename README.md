@@ -21,7 +21,17 @@
 
 ## Installation
 
-See [INSTALL.md](./INSTALL.md) for setup instructions.
+You can run Zola locally in seconds, all you need is an OpenAI API key.
+
+```bash
+git clone https://github.com/ibelick/zola.git
+cd zola
+npm install
+echo "OPENAI_API_KEY=your-key" > .env.local
+npm run dev
+```
+
+To unlock features like auth, file uploads, and agents, see [INSTALL.md](./INSTALL.md).
 
 ## Built with
 
@@ -39,7 +49,7 @@ See [INSTALL.md](./INSTALL.md) for setup instructions.
 
 ## Sponsors
 
-Zola is proudly sponsored by [Vercel](https://vercel.com),  
+Zola is proudly sponsored by [Vercel](https://vercel.com),
 the platform we use to build, preview, and ship the app.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
@@ -51,3 +61,7 @@ Apache License 2.0
 ## Notes
 
 This is a beta release. The codebase is evolving and may change.
+
+```
+
+```
