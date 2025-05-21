@@ -97,6 +97,8 @@ export async function POST(req: Request) {
       await trackSpecialAgentUsage(supabase, userId)
     }
 
+    let streamError: Error | null = null
+
     const result = streamText({
       model: modelInstance as LanguageModelV1,
       system: effectiveSystemPrompt,
@@ -105,9 +107,14 @@ export async function POST(req: Request) {
       // @todo: remove this
       // hardcoded for now
       maxSteps: 10,
-      onError: (err) => {
+      onError: (err: any) => {
         console.error("🛑 streamText error:", err)
+        streamError = new Error(
+          err?.error ||
+            "AI generation failed. Please check your model or API key."
+        )
       },
+
       onFinish: async ({ response }) => {
         await storeAssistantMessage({
           supabase,
@@ -117,8 +124,12 @@ export async function POST(req: Request) {
       },
     })
 
-    // Ensure the stream is consumed so onFinish is triggered.
-    result.consumeStream()
+    await result.consumeStream()
+
+    if (streamError) {
+      throw streamError
+    }
+
     const originalResponse = result.toDataStreamResponse({
       sendReasoning: true,
     })
