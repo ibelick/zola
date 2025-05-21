@@ -2,6 +2,11 @@
 
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { Agent } from "@/app/types/agent"
+import {
+  fetchAgentBySlugOrId,
+  fetchCuratedAgentsFromDb,
+  fetchUserAgentsFromDb,
+} from "@/lib/agent-store/api"
 import { usePathname, useSearchParams } from "next/navigation"
 import {
   createContext,
@@ -41,36 +46,14 @@ export const AgentProvider = ({ children, userId }: AgentProviderProps) => {
   const [userAgents, setUserAgents] = useState<Agent[] | null>(null)
 
   const fetchCuratedAgents = useCallback(async () => {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("agents")
-      .select("*")
-      .in("slug", CURATED_AGENTS_SLUGS)
-
-    if (error) {
-      console.error("Error fetching curated agents:", error)
-    } else {
-      setCuratedAgents(data)
-    }
+    const agents = await fetchCuratedAgentsFromDb()
+    if (agents) setCuratedAgents(agents)
   }, [])
 
   const fetchUserAgents = useCallback(async () => {
-    if (!userId) {
-      return
-    }
-
-    const supabase = createClient()
-
-    const { data, error } = await supabase
-      .from("agents")
-      .select("*")
-      .eq("creator_id", userId)
-
-    if (error) {
-      console.error("Error fetching user agents:", error)
-    } else {
-      setUserAgents(data)
-    }
+    if (!userId) return
+    const agents = await fetchUserAgentsFromDb(userId)
+    if (agents) setUserAgents(agents)
   }, [userId])
 
   const fetchCurrentAgent = useCallback(async () => {
@@ -92,23 +75,12 @@ export const AgentProvider = ({ children, userId }: AgentProviderProps) => {
       }
     }
 
-    const supabase = createClient()
-    let query = supabase.from("agents").select("*")
+    const agent = await fetchAgentBySlugOrId({
+      slug: agentSlug || undefined,
+      id: currentChatAgentId || undefined,
+    })
 
-    if (agentSlug) {
-      query = query.eq("slug", agentSlug)
-    } else if (currentChatAgentId) {
-      query = query.eq("id", currentChatAgentId)
-    }
-
-    const { data, error } = await query.single()
-
-    if (error || !data) {
-      console.error("Error fetching agent:", error)
-      setCurrentAgent(null)
-    } else {
-      setCurrentAgent(data)
-    }
+    setCurrentAgent(agent)
   }, [agentSlug, currentChatAgentId])
 
   useEffect(() => {
