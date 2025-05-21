@@ -2,12 +2,22 @@ import { AgentsPage } from "@/app/components/agents/agents-page"
 import { LayoutApp } from "@/app/components/layout/layout-app"
 import { MessagesProvider } from "@/lib/chat-store/messages/provider"
 import { CURATED_AGENTS_SLUGS } from "@/lib/config"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { createClient } from "@/lib/supabase/server"
+import { notFound } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
 export default async function Page() {
+  if (!isSupabaseEnabled) {
+    notFound()
+  }
+
   const supabase = await createClient()
+
+  if (!supabase) {
+    notFound()
+  }
 
   const { data: userData } = await supabase.auth.getUser()
 

@@ -1,17 +1,27 @@
 import { AgentDetail } from "@/app/components/agents/agent-detail"
 import { LayoutApp } from "@/app/components/layout/layout-app"
 import { MessagesProvider } from "@/lib/chat-store/messages/provider"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { createClient } from "@/lib/supabase/server"
+import { notFound } from "next/navigation"
 
 export default async function AgentIdPage({
   params,
 }: {
   params: Promise<{ agentSlug: string | string[] }>
 }) {
+  if (!isSupabaseEnabled) {
+    notFound()
+  }
+
   const { agentSlug: slugParts } = await params
   const agentSlug = Array.isArray(slugParts) ? slugParts.join("/") : slugParts
 
   const supabase = await createClient()
+
+  if (!supabase) {
+    notFound()
+  }
 
   const { data: agent, error: agentError } = await supabase
     .from("agents")
