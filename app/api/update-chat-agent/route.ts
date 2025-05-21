@@ -7,19 +7,25 @@ export async function POST(request: Request) {
     if (!userId || !chatId) {
       return new Response(
         JSON.stringify({ error: "Missing userId or chatId" }),
-        {
-          status: 400,
-        }
+        { status: 400 }
       )
     }
 
     const supabase = await validateUserIdentity(userId, isAuthenticated)
 
-    const { error: updateError } = await supabase
+    if (!supabase) {
+      console.log("Supabase not enabled, skipping agent update")
+      return new Response(
+        JSON.stringify({ chat: { id: chatId, agent_id: agentId } }),
+        {
+          status: 200,
+        }
+      )
+    }
+
+    const { data, error: updateError } = await supabase
       .from("chats")
-      .update({
-        agent_id: agentId || null,
-      })
+      .update({ agent_id: agentId || null })
       .eq("id", chatId)
       .select()
       .single()
@@ -30,16 +36,14 @@ export async function POST(request: Request) {
       })
     }
 
-    return new Response(JSON.stringify({ chat: updateError }), {
+    return new Response(JSON.stringify({ chat: data }), {
       status: 200,
     })
   } catch (error) {
     console.error("Error updating chat agent:", error)
     return new Response(
       JSON.stringify({ error: "Failed to update chat agent" }),
-      {
-        status: 500,
-      }
+      { status: 500 }
     )
   }
 }

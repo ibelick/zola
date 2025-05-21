@@ -15,6 +15,13 @@ export async function POST(request: Request) {
 
     const supabase = await validateUserIdentity(userId, isAuthenticated)
 
+    if (!supabase) {
+      return new Response(
+        JSON.stringify({ error: "Supabase not available in this deployment." }),
+        { status: 200 }
+      )
+    }
+
     await checkUsageByModel(supabase, userId, model, isAuthenticated)
 
     const { data: chatData, error: chatError } = await supabase

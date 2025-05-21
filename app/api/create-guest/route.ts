@@ -2,19 +2,32 @@ import { createGuestServerClient } from "@/lib/supabase/server-guest"
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createGuestServerClient()
     const { userId } = await request.json()
+
     if (!userId) {
       return new Response(JSON.stringify({ error: "Missing userId" }), {
         status: 400,
       })
     }
+
+    const supabase = await createGuestServerClient()
+    if (!supabase) {
+      console.log("Supabase not enabled, skipping guest creation.")
+      return new Response(
+        JSON.stringify({ user: { id: userId, anonymous: true } }),
+        {
+          status: 200,
+        }
+      )
+    }
+
     // Check if the user record already exists.
     let { data: userData } = await supabase
       .from("users")
       .select("*")
       .eq("id", userId)
       .maybeSingle()
+
     if (!userData) {
       const { data, error } = await supabase
         .from("users")
@@ -28,6 +41,7 @@ export async function POST(request: Request) {
         })
         .select("*")
         .single()
+
       if (error || !data) {
         console.error("Error creating guest user:", error)
         return new Response(
@@ -38,8 +52,10 @@ export async function POST(request: Request) {
           { status: 500 }
         )
       }
+
       userData = data
     }
+
     return new Response(JSON.stringify({ user: userData }), { status: 200 })
   } catch (err: any) {
     console.error("Error in create-guest endpoint:", err)

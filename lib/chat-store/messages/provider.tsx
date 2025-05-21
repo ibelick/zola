@@ -87,6 +87,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
   }
 
   const saveAllMessages = async (newMessages: MessageAISDK[]) => {
+    // @todo: manage the case where the chatId is null (first time the user opens the chat)
     if (!chatId) return
 
     try {
