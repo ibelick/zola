@@ -10,20 +10,13 @@ import {
   API_ROUTE_UPDATE_CHAT_MODEL,
 } from "../../routes"
 
-type SimpleChat = Pick<
-  Chat,
-  "id" | "title" | "created_at" | "model" | "agent_id"
->
-
-export async function getChatsForUserInDb(
-  userId: string
-): Promise<SimpleChat[]> {
+export async function getChatsForUserInDb(userId: string): Promise<Chats[]> {
   const supabase = createClient()
   if (!supabase) return []
 
   const { data, error } = await supabase
     .from("chats")
-    .select("id, title, created_at, model, agent_id")
+    .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
 
@@ -84,9 +77,7 @@ export async function createChatInDb(
   return data.id
 }
 
-export async function fetchAndCacheChats(
-  userId: string
-): Promise<SimpleChat[]> {
+export async function fetchAndCacheChats(userId: string): Promise<Chats[]> {
   const data = await getChatsForUserInDb(userId)
   await writeToIndexedDB("chats", data)
   return data
@@ -188,7 +179,7 @@ export async function createNewChat(
   model?: string,
   isAuthenticated?: boolean,
   agentId?: string
-): Promise<SimpleChat> {
+): Promise<Chats> {
   try {
     // @todo: can keep only one route for create chat
     const apiRoute = agentId
@@ -222,12 +213,14 @@ export async function createNewChat(
       throw new Error(responseData.error || "Failed to create chat")
     }
 
-    const chat: SimpleChat = {
+    const chat: Chats = {
       id: responseData.chat.id,
       title: responseData.chat.title,
       created_at: responseData.chat.created_at,
       model: responseData.chat.model,
       agent_id: responseData.chat.agent_id,
+      user_id: responseData.chat.user_id,
+      public: responseData.chat.public,
     }
 
     await writeToIndexedDB("chats", chat)

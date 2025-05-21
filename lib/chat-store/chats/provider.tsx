@@ -134,6 +134,8 @@ export function ChatsProvider({
       model: model || MODEL_DEFAULT,
       system_prompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
       agent_id: agentId || null,
+      user_id: userId,
+      public: true,
     }
     setChats((prev) => [...prev, optimisticChat])
 

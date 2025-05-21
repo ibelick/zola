@@ -9,8 +9,8 @@ import {
   addMessage,
   cacheMessages,
   clearMessagesForChat,
-  fetchAndCacheMessages,
   getCachedMessages,
+  getMessagesFromDb,
   setMessages as saveMessages,
 } from "./api"
 
@@ -52,7 +52,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
       setMessages(cached)
 
       try {
-        const fresh = await fetchAndCacheMessages(chatId)
+        const fresh = await getMessagesFromDb(chatId)
         setMessages(fresh)
         cacheMessages(chatId, fresh)
       } catch (error) {
@@ -67,7 +67,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     if (!chatId) return
 
     try {
-      const fresh = await fetchAndCacheMessages(chatId)
+      const fresh = await getMessagesFromDb(chatId)
       setMessages(fresh)
     } catch (e) {
       toast({ title: "Failed to refresh messages", status: "error" })
