@@ -16,9 +16,6 @@ import {
   useState,
 } from "react"
 import { useChats } from "../chat-store/chats/provider"
-import { CURATED_AGENTS_SLUGS } from "../config"
-import { createClient } from "../supabase/client"
-import { loadGitHubAgent } from "./load-github-agent"
 
 type AgentContextType = {
   currentAgent: Agent | null
@@ -60,19 +57,6 @@ export const AgentProvider = ({ children, userId }: AgentProviderProps) => {
     if (!agentSlug && !currentChatAgentId) {
       setCurrentAgent(null)
       return
-    }
-
-    // IF first time loading agent, check if it's a github agent
-    // create one if it doesn't exist
-    // @todo:
-    // remove it
-    if (agentSlug?.startsWith("github/")) {
-      const specialAgent = await loadGitHubAgent(agentSlug)
-
-      if (specialAgent) {
-        setCurrentAgent(specialAgent)
-        return
-      }
     }
 
     const agent = await fetchAgentBySlugOrId({
