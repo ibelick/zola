@@ -89,6 +89,10 @@ export function Chat() {
     api: API_ROUTE_CHAT,
     initialMessages,
     initialInput: draftValue,
+    onFinish: async (message) => {
+      // store the assistant message in the cache
+      await cacheAndAddMessage(message)
+    },
   })
 
   const { checkLimitsAndNotify, ensureChatExists } = useChatUtils({
@@ -230,7 +234,7 @@ export function Chat() {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
-      clearDraft() // Clear the draft after successful submission
+      clearDraft()
       hasSentFirstMessageRef.current = true
     } catch (error) {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))

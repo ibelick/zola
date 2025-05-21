@@ -6,7 +6,6 @@ import type { Message as MessageAISDK } from "ai"
 import { createContext, useContext, useEffect, useState } from "react"
 import { writeToIndexedDB } from "../persist"
 import {
-  addMessage,
   cacheMessages,
   clearMessagesForChat,
   getCachedMessages,
@@ -18,7 +17,6 @@ interface MessagesContextType {
   messages: MessageAISDK[]
   setMessages: React.Dispatch<React.SetStateAction<MessageAISDK[]>>
   refresh: () => Promise<void>
-  addMessage: (message: MessageAISDK) => Promise<void>
   saveAllMessages: (messages: MessageAISDK[]) => Promise<void>
   cacheAndAddMessage: (message: MessageAISDK) => Promise<void>
   resetMessages: () => Promise<void>
@@ -74,24 +72,15 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const addSingleMessage = async (message: MessageAISDK) => {
-    if (!chatId) return
-
-    try {
-      await addMessage(chatId, message)
-      setMessages((prev) => [...prev, message])
-    } catch (e) {
-      toast({ title: "Failed to add message", status: "error" })
-    }
-  }
-
   const cacheAndAddMessage = async (message: MessageAISDK) => {
     if (!chatId) return
 
     try {
-      const updated = [...messages, message]
-      await writeToIndexedDB("messages", { id: chatId, messages: updated })
-      setMessages(updated)
+      setMessages((prev) => {
+        const updated = [...prev, message]
+        writeToIndexedDB("messages", { id: chatId, messages: updated })
+        return updated
+      })
     } catch (e) {
       toast({ title: "Failed to save message", status: "error" })
     }
@@ -125,7 +114,6 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
         messages,
         setMessages,
         refresh,
-        addMessage: addSingleMessage,
         saveAllMessages,
         cacheAndAddMessage,
         resetMessages,
