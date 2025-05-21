@@ -1,45 +1,30 @@
-import { validateUserIdentity } from "@/lib/server/api"
-import { checkUsageByModel } from "@/lib/usage"
+import { createChatInDb } from "./api"
 
 export async function POST(request: Request) {
   try {
     const { userId, title, model, isAuthenticated } = await request.json()
+
     if (!userId) {
       return new Response(JSON.stringify({ error: "Missing userId" }), {
         status: 400,
       })
     }
 
-    const supabase = await validateUserIdentity(userId, isAuthenticated)
+    const chat = await createChatInDb({
+      userId,
+      title,
+      model,
+      isAuthenticated,
+    })
 
-    await checkUsageByModel(supabase, userId, model, isAuthenticated)
-
-    // Insert a new chat record in the chats table
-    const { data: chatData, error: chatError } = await supabase
-      .from("chats")
-      .insert({
-        user_id: userId,
-        title: title || "New Chat",
-        model: model,
-      })
-      .select("*")
-      .single()
-
-    if (chatError || !chatData) {
-      console.error("Error creating chat record:", chatError)
+    if (!chat) {
       return new Response(
-        JSON.stringify({
-          error: "Failed to create chat record",
-          details: chatError?.message,
-        }),
-        { status: 500 }
+        JSON.stringify({ error: "Supabase not available in this deployment." }),
+        { status: 200 }
       )
     }
 
-    // return the new chat to write to indexedDB
-    return new Response(JSON.stringify({ chat: chatData }), {
-      status: 200,
-    })
+    return new Response(JSON.stringify({ chat }), { status: 200 })
   } catch (err: any) {
     console.error("Error in create-chat endpoint:", err)
 
