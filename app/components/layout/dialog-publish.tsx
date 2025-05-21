@@ -28,15 +28,16 @@ import {
 } from "@/components/ui/tooltip"
 import { APP_DOMAIN } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { Check, Copy, Globe, Spinner } from "@phosphor-icons/react"
 import type React from "react"
 import { useState } from "react"
 
-type DialogPublishProps = {
-  agent: AgentHeader
-}
+export function DialogPublish() {
+  if (!isSupabaseEnabled) {
+    return null
+  }
 
-export function DialogPublish({ agent }: DialogPublishProps) {
   const [openDialog, setOpenDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { chatId } = useChatSession()
@@ -66,6 +67,11 @@ export function DialogPublish({ agent }: DialogPublishProps) {
     setIsLoading(true)
 
     const supabase = createClient()
+
+    if (!supabase) {
+      throw new Error("Supabase is not configured")
+    }
+
     const { data, error } = await supabase
       .from("chats")
       .update({ public: true })

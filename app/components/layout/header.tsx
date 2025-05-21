@@ -72,7 +72,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
             </div>
           ) : (
             <div className="pointer-events-auto flex flex-1 items-center justify-end gap-2">
-              {currentAgent && <DialogPublish agent={currentAgent} />}
+              {currentAgent && <DialogPublish />}
               <ButtonNewChat />
               <AgentLink />
               {!isSidebarOpen && <HistoryTrigger hasSidebar={hasSidebar} />}

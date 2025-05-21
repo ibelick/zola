@@ -1,7 +1,8 @@
 import { APP_DOMAIN } from "@/lib/config"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { createClient } from "@/lib/supabase/server"
 import type { Metadata } from "next"
-import { redirect } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import Article from "./article"
 
 export const dynamic = "force-static"
@@ -11,8 +12,16 @@ export async function generateMetadata({
 }: {
   params: Promise<{ agentSlug?: string; chatId: string }>
 }): Promise<Metadata> {
+  if (!isSupabaseEnabled) {
+    return notFound()
+  }
+
   const { chatId } = await params
   const supabase = await createClient()
+
+  if (!supabase) {
+    return notFound()
+  }
 
   const { data: chat } = await supabase
     .from("chats")
@@ -45,8 +54,16 @@ export default async function AgentChat({
 }: {
   params: Promise<{ agentSlug?: string; chatId: string }>
 }) {
+  if (!isSupabaseEnabled) {
+    return notFound()
+  }
+
   const { agentSlug, chatId } = await params
   const supabase = await createClient()
+
+  if (!supabase) {
+    return notFound()
+  }
 
   const { data: chatData, error: chatError } = await supabase
     .from("chats")
