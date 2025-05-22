@@ -57,8 +57,6 @@ export async function POST(req: Request) {
         supabase,
         userId,
         chatId,
-        // content: userMessage.content,
-        // attachments: userMessage.experimental_attachments as Attachment[],
         model,
         isAuthenticated,
         parts: userMessage.parts,

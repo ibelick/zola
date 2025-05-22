@@ -39,7 +39,7 @@ export function MessageAssistant({
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
 
   const textParts = parts?.filter((part) => part.type === "text")
-  const textPartsAsText = textParts?.map((part) => part.text).join("")
+  const textPartsAsText = textParts?.map((part) => part.text).join("") || ""
 
   const contentNullOrEmpty = textPartsAsText === null || textPartsAsText === ""
 

@@ -43,8 +43,6 @@ export async function logUserMessage({
   const { error } = await supabase.from("messages").insert({
     chat_id: chatId,
     role: "user",
-    // content: sanitizeUserInput(content),
-    // experimental_attachments: attachments as any,
     user_id: userId,
     parts,
   })
