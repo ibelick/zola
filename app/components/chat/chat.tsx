@@ -22,7 +22,7 @@ import { useChat } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
@@ -36,6 +36,24 @@ const DialogAuth = dynamic(
   () => import("./dialog-auth").then((mod) => mod.DialogAuth),
   { ssr: false }
 )
+
+// Create a separate component that uses useSearchParams
+function SearchParamsProvider({
+  setInput,
+}: {
+  setInput: (input: string) => void
+}) {
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const prompt = searchParams.get("prompt")
+    if (prompt) {
+      setInput(prompt)
+    }
+  }, [searchParams, setInput])
+
+  return null
+}
 
 export function Chat() {
   const { chatId } = useChatSession()
@@ -67,7 +85,6 @@ export function Chat() {
     currentAgent?.system_prompt || user?.system_prompt || SYSTEM_PROMPT_DEFAULT
 
   const [hydrated, setHydrated] = useState(false)
-  const searchParams = useSearchParams()
   const hasSentFirstMessageRef = useRef(false)
 
   const isAuthenticated = !!user?.id
@@ -146,13 +163,6 @@ export function Chat() {
       })
     }
   }, [error])
-
-  useEffect(() => {
-    const prompt = searchParams.get("prompt")
-    if (prompt) {
-      setInput(prompt)
-    }
-  }, [searchParams])
 
   const submit = async () => {
     setIsSubmitting(true)
@@ -335,6 +345,12 @@ export function Chat() {
       )}
     >
       <DialogAuth open={hasDialogAuth} setOpen={setHasDialogAuth} />
+
+      {/* Add Suspense boundary for SearchParamsProvider */}
+      <Suspense>
+        <SearchParamsProvider setInput={setInput} />
+      </Suspense>
+
       <AnimatePresence initial={false} mode="popLayout">
         {!chatId && messages.length === 0 ? (
           <motion.div

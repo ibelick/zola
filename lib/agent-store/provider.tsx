@@ -7,15 +7,32 @@ import {
   fetchCuratedAgentsFromDb,
   fetchUserAgentsFromDb,
 } from "@/lib/agent-store/api"
-import { usePathname, useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   createContext,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
   useState,
 } from "react"
 import { useChats } from "../chat-store/chats/provider"
+
+// Create a separate component that uses useSearchParams
+function SearchParamsProvider({
+  setAgentSlug,
+}: {
+  setAgentSlug: (slug: string | null) => void
+}) {
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const agentSlug = searchParams.get("agent")
+    setAgentSlug(agentSlug)
+  }, [searchParams, setAgentSlug])
+
+  return null
+}
 
 type AgentContextType = {
   currentAgent: Agent | null
@@ -32,8 +49,7 @@ type AgentProviderProps = {
 
 export const AgentProvider = ({ children, userId }: AgentProviderProps) => {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const agentSlug = searchParams.get("agent")
+  const [agentSlug, setAgentSlug] = useState<string | null>(null)
   const { getChatById } = useChats()
   const { chatId } = useChatSession()
   const currentChat = chatId ? getChatById(chatId) : null
@@ -89,9 +105,17 @@ export const AgentProvider = ({ children, userId }: AgentProviderProps) => {
   }, [fetchUserAgents])
 
   return (
-    <AgentContext.Provider value={{ currentAgent, curatedAgents, userAgents }}>
-      {children}
-    </AgentContext.Provider>
+    <>
+      <Suspense fallback={null}>
+        <SearchParamsProvider setAgentSlug={setAgentSlug} />
+      </Suspense>
+
+      <AgentContext.Provider
+        value={{ currentAgent, curatedAgents, userAgents }}
+      >
+        {children}
+      </AgentContext.Provider>
+    </>
   )
 }
 
