@@ -1,14 +1,10 @@
 import { loadAgent } from "@/lib/agents/load-agent"
 import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
+import type { LanguageModelV2 } from "@ai-sdk/provider"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import {
-  convertToModelMessages,
-  LanguageModelV2,
-  streamText,
-  UIMessage,
-} from "ai"
+import { convertToModelMessages, streamText, UIMessage } from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,

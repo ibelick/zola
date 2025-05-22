@@ -52,7 +52,6 @@ export function Conversation({
               key={message.id}
               id={message.id}
               variant={message.role}
-              attachments={message.experimental_attachments}
               isLast={isLast}
               onDelete={onDelete}
               onEdit={onEdit}

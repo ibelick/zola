@@ -7,7 +7,6 @@ type MessageProps = {
   variant: UIMessage["role"]
   children: string
   id: string
-  attachments?: UIMessage["experimental_attachments"]
   isLast?: boolean
   onDelete: (id: string) => void
   onEdit: (id: string, newText: string) => void
@@ -21,7 +20,6 @@ export function Message({
   variant,
   children,
   id,
-  attachments,
   isLast,
   onDelete,
   onEdit,
@@ -49,7 +47,6 @@ export function Message({
         onDelete={onDelete}
         id={id}
         hasScrollAnchor={hasScrollAnchor}
-        attachments={attachments}
       />
     )
   }

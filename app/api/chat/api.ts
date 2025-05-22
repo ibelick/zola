@@ -25,8 +25,8 @@ export async function logUserMessage({
   supabase,
   userId,
   chatId,
-  content,
-  attachments,
+  // content,
+  // attachments,
   model,
   isAuthenticated,
 }: {

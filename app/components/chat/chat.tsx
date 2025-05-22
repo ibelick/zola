@@ -24,6 +24,7 @@ import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
 import { Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { z } from "zod"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
@@ -55,6 +56,14 @@ function SearchParamsProvider({
 
   return null
 }
+
+const messageMetadataSchema = z.object({
+  createdAt: z.date(),
+})
+
+type MessageMetadata = z.infer<typeof messageMetadataSchema>
+
+export type UIMessageWithMetadata = UIMessage<MessageMetadata>
 
 export function Chat() {
   const { chatId } = useChatSession()
@@ -96,9 +105,10 @@ export function Chat() {
     api: API_ROUTE_CHAT,
     chats: {
       [chatId || "default"]: {
-        messages: initialMessages as UIMessage[],
+        messages: initialMessages as UIMessageWithMetadata[],
       },
     },
+    messageMetadataSchema,
   })
 
   const {
@@ -114,8 +124,8 @@ export function Chat() {
     append,
   } = useChat({
     chatStore,
-    onFinish: async (message) => {
-      await cacheAndAddMessage(message)
+    onFinish: async (data) => {
+      await cacheAndAddMessage(data.message)
     },
   })
 
@@ -185,17 +195,16 @@ export function Chat() {
     if (!uid) return
 
     const optimisticId = `optimistic-${Date.now().toString()}`
-    const optimisticAttachments =
-      files.length > 0 ? createOptimisticAttachments(files) : []
+    // const optimisticAttachments =
+    //   files.length > 0 ? createOptimisticAttachments(files) : []
 
-    const optimisticMessage: UIMessage = {
+    const optimisticMessage: UIMessageWithMetadata = {
       id: optimisticId,
       role: "user" as const,
-      content: input,
-      createdAt: new Date(),
+      metadata: {
+        createdAt: new Date(),
+      },
       parts: [{ type: "text" as const, text: input }],
-      experimental_attachments:
-        optimisticAttachments.length > 0 ? optimisticAttachments : undefined,
     }
 
     setMessages((prev) => [...prev, optimisticMessage])
@@ -207,7 +216,7 @@ export function Chat() {
     const allowed = await checkLimitsAndNotify(uid)
     if (!allowed) {
       setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       setIsSubmitting(false)
       return
     }
@@ -215,7 +224,7 @@ export function Chat() {
     const currentChatId = await ensureChatExists(uid)
     if (!currentChatId) {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       setIsSubmitting(false)
       return
     }
@@ -226,7 +235,7 @@ export function Chat() {
         status: "error",
       })
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       setIsSubmitting(false)
       return
     }
@@ -236,7 +245,7 @@ export function Chat() {
       attachments = await handleFileUploads(uid, currentChatId)
       if (attachments === null) {
         setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         setIsSubmitting(false)
         return
       }
@@ -257,13 +266,13 @@ export function Chat() {
     try {
       handleSubmit(undefined, options)
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
       hasSentFirstMessageRef.current = true
     } catch {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       toast({ title: "Failed to send message", status: "error" })
     } finally {
       setIsSubmitting(false)
@@ -274,11 +283,12 @@ export function Chat() {
     async (suggestion: string) => {
       setIsSubmitting(true)
       const optimisticId = `optimistic-${Date.now().toString()}`
-      const optimisticMessage: UIMessage = {
+      const optimisticMessage: UIMessageWithMetadata = {
         id: optimisticId,
-        content: suggestion,
         role: "user" as const,
-        createdAt: new Date(),
+        metadata: {
+          createdAt: new Date(),
+        },
         parts: [{ type: "text" as const, text: suggestion }],
       }
 

@@ -52,8 +52,8 @@ export function MessageAssistant({
       )}
     >
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
-        {reasoningParts && reasoningParts.reasoning && (
-          <Reasoning reasoning={reasoningParts.reasoning} />
+        {reasoningParts && reasoningParts.text && (
+          <Reasoning reasoning={reasoningParts.text} />
         )}
 
         {toolInvocationParts && toolInvocationParts.length > 0 && (

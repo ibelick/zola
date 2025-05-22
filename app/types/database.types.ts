@@ -191,30 +191,30 @@ export type Database = {
         Row: {
           experimental_attachments: Attachment[]
           chat_id: string
-          content: string | null
+          // content: string | null
           created_at: string | null
           id: number
-          role: "system" | "user" | "assistant" | "data"
+          role: "system" | "user" | "assistant"
           parts: Json | null
           user_id?: string | null
         }
         Insert: {
           experimental_attachments?: Attachment[]
           chat_id: string
-          content: string | null
+          // content: string | null
           created_at?: string | null
           id?: number
-          role: "system" | "user" | "assistant" | "data"
+          role: "system" | "user" | "assistant"
           parts?: Json
           user_id?: string | null
         }
         Update: {
           experimental_attachments?: Attachment[]
           chat_id?: string
-          content?: string | null
+          // content?: string | null
           created_at?: string | null
           id?: number
-          role?: "system" | "user" | "assistant" | "data"
+          role?: "system" | "user" | "assistant"
           parts?: Json
           user_id?: string | null
         }

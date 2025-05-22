@@ -16,7 +16,6 @@ import {
 } from "@/components/prompt-kit/message"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { UIMessage } from "@ai-sdk/react"
 import { Check, Copy, Trash } from "@phosphor-icons/react"
 import { useRef, useState } from "react"
 
@@ -27,7 +26,6 @@ const getTextFromDataUrl = (dataUrl: string) => {
 
 export type MessageUserProps = {
   hasScrollAnchor?: boolean
-  attachments?: UIMessage["experimental_attachments"]
   children: string
   copied: boolean
   copyToClipboard: () => void
@@ -39,7 +37,6 @@ export type MessageUserProps = {
 
 export function MessageUser({
   hasScrollAnchor,
-  attachments,
   children,
   copied,
   copyToClipboard,
@@ -76,7 +73,7 @@ export function MessageUser({
         hasScrollAnchor && "min-h-scroll-anchor"
       )}
     >
-      {attachments?.map((attachment, index) => (
+      {/* {attachments?.map((attachment, index) => (
         <div
           className="flex flex-row gap-2"
           key={`${attachment.name}-${index}`}
@@ -115,7 +112,7 @@ export function MessageUser({
             </div>
           ) : null}
         </div>
-      ))}
+      ))} */}
       {isEditing ? (
         <div
           className="bg-accent relative flex min-w-[180px] flex-col gap-2 rounded-3xl px-5 py-2.5"
