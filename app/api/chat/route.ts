@@ -5,7 +5,7 @@ import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
 import type { LanguageModelV2 } from "@ai-sdk/provider"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import { convertToModelMessages, streamText, UIMessage } from "ai"
+import { convertToModelMessages, maxSteps, streamText, UIMessage } from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,
@@ -105,9 +105,7 @@ export async function POST(req: Request) {
       system: effectiveSystemPrompt,
       messages: convertToModelMessages(messages),
       tools: toolsToUse,
-      // @todo: remove this
-      // hardcoded for now
-      // maxSteps: 10,
+      continueUntil: (ops) => maxSteps(10)(ops),
       onError: (err: any) => {
         console.error("🛑 streamText error:", err)
         streamError = new Error(
@@ -116,7 +114,7 @@ export async function POST(req: Request) {
         )
       },
 
-      onFinish: async ({ response, content, steps }) => {
+      onFinish: async ({ content }) => {
         const parts: UIMessageWithMetadata["parts"] =
           content as unknown as UIMessageWithMetadata["parts"] // TODO FIX
         await storeAssistantMessage({

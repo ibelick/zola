@@ -5,7 +5,6 @@ import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
 import type { SupabaseClient } from "@/lib/supabase/server"
 import { checkUsageByModel, incrementUsageByModel } from "@/lib/usage"
-import type { Attachment } from "@ai-sdk/ui-utils"
 
 export async function validateAndTrackUsage({
   userId,
@@ -21,6 +20,16 @@ export async function validateAndTrackUsage({
 
   await checkUsageByModel(supabase, userId, model, isAuthenticated)
   return supabase
+}
+
+function sanitizeUserMessagePart(part: UIMessageWithMetadata["parts"][number]) {
+  if (part.type === "text") {
+    return {
+      ...part,
+      text: sanitizeUserInput(part.text),
+    }
+  }
+  return part
 }
 
 export async function logUserMessage({
@@ -44,7 +53,7 @@ export async function logUserMessage({
     chat_id: chatId,
     role: "user",
     user_id: userId,
-    parts,
+    parts: parts.map(sanitizeUserMessagePart),
   })
 
   if (error) {
