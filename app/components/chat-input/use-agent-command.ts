@@ -6,33 +6,20 @@ import { Agent } from "@/app/types/agent"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { debounce } from "@/lib/utils"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
-
-// Create a separate hook for search params that can be wrapped in Suspense
-export function useSearchParamsWrapper() {
-  return useSearchParams()
-}
+import { useCallback, useEffect, useRef, useState } from "react"
 
 export function useAgentCommand({
   value,
   onValueChange,
   agents,
   defaultAgent = null,
-  searchParams, // Accept searchParams as a prop
 }: {
   value: string
   onValueChange: (value: string) => void
   agents: Agent[]
   defaultAgent?: Agent | null
-  searchParams?: URLSearchParams // Make it optional for backward compatibility
 }) {
+  const searchParams = useSearchParams()
   const { chatId } = useChatSession()
   const { user } = useUser()
   const { updateChatAgent } = useChats()
