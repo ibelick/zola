@@ -3,7 +3,10 @@
 import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
-import { useChatSession } from "@/app/providers/chat-session-provider"
+import {
+  getChatIdFromPathname,
+  useChatSession,
+} from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import { toast } from "@/components/ui/toast"
 import { useAgent } from "@/lib/agent-store/provider"
@@ -58,12 +61,17 @@ function SearchParamsProvider({
 }
 
 const messageMetadataSchema = z.object({
-  createdAt: z.date(),
+  createdAt: z.string(),
 })
 
-type MessageMetadata = z.infer<typeof messageMetadataSchema>
+export type MessageMetadata = z.infer<typeof messageMetadataSchema>
 
 export type UIMessageWithMetadata = UIMessage<MessageMetadata>
+
+const chatStore = defaultChatStore({
+  api: API_ROUTE_CHAT,
+  messageMetadataSchema,
+})
 
 export function Chat() {
   const { chatId } = useChatSession()
@@ -101,17 +109,14 @@ export function Chat() {
 
   const { draftValue, clearDraft } = useChatDraft(chatId)
 
-  const chatStore = defaultChatStore({
-    api: API_ROUTE_CHAT,
-    chats: {
-      [chatId || "default"]: {
-        messages: initialMessages as UIMessageWithMetadata[],
-      },
-    },
-    messageMetadataSchema,
-  })
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages)
+    }
+  }, [initialMessages])
 
   const {
+    chatId: chatIdFromUseChat,
     messages,
     input,
     handleSubmit,
@@ -124,17 +129,19 @@ export function Chat() {
     append,
   } = useChat({
     chatStore,
+    chatId: chatId || "default",
     onFinish: async (data) => {
+      console.log("onFinish", { data })
       await cacheAndAddMessage(data.message)
     },
   })
 
-  // Set initial input from draft if available
-  useEffect(() => {
-    if (draftValue) {
-      setInput(draftValue)
-    }
-  }, [draftValue, setInput])
+  // // Set initial input from draft if available
+  // useEffect(() => {
+  //   if (draftValue) {
+  //     setInput(draftValue)
+  //   }
+  // }, [draftValue, setInput])
 
   const { checkLimitsAndNotify, ensureChatExists } = useChatUtils({
     isAuthenticated,
@@ -202,7 +209,7 @@ export function Chat() {
       id: optimisticId,
       role: "user" as const,
       metadata: {
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       },
       parts: [{ type: "text" as const, text: input }],
     }
@@ -287,7 +294,7 @@ export function Chat() {
         id: optimisticId,
         role: "user" as const,
         metadata: {
-          createdAt: new Date(),
+          createdAt: new Date().toISOString(),
         },
         parts: [{ type: "text" as const, text: suggestion }],
       }
@@ -405,6 +412,26 @@ export function Chat() {
           />
         )}
       </AnimatePresence>
+
+      {/* <pre className="text-sm">
+        {JSON.stringify(
+          {
+            messages,
+            status,
+            error,
+            input,
+            chatId,
+            chatIdFromUseChat,
+            // chatStoreGetChats: chatStore.getChats(),
+            chatStoreGetMessagesLength: chatStore.getMessages(
+              chatId || "default"
+            ).length,
+          },
+          null,
+          2
+        )}
+      </pre> */}
+
       <motion.div
         className={cn(
           "relative inset-x-0 bottom-0 z-50 mx-auto w-full max-w-3xl"

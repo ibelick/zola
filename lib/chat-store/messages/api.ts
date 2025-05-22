@@ -51,8 +51,7 @@ async function insertMessageToDb(
   await supabase.from("messages").insert({
     chat_id: chatId,
     role: message.role,
-    created_at:
-      message.metadata?.createdAt?.toISOString() || new Date().toISOString(),
+    created_at: message.metadata?.createdAt || new Date().toISOString(),
   })
 }
 
@@ -66,8 +65,7 @@ async function insertMessagesToDb(
   const payload = messages.map((message) => ({
     chat_id: chatId,
     role: message.role,
-    created_at:
-      message.metadata?.createdAt?.toISOString() || new Date().toISOString(),
+    created_at: message.metadata?.createdAt || new Date().toISOString(),
   }))
 
   await supabase.from("messages").insert(payload)

@@ -1,7 +1,10 @@
 "use client"
 
 import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
-import { useChatSession } from "@/app/providers/chat-session-provider"
+import {
+  getChatIdFromPathname,
+  useChatSession,
+} from "@/app/providers/chat-session-provider"
 import { toast } from "@/components/ui/toast"
 // import type { UIMessage } from "ai"
 import { createContext, useContext, useEffect, useState } from "react"
@@ -74,6 +77,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
   }
 
   const cacheAndAddMessage = async (message: UIMessageWithMetadata) => {
+    const chatId = getChatIdFromPathname()
     if (!chatId) return
 
     try {

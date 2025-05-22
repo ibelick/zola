@@ -1,4 +1,7 @@
-import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
+import type {
+  MessageMetadata,
+  UIMessageWithMetadata,
+} from "@/app/components/chat/chat"
 import { loadAgent } from "@/lib/agents/load-agent"
 import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
@@ -133,6 +136,11 @@ export async function POST(req: Request) {
 
     const originalResponse = result.toUIMessageStreamResponse({
       sendReasoning: true,
+      messageMetadata: (): MessageMetadata | undefined => {
+        return {
+          createdAt: new Date().toISOString(),
+        }
+      },
     })
     // Optionally attach chatId in a custom header.
     const headers = new Headers(originalResponse.headers)
