@@ -13,7 +13,6 @@ import { SourcesList } from "./sources-list"
 import { ToolInvocation } from "./tool-invocation"
 
 type MessageAssistantProps = {
-  children: string
   isLast?: boolean
   hasScrollAnchor?: boolean
   copied?: boolean
@@ -24,7 +23,6 @@ type MessageAssistantProps = {
 }
 
 export function MessageAssistant({
-  children,
   isLast,
   hasScrollAnchor,
   copied,
@@ -40,7 +38,10 @@ export function MessageAssistant({
   )
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
 
-  const contentNullOrEmpty = children === null || children === ""
+  const textParts = parts?.filter((part) => part.type === "text")
+  const textPartsAsText = textParts?.map((part) => part.text).join("")
+
+  const contentNullOrEmpty = textPartsAsText === null || textPartsAsText === ""
 
   const isLastStreaming = status === "streaming" && isLast
 
@@ -68,7 +69,7 @@ export function MessageAssistant({
             )}
             markdown={true}
           >
-            {children}
+            {textPartsAsText}
           </MessageContent>
         )}
 

@@ -59,12 +59,7 @@ export function Conversation({
               hasScrollAnchor={hasScrollAnchor}
               parts={message.parts}
               status={status}
-            >
-              {message.parts
-                .filter((part) => part.type == "text")
-                .map((part) => part.text)
-                .join("")}
-            </Message>
+            />
           )
         })}
         {status === "submitted" &&

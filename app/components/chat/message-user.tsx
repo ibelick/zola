@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Check, Copy, Trash } from "@phosphor-icons/react"
 import { useRef, useState } from "react"
+import type { UIMessageWithMetadata } from "./chat"
 
 const getTextFromDataUrl = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1]
@@ -26,7 +27,7 @@ const getTextFromDataUrl = (dataUrl: string) => {
 
 export type MessageUserProps = {
   hasScrollAnchor?: boolean
-  children: string
+  parts: UIMessageWithMetadata["parts"]
   copied: boolean
   copyToClipboard: () => void
   onEdit: (id: string, newText: string) => void
@@ -37,7 +38,7 @@ export type MessageUserProps = {
 
 export function MessageUser({
   hasScrollAnchor,
-  children,
+  parts,
   copied,
   copyToClipboard,
   onEdit,
@@ -45,13 +46,18 @@ export function MessageUser({
   onDelete,
   id,
 }: MessageUserProps) {
-  const [editInput, setEditInput] = useState(children)
+  const textParts = parts?.filter((part) => part.type === "text")
+  const textPartsAsText = textParts?.map((part) => part.text).join("")
+
+  const fileParts = parts?.filter((part) => part.type === "file")
+
+  const [editInput, setEditInput] = useState(textPartsAsText)
   const [isEditing, setIsEditing] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
 
   const handleEditCancel = () => {
     setIsEditing(false)
-    setEditInput(children)
+    setEditInput(textPartsAsText)
   }
 
   const handleSave = () => {
@@ -73,12 +79,9 @@ export function MessageUser({
         hasScrollAnchor && "min-h-scroll-anchor"
       )}
     >
-      {/* {attachments?.map((attachment, index) => (
-        <div
-          className="flex flex-row gap-2"
-          key={`${attachment.name}-${index}`}
-        >
-          {attachment.contentType?.startsWith("image") ? (
+      {fileParts?.map((file, index) => (
+        <div className="flex flex-row gap-2" key={`${file.filename}-${index}`}>
+          {file.mediaType?.startsWith("image") ? (
             <MorphingDialog
               transition={{
                 type: "spring",
@@ -90,29 +93,29 @@ export function MessageUser({
               <MorphingDialogTrigger className="z-10">
                 <img
                   className="mb-1 w-40 rounded-md"
-                  key={attachment.name}
-                  src={attachment.url}
-                  alt={attachment.name}
+                  key={file.filename}
+                  src={file.url}
+                  alt={file.filename}
                 />
               </MorphingDialogTrigger>
               <MorphingDialogContainer>
                 <MorphingDialogContent className="relative rounded-lg">
                   <MorphingDialogImage
-                    src={attachment.url}
-                    alt={attachment.name || ""}
+                    src={file.url}
+                    alt={file.filename || ""}
                     className="max-h-[90vh] max-w-[90vw] object-contain"
                   />
                 </MorphingDialogContent>
                 <MorphingDialogClose className="text-primary" />
               </MorphingDialogContainer>
             </MorphingDialog>
-          ) : attachment.contentType?.startsWith("text") ? (
+          ) : file.mediaType?.startsWith("text") ? (
             <div className="text-primary mb-3 h-24 w-40 overflow-hidden rounded-md border p-2 text-xs">
-              {getTextFromDataUrl(attachment.url)}
+              {getTextFromDataUrl(file.url)}
             </div>
           ) : null}
         </div>
-      ))} */}
+      ))}
       {isEditing ? (
         <div
           className="bg-accent relative flex min-w-[180px] flex-col gap-2 rounded-3xl px-5 py-2.5"
@@ -164,7 +167,7 @@ export function MessageUser({
             ol: ({ children }) => <>{children}</>,
           }}
         >
-          {children}
+          {textPartsAsText}
         </MessageContent>
       )}
       <MessageActions className="flex gap-0 opacity-0 transition-opacity duration-0 group-hover:opacity-100">
