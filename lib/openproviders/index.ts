@@ -14,29 +14,28 @@ import type {
   XaiModel,
 } from "./types"
 
-// type OpenAIChatSettings = Parameters<typeof openai>[1]
-// type MistralProviderSettings = Parameters<typeof mistral>[1]
-// type GoogleGenerativeAIProviderSettings = Parameters<typeof google>[1]
-// type AnthropicProviderSettings = Parameters<typeof anthropic>[1]
-// type XaiProviderSettings = Parameters<typeof xai>[1]
+type OpenAIChatSettings = Parameters<typeof openai>[0]
+type MistralProviderSettings = Parameters<typeof mistral>[0]
+type GoogleGenerativeAIProviderSettings = Parameters<typeof google>[0]
+type AnthropicProviderSettings = Parameters<typeof anthropic>[0]
+type XaiProviderSettings = Parameters<typeof xai>[0]
 
-// type ModelSettings<T extends SupportedModel> = T extends OpenAIModel
-//   ? OpenAIChatSettings
-//   : T extends MistralModel
-//     ? MistralProviderSettings
-//     : T extends GeminiModel
-//       ? GoogleGenerativeAIProviderSettings
-//       : T extends AnthropicModel
-//         ? AnthropicProviderSettings
-//         : T extends XaiModel
-//           ? XaiProviderSettings
-//           : never
+type ModelSettings<T extends SupportedModel> = T extends OpenAIModel
+  ? OpenAIChatSettings
+  : T extends MistralModel
+    ? MistralProviderSettings
+    : T extends GeminiModel
+      ? GoogleGenerativeAIProviderSettings
+      : T extends AnthropicModel
+        ? AnthropicProviderSettings
+        : T extends XaiModel
+          ? XaiProviderSettings
+          : never
 
-// export type OpenProvidersOptions<T extends SupportedModel> = ModelSettings<T>
+export type OpenProvidersOptions<T extends SupportedModel> = ModelSettings<T>
 
 export function openproviders<T extends SupportedModel>(
-  modelId: T,
-  settings?: any // FIX THIS
+  modelId: T
 ): LanguageModelV2 {
   const provider = getProviderForModel(modelId)
 
