@@ -103,7 +103,7 @@ export async function POST(req: Request) {
     let streamError: Error | null = null
 
     const result = streamText({
-      model: modelInstance as LanguageModelV2,
+      model: modelInstance as unknown as LanguageModelV2, // TODO fix
       system: effectiveSystemPrompt,
       messages: convertToModelMessages(messages),
       tools: toolsToUse,
@@ -118,8 +118,9 @@ export async function POST(req: Request) {
         )
       },
 
-      onFinish: async ({ response, content }) => {
-        const parts: UIMessageWithMetadata["parts"] = content
+      onFinish: async ({ response, content, steps }) => {
+        const parts: UIMessageWithMetadata["parts"] =
+          content as unknown as UIMessageWithMetadata["parts"] // TODO FIX
         await storeAssistantMessage({
           supabase,
           chatId,
