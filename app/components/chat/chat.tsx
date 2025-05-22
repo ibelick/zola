@@ -282,8 +282,6 @@ export function Chat() {
         parts: [{ type: "text" as const, text: suggestion }],
       }
 
-      // setMessages((prev) => [...prev, optimisticMessage])
-
       const uid = await getOrCreateGuestUserId(user)
 
       if (!uid) {
@@ -324,7 +322,6 @@ export function Chat() {
         },
         options
       )
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       setIsSubmitting(false)
     },
     [ensureChatExists, selectedModel, user?.id, append]
@@ -412,20 +409,19 @@ export function Chat() {
       >
         <ChatInput
           value={input}
+          onSuggestion={handleSuggestion}
           onValueChange={handleInputChange}
           onSend={submit}
           isSubmitting={isSubmitting}
           files={files}
           onFileUpload={handleFileUpload}
           onFileRemove={handleFileRemove}
-          onSuggestion={handleSuggestion}
           hasSuggestions={!chatId && messages.length === 0}
           onSelectModel={handleModelChange}
           selectedModel={selectedModel}
           isUserAuthenticated={isAuthenticated}
           stop={stop}
           status={status}
-          hasMessages={messages.length > 0}
         />
       </motion.div>
 
