@@ -1,4 +1,4 @@
-import { UIMessageWithMetadata } from "@/app/components/chat/chat"
+import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
 import { loadAgent } from "@/lib/agents/load-agent"
 import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"

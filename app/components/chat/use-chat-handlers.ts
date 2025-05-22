@@ -2,7 +2,7 @@ import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { UserProfile } from "@/app/types/user"
 import { toast } from "@/components/ui/toast"
 import { useCallback } from "react"
-import { UIMessageWithMetadata } from "./chat"
+import type { UIMessageWithMetadata } from "./chat"
 
 type UseChatHandlersProps = {
   messages: UIMessageWithMetadata[]

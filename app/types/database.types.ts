@@ -1,5 +1,5 @@
 import { Attachment } from "@ai-sdk/ui-utils"
-import { UIMessageWithMetadata } from "../components/chat/chat"
+import type { UIMessageWithMetadata } from "../components/chat/chat"
 
 export type Json =
   | string

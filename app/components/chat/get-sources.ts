@@ -1,4 +1,4 @@
-import { UIMessageWithMetadata } from "./chat"
+import type { UIMessageWithMetadata } from "./chat"
 
 export function getSources(parts: UIMessageWithMetadata["parts"]) {
   const sources = parts

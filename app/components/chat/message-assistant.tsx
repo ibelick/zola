@@ -6,7 +6,7 @@ import {
 } from "@/components/prompt-kit/message"
 import { cn } from "@/lib/utils"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
-import { UIMessageWithMetadata } from "./chat"
+import type { UIMessageWithMetadata } from "./chat"
 import { getSources } from "./get-sources"
 import { Reasoning } from "./reasoning"
 import { SourcesList } from "./sources-list"
