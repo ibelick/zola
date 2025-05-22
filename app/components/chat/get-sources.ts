@@ -1,13 +1,13 @@
-import type { Message as MessageAISDK } from "@ai-sdk/react"
+import { UIMessageWithMetadata } from "./chat"
 
-export function getSources(parts: MessageAISDK["parts"]) {
+export function getSources(parts: UIMessageWithMetadata["parts"]) {
   const sources = parts
     ?.filter(
-      (part) => part.type === "source" || part.type === "tool-invocation"
+      (part) => part.type === "source-url" || part.type === "tool-invocation"
     )
     .map((part) => {
-      if (part.type === "source") {
-        return part.source
+      if (part.type === "source-url") {
+        return part.url
       }
 
       if (

@@ -1,4 +1,5 @@
 import { Attachment } from "@ai-sdk/ui-utils"
+import { UIMessageWithMetadata } from "../components/chat/chat"
 
 export type Json =
   | string
@@ -191,31 +192,28 @@ export type Database = {
         Row: {
           experimental_attachments: Attachment[]
           chat_id: string
-          // content: string | null
           created_at: string | null
           id: number
           role: "system" | "user" | "assistant"
-          parts: Json | null
+          parts: UIMessageWithMetadata["parts"] | null
           user_id?: string | null
         }
         Insert: {
           experimental_attachments?: Attachment[]
           chat_id: string
-          // content: string | null
           created_at?: string | null
           id?: number
           role: "system" | "user" | "assistant"
-          parts?: Json
+          parts?: UIMessageWithMetadata["parts"]
           user_id?: string | null
         }
         Update: {
           experimental_attachments?: Attachment[]
           chat_id?: string
-          // content?: string | null
           created_at?: string | null
           id?: number
           role?: "system" | "user" | "assistant"
-          parts?: Json
+          parts?: UIMessageWithMetadata["parts"]
           user_id?: string | null
         }
         Relationships: [

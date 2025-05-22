@@ -5,8 +5,8 @@ import {
   MessageContent,
 } from "@/components/prompt-kit/message"
 import { cn } from "@/lib/utils"
-import type { UIMessage } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
+import { UIMessageWithMetadata } from "./chat"
 import { getSources } from "./get-sources"
 import { Reasoning } from "./reasoning"
 import { SourcesList } from "./sources-list"
@@ -19,7 +19,7 @@ type MessageAssistantProps = {
   copied?: boolean
   copyToClipboard?: () => void
   onReload?: () => void
-  parts?: UIMessage["parts"]
+  parts?: UIMessageWithMetadata["parts"]
   status?: "streaming" | "ready" | "submitted" | "error"
 }
 
@@ -33,7 +33,7 @@ export function MessageAssistant({
   parts,
   status,
 }: MessageAssistantProps) {
-  const sources = getSources(parts)
+  const sources = getSources(parts || [])
 
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"

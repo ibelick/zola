@@ -1,4 +1,4 @@
-import { UIMessageWithMetadata } from "@/app/components/chat/chat"
+import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
 import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import type { UIMessage } from "ai"

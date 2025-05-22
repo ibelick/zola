@@ -1,6 +1,6 @@
 "use client"
 
-import { UIMessageWithMetadata } from "@/app/components/chat/chat"
+import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
 import { useChatSession } from "@/app/providers/chat-session-provider"
 import { toast } from "@/components/ui/toast"
 // import type { UIMessage } from "ai"

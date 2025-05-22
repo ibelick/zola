@@ -1,3 +1,4 @@
+import { UIMessageWithMetadata } from "@/app/components/chat/chat"
 import { loadAgent } from "@/lib/agents/load-agent"
 import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
@@ -56,10 +57,11 @@ export async function POST(req: Request) {
         supabase,
         userId,
         chatId,
-        content: userMessage.content,
-        attachments: userMessage.experimental_attachments as Attachment[],
+        // content: userMessage.content,
+        // attachments: userMessage.experimental_attachments as Attachment[],
         model,
         isAuthenticated,
+        parts: userMessage.parts,
       })
     }
 
@@ -116,11 +118,12 @@ export async function POST(req: Request) {
         )
       },
 
-      onFinish: async ({ response }) => {
+      onFinish: async ({ response, content }) => {
+        const parts: UIMessageWithMetadata["parts"] = content
         await storeAssistantMessage({
           supabase,
           chatId,
-          messages: response.messages,
+          parts,
         })
       },
     })
