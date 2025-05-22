@@ -1,12 +1,12 @@
 import { toast } from "@/components/ui/toast"
 import { checkRateLimits } from "@/lib/api"
 import { REMAINING_QUERY_ALERT_THRESHOLD } from "@/lib/config"
-import { Message } from "@ai-sdk/react"
+import { UIMessage } from "@ai-sdk/react"
 
 type UseChatUtilsProps = {
   isAuthenticated: boolean
   chatId: string | null
-  messages: Message[]
+  messages: UIMessage[]
   input: string
   selectedModel: string
   systemPrompt: string

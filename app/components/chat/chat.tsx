@@ -19,6 +19,7 @@ import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 import { useChat } from "@ai-sdk/react"
+import { defaultChatStore, UIMessage } from "ai"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
@@ -91,6 +92,15 @@ export function Chat() {
 
   const { draftValue, clearDraft } = useChatDraft(chatId)
 
+  const chatStore = defaultChatStore({
+    api: API_ROUTE_CHAT,
+    chats: {
+      [chatId || "default"]: {
+        messages: initialMessages as UIMessage[],
+      },
+    },
+  })
+
   const {
     messages,
     input,
@@ -103,14 +113,18 @@ export function Chat() {
     setInput,
     append,
   } = useChat({
-    api: API_ROUTE_CHAT,
-    initialMessages,
-    initialInput: draftValue,
+    chatStore,
     onFinish: async (message) => {
-      // store the assistant message in the cache
       await cacheAndAddMessage(message)
     },
   })
+
+  // Set initial input from draft if available
+  useEffect(() => {
+    if (draftValue) {
+      setInput(draftValue)
+    }
+  }, [draftValue, setInput])
 
   const { checkLimitsAndNotify, ensureChatExists } = useChatUtils({
     isAuthenticated,
@@ -174,11 +188,12 @@ export function Chat() {
     const optimisticAttachments =
       files.length > 0 ? createOptimisticAttachments(files) : []
 
-    const optimisticMessage = {
+    const optimisticMessage: UIMessage = {
       id: optimisticId,
-      content: input,
       role: "user" as const,
+      content: input,
       createdAt: new Date(),
+      parts: [{ type: "text" as const, text: input }],
       experimental_attachments:
         optimisticAttachments.length > 0 ? optimisticAttachments : undefined,
     }
@@ -246,7 +261,7 @@ export function Chat() {
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
       hasSentFirstMessageRef.current = true
-    } catch (error) {
+    } catch {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       toast({ title: "Failed to send message", status: "error" })
@@ -259,14 +274,15 @@ export function Chat() {
     async (suggestion: string) => {
       setIsSubmitting(true)
       const optimisticId = `optimistic-${Date.now().toString()}`
-      const optimisticMessage = {
+      const optimisticMessage: UIMessage = {
         id: optimisticId,
         content: suggestion,
         role: "user" as const,
         createdAt: new Date(),
+        parts: [{ type: "text" as const, text: suggestion }],
       }
 
-      setMessages((prev) => [...prev, optimisticMessage])
+      // setMessages((prev) => [...prev, optimisticMessage])
 
       const uid = await getOrCreateGuestUserId(user)
 
@@ -304,7 +320,7 @@ export function Chat() {
       append(
         {
           role: "user",
-          content: suggestion,
+          parts: [{ type: "text" as const, text: suggestion }],
         },
         options
       )
@@ -368,7 +384,7 @@ export function Chat() {
             }}
           >
             <h1 className="mb-6 text-3xl font-medium tracking-tight">
-              What's on your mind?
+              What&apos;s on your mind?
             </h1>
           </motion.div>
         ) : (
@@ -396,19 +412,20 @@ export function Chat() {
       >
         <ChatInput
           value={input}
-          onSuggestion={handleSuggestion}
           onValueChange={handleInputChange}
           onSend={submit}
           isSubmitting={isSubmitting}
           files={files}
           onFileUpload={handleFileUpload}
           onFileRemove={handleFileRemove}
+          onSuggestion={handleSuggestion}
           hasSuggestions={!chatId && messages.length === 0}
           onSelectModel={handleModelChange}
           selectedModel={selectedModel}
           isUserAuthenticated={isAuthenticated}
           stop={stop}
           status={status}
+          hasMessages={messages.length > 0}
         />
       </motion.div>
 

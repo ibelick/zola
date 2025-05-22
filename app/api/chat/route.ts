@@ -3,7 +3,12 @@ import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import { LanguageModelV1, Message as MessageAISDK, streamText } from "ai"
+import {
+  convertToModelMessages,
+  LanguageModelV2,
+  streamText,
+  UIMessage,
+} from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,
@@ -14,7 +19,7 @@ import {
 export const maxDuration = 60
 
 type ChatRequest = {
-  messages: MessageAISDK[]
+  messages: UIMessage[]
   chatId: string
   userId: string
   model: string
@@ -100,13 +105,13 @@ export async function POST(req: Request) {
     let streamError: Error | null = null
 
     const result = streamText({
-      model: modelInstance as LanguageModelV1,
+      model: modelInstance as LanguageModelV2,
       system: effectiveSystemPrompt,
-      messages,
+      messages: convertToModelMessages(messages),
       tools: toolsToUse,
       // @todo: remove this
       // hardcoded for now
-      maxSteps: 10,
+      // maxSteps: 10,
       onError: (err: any) => {
         console.error("🛑 streamText error:", err)
         streamError = new Error(
@@ -130,7 +135,7 @@ export async function POST(req: Request) {
       throw streamError
     }
 
-    const originalResponse = result.toDataStreamResponse({
+    const originalResponse = result.toUIMessageStreamResponse({
       sendReasoning: true,
     })
     // Optionally attach chatId in a custom header.
