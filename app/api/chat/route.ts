@@ -137,6 +137,7 @@ export async function POST(req: Request) {
 
     const originalResponse = result.toDataStreamResponse({
       sendReasoning: true,
+      sendSources: true,
     })
     // Optionally attach chatId in a custom header.
     const headers = new Headers(originalResponse.headers)
