@@ -11,3 +11,9 @@ export const getAvailableTools = () =>
   Object.entries(TOOL_REGISTRY)
     .filter(([_, tool]) => tool.isAvailable)
     .map(([id, tool]) => ({ ...tool, id }))
+
+export const getAllTools = () =>
+  Object.entries(TOOL_REGISTRY).map(([id, tool]) => ({
+    ...tool,
+    id,
+  }))
