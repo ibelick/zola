@@ -1,22 +1,42 @@
 "use client"
 
+import { useUser } from "@/app/providers/user-provider"
 import { AgentSummary } from "@/app/types/agent"
 import type { Tables } from "@/app/types/database.types"
 import { ButtonCopy } from "@/components/common/button-copy"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { toast } from "@/components/ui/toast"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import {
   ChatCircle,
   Check,
   CopySimple,
   Cube,
-  User,
+  DotsThree,
+  Trash,
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -70,6 +90,7 @@ export function AgentDetail({
   name,
   description,
   example_inputs,
+  creator_id,
   avatar_url,
   onAgentClick,
   randomAgents,
@@ -79,7 +100,10 @@ export function AgentDetail({
   mcp_config,
 }: AgentDetailProps) {
   const [copied, setCopied] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
+  const { user } = useUser()
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(`${window.location.origin}/agents/${slug}`)
@@ -111,6 +135,59 @@ export function AgentDetail({
     router.push(`/?agent=${slug}`)
   }
 
+  const handleDelete = async () => {
+    const supabase = createClient()
+
+    if (!supabase) {
+      throw new Error("Supabase is not available")
+    }
+
+    if (!user?.id) {
+      throw new Error("You must be logged in to delete an agent.")
+    }
+
+    if (creator_id !== user.id) {
+      throw new Error("You can only delete agents that you created.")
+    }
+
+    setIsDeleting(true)
+    try {
+      const { error } = await supabase
+        .from("agents")
+        .delete()
+        .eq("slug", slug)
+        .eq("creator_id", user.id)
+
+      if (error) {
+        throw error
+      }
+
+      toast({
+        title: "Success",
+        description: "Agent deleted successfully.",
+        status: "success",
+      })
+
+      setShowDeleteDialog(false)
+      router.push("/agents")
+    } catch (error) {
+      console.error("Failed to delete agent:", error)
+      toast({
+        title: "Error",
+        description: "Failed to delete agent. Please try again.",
+        status: "error",
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const canDelete = user?.id && creator_id === user.id
+
+  console.log("canDelete", canDelete)
+  console.log("creator_id", creator_id)
+  console.log("user.id", user?.id)
+
   return (
     <div
       className={cn(
@@ -124,21 +201,44 @@ export function AgentDetail({
           isFullPage ? "pb-0" : "pb-20"
         )}
       >
-        <div className="mb-6 flex items-center gap-4 pt-8 pl-8">
-          {avatar_url ? (
-            <Avatar className="size-16">
-              <AvatarImage
-                src={avatar_url}
-                alt={name}
-                className="h-full w-full object-cover"
-              />
-            </Avatar>
-          ) : (
-            <div className="bg-background flex size-16 items-center justify-center rounded-full border border-dashed">
-              <Cube className="size-8" />
-            </div>
+        <div className="mb-6 flex items-center justify-between gap-4 pt-8 pr-8 pl-8">
+          <div className="flex items-center gap-4">
+            {avatar_url ? (
+              <Avatar className="size-16">
+                <AvatarImage
+                  src={avatar_url}
+                  alt={name}
+                  className="h-full w-full object-cover"
+                />
+              </Avatar>
+            ) : (
+              <div className="bg-background flex size-16 items-center justify-center rounded-full border border-dashed">
+                <Cube className="size-8" />
+              </div>
+            )}
+            <h1 className="text-2xl font-medium">{name}</h1>
+          </div>
+
+          {canDelete && (
+            // fix shadcn/ui / radix bug when dialog into dropdown menu
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <DotsThree className="size-4" weight="bold" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash className="fill-destructive size-4" />
+                  Delete agent
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
-          <h1 className="text-2xl font-medium">{name}</h1>
         </div>
 
         <div className="px-4 md:px-8">
@@ -281,6 +381,24 @@ export function AgentDetail({
           Chat with {name}
         </Button>
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Agent</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{name}"? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

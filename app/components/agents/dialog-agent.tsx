@@ -24,6 +24,7 @@ type DialogAgentProps = {
   tools?: string[] | null
   mcp_config?: Tables<"agents">["mcp_config"] | null
   isCardLight?: boolean
+  creator_id?: string | null
 }
 
 export function DialogAgent({
@@ -44,6 +45,7 @@ export function DialogAgent({
   tools,
   mcp_config,
   isCardLight = false,
+  creator_id,
 }: DialogAgentProps) {
   const isMobile = useBreakpoint(768)
 
@@ -83,6 +85,7 @@ export function DialogAgent({
       mcp_config={mcp_config}
       onAgentClick={onAgentClick}
       randomAgents={randomAgents}
+      creator_id={creator_id}
     />
   )
 

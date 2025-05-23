@@ -24,6 +24,7 @@ export function UserMenu() {
   if (!user) return null
 
   return (
+    // fix shadcn/ui / radix bug when dialog into dropdown menu
     <DropdownMenu modal={false}>
       <Tooltip>
         <TooltipTrigger asChild>
