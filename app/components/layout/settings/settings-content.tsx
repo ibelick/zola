@@ -24,6 +24,7 @@ import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
+import { ConnectionsSection } from "./connections-section"
 import { LayoutSection } from "./layout-section"
 import { SystemPromptSection } from "./system-prompt-section"
 
@@ -246,15 +247,7 @@ export function SettingsContent({
             </TabsContent>
 
             <TabsContent value="connections" className="py-4">
-              <div className="py-8 text-center">
-                <PlugsConnected className="text-muted-foreground mx-auto mb-2 size-12" />
-                <h3 className="mb-1 text-sm font-medium">
-                  No connections available
-                </h3>
-                <p className="text-muted-foreground text-sm">
-                  Third-party service connections will appear here.
-                </p>
-              </div>
+              <ConnectionsSection />
             </TabsContent>
           </div>
         ) : (
@@ -409,15 +402,7 @@ export function SettingsContent({
               </TabsContent>
 
               <TabsContent value="connections" className="mt-0">
-                <div className="py-8 text-center">
-                  <PlugsConnected className="text-muted-foreground mx-auto mb-2 size-12" />
-                  <h4 className="mb-1 text-sm font-medium">
-                    No connections available
-                  </h4>
-                  <p className="text-muted-foreground text-sm">
-                    Third-party service connections will appear here.
-                  </p>
-                </div>
+                <ConnectionsSection />
               </TabsContent>
             </div>
           </>
