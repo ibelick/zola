@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react"
 
 const isDev = process.env.NODE_ENV === "development"
 
-interface ToolsSectionProps {
+type ToolsSectionProps = {
   onSelectTools: (selectedTools: string[]) => void
 }
 

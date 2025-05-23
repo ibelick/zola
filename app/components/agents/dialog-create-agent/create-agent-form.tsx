@@ -22,6 +22,7 @@ type AgentFormData = {
   systemPrompt: string
   mcp: "none" | "git-mcp"
   repository?: string
+  tools: string[]
 }
 
 type CreateAgentFormProps = {
@@ -34,6 +35,7 @@ type CreateAgentFormProps = {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void
   handleSelectChange: (value: string) => void
+  handleToolsChange: (selectedTools: string[]) => void
   handleSubmit: (e: React.FormEvent) => Promise<void>
   onClose: () => void
   isDrawer?: boolean
@@ -47,6 +49,7 @@ export function CreateAgentForm({
   isLoading,
   handleInputChange,
   handleSelectChange,
+  handleToolsChange,
   handleSubmit,
   onClose,
   isDrawer = false,
@@ -115,11 +118,7 @@ export function CreateAgentForm({
             )}
           </div>
 
-          <ToolsSection
-            onSelectTools={(tools) => {
-              console.log(tools)
-            }}
-          />
+          <ToolsSection onSelectTools={handleToolsChange} />
 
           {/* MCP Dropdown */}
           <div className="space-y-2">

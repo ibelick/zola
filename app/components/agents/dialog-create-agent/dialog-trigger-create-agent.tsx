@@ -30,6 +30,7 @@ type AgentFormData = {
   systemPrompt: string
   mcp: "none" | "git-mcp"
   repository?: string
+  tools: string[]
 }
 
 type DialogCreateAgentTrigger = {
@@ -48,6 +49,7 @@ export function DialogCreateAgentTrigger({
     description: "",
     systemPrompt: "",
     mcp: "none",
+    tools: [],
   })
   const [repository, setRepository] = useState("")
   const [error, setError] = useState<{ [key: string]: string }>({})
@@ -116,6 +118,10 @@ Never invent answers. Use tools and return what you find.`
         systemPrompt: generateSystemPrompt(owner, repo),
       }))
     }
+  }
+
+  const handleToolsChange = (selectedTools: string[]) => {
+    setFormData({ ...formData, tools: selectedTools })
   }
 
   const validateRepository = (repo: string) => {
@@ -210,6 +216,7 @@ Never invent answers. Use tools and return what you find.`
                 "where is the main code located?",
               ]
             : null,
+          tools: formData.tools,
           remixable: false,
           is_public: true,
           max_steps: 5,
@@ -248,6 +255,7 @@ Never invent answers. Use tools and return what you find.`
       isLoading={isLoading}
       handleInputChange={handleInputChange}
       handleSelectChange={handleSelectChange}
+      handleToolsChange={handleToolsChange}
       handleSubmit={handleSubmit}
       onClose={() => setOpen(false)}
       isDrawer={isMobile}
