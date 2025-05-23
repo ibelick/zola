@@ -20,11 +20,10 @@ export async function GET() {
       name: "Exa",
       icon: "🧠",
       description: "Use Exa to power search-based agents.",
-      envKeys: ["EXA_API_KEY", "EXA_INDEX_ID"],
+      envKeys: ["EXA_API_KEY"],
       connected: Boolean(process.env.EXA_API_KEY),
       maskedKey: getMaskedKey(process.env.EXA_API_KEY),
-      sampleEnv: `EXA_API_KEY=your_key_here
-EXA_INDEX_ID=optional_index`,
+      sampleEnv: `EXA_API_KEY=your_key_here`,
     },
     {
       id: "github",
