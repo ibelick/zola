@@ -50,7 +50,7 @@ To unlock features like auth, file uploads, and agents, see [INSTALL.md](./INSTA
 ## Sponsors
 
 Zola is proudly sponsored by [Vercel](https://vercel.com),
-the platform we use to build, preview, and ship the app.
+the platform we use to build, preview, and ship.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
 

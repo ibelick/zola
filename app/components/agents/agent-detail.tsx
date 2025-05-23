@@ -13,6 +13,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -28,6 +29,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { fetchClient } from "@/lib/fetch"
+import { API_ROUTE_DELETE_AGENT } from "@/lib/routes"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import {
@@ -137,30 +140,36 @@ export function AgentDetail({
   }
 
   const handleDelete = async () => {
-    const supabase = createClient()
-
-    if (!supabase) {
-      throw new Error("Supabase is not available")
-    }
-
     if (!user?.id) {
-      throw new Error("You must be logged in to delete an agent.")
+      toast({
+        title: "Error",
+        description: "You must be logged in to delete an agent.",
+        status: "error",
+      })
+      return
     }
 
     if (creator_id !== user.id) {
-      throw new Error("You can only delete agents that you created.")
+      toast({
+        title: "Error",
+        description: "You can only delete agents that you created.",
+        status: "error",
+      })
+      return
     }
 
     setIsDeleting(true)
     try {
-      const { error } = await supabase
-        .from("agents")
-        .delete()
-        .eq("slug", slug)
-        .eq("creator_id", user.id)
+      const response = await fetchClient(API_ROUTE_DELETE_AGENT, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+      })
 
-      if (error) {
-        throw error
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}`)
       }
 
       toast({
@@ -170,16 +179,44 @@ export function AgentDetail({
       })
 
       setShowDeleteDialog(false)
+
+      // If we're in a dialog (not full page), close it first
+      if (!isFullPage && onAgentClick) {
+        onAgentClick("")
+      }
+
+      // Navigate to agents page
       router.push("/agents")
     } catch (error) {
       console.error("Failed to delete agent:", error)
       toast({
         title: "Error",
-        description: "Failed to delete agent. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to delete agent. Please try again.",
         status: "error",
       })
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleDeleteClick = () => {
+    // If we're in a dialog, we need to handle the nesting issue
+    if (!isFullPage) {
+      // For non-full page (dialog mode), we'll use a different approach
+      // Close the parent dialog first, then show confirmation
+      if (
+        window.confirm(
+          `Are you sure you want to delete "${name}"? This action cannot be undone.`
+        )
+      ) {
+        handleDelete()
+      }
+    } else {
+      // For full page, use the normal dialog
+      setShowDeleteDialog(true)
     }
   }
 
@@ -222,7 +259,6 @@ export function AgentDetail({
             )}
           >
             {canDelete && (
-              // fix shadcn/ui / radix bug when dialog into dropdown menu
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -238,7 +274,7 @@ export function AgentDetail({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
-                    onClick={() => setShowDeleteDialog(true)}
+                    onClick={handleDeleteClick}
                   >
                     <Trash className="fill-destructive size-4" />
                     Delete agent
@@ -401,23 +437,26 @@ export function AgentDetail({
         </Button>
       </div>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Agent</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{name}"? This action cannot be
-              undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Only show AlertDialog in full page mode to avoid nesting issues */}
+      {isFullPage && (
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Agent</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{name}"? This action cannot be
+                undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                {isDeleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   )
 }
