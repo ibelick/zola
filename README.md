@@ -61,7 +61,3 @@ Apache License 2.0
 ## Notes
 
 This is a beta release. The codebase is evolving and may change.
-
-```
-
-```

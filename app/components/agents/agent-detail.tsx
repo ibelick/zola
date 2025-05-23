@@ -202,24 +202,6 @@ export function AgentDetail({
     }
   }
 
-  const handleDeleteClick = () => {
-    // If we're in a dialog, we need to handle the nesting issue
-    if (!isFullPage) {
-      // For non-full page (dialog mode), we'll use a different approach
-      // Close the parent dialog first, then show confirmation
-      if (
-        window.confirm(
-          `Are you sure you want to delete "${name}"? This action cannot be undone.`
-        )
-      ) {
-        handleDelete()
-      }
-    } else {
-      // For full page, use the normal dialog
-      setShowDeleteDialog(true)
-    }
-  }
-
   const canDelete = user?.id && creator_id === user.id
 
   return (
@@ -258,7 +240,7 @@ export function AgentDetail({
               isFullPage ? "relative" : "absolute top-0 right-0 p-4"
             )}
           >
-            {canDelete && (
+            {isFullPage && canDelete && (
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -274,7 +256,7 @@ export function AgentDetail({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
-                    onClick={handleDeleteClick}
+                    onClick={() => setShowDeleteDialog(true)}
                   >
                     <Trash className="fill-destructive size-4" />
                     Delete agent
