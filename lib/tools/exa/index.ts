@@ -1,3 +1,5 @@
+import { config as crawlConfig } from "./crawl/config"
+import { runCrawl } from "./crawl/run"
 import { config as webSearchConfig } from "./webSearch/config"
 import { runWebSearch } from "./webSearch/run"
 
@@ -14,5 +16,14 @@ export const exaTools = {
     isAvailable: () => isAvailable(webSearchConfig.envVars),
     run: runWebSearch,
     config: webSearchConfig,
+  },
+  "exa.crawl": {
+    id: "exa.crawl",
+    label: crawlConfig.label,
+    icon: "🧠",
+    description: crawlConfig.description,
+    isAvailable: () => isAvailable(crawlConfig.envVars),
+    run: runCrawl,
+    config: crawlConfig,
   },
 }

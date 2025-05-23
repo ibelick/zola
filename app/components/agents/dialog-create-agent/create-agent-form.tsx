@@ -115,7 +115,11 @@ export function CreateAgentForm({
             )}
           </div>
 
-          <ToolsSection />
+          <ToolsSection
+            onSelectTools={(tools) => {
+              console.log(tools)
+            }}
+          />
 
           {/* MCP Dropdown */}
           <div className="space-y-2">
