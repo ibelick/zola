@@ -1,9 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import { Tool } from "ai"
-import { tools } from "./tools"
-
-type ToolName = keyof typeof tools
-type ToolType = Tool<any, any>
+import { TOOL_REGISTRY, ToolId } from "../tools"
 
 export async function loadAgent(agentId: string) {
   const supabase = await createClient()
@@ -22,20 +18,16 @@ export async function loadAgent(agentId: string) {
     throw new Error("Agent not found")
   }
 
-  const activeTools =
-    !agent.tools || agent.tools.length === 0
-      ? null
-      : agent.tools.reduce<Record<ToolName, ToolType>>(
-          (acc, toolName) => {
-            if (tools[toolName as ToolName]) {
-              acc[toolName as ToolName] = tools[
-                toolName as ToolName
-              ] as ToolType
-            }
-            return acc
-          },
-          {} as Record<ToolName, ToolType>
-        )
+  const activeTools = Array.isArray(agent.tools)
+    ? agent.tools
+        .map((toolId: string) => {
+          const tool = TOOL_REGISTRY[toolId as ToolId]
+          if (!tool) return null
+          if (!tool.isAvailable?.()) return null
+          return tool
+        })
+        .filter(Boolean)
+    : []
 
   return {
     systemPrompt: agent.system_prompt,

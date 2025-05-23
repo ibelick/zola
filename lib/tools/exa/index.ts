@@ -1,7 +1,7 @@
 import { config as crawlConfig } from "./crawl/config"
-import { runCrawl } from "./crawl/run"
+import { crawlTool } from "./crawl/tool"
 import { config as webSearchConfig } from "./webSearch/config"
-import { runWebSearch } from "./webSearch/run"
+import { webSearchTool } from "./webSearch/tool"
 
 const isAvailable = (envVars: string[]) => {
   return envVars.every((v) => !!process.env[v])
@@ -9,21 +9,11 @@ const isAvailable = (envVars: string[]) => {
 
 export const exaTools = {
   "exa.webSearch": {
-    id: "exa.webSearch",
-    label: webSearchConfig.label,
-    icon: "🧠",
-    description: webSearchConfig.description,
+    ...webSearchTool,
     isAvailable: () => isAvailable(webSearchConfig.envVars),
-    run: runWebSearch,
-    config: webSearchConfig,
   },
   "exa.crawl": {
-    id: "exa.crawl",
-    label: crawlConfig.label,
-    icon: "🧠",
-    description: crawlConfig.description,
+    ...crawlTool,
     isAvailable: () => isAvailable(crawlConfig.envVars),
-    run: runCrawl,
-    config: crawlConfig,
   },
 }

@@ -92,7 +92,7 @@ export function ToolsSection({ onSelectTools }: ToolsSectionProps) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex items-center gap-2">
-                    <h3 className="text-sm font-medium">{tool.label}</h3>
+                    <h3 className="text-sm font-medium">{tool.id}</h3>
                   </div>
                   <p className="text-muted-foreground text-xs leading-relaxed">
                     {tool.description}
@@ -111,7 +111,7 @@ export function ToolsSection({ onSelectTools }: ToolsSectionProps) {
             {selectedTools
               .map((toolId) => {
                 const tool = tools.find((t) => t.id === toolId)
-                return tool?.label || toolId
+                return tool?.description || toolId
               })
               .join(", ")}
           </div>

@@ -493,7 +493,6 @@ export const CURATED_AGENTS_SLUGS = [
   "github/ibelick/prompt-kit",
   "github/ibelick/zola",
   "github/shadcn/ui",
-  "research",
   "tweet-vibe-checker",
   "blog-draft",
 ]

@@ -3,7 +3,12 @@ import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import { LanguageModelV1, Message as MessageAISDK, streamText } from "ai"
+import {
+  LanguageModelV1,
+  Message as MessageAISDK,
+  streamText,
+  ToolSet,
+} from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,
@@ -103,7 +108,7 @@ export async function POST(req: Request) {
       model: modelInstance as LanguageModelV1,
       system: effectiveSystemPrompt,
       messages,
-      tools: toolsToUse,
+      tools: toolsToUse as ToolSet,
       // @todo: remove this
       // hardcoded for now
       maxSteps: 10,
