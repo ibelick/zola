@@ -37,6 +37,7 @@ import {
   Cube,
   DotsThree,
   Trash,
+  X,
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -184,10 +185,6 @@ export function AgentDetail({
 
   const canDelete = user?.id && creator_id === user.id
 
-  console.log("canDelete", canDelete)
-  console.log("creator_id", creator_id)
-  console.log("user.id", user?.id)
-
   return (
     <div
       className={cn(
@@ -219,26 +216,48 @@ export function AgentDetail({
             <h1 className="text-2xl font-medium">{name}</h1>
           </div>
 
-          {canDelete && (
-            // fix shadcn/ui / radix bug when dialog into dropdown menu
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <DotsThree className="size-4" weight="bold" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  <Trash className="fill-destructive size-4" />
-                  Delete agent
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          <div
+            className={cn(
+              isFullPage ? "relative" : "absolute top-0 right-0 p-4"
+            )}
+          >
+            {canDelete && (
+              // fix shadcn/ui / radix bug when dialog into dropdown menu
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    type="button"
+                  >
+                    <DotsThree className="size-4" weight="bold" />
+                    <span className="sr-only">Open menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={() => setShowDeleteDialog(true)}
+                  >
+                    <Trash className="fill-destructive size-4" />
+                    Delete agent
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {!isFullPage && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                type="button"
+                onClick={() => onAgentClick?.("")}
+              >
+                <X className="size-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="px-4 md:px-8">

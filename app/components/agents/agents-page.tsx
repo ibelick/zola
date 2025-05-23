@@ -27,7 +27,7 @@ export function AgentsPage({
       .slice(0, 4)
   }, [curatedAgents, openAgentId])
 
-  const handleAgentClick = (agentId: string) => {
+  const handleAgentClick = (agentId: string | null) => {
     setOpenAgentId(agentId)
   }
 

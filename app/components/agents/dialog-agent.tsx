@@ -15,7 +15,7 @@ type DialogAgentProps = {
   className?: string
   isAvailable: boolean
   slug: string
-  onAgentClick?: (agentId: string) => void
+  onAgentClick?: (agentId: string | null) => void
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   randomAgents: AgentSummary[]
@@ -104,6 +104,7 @@ export function DialogAgent({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
       <DialogContent
+        hasCloseButton={false}
         className="[&>button:last-child]:bg-background flex gap-0 overflow-hidden rounded-3xl p-0 shadow-xs [&>button:last-child]:rounded-full [&>button:last-child]:p-1"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
