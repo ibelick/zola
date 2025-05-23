@@ -14,6 +14,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { AlertCircle, Check, Github, X } from "lucide-react"
 import type React from "react"
+import { ToolsSection } from "./tools-section"
 
 type AgentFormData = {
   name: string
@@ -113,6 +114,8 @@ export function CreateAgentForm({
               </div>
             )}
           </div>
+
+          <ToolsSection />
 
           {/* MCP Dropdown */}
           <div className="space-y-2">

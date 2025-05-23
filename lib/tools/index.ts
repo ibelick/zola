@@ -1,0 +1,13 @@
+import { exaTools } from "./exa/index"
+
+export const TOOL_REGISTRY = {
+  ...exaTools,
+  // future: ...githubTools, ...huggingfaceTools, etc.
+}
+
+export type ToolId = keyof typeof TOOL_REGISTRY
+
+export const getAvailableTools = () =>
+  Object.entries(TOOL_REGISTRY)
+    .filter(([_, tool]) => tool.isAvailable)
+    .map(([id, tool]) => ({ ...tool, id }))
