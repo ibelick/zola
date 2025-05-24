@@ -1,6 +1,7 @@
 import { loadAgent } from "@/lib/agents/load-agent"
-import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
+import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
+import { MODELS } from "@/lib/models"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import {
@@ -73,19 +74,10 @@ export async function POST(req: Request) {
       agentConfig = await loadAgent(agentId)
     }
 
-    const modelConfig = MODELS_OPTIONS.find((m) => m.id === model)
+    const modelConfig = MODELS.find((m) => m.id === model)
 
-    if (!modelConfig) {
+    if (!modelConfig || !modelConfig.apiSdk) {
       throw new Error(`Model ${model} not found`)
-    }
-    let modelInstance
-    if (modelConfig.provider === "openrouter") {
-      const openRouter = createOpenRouter({
-        apiKey: process.env.OPENROUTER_API_KEY,
-      })
-      modelInstance = openRouter.chat(modelConfig.api_sdk as string) // this is a special case for openrouter. Normal openrouter models are not supported.
-    } else {
-      modelInstance = modelConfig.api_sdk
     }
 
     let effectiveSystemPrompt =
@@ -105,7 +97,7 @@ export async function POST(req: Request) {
     let streamError: Error | null = null
 
     const result = streamText({
-      model: modelInstance as LanguageModelV1,
+      model: modelConfig.apiSdk(),
       system: effectiveSystemPrompt,
       messages,
       tools: toolsToUse as ToolSet,

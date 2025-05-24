@@ -23,13 +23,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import type { Model } from "@/lib/config"
 import {
-  MODELS_FREE,
-  MODELS_OPTIONS,
-  MODELS_PRO,
-  PROVIDERS,
+  // FREE_MODELS,
+  // MODELS_FREE,
+  FREE_MODELS_IDS,
+  // MODELS_OPTIONS,
+  // MODELS_PRO,
+  // PROVIDERS,
 } from "@/lib/config"
+import { MODELS } from "@/lib/models"
+import { ModelConfig } from "@/lib/models/types"
+import { PROVIDERS } from "@/lib/providers"
 import { cn } from "@/lib/utils"
 import { CaretDown, MagnifyingGlass, Star } from "@phosphor-icons/react"
 import { useEffect, useRef, useState } from "react"
@@ -49,12 +53,15 @@ export function ModelSelector({
   className,
   isUserAuthenticated = true,
 }: ModelSelectorProps) {
-  const currentModel = MODELS_OPTIONS.find(
-    (model) => model.id === selectedModelId
-  )
+  const currentModel = MODELS.find((model) => model.id === selectedModelId)
   const currentProvider = PROVIDERS.find(
     (provider) => provider.id === currentModel?.provider
   )
+  const freeModels = MODELS.filter((model) =>
+    FREE_MODELS_IDS.includes(model.id)
+  )
+  const proModels = MODELS.filter((model) => !freeModels.includes(model))
+
   const isMobile = useBreakpoint(768)
 
   const [hoveredModel, setHoveredModel] = useState<string | null>(null)
@@ -99,8 +106,11 @@ export function ModelSelector({
     }
   }, [isDropdownOpen, selectedModelId])
 
-  const renderModelItem = (model: Model) => {
-    const isPro = MODELS_PRO.some((proModel) => proModel.id === model.id)
+  const renderModelItem = (model: ModelConfig) => {
+    const isPro = proModels.some((proModel) => proModel.id === model.id)
+    const provider = PROVIDERS.find(
+      (provider) => provider.id === model.provider
+    )
 
     return (
       <div
@@ -125,7 +135,7 @@ export function ModelSelector({
         }}
       >
         <div className="flex items-center gap-3">
-          {model?.icon && <model.icon className="size-5" />}
+          {provider?.icon && <provider.icon className="size-5" />}
           <div className="flex flex-col gap-0">
             <span className="text-sm">{model.name}</span>
           </div>
@@ -141,12 +151,9 @@ export function ModelSelector({
   }
 
   // Get the hovered model data
-  const hoveredModelData = MODELS_OPTIONS.find(
-    (model) => model.id === hoveredModel
-  )
+  const hoveredModelData = MODELS.find((model) => model.id === hoveredModel)
 
-  const models = [...MODELS_FREE, ...MODELS_PRO] as Model[]
-  const filteredModels = models.filter((model) =>
+  const filteredModels = MODELS.filter((model) =>
     model.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
@@ -156,7 +163,7 @@ export function ModelSelector({
       className={cn("dark:bg-secondary justify-between", className)}
     >
       <div className="flex items-center gap-2">
-        {currentModel?.icon && <currentModel.icon className="size-5" />}
+        {currentProvider?.icon && <currentProvider.icon className="size-5" />}
         <span>{currentModel?.name}</span>
       </div>
       <CaretDown className="size-4 opacity-50" />
@@ -299,8 +306,11 @@ export function ModelSelector({
             <div className="flex h-full flex-col space-y-0.5 overflow-y-auto px-1 pt-1 pb-0">
               {filteredModels.length > 0 ? (
                 filteredModels.map((model) => {
-                  const isPro = MODELS_PRO.some(
+                  const isPro = proModels.some(
                     (proModel) => proModel.id === model.id
+                  )
+                  const provider = PROVIDERS.find(
+                    (provider) => provider.id === model.provider
                   )
 
                   return (
@@ -332,7 +342,7 @@ export function ModelSelector({
                       }}
                     >
                       <div className="flex items-center gap-3">
-                        {model?.icon && <model.icon className="size-5" />}
+                        {provider?.icon && <provider.icon className="size-5" />}
                         <div className="flex flex-col gap-0">
                           <span className="text-sm">{model.name}</span>
                         </div>

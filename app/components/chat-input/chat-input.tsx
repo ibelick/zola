@@ -10,7 +10,7 @@ import {
 } from "@/components/prompt-kit/prompt-input"
 import { Button } from "@/components/ui/button"
 import { useAgent } from "@/lib/agent-store/provider"
-import { MODELS_OPTIONS } from "@/lib/config"
+import { MODELS } from "@/lib/models"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { ArrowUp, Stop, Warning } from "@phosphor-icons/react"
 import React, { useCallback, useEffect } from "react"
@@ -63,12 +63,8 @@ export function ChatInput({
     defaultAgent: currentAgent,
   })
 
-  const selectModelConfig = MODELS_OPTIONS.find(
-    (model) => model.id === selectedModel
-  )
-  const noToolSupport = selectModelConfig?.features?.some(
-    (feature) => feature.id === "tool-use" && !feature.enabled
-  )
+  const selectModelConfig = MODELS.find((model) => model.id === selectedModel)
+  const noToolSupport = selectModelConfig?.tools
 
   const handleSend = useCallback(() => {
     if (isSubmitting) {

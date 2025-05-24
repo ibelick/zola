@@ -14,7 +14,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { MODELS_OPTIONS } from "@/lib/config"
+import { MODELS } from "@/lib/models"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { cn } from "@/lib/utils"
 import { FileArrowUp, Paperclip } from "@phosphor-icons/react"
@@ -36,9 +36,7 @@ export function ButtonFileUpload({
     return null
   }
 
-  const isFileUploadAvailable = MODELS_OPTIONS.find(
-    (m) => m.id === model
-  )?.features?.find((f) => f.id === "file-upload")?.enabled
+  const isFileUploadAvailable = MODELS.find((m) => m.id === model)?.vision
 
   if (!isFileUploadAvailable) {
     return (
