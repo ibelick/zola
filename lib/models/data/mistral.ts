@@ -1,8 +1,9 @@
+import { openproviders } from "@/lib/openproviders"
 import { ModelConfig } from "../types"
 
 const mistralModels: ModelConfig[] = [
   {
-    id: "mistral-codestral-25-01",
+    id: "open-mistral-7b",
     name: "Mistral Codestral 25.01",
     provider: "Mistral",
     modelFamily: "Codestral",
@@ -23,9 +24,10 @@ const mistralModels: ModelConfig[] = [
     apiDocs: "https://docs.mistral.ai/models",
     modelPage: "https://mistral.ai/news/mistral-codestral/",
     releasedAt: "2024-05-21",
+    apiSdk: () => openproviders("open-mistral-7b"),
   },
   {
-    id: "ministral-3b",
+    id: "ministral-3b-latest",
     name: "Ministral 3B",
     provider: "Mistral",
     modelFamily: "Ministral",
@@ -45,9 +47,10 @@ const mistralModels: ModelConfig[] = [
     website: "https://mistral.ai",
     apiDocs: "https://docs.mistral.ai/models",
     modelPage: "https://mistral.ai/news/ministral/",
+    apiSdk: () => openproviders("ministral-3b-latest"),
   },
   {
-    id: "ministral-8b",
+    id: "ministral-8b-latest",
     name: "Ministral 8B",
     provider: "Mistral",
     modelFamily: "Ministral",
@@ -67,9 +70,10 @@ const mistralModels: ModelConfig[] = [
     website: "https://mistral.ai",
     apiDocs: "https://docs.mistral.ai/models",
     modelPage: "https://mistral.ai/news/ministral/",
+    apiSdk: () => openproviders("ministral-8b-latest"),
   },
   {
-    id: "mistral-large",
+    id: "mistral-large-latest",
     name: "Mistral Large",
     provider: "Mistral",
     modelFamily: "Mistral",
@@ -90,9 +94,10 @@ const mistralModels: ModelConfig[] = [
     apiDocs: "https://docs.mistral.ai/models",
     modelPage: "https://mistral.ai/news/mistral-large/",
     releasedAt: "2024-02-26",
+    apiSdk: () => openproviders("mistral-large-latest"),
   },
   {
-    id: "mistral-small",
+    id: "mistral-small-latest",
     name: "Mistral Small",
     provider: "Mistral",
     modelFamily: "Mistral",
@@ -111,6 +116,7 @@ const mistralModels: ModelConfig[] = [
     intelligence: "Medium",
     website: "https://mistral.ai",
     apiDocs: "https://docs.mistral.ai/models",
+    apiSdk: () => openproviders("mistral-small-latest"),
   },
   {
     id: "mistral-small-2503",
@@ -133,6 +139,7 @@ const mistralModels: ModelConfig[] = [
     website: "https://mistral.ai",
     apiDocs: "https://docs.mistral.ai/models",
     releasedAt: "2025-03-01",
+    apiSdk: () => openproviders("mistral-small-latest"),
   },
   {
     id: "pixtral-12b-2409",
@@ -156,9 +163,10 @@ const mistralModels: ModelConfig[] = [
     apiDocs: "https://docs.mistral.ai/models",
     modelPage: "https://mistral.ai/news/pixtral-12b/",
     releasedAt: "2024-09-01",
+    apiSdk: () => openproviders("pixtral-12b-2409"),
   },
   {
-    id: "pixtral-large",
+    id: "pixtral-large-latest",
     name: "Pixtral Large",
     provider: "Mistral",
     modelFamily: "Pixtral",
@@ -178,6 +186,7 @@ const mistralModels: ModelConfig[] = [
     website: "https://mistral.ai",
     apiDocs: "https://docs.mistral.ai/models",
     modelPage: "https://mistral.ai/news/pixtral-large/",
+    apiSdk: () => openproviders("pixtral-large-latest"),
   },
 ]
 

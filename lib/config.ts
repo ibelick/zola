@@ -15,6 +15,7 @@ import {
   PaintBrush,
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr"
+import { MODELS } from "./models"
 import { openproviders, OpenProvidersOptions } from "./openproviders"
 import { SupportedModel } from "./openproviders/types"
 
@@ -37,6 +38,17 @@ export type Model = {
   description?: string
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
+
+export const FREE_MODELS_IDS = [
+  "deepseek-r1",
+  "pixtral-large-latest",
+  "mistral-large-latest",
+  "gpt-4.1-nano",
+]
+
+export const FREE_MODELS = MODELS.filter((model) =>
+  FREE_MODELS_IDS.includes(model.id)
+)
 
 export const MODELS_FREE = [
   {

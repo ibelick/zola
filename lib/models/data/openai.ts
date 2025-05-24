@@ -1,8 +1,9 @@
+import { openproviders } from "@/lib/openproviders"
 import { ModelConfig } from "../types"
 
 const openaiModels: ModelConfig[] = [
   {
-    id: "gpt-3-5-turbo",
+    id: "gpt-3.5-turbo",
     name: "GPT-3.5 Turbo",
     provider: "OpenAI",
     modelFamily: "GPT-3.5",
@@ -20,9 +21,10 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     modelPage: "https://platform.openai.com/docs/models/gpt-3-5-turbo",
+    apiSdk: () => openproviders("gpt-3.5-turbo"),
   },
   {
-    id: "gpt-3-5-turbo-instruct",
+    id: "gpt-3.5-turbo-instruct",
     name: "GPT-3.5 Turbo Instruct",
     provider: "OpenAI",
     modelFamily: "GPT-3.5",
@@ -41,6 +43,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     modelPage: "https://platform.openai.com/docs/models/gpt-3-5-turbo",
+    apiSdk: () => openproviders("gpt-3.5-turbo-instruct"),
   },
   {
     id: "gpt-4-turbo",
@@ -61,9 +64,10 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     modelPage: "https://platform.openai.com/docs/models/gpt-4-turbo-and-gpt-4",
+    apiSdk: () => openproviders("gpt-4-turbo"),
   },
   {
-    id: "gpt-4-1",
+    id: "gpt-4.1",
     name: "GPT-4.1",
     provider: "OpenAI",
     modelFamily: "GPT-4",
@@ -80,9 +84,10 @@ const openaiModels: ModelConfig[] = [
     speed: "Medium",
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
+    apiSdk: () => openproviders("gpt-4.1"),
   },
   {
-    id: "gpt-4-1-mini",
+    id: "gpt-4.1-mini",
     name: "GPT-4.1 Mini",
     provider: "OpenAI",
     modelFamily: "GPT-4",
@@ -100,9 +105,10 @@ const openaiModels: ModelConfig[] = [
     speed: "Fast",
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
+    apiSdk: () => openproviders("gpt-4.1-mini"),
   },
   {
-    id: "gpt-4-1-nano",
+    id: "gpt-4.1-nano",
     name: "GPT-4.1 Nano",
     provider: "OpenAI",
     modelFamily: "GPT-4",
@@ -119,9 +125,10 @@ const openaiModels: ModelConfig[] = [
     speed: "Fast",
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
+    apiSdk: () => openproviders("gpt-4.1-nano"),
   },
   {
-    id: "gpt-4-5-preview",
+    id: "gpt-4.5-preview",
     name: "GPT-4.5 Preview",
     provider: "OpenAI",
     modelFamily: "GPT-4",
@@ -139,6 +146,7 @@ const openaiModels: ModelConfig[] = [
     speed: "Fast",
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
+    apiSdk: () => openproviders("gpt-4.5-preview"),
   },
   {
     id: "gpt-4o",
@@ -160,6 +168,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     modelPage: "https://platform.openai.com/docs/models/gpt-4o",
+    apiSdk: () => openproviders("gpt-4o"),
   },
   {
     id: "gpt-4o-mini",
@@ -181,12 +190,13 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     modelPage: "https://platform.openai.com/docs/models/gpt-4o-mini",
+    apiSdk: () => openproviders("gpt-4o-mini"),
   },
   {
-    id: "o3",
-    name: "o3",
+    id: "o1",
+    name: "o1",
     provider: "OpenAI",
-    modelFamily: "o3",
+    modelFamily: "o1",
     description:
       "Advanced reasoning model designed for complex problems requiring deep thinking",
     tags: ["reasoning", "complex", "research"],
@@ -202,6 +212,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
+    apiSdk: () => openproviders("o1"),
   },
   {
     id: "o3-mini",
@@ -222,6 +233,29 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
+    apiSdk: () => openproviders("o3-mini"),
+  },
+  {
+    id: "o1-mini",
+    name: "o1-mini",
+    provider: "OpenAI",
+    modelFamily: "o1",
+    description:
+      "o1-mini with high compute allocation for better reasoning performance",
+    tags: ["reasoning", "high-compute", "performance"],
+    contextWindow: 128000,
+    inputCost: 7.0,
+    outputCost: 28.0,
+    priceUnit: "per 1M tokens",
+    vision: true,
+    tools: true,
+    audio: false,
+    openSource: false,
+    speed: "Slow",
+    website: "https://openai.com",
+    apiDocs: "https://platform.openai.com/docs/api-reference",
+    releasedAt: "2024-12-20",
+    apiSdk: () => openproviders("o1-mini"),
   },
   {
     id: "o3-mini-high",
@@ -243,6 +277,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
+    apiSdk: () => openproviders("o3-mini"),
   },
   {
     id: "o3-mini-low",
@@ -264,6 +299,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
+    apiSdk: () => openproviders("o3-mini"),
   },
   {
     id: "o3-mini-medium",
@@ -285,6 +321,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
+    apiSdk: () => openproviders("o3-mini"),
   },
   {
     id: "o4-mini",
@@ -305,6 +342,7 @@ const openaiModels: ModelConfig[] = [
     speed: "Medium",
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
+    apiSdk: () => openproviders("gpt-4o-mini"),
   },
 ]
 

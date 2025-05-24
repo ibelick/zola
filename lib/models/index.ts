@@ -10,7 +10,9 @@ export const MODELS: ModelConfig[] = [
   ...openaiModels,
   ...mistralModels,
   ...deepseekModels,
-  ...llamaModels,
   ...claudeModels,
   ...grokModels,
+
+  // not ready
+  // ...llamaModels,
 ]

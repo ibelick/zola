@@ -1,3 +1,4 @@
+import { openproviders } from "@/lib/openproviders"
 import { ModelConfig } from "../types"
 
 const grokModels: ModelConfig[] = [
@@ -24,6 +25,7 @@ const grokModels: ModelConfig[] = [
     apiDocs: "https://docs.x.ai/docs/models",
     modelPage: "https://x.ai/news/grok-2",
     releasedAt: "2024-01-21",
+    apiSdk: () => openproviders("grok-2"),
   },
   {
     id: "grok-2-vision",
@@ -46,9 +48,10 @@ const grokModels: ModelConfig[] = [
     website: "https://x.ai",
     apiDocs: "https://docs.x.ai/docs/models",
     modelPage: "https://x.ai/news/grok-2",
+    apiSdk: () => openproviders("grok-2-vision"),
   },
   {
-    id: "grok-3-beta",
+    id: "grok-3",
     name: "Grok 3 Beta",
     provider: "xAI",
     modelFamily: "Grok",
@@ -68,9 +71,10 @@ const grokModels: ModelConfig[] = [
     website: "https://x.ai",
     apiDocs: "https://docs.x.ai/docs/models",
     releasedAt: "2024-05-01",
+    apiSdk: () => openproviders("grok-3"),
   },
   {
-    id: "grok-3-fast-beta",
+    id: "grok-3-fast",
     name: "Grok 3 Fast Beta",
     provider: "xAI",
     modelFamily: "Grok",
@@ -91,9 +95,10 @@ const grokModels: ModelConfig[] = [
     website: "https://x.ai",
     apiDocs: "https://docs.x.ai/docs/models",
     releasedAt: "2024-05-01",
+    apiSdk: () => openproviders("grok-3-fast"),
   },
   {
-    id: "grok-3-mini-beta",
+    id: "grok-3-mini",
     name: "Grok 3 Mini Beta",
     provider: "xAI",
     modelFamily: "Grok",
@@ -112,9 +117,10 @@ const grokModels: ModelConfig[] = [
     intelligence: "Low",
     website: "https://x.ai",
     apiDocs: "https://docs.x.ai/docs/models",
+    apiSdk: () => openproviders("grok-3-mini"),
   },
   {
-    id: "grok-3-mini-fast-beta",
+    id: "grok-3-mini-fast",
     name: "Grok 3 Mini Fast Beta",
     provider: "xAI",
     modelFamily: "Grok",
@@ -134,6 +140,7 @@ const grokModels: ModelConfig[] = [
     intelligence: "Low",
     website: "https://x.ai",
     apiDocs: "https://docs.x.ai/docs/models",
+    apiSdk: () => openproviders("grok-3-mini-fast"),
   },
 ]
 
