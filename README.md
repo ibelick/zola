@@ -2,7 +2,7 @@
 
 [zola.chat](https://zola.chat)
 
-**Zola** is a free, open-source AI chat app with multi-model support.
+**Zola** is the open-source interface for AI chat.
 
 [![Chat with this repo](https://zola.chat/button/github.svg)](https://zola.chat/?agent=github/ibelick/zola)
 
@@ -11,13 +11,17 @@
 ## Features
 
 - Multi-model support: OpenAI, Mistral, Claude, Gemini
-- `@agent` mentions to customize behavior or chat with GitHub repos
 - File uploads with context-aware answers
-- Prompt suggestions to guide input
 - Clean, responsive UI with light/dark themes
 - Built with Tailwind, shadcn/ui, and prompt-kit
-- Early support for tools and MCPs
 - Fully open-source and self-hostable
+- Customizable: user system prompt, multiple layout options
+
+## Agent Features (WIP)
+
+- `@agent` mentions
+- Early tool and MCP integration for agent workflows
+- Foundation for more powerful, customizable agents (more coming soon)
 
 ## Installation
 
@@ -31,6 +35,8 @@ echo "OPENAI_API_KEY=your-key" > .env.local
 npm run dev
 ```
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
+
 To unlock features like auth, file uploads, and agents, see [INSTALL.md](./INSTALL.md).
 
 ## Built with
@@ -41,18 +47,11 @@ To unlock features like auth, file uploads, and agents, see [INSTALL.md](./INSTA
 - [vercel ai sdk](https://vercel.com/blog/introducing-the-vercel-ai-sdk) — model integration, AI features
 - [supabase](https://supabase.com) — auth and storage
 
-## Coming next
-
-- more model support
-- search
-- improve agent / MCP layer and capabilities
-
 ## Sponsors
 
-Zola is proudly sponsored by [Vercel](https://vercel.com),
-the platform we use to build, preview, and ship.
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
+<a href="https://vercel.com/oss">
+  <img alt="Vercel OSS Program" src="https://vercel.com/oss/program-badge.svg" />
+</a>
 
 ## License
 
