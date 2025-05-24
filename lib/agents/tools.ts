@@ -68,7 +68,10 @@ export const tools = {
         .transform((input) => (Array.isArray(input) ? input : [input])),
     }),
     async execute({ searchResults }) {
-      return await summarizeSources({ searchResults })
+      const formattedSearchResults = Array.isArray(searchResults)
+        ? searchResults
+        : [searchResults]
+      return await summarizeSources({ searchResults: formattedSearchResults })
     },
   }),
   generateReport: tool({

@@ -1,12 +1,12 @@
 import { ScrollButton } from "@/components/motion-primitives/scroll-button"
 import { ChatContainer } from "@/components/prompt-kit/chat-container"
 import { Loader } from "@/components/prompt-kit/loader"
-import { Message as MessageType } from "@ai-sdk/react"
+import { UIMessage } from "@ai-sdk/react"
 import { useRef } from "react"
 import { Message } from "./message"
 
 type ConversationProps = {
-  messages: MessageType[]
+  messages: UIMessage[]
   status?: "streaming" | "ready" | "submitted" | "error"
   onDelete: (id: string) => void
   onEdit: (id: string, newText: string) => void
@@ -52,7 +52,6 @@ export function Conversation({
               key={message.id}
               id={message.id}
               variant={message.role}
-              attachments={message.experimental_attachments}
               isLast={isLast}
               onDelete={onDelete}
               onEdit={onEdit}
@@ -60,9 +59,7 @@ export function Conversation({
               hasScrollAnchor={hasScrollAnchor}
               parts={message.parts}
               status={status}
-            >
-              {message.content}
-            </Message>
+            />
           )
         })}
         {status === "submitted" &&

@@ -1,27 +1,23 @@
-import { Message as MessageType } from "@ai-sdk/react"
+import { UIMessage } from "@ai-sdk/react"
 import React, { useState } from "react"
 import { MessageAssistant } from "./message-assistant"
 import { MessageUser } from "./message-user"
 
 type MessageProps = {
-  variant: MessageType["role"]
-  children: string
+  variant: UIMessage["role"]
   id: string
-  attachments?: MessageType["experimental_attachments"]
   isLast?: boolean
   onDelete: (id: string) => void
   onEdit: (id: string, newText: string) => void
   onReload: () => void
   hasScrollAnchor?: boolean
-  parts?: MessageType["parts"]
+  parts?: UIMessage["parts"]
   status?: "streaming" | "ready" | "submitted" | "error"
 }
 
 export function Message({
   variant,
-  children,
   id,
-  attachments,
   isLast,
   onDelete,
   onEdit,
@@ -32,16 +28,27 @@ export function Message({
 }: MessageProps) {
   const [copied, setCopied] = useState(false)
 
+  const textParts = parts?.filter((part) => part.type === "text")
+  const textPartsAsText = textParts?.map((part) => part.text).join("")
+
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(children)
+    if (!textPartsAsText) {
+      return
+    }
+    navigator.clipboard.writeText(textPartsAsText)
     setCopied(true)
     setTimeout(() => setCopied(false), 500)
   }
 
   if (variant === "user") {
+    if (!parts) {
+      // should not happen
+      console.log("no parts")
+      return null
+    }
     return (
       <MessageUser
-        children={children}
+        parts={parts}
         copied={copied}
         copyToClipboard={copyToClipboard}
         onReload={onReload}
@@ -49,7 +56,6 @@ export function Message({
         onDelete={onDelete}
         id={id}
         hasScrollAnchor={hasScrollAnchor}
-        attachments={attachments}
       />
     )
   }
@@ -57,7 +63,6 @@ export function Message({
   if (variant === "assistant") {
     return (
       <MessageAssistant
-        children={children}
         copied={copied}
         copyToClipboard={copyToClipboard}
         onReload={onReload}

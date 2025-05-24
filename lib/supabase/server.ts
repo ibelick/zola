@@ -3,6 +3,8 @@ import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { isSupabaseEnabled } from "./config"
 
+export type SupabaseClient = Awaited<ReturnType<typeof createClient>>
+
 export const createClient = async () => {
   if (!isSupabaseEnabled) {
     return null

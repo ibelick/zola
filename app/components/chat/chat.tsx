@@ -3,7 +3,10 @@
 import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
-import { useChatSession } from "@/app/providers/chat-session-provider"
+import {
+  getChatIdFromPathname,
+  useChatSession,
+} from "@/app/providers/chat-session-provider"
 import { useUser } from "@/app/providers/user-provider"
 import { toast } from "@/components/ui/toast"
 import { useAgent } from "@/lib/agent-store/provider"
@@ -19,10 +22,12 @@ import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 import { useChat } from "@ai-sdk/react"
+import { defaultChatStore, UIMessage } from "ai"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
 import { Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { z } from "zod"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
@@ -54,6 +59,19 @@ function SearchParamsProvider({
 
   return null
 }
+
+const messageMetadataSchema = z.object({
+  createdAt: z.string(),
+})
+
+export type MessageMetadata = z.infer<typeof messageMetadataSchema>
+
+export type UIMessageWithMetadata = UIMessage<MessageMetadata>
+
+const chatStore = defaultChatStore({
+  api: API_ROUTE_CHAT,
+  messageMetadataSchema,
+})
 
 export function Chat() {
   const { chatId } = useChatSession()
@@ -91,7 +109,14 @@ export function Chat() {
 
   const { draftValue, clearDraft } = useChatDraft(chatId)
 
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages)
+    }
+  }, [initialMessages])
+
   const {
+    chatId: chatIdFromUseChat,
     messages,
     input,
     handleSubmit,
@@ -103,14 +128,20 @@ export function Chat() {
     setInput,
     append,
   } = useChat({
-    api: API_ROUTE_CHAT,
-    initialMessages,
-    initialInput: draftValue,
-    onFinish: async (message) => {
-      // store the assistant message in the cache
-      await cacheAndAddMessage(message)
+    chatStore,
+    chatId: chatId || "default",
+    onFinish: async (data) => {
+      console.log("onFinish", { data })
+      await cacheAndAddMessage(data.message)
     },
   })
+
+  // Set initial input from draft if available
+  useEffect(() => {
+    if (draftValue) {
+      setInput(draftValue)
+    }
+  }, [draftValue, setInput])
 
   const { checkLimitsAndNotify, ensureChatExists } = useChatUtils({
     isAuthenticated,
@@ -171,16 +202,16 @@ export function Chat() {
     if (!uid) return
 
     const optimisticId = `optimistic-${Date.now().toString()}`
-    const optimisticAttachments =
-      files.length > 0 ? createOptimisticAttachments(files) : []
+    // const optimisticAttachments =
+    //   files.length > 0 ? createOptimisticAttachments(files) : []
 
-    const optimisticMessage = {
+    const optimisticMessage: UIMessageWithMetadata = {
       id: optimisticId,
-      content: input,
       role: "user" as const,
-      createdAt: new Date(),
-      experimental_attachments:
-        optimisticAttachments.length > 0 ? optimisticAttachments : undefined,
+      metadata: {
+        createdAt: new Date().toISOString(),
+      },
+      parts: [{ type: "text" as const, text: input }],
     }
 
     setMessages((prev) => [...prev, optimisticMessage])
@@ -192,7 +223,7 @@ export function Chat() {
     const allowed = await checkLimitsAndNotify(uid)
     if (!allowed) {
       setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       setIsSubmitting(false)
       return
     }
@@ -200,7 +231,7 @@ export function Chat() {
     const currentChatId = await ensureChatExists(uid)
     if (!currentChatId) {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       setIsSubmitting(false)
       return
     }
@@ -211,7 +242,7 @@ export function Chat() {
         status: "error",
       })
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       setIsSubmitting(false)
       return
     }
@@ -221,7 +252,7 @@ export function Chat() {
       attachments = await handleFileUploads(uid, currentChatId)
       if (attachments === null) {
         setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         setIsSubmitting(false)
         return
       }
@@ -242,78 +273,103 @@ export function Chat() {
     try {
       handleSubmit(undefined, options)
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
       hasSentFirstMessageRef.current = true
-    } catch (error) {
+    } catch {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       toast({ title: "Failed to send message", status: "error" })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleSuggestion = useCallback(
-    async (suggestion: string) => {
-      setIsSubmitting(true)
-      const optimisticId = `optimistic-${Date.now().toString()}`
-      const optimisticMessage = {
-        id: optimisticId,
-        content: suggestion,
-        role: "user" as const,
-        createdAt: new Date(),
-      }
+  const suggestionSubmit = async (suggestion: string) => {
+    setIsSubmitting(true)
 
-      setMessages((prev) => [...prev, optimisticMessage])
+    const uid = await getOrCreateGuestUserId(user)
+    if (!uid) return
 
-      const uid = await getOrCreateGuestUserId(user)
+    const optimisticId = `optimistic-${Date.now().toString()}`
 
-      if (!uid) {
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-        setIsSubmitting(false)
-        return
-      }
+    const optimisticMessage: UIMessageWithMetadata = {
+      id: optimisticId,
+      role: "user" as const,
+      metadata: {
+        createdAt: new Date().toISOString(),
+      },
+      parts: [{ type: "text" as const, text: suggestion }],
+    }
 
-      const allowed = await checkLimitsAndNotify(uid)
-      if (!allowed) {
+    setMessages((prev) => [...prev, optimisticMessage])
+    setInput("")
+
+    const submittedFiles = [...files]
+    setFiles([])
+
+    const allowed = await checkLimitsAndNotify(uid)
+    if (!allowed) {
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+      setIsSubmitting(false)
+      return
+    }
+
+    const currentChatId = await ensureChatExists(uid)
+
+    if (!currentChatId) {
+      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      setIsSubmitting(false)
+      return
+    }
+
+    if (input.length > MESSAGE_MAX_LENGTH) {
+      toast({
+        title: `The message you submitted was too long, please submit something shorter. (Max ${MESSAGE_MAX_LENGTH} characters)`,
+        status: "error",
+      })
+      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+      setIsSubmitting(false)
+      return
+    }
+
+    let attachments: Attachment[] | null = []
+    if (submittedFiles.length > 0) {
+      attachments = await handleFileUploads(uid, currentChatId)
+      if (attachments === null) {
         setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
         setIsSubmitting(false)
         return
       }
+    }
 
-      const currentChatId = await ensureChatExists(uid)
+    const options = {
+      body: {
+        chatId: currentChatId,
+        userId: uid,
+        model: selectedModel,
+        isAuthenticated,
+        systemPrompt: SYSTEM_PROMPT_DEFAULT,
+      },
+    }
 
-      if (!currentChatId) {
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-        setIsSubmitting(false)
-        return
-      }
-
-      const options = {
-        body: {
-          chatId: currentChatId,
-          userId: uid,
-          model: selectedModel,
-          isAuthenticated,
-          systemPrompt: SYSTEM_PROMPT_DEFAULT,
-        },
-      }
-
-      append(
-        {
-          role: "user",
-          content: suggestion,
-        },
-        options
-      )
+    try {
+      handleSubmit(undefined, options)
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      cacheAndAddMessage(optimisticMessage)
+      clearDraft()
+      hasSentFirstMessageRef.current = true
+    } catch {
+      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      toast({ title: "Failed to send message", status: "error" })
+    } finally {
       setIsSubmitting(false)
-    },
-    [ensureChatExists, selectedModel, user?.id, append]
-  )
-
+    }
+  }
   const handleReload = async () => {
     const uid = await getOrCreateGuestUserId(user)
     if (!uid) {
@@ -368,7 +424,7 @@ export function Chat() {
             }}
           >
             <h1 className="mb-6 text-3xl font-medium tracking-tight">
-              What's on your mind?
+              What&apos;s on your mind?
             </h1>
           </motion.div>
         ) : (
@@ -382,6 +438,7 @@ export function Chat() {
           />
         )}
       </AnimatePresence>
+
       <motion.div
         className={cn(
           "relative inset-x-0 bottom-0 z-50 mx-auto w-full max-w-3xl"
@@ -396,7 +453,7 @@ export function Chat() {
       >
         <ChatInput
           value={input}
-          onSuggestion={handleSuggestion}
+          onSuggestion={suggestionSubmit}
           onValueChange={handleInputChange}
           onSend={submit}
           isSubmitting={isSubmitting}

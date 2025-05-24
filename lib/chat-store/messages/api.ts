@@ -1,11 +1,12 @@
+import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
 import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
-import type { Message as MessageAISDK } from "ai"
+import type { UIMessage } from "ai"
 import { readFromIndexedDB, writeToIndexedDB } from "../persist"
 
 export async function getMessagesFromDb(
   chatId: string
-): Promise<MessageAISDK[]> {
+): Promise<UIMessageWithMetadata[]> {
   // fallback to local cache only
   if (!isSupabaseEnabled) {
     const cached = await getCachedMessages(chatId)
@@ -17,7 +18,7 @@ export async function getMessagesFromDb(
 
   const { data, error } = await supabase
     .from("messages")
-    .select("id, content, role, experimental_attachments, created_at, parts")
+    .select("id, role, created_at, parts")
     .eq("chat_id", chatId)
     .order("created_at", { ascending: true })
 
@@ -26,38 +27,45 @@ export async function getMessagesFromDb(
     return []
   }
 
-  return data.map((message) => ({
-    ...message,
-    id: String(message.id),
-    content: message.content ?? "",
-    createdAt: new Date(message.created_at || ""),
-    parts: (message?.parts as MessageAISDK["parts"]) || undefined,
-  }))
+  return data.map((message) => {
+    const uiMessage: UIMessageWithMetadata = {
+      id: String(message.id),
+      role: message["role"],
+      metadata: {
+        createdAt: new Date(message.created_at || ""),
+      },
+      parts: (message?.parts as UIMessage["parts"]) || undefined,
+    }
+
+    return uiMessage
+  })
 }
 
-async function insertMessageToDb(chatId: string, message: MessageAISDK) {
+async function insertMessageToDb(
+  chatId: string,
+  message: UIMessageWithMetadata
+) {
   const supabase = createClient()
   if (!supabase) return
 
   await supabase.from("messages").insert({
     chat_id: chatId,
     role: message.role,
-    content: message.content,
-    experimental_attachments: message.experimental_attachments,
-    created_at: message.createdAt?.toISOString() || new Date().toISOString(),
+    created_at: message.metadata?.createdAt || new Date().toISOString(),
   })
 }
 
-async function insertMessagesToDb(chatId: string, messages: MessageAISDK[]) {
+async function insertMessagesToDb(
+  chatId: string,
+  messages: UIMessageWithMetadata[]
+) {
   const supabase = createClient()
   if (!supabase) return
 
   const payload = messages.map((message) => ({
     chat_id: chatId,
     role: message.role,
-    content: message.content,
-    experimental_attachments: message.experimental_attachments,
-    created_at: message.createdAt?.toISOString() || new Date().toISOString(),
+    created_at: message.metadata?.createdAt || new Date().toISOString(),
   }))
 
   await supabase.from("messages").insert(payload)
@@ -79,31 +87,33 @@ async function deleteMessagesFromDb(chatId: string) {
 
 type ChatMessageEntry = {
   id: string
-  messages: MessageAISDK[]
+  messages: UIMessageWithMetadata[]
 }
 
 export async function getCachedMessages(
   chatId: string
-): Promise<MessageAISDK[]> {
+): Promise<UIMessageWithMetadata[]> {
   const entry = await readFromIndexedDB<ChatMessageEntry>("messages", chatId)
 
   if (!entry || Array.isArray(entry)) return []
 
   return (entry.messages || []).sort(
-    (a, b) => +new Date(a.createdAt || 0) - +new Date(b.createdAt || 0)
+    (a, b) =>
+      +new Date(a.metadata?.createdAt || 0) -
+      +new Date(b.metadata?.createdAt || 0)
   )
 }
 
 export async function cacheMessages(
   chatId: string,
-  messages: MessageAISDK[]
+  messages: UIMessageWithMetadata[]
 ): Promise<void> {
   await writeToIndexedDB("messages", { id: chatId, messages })
 }
 
 export async function addMessage(
   chatId: string,
-  message: MessageAISDK
+  message: UIMessageWithMetadata
 ): Promise<void> {
   await insertMessageToDb(chatId, message)
   const current = await getCachedMessages(chatId)
@@ -118,7 +128,7 @@ export async function addMessage(
 
 export async function setMessages(
   chatId: string,
-  messages: MessageAISDK[]
+  messages: UIMessageWithMetadata[]
 ): Promise<void> {
   await insertMessagesToDb(chatId, messages)
   await writeToIndexedDB("messages", { id: chatId, messages })

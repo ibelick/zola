@@ -184,9 +184,7 @@ CREATE TABLE messages (
   id SERIAL PRIMARY KEY, -- Using SERIAL for auto-incrementing integer ID
   chat_id UUID NOT NULL,
   user_id UUID,
-  content TEXT,
-  role TEXT NOT NULL CHECK (role IN ('system', 'user', 'assistant', 'data')), -- Added CHECK constraint
-  experimental_attachments JSONB, -- Storing Attachment[] as JSONB
+  role TEXT NOT NULL CHECK (role IN ('system', 'user', 'assistant')), -- Added CHECK constraint
   parts JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT messages_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,

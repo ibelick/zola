@@ -8,7 +8,7 @@ export async function planSearchQueries(input: {
 }): Promise<{ result: string[] }> {
   try {
     const { object } = await generateObject({
-      model: openai("gpt-4.1-nano", { structuredOutputs: true }),
+      model: openai("gpt-4.1-nano"),
       schema: z.object({ queries: z.array(z.string()) }),
       prompt: `Generate exactly 3 search queries for "${input.prompt}" that would make good H2 sections.`,
     })

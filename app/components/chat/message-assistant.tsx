@@ -5,26 +5,24 @@ import {
   MessageContent,
 } from "@/components/prompt-kit/message"
 import { cn } from "@/lib/utils"
-import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
+import type { UIMessageWithMetadata } from "./chat"
 import { getSources } from "./get-sources"
 import { Reasoning } from "./reasoning"
 import { SourcesList } from "./sources-list"
 import { ToolInvocation } from "./tool-invocation"
 
 type MessageAssistantProps = {
-  children: string
   isLast?: boolean
   hasScrollAnchor?: boolean
   copied?: boolean
   copyToClipboard?: () => void
   onReload?: () => void
-  parts?: MessageAISDK["parts"]
+  parts?: UIMessageWithMetadata["parts"]
   status?: "streaming" | "ready" | "submitted" | "error"
 }
 
 export function MessageAssistant({
-  children,
   isLast,
   hasScrollAnchor,
   copied,
@@ -33,14 +31,17 @@ export function MessageAssistant({
   parts,
   status,
 }: MessageAssistantProps) {
-  const sources = getSources(parts)
+  const sources = getSources(parts || [])
 
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"
   )
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
 
-  const contentNullOrEmpty = children === null || children === ""
+  const textParts = parts?.filter((part) => part.type === "text")
+  const textPartsAsText = textParts?.map((part) => part.text).join("") || ""
+
+  const contentNullOrEmpty = textPartsAsText === null || textPartsAsText === ""
 
   const isLastStreaming = status === "streaming" && isLast
 
@@ -52,8 +53,8 @@ export function MessageAssistant({
       )}
     >
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
-        {reasoningParts && reasoningParts.reasoning && (
-          <Reasoning reasoning={reasoningParts.reasoning} />
+        {reasoningParts && reasoningParts.text && (
+          <Reasoning reasoning={reasoningParts.text} />
         )}
 
         {toolInvocationParts && toolInvocationParts.length > 0 && (
@@ -68,7 +69,7 @@ export function MessageAssistant({
             )}
             markdown={true}
           >
-            {children}
+            {textPartsAsText}
           </MessageContent>
         )}
 

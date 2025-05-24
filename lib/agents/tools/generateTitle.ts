@@ -5,7 +5,7 @@ import { z } from "zod"
 export async function generateTitle(prompt: string): Promise<string> {
   try {
     const { object: titleObj } = await generateObject({
-      model: openai("gpt-4.1-nano", { structuredOutputs: true }),
+      model: openai("gpt-4.1-nano"),
       schema: z.object({ title: z.string() }),
       prompt: `Write a short report title (max 12 words) for:
         "${prompt}". Only capitalize the first word; no trailing punctuation; avoid the word "report".`,

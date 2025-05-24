@@ -1,9 +1,14 @@
+import type {
+  MessageMetadata,
+  UIMessageWithMetadata,
+} from "@/app/components/chat/chat"
 import { loadAgent } from "@/lib/agents/load-agent"
 import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
+import type { LanguageModelV2 } from "@ai-sdk/provider"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import { LanguageModelV1, Message as MessageAISDK, streamText } from "ai"
+import { convertToModelMessages, maxSteps, streamText, UIMessage } from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,
@@ -14,7 +19,7 @@ import {
 export const maxDuration = 60
 
 type ChatRequest = {
-  messages: MessageAISDK[]
+  messages: UIMessage[]
   chatId: string
   userId: string
   model: string
@@ -55,10 +60,9 @@ export async function POST(req: Request) {
         supabase,
         userId,
         chatId,
-        content: userMessage.content,
-        attachments: userMessage.experimental_attachments as Attachment[],
         model,
         isAuthenticated,
+        parts: userMessage.parts,
       })
     }
 
@@ -100,13 +104,11 @@ export async function POST(req: Request) {
     let streamError: Error | null = null
 
     const result = streamText({
-      model: modelInstance as LanguageModelV1,
+      model: modelInstance as unknown as LanguageModelV2, // TODO fix
       system: effectiveSystemPrompt,
-      messages,
+      messages: convertToModelMessages(messages),
       tools: toolsToUse,
-      // @todo: remove this
-      // hardcoded for now
-      maxSteps: 10,
+      continueUntil: (ops) => maxSteps(10)(ops),
       onError: (err: any) => {
         console.error("🛑 streamText error:", err)
         streamError = new Error(
@@ -115,11 +117,13 @@ export async function POST(req: Request) {
         )
       },
 
-      onFinish: async ({ response }) => {
+      onFinish: async ({ content }) => {
+        const parts: UIMessageWithMetadata["parts"] =
+          content as unknown as UIMessageWithMetadata["parts"] // TODO FIX
         await storeAssistantMessage({
           supabase,
           chatId,
-          messages: response.messages,
+          parts,
         })
       },
     })
@@ -130,8 +134,13 @@ export async function POST(req: Request) {
       throw streamError
     }
 
-    const originalResponse = result.toDataStreamResponse({
+    const originalResponse = result.toUIMessageStreamResponse({
       sendReasoning: true,
+      messageMetadata: (): MessageMetadata | undefined => {
+        return {
+          createdAt: new Date().toISOString(),
+        }
+      },
     })
     // Optionally attach chatId in a custom header.
     const headers = new Headers(originalResponse.headers)
