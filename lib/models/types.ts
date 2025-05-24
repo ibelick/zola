@@ -15,12 +15,16 @@ type ModelConfig = {
   vision?: boolean
   tools?: boolean
   audio?: boolean
+  reasoning?: boolean
   openSource?: boolean
 
-  latency?: "Fast" | "Medium" | "Slow"
+  speed?: "Fast" | "Medium" | "Slow"
+  intelligence?: "Low" | "Medium" | "High"
 
   website?: string // official website (e.g. https://openai.com)
   apiDocs?: string // official API docs (e.g. https://platform.openai.com/docs/api-reference)
   modelPage?: string // official product page (e.g. https://x.ai/news/grok-2)
   releasedAt?: string // "2024-12-01" (optional, for tracking changes)
 }
+
+export type { ModelConfig }
