@@ -1,6 +1,7 @@
 "use client"
 
 import { useAgentCommand } from "@/app/components/chat-input/use-agent-command"
+import { ModelSelector } from "@/components/common/model-selector/base"
 import {
   PromptInput,
   PromptInputAction,
@@ -17,7 +18,6 @@ import { PromptSystem } from "../suggestions/prompt-system"
 import { AgentCommand } from "./agent-command"
 import { ButtonFileUpload } from "./button-file-upload"
 import { FileList } from "./file-list"
-import { SelectModel } from "./select-model"
 import { SelectedAgent } from "./selected-agent"
 
 type ChatInputProps = {
@@ -203,10 +203,11 @@ export function ChatInput({
                 isUserAuthenticated={isUserAuthenticated}
                 model={selectedModel}
               />
-              <SelectModel
-                selectedModel={selectedModel}
-                onSelectModel={onSelectModel}
+              <ModelSelector
+                selectedModelId={selectedModel}
+                setSelectedModelId={onSelectModel}
                 isUserAuthenticated={isUserAuthenticated}
+                className="rounded-full"
               />
               {currentAgent && noToolSupport && (
                 <div className="flex items-center gap-1">

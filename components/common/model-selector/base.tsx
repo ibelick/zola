@@ -1,5 +1,6 @@
 "use client"
 
+import { PopoverContentAuth } from "@/app/components/chat-input/popover-content-auth"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,13 +17,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import type { Model } from "@/lib/config"
-import { MODELS_FREE, MODELS_OPTIONS, MODELS_PRO } from "@/lib/config"
+import {
+  MODELS_FREE,
+  MODELS_OPTIONS,
+  MODELS_PRO,
+  PROVIDERS,
+} from "@/lib/config"
 import { cn } from "@/lib/utils"
 import { CaretDown, MagnifyingGlass, Star } from "@phosphor-icons/react"
 import { useEffect, useRef, useState } from "react"
@@ -33,15 +40,20 @@ type ModelSelectorProps = {
   selectedModelId: string
   setSelectedModelId: (modelId: string) => void
   className?: string
+  isUserAuthenticated?: boolean
 }
 
 export function ModelSelector({
   selectedModelId,
   setSelectedModelId,
   className,
+  isUserAuthenticated = true,
 }: ModelSelectorProps) {
   const currentModel = MODELS_OPTIONS.find(
     (model) => model.id === selectedModelId
+  )
+  const currentProvider = PROVIDERS.find(
+    (provider) => provider.id === currentModel?.provider
   )
   const isMobile = useBreakpoint(768)
 
@@ -157,6 +169,37 @@ export function ModelSelector({
     setSearchQuery(e.target.value)
   }
 
+  // If user is not authenticated, show the auth popover
+  if (!isUserAuthenticated) {
+    return (
+      <Popover>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <Button
+                size="sm"
+                variant="secondary"
+                className={cn(
+                  "border-border dark:bg-secondary text-accent-foreground h-9 w-auto border bg-transparent",
+                  className
+                )}
+                type="button"
+              >
+                {currentProvider?.icon && (
+                  <currentProvider.icon className="size-5" />
+                )}
+                {currentModel?.name}
+                <CaretDown className="size-4" />
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Select a model</TooltipContent>
+        </Tooltip>
+        <PopoverContentAuth />
+      </Popover>
+    )
+  }
+
   if (isMobile) {
     return (
       <>
@@ -166,9 +209,7 @@ export function ModelSelector({
           currentModel={selectedProModel || ""}
         />
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DrawerTrigger asChild>
-            {trigger}
-          </DrawerTrigger>
+          <DrawerTrigger asChild>{trigger}</DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
               <DrawerTitle>Select Model</DrawerTitle>
