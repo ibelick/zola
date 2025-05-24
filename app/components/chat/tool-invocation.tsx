@@ -76,7 +76,7 @@ export function ToolInvocation({
           <div className="flex flex-1 flex-row items-center gap-2 text-left text-base">
             <Nut className="text-muted-foreground size-4" />
             <span className="text-sm">Tools executed</span>
-            <div className="bg-secondary rounded-full px-1.5 py-0.5 font-mono text-xs text-slate-700">
+            <div className="bg-secondary text-secondary-foreground rounded-full px-1.5 py-0.5 font-mono text-xs">
               {uniqueToolIds.length}
             </div>
           </div>
@@ -281,7 +281,7 @@ function SingleToolCard({
   const formattedArgs = args
     ? Object.entries(args).map(([key, value]) => (
         <div key={key} className="mb-1">
-          <span className="font-medium text-slate-600">{key}:</span>{" "}
+          <span className="text-muted-foreground font-medium">{key}:</span>{" "}
           <span className="font-mono">
             {typeof value === "object"
               ? value === null
@@ -315,7 +315,7 @@ function SingleToolCard({
             {parsedResult.map((item: any, index: number) => (
               <div
                 key={index}
-                className="border-b border-gray-100 pb-3 last:border-0 last:pb-0"
+                className="border-border border-b pb-3 last:border-0 last:pb-0"
               >
                 <a
                   href={item.url}
@@ -415,7 +415,7 @@ function SingleToolCard({
                 transition={{ duration: 0.15 }}
                 key="loading"
               >
-                <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700">
+                <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-400">
                   <Spinner className="mr-1 h-3 w-3 animate-spin" />
                   Running
                 </div>
@@ -428,7 +428,7 @@ function SingleToolCard({
                 transition={{ duration: 0.15 }}
                 key="completed"
               >
-                <div className="inline-flex items-center rounded-full border border-green-200 bg-green-50 px-1.5 py-0.5 text-xs text-green-700">
+                <div className="inline-flex items-center rounded-full border border-green-200 bg-green-50 px-1.5 py-0.5 text-xs text-green-700 dark:border-green-800 dark:bg-green-950/30 dark:text-green-400">
                   <CheckCircle className="mr-1 h-3 w-3" />
                   Completed
                 </div>
