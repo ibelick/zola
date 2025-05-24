@@ -35,7 +35,9 @@ export function AgentsPage({
     <div className="bg-background min-h-screen px-4 pt-20 pb-20 sm:px-6">
       <div className="mx-auto max-w-3xl">
         <div className="mb-20 text-center">
-          <h1 className="text-foreground text-sm font-medium">Agents</h1>
+          <h1 className="text-foreground text-sm font-medium">
+            Agents (experimental)
+          </h1>
           <div className="text-foreground mx-auto my-4 max-w-2xl text-3xl font-medium tracking-tight md:text-5xl">
             Your every day AI assistant
           </div>
