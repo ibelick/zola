@@ -15,8 +15,10 @@ import {
   MODEL_DEFAULT,
   SYSTEM_PROMPT_DEFAULT,
 } from "@/lib/config"
+import { fetchClient } from "@/lib/fetch"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
+import { XAICitation } from "@/app/types/citation.js"
 import { cn } from "@/lib/utils"
 import { useChat } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -68,6 +70,7 @@ export function Chat() {
   const { user } = useUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
+  const [isLiveSearchEnabled, setIsLiveSearchEnabled] = useState(false)
   const {
     files,
     setFiles,
@@ -164,6 +167,77 @@ export function Chat() {
     }
   }, [error])
 
+  const toggleLiveSearch = () => {
+    setIsLiveSearchEnabled((prev) => !prev)
+    toast({
+      title: `Live Search ${!isLiveSearchEnabled ? "Enabled" : "Disabled"}`,
+      status: "info",
+    })
+  }
+
+  const handleLiveSearch = async (
+    content: string,
+    chatId: string,
+    uid: string
+  ) => {
+    try {
+      const response = await fetchClient("/api/live-search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: uid,
+          isAuthenticated,
+          chatId,
+          messages: [{ role: "user", content }],
+          searchOptions: {
+            mode: "on",
+            return_citations: true,
+          },
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Live search failed")
+      }
+
+      const data = await response.json()
+
+      if (data.choices && data.choices.length > 0) {
+        const assistantMessage = {
+          id: `live-search-${Date.now()}`,
+          content: data.choices[0].message.content,
+          role: "assistant" as const,
+          createdAt: new Date(),
+          parts: data.choices[0].message.citations ? 
+            [
+              { type: "text", text: data.choices[0].message.content },
+              ...data.choices[0].message.citations.map((citation: XAICitation) => ({
+                type: "source",
+                source: citation
+              }))
+            ] : undefined
+        }
+
+        setMessages((prev) => [...prev, assistantMessage])
+        await cacheAndAddMessage(assistantMessage)
+      } else {
+        toast({
+          title: "No response received from Live Search",
+          status: "warning",
+        })
+      }
+    } catch (error) {
+      console.error("Live search error:", error)
+      toast({
+        title: "Live search failed",
+        status: "error",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
   const submit = async () => {
     setIsSubmitting(true)
 
@@ -227,30 +301,36 @@ export function Chat() {
       }
     }
 
-    const options = {
-      body: {
-        chatId: currentChatId,
-        userId: uid,
-        model: selectedModel,
-        isAuthenticated,
-        systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-        ...(currentAgent?.id && { agentId: currentAgent.id }),
-      },
-      experimental_attachments: attachments || undefined,
-    }
-
     try {
-      handleSubmit(undefined, options)
+      // Store the optimistic message
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
       hasSentFirstMessageRef.current = true
+
+      if (isLiveSearchEnabled) {
+        // Use live search instead of the regular chat submission
+        await handleLiveSearch(optimisticMessage.content, currentChatId, uid)
+      } else {
+        // Regular chat submission
+        const options = {
+          body: {
+            chatId: currentChatId,
+            userId: uid,
+            model: selectedModel,
+            isAuthenticated,
+            systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
+            ...(currentAgent?.id && { agentId: currentAgent.id }),
+          },
+          experimental_attachments: attachments || undefined,
+        }
+
+        handleSubmit(undefined, options)
+      }
     } catch (error) {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       toast({ title: "Failed to send message", status: "error" })
-    } finally {
       setIsSubmitting(false)
     }
   }
@@ -344,6 +424,7 @@ export function Chat() {
         "@container/main relative flex h-full flex-col items-center justify-end md:justify-center"
       )}
     >
+      {/* Live Search button moved to chat input */}
       <DialogAuth open={hasDialogAuth} setOpen={setHasDialogAuth} />
 
       {/* Add Suspense boundary for SearchParamsProvider */}
@@ -379,6 +460,7 @@ export function Chat() {
             onDelete={handleDelete}
             onEdit={handleEdit}
             onReload={handleReload}
+            isLiveSearch={isLiveSearchEnabled}
           />
         )}
       </AnimatePresence>
@@ -409,6 +491,8 @@ export function Chat() {
           isUserAuthenticated={isAuthenticated}
           stop={stop}
           status={status}
+          isLiveSearchEnabled={isLiveSearchEnabled}
+          onToggleLiveSearch={toggleLiveSearch}
         />
       </motion.div>
 

@@ -14,12 +14,14 @@ export type SelectModelProps = {
   selectedModel: string
   onSelectModel: (model: string) => void
   isUserAuthenticated: boolean
+  disabled?: boolean
 }
 
 export function SelectModel({
   selectedModel,
   onSelectModel,
   isUserAuthenticated,
+  disabled = false,
 }: SelectModelProps) {
   const currentModel = MODELS_OPTIONS.find(
     (model) => model.id === selectedModel
@@ -39,6 +41,7 @@ export function SelectModel({
                 variant="secondary"
                 className="border-border dark:bg-secondary text-accent-foreground h-9 w-auto rounded-full border bg-transparent"
                 type="button"
+                disabled={disabled}
               >
                 {currentProvider?.icon && (
                   <currentProvider.icon className="size-5" />

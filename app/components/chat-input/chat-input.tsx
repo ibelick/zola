@@ -36,6 +36,8 @@ type ChatInputProps = {
   isUserAuthenticated: boolean
   stop: () => void
   status?: "submitted" | "streaming" | "ready" | "error"
+  isLiveSearchEnabled?: boolean
+  onToggleLiveSearch?: () => void
 }
 
 export function ChatInput({
@@ -53,6 +55,8 @@ export function ChatInput({
   isUserAuthenticated,
   stop,
   status,
+  isLiveSearchEnabled = false,
+  onToggleLiveSearch,
 }: ChatInputProps) {
   const { currentAgent, curatedAgents, userAgents } = useAgent()
 
@@ -202,12 +206,25 @@ export function ChatInput({
                 onFileUpload={onFileUpload}
                 isUserAuthenticated={isUserAuthenticated}
                 model={selectedModel}
+                disabled={isLiveSearchEnabled}
               />
               <SelectModel
                 selectedModel={selectedModel}
                 onSelectModel={onSelectModel}
                 isUserAuthenticated={isUserAuthenticated}
+                disabled={isLiveSearchEnabled}
               />
+              {onToggleLiveSearch && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="border-border dark:bg-secondary text-accent-foreground h-9 w-auto rounded-full border bg-transparent"
+                  type="button"
+                  onClick={onToggleLiveSearch}
+                >
+                  {isLiveSearchEnabled ? "Live Search: ON" : "Live Search: OFF"}
+                </Button>
+              )}
               {currentAgent && noToolSupport && (
                 <div className="flex items-center gap-1">
                   <Warning className="size-4" />

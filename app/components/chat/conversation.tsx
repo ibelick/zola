@@ -11,6 +11,7 @@ type ConversationProps = {
   onDelete: (id: string) => void
   onEdit: (id: string, newText: string) => void
   onReload: () => void
+  isLiveSearch?: boolean
 }
 
 export function Conversation({
@@ -19,6 +20,7 @@ export function Conversation({
   onDelete,
   onEdit,
   onReload,
+  isLiveSearch,
 }: ConversationProps) {
   const initialMessageCount = useRef(messages.length)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -60,6 +62,7 @@ export function Conversation({
               hasScrollAnchor={hasScrollAnchor}
               parts={message.parts}
               status={status}
+              isLiveSearch={isLiveSearch}
             >
               {message.content}
             </Message>

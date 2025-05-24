@@ -21,16 +21,18 @@ import { FileArrowUp, Paperclip } from "@phosphor-icons/react"
 import React from "react"
 import { PopoverContentAuth } from "./popover-content-auth"
 
-type ButtonFileUploadProps = {
+export type ButtonFileUploadProps = {
   onFileUpload: (files: File[]) => void
   isUserAuthenticated: boolean
   model: string
+  disabled?: boolean
 }
 
 export function ButtonFileUpload({
   onFileUpload,
   isUserAuthenticated,
   model,
+  disabled = false,
 }: ButtonFileUploadProps) {
   if (!isSupabaseEnabled) {
     return null
@@ -52,6 +54,7 @@ export function ButtonFileUpload({
                 className="border-border dark:bg-secondary size-9 rounded-full border bg-transparent"
                 type="button"
                 aria-label="Add files"
+                disabled={disabled}
               >
                 <Paperclip className="size-4" />
               </Button>
@@ -82,6 +85,7 @@ export function ButtonFileUpload({
                 className="border-border dark:bg-secondary size-9 rounded-full border bg-transparent"
                 type="button"
                 aria-label="Add files"
+                disabled={disabled}
               >
                 <Paperclip className="size-4" />
               </Button>
@@ -112,7 +116,7 @@ export function ButtonFileUpload({
                 !isUserAuthenticated && "opacity-50"
               )}
               type="button"
-              disabled={!isUserAuthenticated}
+              disabled={!isUserAuthenticated || disabled}
               aria-label="Add files"
             >
               <Paperclip className="size-4" />

@@ -123,6 +123,26 @@ export const MODELS_FREE = [
       "Ultra fast and cheap. Ideal for simple tasks, summaries, or classification.",
     icon: OpenAI,
   },
+  {
+    id: "grok-3",
+    name: "Grok 3",
+    provider: "xai",
+    features: [
+      {
+        id: "file-upload",
+        enabled: false,
+      },
+      {
+        id: "tool-use",
+        enabled: true,
+      },
+    ],
+    creator: "xai",
+    api_sdk: openproviders("grok-3"),
+    description:
+      "Flagship model excelling at enterprise use cases with deep domain knowledge in finance, healthcare, law, and science.",
+    icon: Grok,
+  },
 ]
 
 export const MODELS_PRO = [
@@ -273,26 +293,6 @@ export const MODELS_PRO = [
     description:
       "Anthropic’s most powerful model for highly complex reasoning and generation tasks.",
     icon: Claude,
-  },
-  {
-    id: "grok-3",
-    name: "Grok 3",
-    provider: "xai",
-    features: [
-      {
-        id: "file-upload",
-        enabled: false,
-      },
-      {
-        id: "tool-use",
-        enabled: true,
-      },
-    ],
-    creator: "xai",
-    api_sdk: openproviders("grok-3"),
-    description:
-      "Flagship model excelling at enterprise use cases with deep domain knowledge in finance, healthcare, law, and science.",
-    icon: Grok,
   },
   {
     id: "grok-3-mini",
