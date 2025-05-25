@@ -148,7 +148,11 @@ export function ModelSelector({
 
   const filteredModels = MODELS.filter((model) =>
     model.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  ).sort((a, b) => {
+    const aIsFree = FREE_MODELS_IDS.includes(a.id)
+    const bIsFree = FREE_MODELS_IDS.includes(b.id)
+    return aIsFree === bIsFree ? 0 : aIsFree ? -1 : 1
+  })
 
   const trigger = (
     <Button
@@ -342,7 +346,7 @@ export function ModelSelector({
                       </div>
                       {isPro && (
                         <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
-                          <Star className="size-2" />
+                          {/* <Star className="size-2" /> */}
                           <span>Pro</span>
                         </div>
                       )}

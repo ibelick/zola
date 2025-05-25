@@ -124,7 +124,7 @@ const openaiModels: ModelConfig[] = [
     inputCost: 0.1,
     outputCost: 0.4,
     priceUnit: "per 1M tokens",
-    vision: false,
+    vision: true,
     tools: true,
     audio: false,
     openSource: false,
