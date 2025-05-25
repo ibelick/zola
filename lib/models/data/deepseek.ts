@@ -30,7 +30,7 @@ const deepseekModels: ModelConfig[] = [
     apiSdk: () =>
       createOpenRouter({
         apiKey: process.env.OPENROUTER_API_KEY,
-      }).chat("deepseek-r1"),
+      }).chat("deepseek/deepseek-r1:free"),
   },
   {
     id: "deepseek-v3",

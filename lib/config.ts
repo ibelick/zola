@@ -1,11 +1,3 @@
-import Claude from "@/components/icons/claude"
-import DeepSeek from "@/components/icons/deepseek"
-import Gemini from "@/components/icons/gemini"
-import Grok from "@/components/icons/grok"
-import Mistral from "@/components/icons/mistral"
-import OpenAI from "@/components/icons/openai"
-import OpenRouter from "@/components/icons/openrouter"
-import Xai from "@/components/icons/xai"
 import {
   BookOpenText,
   Brain,
