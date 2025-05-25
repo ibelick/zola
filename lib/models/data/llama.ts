@@ -5,6 +5,7 @@ const llamaModels: ModelConfig[] = [
     id: "llama-4-scout-groq",
     name: "Llama 4 Scout (Groq)",
     provider: "Meta",
+    providerId: "meta",
     modelFamily: "Llama 4",
     description:
       "Groq-hosted Llama 4 Scout variant optimized for ultra-fast inference.",
@@ -28,6 +29,7 @@ const llamaModels: ModelConfig[] = [
     id: "llama-3-3-70b-groq",
     name: "Llama 3.3 70B (Groq)",
     provider: "Meta",
+    providerId: "meta",
     modelFamily: "Llama 3",
     description:
       "Groq-hosted Llama 3.3 with enhanced 70B weights and large context.",
@@ -52,6 +54,7 @@ const llamaModels: ModelConfig[] = [
     id: "llama-3-1-8b-groq",
     name: "Llama 3.1 8B (Groq)",
     provider: "Meta",
+    providerId: "meta",
     modelFamily: "Llama 3",
     description:
       "8B version of Llama 3.1, tuned for Groq's low-latency execution.",
@@ -76,6 +79,7 @@ const llamaModels: ModelConfig[] = [
     id: "llama-3-70b-groq",
     name: "Llama 3 70B (Groq)",
     provider: "Meta",
+    providerId: "meta",
     modelFamily: "Llama 3",
     description:
       "Early Llama 3 70B release on Groq with limited context window.",
@@ -100,6 +104,7 @@ const llamaModels: ModelConfig[] = [
     id: "llama-3-1-405b-together",
     name: "Llama 3.1 405B (Together AI)",
     provider: "Meta",
+    providerId: "meta",
     modelFamily: "Llama 3",
     description:
       "Massive 405B Llama model served by Together AI with deep reasoning.",

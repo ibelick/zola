@@ -4,6 +4,7 @@ type ModelConfig = {
   id: string // "gpt-4.1-nano" // same from AI SDKs
   name: string // "GPT-4.1 Nano"
   provider: string // "OpenAI", "Mistral", etc.
+  providerId: string // "openai", "mistral", etc.
   modelFamily?: string // "GPT-4", "Claude 3", etc.
 
   description?: string // Short 1–2 line summary

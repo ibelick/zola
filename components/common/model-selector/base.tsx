@@ -23,14 +23,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import {
-  // FREE_MODELS,
-  // MODELS_FREE,
-  FREE_MODELS_IDS,
-  // MODELS_OPTIONS,
-  // MODELS_PRO,
-  // PROVIDERS,
-} from "@/lib/config"
+import { FREE_MODELS_IDS } from "@/lib/config"
 import { MODELS } from "@/lib/models"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
@@ -55,7 +48,7 @@ export function ModelSelector({
 }: ModelSelectorProps) {
   const currentModel = MODELS.find((model) => model.id === selectedModelId)
   const currentProvider = PROVIDERS.find(
-    (provider) => provider.id === currentModel?.provider
+    (provider) => provider.id === currentModel?.providerId
   )
   const freeModels = MODELS.filter((model) =>
     FREE_MODELS_IDS.includes(model.id)
@@ -310,7 +303,7 @@ export function ModelSelector({
                     (proModel) => proModel.id === model.id
                   )
                   const provider = PROVIDERS.find(
-                    (provider) => provider.id === model.provider
+                    (provider) => provider.id === model.providerId
                   )
 
                   return (

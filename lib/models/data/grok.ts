@@ -6,6 +6,7 @@ const grokModels: ModelConfig[] = [
     id: "grok-2",
     name: "Grok 2",
     provider: "xAI",
+    providerId: "xai",
     modelFamily: "Grok",
     description:
       "Second-generation model developed by xAI, designed for reasoning and general tasks.",
@@ -31,6 +32,7 @@ const grokModels: ModelConfig[] = [
     id: "grok-2-vision",
     name: "Grok 2 Vision",
     provider: "xAI",
+    providerId: "xai",
     modelFamily: "Grok",
     description: "Vision-capable variant of Grok 2 for multimodal use.",
     tags: ["vision", "multimodal", "reasoning"],
@@ -54,6 +56,7 @@ const grokModels: ModelConfig[] = [
     id: "grok-3",
     name: "Grok 3 Beta",
     provider: "xAI",
+    providerId: "xai",
     modelFamily: "Grok",
     description: "Early beta of Grok 3 with improved performance and speed.",
     tags: ["beta", "next-gen", "reasoning", "experimental"],
@@ -77,6 +80,7 @@ const grokModels: ModelConfig[] = [
     id: "grok-3-fast",
     name: "Grok 3 Fast Beta",
     provider: "xAI",
+    providerId: "xai",
     modelFamily: "Grok",
     description:
       "Beta version of Grok 3 optimized for lower latency responses.",
@@ -101,6 +105,7 @@ const grokModels: ModelConfig[] = [
     id: "grok-3-mini",
     name: "Grok 3 Mini Beta",
     provider: "xAI",
+    providerId: "xai",
     modelFamily: "Grok",
     description: "Small variant of Grok 3 for lighter usage scenarios.",
     tags: ["beta", "mini", "lightweight", "cheap"],
@@ -123,6 +128,7 @@ const grokModels: ModelConfig[] = [
     id: "grok-3-mini-fast",
     name: "Grok 3 Mini Fast Beta",
     provider: "xAI",
+    providerId: "xai",
     modelFamily: "Grok",
     description:
       "Faster version of Grok 3 Mini, ideal for responsive applications.",

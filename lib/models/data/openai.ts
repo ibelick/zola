@@ -6,6 +6,7 @@ const openaiModels: ModelConfig[] = [
     id: "gpt-3.5-turbo",
     name: "GPT-3.5 Turbo",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "GPT-3.5",
     description: "Fast, inexpensive model for simple tasks",
     tags: ["fast", "cheap", "chat"],
@@ -27,6 +28,7 @@ const openaiModels: ModelConfig[] = [
     id: "gpt-3.5-turbo-instruct",
     name: "GPT-3.5 Turbo Instruct",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "GPT-3.5",
     description:
       "Similar capabilities to text-davinci-003 but compatible with legacy Completions endpoint",
@@ -49,6 +51,7 @@ const openaiModels: ModelConfig[] = [
     id: "gpt-4-turbo",
     name: "GPT-4 Turbo",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "GPT-4",
     description: "The latest GPT-4 Turbo model with vision capabilities",
     tags: ["vision", "tools", "large-context"],
@@ -70,6 +73,7 @@ const openaiModels: ModelConfig[] = [
     id: "gpt-4.1",
     name: "GPT-4.1",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "GPT-4",
     description: "Advanced reasoning model with improved capabilities",
     tags: ["reasoning", "tools", "large-context"],
@@ -90,6 +94,7 @@ const openaiModels: ModelConfig[] = [
     id: "gpt-4.1-mini",
     name: "GPT-4.1 Mini",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "GPT-4",
     description:
       "Smaller, faster version of GPT-4.1 with excellent cost-performance",
@@ -111,6 +116,7 @@ const openaiModels: ModelConfig[] = [
     id: "gpt-4.1-nano",
     name: "GPT-4.1 Nano",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "GPT-4",
     description: "Ultra-efficient model for simple tasks with GPT-4 quality",
     tags: ["fast", "cheap", "efficient"],
@@ -131,6 +137,7 @@ const openaiModels: ModelConfig[] = [
     id: "gpt-4.5-preview",
     name: "GPT-4.5 Preview",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "GPT-4",
     description:
       "Preview of next-generation GPT-4.5 with enhanced capabilities",
@@ -152,6 +159,7 @@ const openaiModels: ModelConfig[] = [
     id: "gpt-4o",
     name: "GPT-4o",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "GPT-4o",
     description:
       "Flagship model that's faster and cheaper than GPT-4 Turbo with stronger vision",
@@ -174,6 +182,7 @@ const openaiModels: ModelConfig[] = [
     id: "gpt-4o-mini",
     name: "GPT-4o Mini",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "GPT-4o",
     description:
       "Affordable and intelligent small model for fast, lightweight tasks",
@@ -196,6 +205,7 @@ const openaiModels: ModelConfig[] = [
     id: "o1",
     name: "o1",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "o1",
     description:
       "Advanced reasoning model designed for complex problems requiring deep thinking",
@@ -218,6 +228,7 @@ const openaiModels: ModelConfig[] = [
     id: "o3-mini",
     name: "o3-mini",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "o3",
     description: "Smaller reasoning model balancing performance and efficiency",
     tags: ["reasoning", "efficient", "balanced"],
@@ -239,6 +250,7 @@ const openaiModels: ModelConfig[] = [
     id: "o1-mini",
     name: "o1-mini",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "o1",
     description:
       "o1-mini with high compute allocation for better reasoning performance",
@@ -261,6 +273,7 @@ const openaiModels: ModelConfig[] = [
     id: "o3-mini-high",
     name: "o3-mini (High)",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "o3",
     description:
       "o3-mini with high compute allocation for better reasoning performance",
@@ -283,6 +296,7 @@ const openaiModels: ModelConfig[] = [
     id: "o3-mini-low",
     name: "o3-mini (Low)",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "o3",
     description:
       "o3-mini with low compute allocation for cost-effective reasoning",
@@ -305,6 +319,7 @@ const openaiModels: ModelConfig[] = [
     id: "o3-mini-medium",
     name: "o3-mini (Medium)",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "o3",
     description:
       "o3-mini with medium compute allocation balancing cost and performance",
@@ -327,6 +342,7 @@ const openaiModels: ModelConfig[] = [
     id: "o4-mini",
     name: "o4-mini",
     provider: "OpenAI",
+    providerId: "openai",
     modelFamily: "o4",
     description:
       "Next-generation reasoning model with improved efficiency and capabilities",

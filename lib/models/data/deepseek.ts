@@ -6,6 +6,8 @@ const deepseekModels: ModelConfig[] = [
     id: "deepseek-r1",
     name: "DeepSeek R1",
     provider: "DeepSeek",
+
+    providerId: "deepseek",
     modelFamily: "DeepSeek",
     description:
       "Flagship model by DeepSeek, optimized for performance and reliability.",
@@ -34,6 +36,7 @@ const deepseekModels: ModelConfig[] = [
     id: "deepseek-v3",
     name: "DeepSeek-V3",
     provider: "DeepSeek",
+    providerId: "deepseek",
     modelFamily: "DeepSeek",
     description: "Smaller open-weight DeepSeek model for casual or hobby use.",
     tags: ["open-source", "smaller", "hobby", "research"],

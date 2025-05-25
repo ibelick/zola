@@ -2,19 +2,13 @@ import { UsageLimitError } from "@/lib/api"
 import {
   AUTH_DAILY_MESSAGE_LIMIT,
   DAILY_LIMIT_PRO_MODELS,
-  MODELS_FREE,
-  MODELS_PRO,
+  FREE_MODELS_IDS,
   NON_AUTH_DAILY_MESSAGE_LIMIT,
 } from "@/lib/config"
 import { SupabaseClient } from "@supabase/supabase-js"
 
-export function isProModel(modelId: string): boolean {
-  return MODELS_PRO.some((m) => m.id === modelId)
-}
-
-export function isFreeModel(modelId: string): boolean {
-  return MODELS_FREE.some((m) => m.id === modelId)
-}
+const isFreeModel = (modelId: string) => FREE_MODELS_IDS.includes(modelId)
+const isProModel = (modelId: string) => !isFreeModel(modelId)
 
 /**
  * Checks the user's daily usage to see if they've reached their limit.

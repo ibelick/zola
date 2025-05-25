@@ -1,6 +1,8 @@
+import Anthropic from "@/components/icons/anthropic"
 import Claude from "@/components/icons/claude"
 import DeepSeek from "@/components/icons/deepseek"
 import Gemini from "@/components/icons/gemini"
+import Google from "@/components/icons/google"
 import Grok from "@/components/icons/grok"
 import Mistral from "@/components/icons/mistral"
 import OpenAI from "@/components/icons/openai"
@@ -54,5 +56,15 @@ export const PROVIDERS: Provider[] = [
     id: "xai",
     name: "XAI",
     icon: Xai,
+  },
+  {
+    id: "google",
+    name: "Google",
+    icon: Google,
+  },
+  {
+    id: "anthropic",
+    name: "Anthropic",
+    icon: Anthropic,
   },
 ] as Provider[]
