@@ -32,6 +32,7 @@ type CommandHistoryProps = {
   trigger: React.ReactNode
   isOpen: boolean
   setIsOpen: (open: boolean) => void
+  hasPopover?: boolean
 }
 
 type CommandItemEditProps = {
@@ -273,6 +274,7 @@ export function CommandHistory({
   trigger,
   isOpen,
   setIsOpen,
+  hasPopover = true,
 }: CommandHistoryProps) {
   const { chatId } = useChatSession()
   const router = useRouter()
@@ -435,10 +437,14 @@ export function CommandHistory({
 
   return (
     <>
-      <Tooltip>
-        <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-        <TooltipContent>History ⌘+K</TooltipContent>
-      </Tooltip>
+      {hasPopover ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+          <TooltipContent>History ⌘+K</TooltipContent>
+        </Tooltip>
+      ) : (
+        trigger
+      )}
       <CommandDialog
         open={isOpen}
         onOpenChange={handleOpenChange}

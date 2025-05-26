@@ -15,12 +15,16 @@ type HistoryTriggerProps = {
   hasSidebar: boolean
   classNameTrigger?: string
   icon?: React.ReactNode
+  label?: React.ReactNode | string
+  hasPopover?: boolean
 }
 
 export function HistoryTrigger({
   hasSidebar,
   classNameTrigger,
   icon,
+  label,
+  hasPopover = true,
 }: HistoryTriggerProps) {
   const isMobile = useBreakpoint(768)
   const router = useRouter()
@@ -54,6 +58,7 @@ export function HistoryTrigger({
       tabIndex={isMobile ? -1 : 0}
     >
       {icon || <ListMagnifyingGlass size={24} />}
+      {label}
     </button>
   )
 
@@ -78,6 +83,7 @@ export function HistoryTrigger({
       trigger={defaultTrigger}
       isOpen={isOpen}
       setIsOpen={setIsOpen}
+      hasPopover={hasPopover}
     />
   )
 }
