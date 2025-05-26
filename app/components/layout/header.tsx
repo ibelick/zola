@@ -5,6 +5,7 @@ import { AppInfoTrigger } from "@/app/components/layout/app-info/app-info-trigge
 import { ButtonNewChat } from "@/app/components/layout/button-new-chat"
 import { UserMenu } from "@/app/components/layout/user-menu"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
+import { useUserPreferences } from "@/app/providers/user-preferences-provider"
 import { useUser } from "@/app/providers/user-provider"
 import type { Agent } from "@/app/types/agent"
 import { Button } from "@/components/ui/button"
@@ -75,7 +76,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
               {currentAgent && <DialogPublish />}
               <ButtonNewChat />
               <AgentLink />
-              {!isSidebarOpen && <HistoryTrigger hasSidebar={hasSidebar} />}
+              {!hasSidebar && <HistoryTrigger hasSidebar={hasSidebar} />}
               <UserMenu />
             </div>
           )}
