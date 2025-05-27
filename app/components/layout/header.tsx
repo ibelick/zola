@@ -26,7 +26,6 @@ export type AgentHeader = Pick<
 export function Header({ hasSidebar }: { hasSidebar: boolean }) {
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
-  const { open: isSidebarOpen } = useSidebar()
   const { currentAgent } = useAgent()
 
   const isLoggedIn = !!user
@@ -35,7 +34,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
     <header className="h-app-header pointer-events-none fixed top-0 right-0 left-0 z-50">
       <div className="relative mx-auto flex h-full max-w-full items-center justify-between bg-transparent px-4 sm:px-6 lg:bg-transparent lg:px-8">
         <div className="flex flex-1 items-center justify-between">
-          <div className="flex flex-1 items-center gap-2">
+          <div className="flex flex-1 items-center gap-2 pl-0 md:pl-0.5">
             {hasSidebar && <HeaderSidebarTrigger />}
             {Boolean(!currentAgent || !isMobile) && (
               <div className="flex-1">

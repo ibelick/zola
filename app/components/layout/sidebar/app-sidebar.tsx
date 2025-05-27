@@ -15,12 +15,9 @@ import {
   ChatTeardropText,
   GithubLogo,
   MagnifyingGlass,
-  NotePencil,
   NotePencilIcon,
-  Pencil,
   X,
 } from "@phosphor-icons/react"
-import { AnimatePresence, motion } from "motion/react"
 import { useParams, useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { HistoryTrigger } from "../../history/history-trigger"
@@ -28,7 +25,7 @@ import { SidebarList } from "./sidebar-list"
 
 export function AppSidebar() {
   const isMobile = useBreakpoint(768)
-  const { open, setOpenMobile } = useSidebar()
+  const { setOpenMobile } = useSidebar()
   const { chats, isLoading } = useChats()
   const params = useParams<{ chatId: string }>()
   const currentChatId = params.chatId
@@ -52,23 +49,6 @@ export function AppSidebar() {
           ) : (
             <div className="h-full" />
           )}
-          {/* <AnimatePresence mode="sync" initial={false}>
-            {open && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.15, delay: 0.1, ease: "easeOut" }}
-                className="pt-0"
-              >
-                <HistoryTrigger
-                  hasSidebar={false}
-                  classNameTrigger="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-9 items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none bg-transparent"
-                  icon={<MagnifyingGlass size={24} />}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence> */}
         </div>
       </SidebarHeader>
       <SidebarContent className="mask-t-from-98% mask-t-to-100% mask-b-from-98% mask-b-to-100% px-3">
