@@ -16,6 +16,7 @@ import {
 } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
+import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import { useChat } from "@ai-sdk/react"
@@ -67,6 +68,7 @@ export function Chat() {
   const { messages: initialMessages, cacheAndAddMessage } = useMessages()
   const { user } = useUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { preferences } = useUserPreferences()
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
   const {
     files,
@@ -403,7 +405,9 @@ export function Chat() {
           files={files}
           onFileUpload={handleFileUpload}
           onFileRemove={handleFileRemove}
-          hasSuggestions={!chatId && messages.length === 0}
+          hasSuggestions={
+            preferences.promptSuggestions && !chatId && messages.length === 0
+          }
           onSelectModel={handleModelChange}
           selectedModel={selectedModel}
           isUserAuthenticated={isAuthenticated}

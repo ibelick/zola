@@ -3,6 +3,7 @@
 import { ModelSelector } from "@/components/common/model-selector/base"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/components/ui/toast"
 import { useChats } from "@/lib/chat-store/chats/provider"
@@ -10,6 +11,7 @@ import { useMessages } from "@/lib/chat-store/messages/provider"
 import { clearAllIndexedDBStores } from "@/lib/chat-store/persist"
 import { MODEL_DEFAULT } from "@/lib/config"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
+import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import {
@@ -43,6 +45,7 @@ export function SettingsContent({
   const { resetChats } = useChats()
   const { resetMessages } = useMessages()
   const { theme, setTheme } = useTheme()
+  const { preferences, setPromptSuggestions } = useUserPreferences()
   const [selectedTheme, setSelectedTheme] = useState(theme || "system")
   const [selectedModelId, setSelectedModelId] = useState<string>(
     user?.preferred_model || MODEL_DEFAULT
@@ -244,6 +247,22 @@ export function SettingsContent({
               <div className="py-4">
                 <LayoutSection />
               </div>
+
+              {/* Prompt Suggestions */}
+              <div className="py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium">Prompt suggestions</h3>
+                    <p className="text-muted-foreground text-xs">
+                      Show suggested prompts when starting a new conversation
+                    </p>
+                  </div>
+                  <Switch
+                    checked={preferences.promptSuggestions}
+                    onCheckedChange={setPromptSuggestions}
+                  />
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="connections" className="py-4">
@@ -399,6 +418,24 @@ export function SettingsContent({
                   </div>
                 </div>
                 <LayoutSection />
+
+                {/* Prompt Suggestions */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium">
+                        Prompt suggestions
+                      </h3>
+                      <p className="text-muted-foreground text-xs">
+                        Show suggested prompts when starting a new conversation
+                      </p>
+                    </div>
+                    <Switch
+                      checked={preferences.promptSuggestions}
+                      onCheckedChange={setPromptSuggestions}
+                    />
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="connections" className="mt-0">

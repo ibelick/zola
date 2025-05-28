@@ -6,10 +6,12 @@ export type LayoutType = "sidebar" | "fullscreen"
 
 type UserPreferences = {
   layout: LayoutType
+  promptSuggestions: boolean
 }
 
 const defaultPreferences: UserPreferences = {
   layout: "fullscreen",
+  promptSuggestions: true,
 }
 
 const PREFERENCES_STORAGE_KEY = "user-preferences"
@@ -18,6 +20,7 @@ const LAYOUT_STORAGE_KEY = "preferred-layout"
 interface UserPreferencesContextType {
   preferences: UserPreferences
   setLayout: (layout: LayoutType) => void
+  setPromptSuggestions: (enabled: boolean) => void
 }
 
 const UserPreferencesContext = createContext<
@@ -83,11 +86,16 @@ export function UserPreferencesProvider({
     }
   }
 
+  const setPromptSuggestions = (enabled: boolean) => {
+    setPreferences((prev) => ({ ...prev, promptSuggestions: enabled }))
+  }
+
   return (
     <UserPreferencesContext.Provider
       value={{
         preferences,
         setLayout,
+        setPromptSuggestions,
       }}
     >
       {children}
