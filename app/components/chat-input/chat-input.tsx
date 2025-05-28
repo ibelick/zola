@@ -63,6 +63,7 @@ export function ChatInput({
     defaultAgent: currentAgent,
   })
 
+  const isEmpty = (value: string) => !/[^\s]/.test(value)
   const selectModelConfig = MODELS.find((model) => model.id === selectedModel)
   const noToolSupport = selectModelConfig?.tools
 
@@ -96,10 +97,13 @@ export function ChatInput({
 
       if (e.key === "Enter" && !e.shiftKey && !agentCommand.showAgentCommand) {
         e.preventDefault()
+        if (isEmpty(value)) {
+          return
+        }
         onSend()
       }
     },
-    [agentCommand, isSubmitting, onSend, status]
+    [agentCommand, isSubmitting, onSend, status, value]
   )
 
   const handlePaste = useCallback(
@@ -221,7 +225,7 @@ export function ChatInput({
               <Button
                 size="sm"
                 className="size-9 rounded-full transition-all duration-300 ease-out"
-                disabled={!value || isSubmitting}
+                disabled={!value || isSubmitting || isEmpty(value)}
                 type="button"
                 onClick={handleSend}
                 aria-label={status === "streaming" ? "Stop" : "Send message"}
