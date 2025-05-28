@@ -64,7 +64,7 @@ export function ChatInput({
   })
 
   const selectModelConfig = MODELS.find((model) => model.id === selectedModel)
-  const noToolSupport = selectModelConfig?.tools
+  const hasToolSupport = Boolean(selectModelConfig?.tools)
   const isOnlyWhitespace = (text: string) => !/[^\s]/.test(text)
 
   const handleSend = useCallback(() => {
@@ -208,7 +208,7 @@ export function ChatInput({
                 isUserAuthenticated={isUserAuthenticated}
                 className="rounded-full"
               />
-              {currentAgent && noToolSupport && (
+              {currentAgent && !hasToolSupport && (
                 <div className="flex items-center gap-1">
                   <Warning className="size-4" />
                   <p className="line-clamp-2 text-xs">
