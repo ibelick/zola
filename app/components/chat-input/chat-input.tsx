@@ -63,9 +63,9 @@ export function ChatInput({
     defaultAgent: currentAgent,
   })
 
-  const isEmpty = (value: string) => !/[^\s]/.test(value)
   const selectModelConfig = MODELS.find((model) => model.id === selectedModel)
   const noToolSupport = selectModelConfig?.tools
+  const isOnlyWhitespace = (text: string) => !/[^\s]/.test(text)
 
   const handleSend = useCallback(() => {
     if (isSubmitting) {
@@ -96,10 +96,11 @@ export function ChatInput({
       }
 
       if (e.key === "Enter" && !e.shiftKey && !agentCommand.showAgentCommand) {
-        e.preventDefault()
-        if (isEmpty(value)) {
+        if (isOnlyWhitespace(value)) {
           return
         }
+
+        e.preventDefault()
         onSend()
       }
     },
@@ -225,7 +226,7 @@ export function ChatInput({
               <Button
                 size="sm"
                 className="size-9 rounded-full transition-all duration-300 ease-out"
-                disabled={!value || isSubmitting || isEmpty(value)}
+                disabled={!value || isSubmitting || isOnlyWhitespace(value)}
                 type="button"
                 onClick={handleSend}
                 aria-label={status === "streaming" ? "Stop" : "Send message"}
