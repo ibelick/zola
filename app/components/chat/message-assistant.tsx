@@ -47,13 +47,13 @@ export function MessageAssistant({
         (part) =>
           part.type === "tool-invocation" &&
           part.toolInvocation?.state === "result" &&
-          part.toolInvocation?.toolName === "exaImageSearch" &&
+          part.toolInvocation?.toolName === "imageSearch" &&
           part.toolInvocation?.result?.content?.[0]?.type === "images"
       )
       .flatMap((part) =>
         part.type === "tool-invocation" &&
         part.toolInvocation?.state === "result" &&
-        part.toolInvocation?.toolName === "exaImageSearch" &&
+        part.toolInvocation?.toolName === "imageSearch" &&
         part.toolInvocation?.result?.content?.[0]?.type === "images"
           ? (part.toolInvocation?.result?.content?.[0]?.results ?? [])
           : []

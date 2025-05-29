@@ -16,8 +16,10 @@ import React, { useCallback, useEffect } from "react"
 import { PromptSystem } from "../suggestions/prompt-system"
 import { AgentCommand } from "./agent-command"
 import { ButtonFileUpload } from "./button-file-upload"
+import { ButtonSearch } from "./button-search"
 import { FileList } from "./file-list"
 import { SelectedAgent } from "./selected-agent"
+import { useSearchAgent } from "./use-search-agent"
 
 type ChatInputProps = {
   value: string
@@ -35,6 +37,7 @@ type ChatInputProps = {
   isUserAuthenticated: boolean
   stop: () => void
   status?: "submitted" | "streaming" | "ready" | "error"
+  onSearchToggle?: (enabled: boolean, agentId: string | null) => void
 }
 
 export function ChatInput({
@@ -52,8 +55,15 @@ export function ChatInput({
   isUserAuthenticated,
   stop,
   status,
+  onSearchToggle,
 }: ChatInputProps) {
   const { currentAgent, curatedAgents, userAgents } = useAgent()
+  const {
+    isSearchEnabled,
+    toggleSearch,
+    getActiveAgentId,
+    isSearchAgentAvailable,
+  } = useSearchAgent()
 
   const agentCommand = useAgentCommand({
     value,
@@ -65,6 +75,16 @@ export function ChatInput({
   const selectModelConfig = getModelInfo(selectedModel)
   const hasToolSupport = Boolean(selectModelConfig?.tools)
   const isOnlyWhitespace = (text: string) => !/[^\s]/.test(text)
+
+  // Handle search toggle
+  const handleSearchToggle = useCallback(
+    (enabled: boolean) => {
+      toggleSearch(enabled)
+      const agentId = enabled ? "search" : null
+      onSearchToggle?.(enabled, agentId)
+    },
+    [toggleSearch, onSearchToggle]
+  )
 
   const handleSend = useCallback(() => {
     if (isSubmitting) {
@@ -206,6 +226,10 @@ export function ChatInput({
                 setSelectedModelId={onSelectModel}
                 isUserAuthenticated={isUserAuthenticated}
                 className="rounded-full"
+              />
+              <ButtonSearch
+                isSelected={isSearchEnabled}
+                onToggle={handleSearchToggle}
               />
               {currentAgent && !hasToolSupport && (
                 <div className="flex items-center gap-1">

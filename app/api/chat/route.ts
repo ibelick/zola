@@ -64,6 +64,8 @@ export async function POST(req: Request) {
 
     let agentConfig = null
 
+    console.log("agentId", agentId)
+
     if (supabase && agentId) {
       agentConfig = await loadAgent(agentId)
     }
@@ -89,6 +91,10 @@ export async function POST(req: Request) {
         await trackSpecialAgentUsage(supabase, userId)
       }
     }
+
+    console.log("agentConfig", agentConfig)
+    console.log("effectiveSystemPrompt", effectiveSystemPrompt)
+    console.log("toolsToUse", toolsToUse)
 
     let streamError: Error | null = null
 

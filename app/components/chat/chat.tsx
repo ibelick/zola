@@ -70,6 +70,7 @@ export function Chat() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { preferences } = useUserPreferences()
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
+  const [searchAgentId, setSearchAgentId] = useState<string | null>(null)
   const {
     files,
     setFiles,
@@ -121,7 +122,7 @@ export function Chat() {
     input,
     selectedModel,
     systemPrompt,
-    selectedAgentId: currentAgent?.id || null,
+    selectedAgentId: searchAgentId || currentAgent?.id || null,
     createNewChat,
     setHasDialogAuth,
   })
@@ -229,6 +230,7 @@ export function Chat() {
       }
     }
 
+    const effectiveAgentId = searchAgentId || currentAgent?.id
     const options = {
       body: {
         chatId: currentChatId,
@@ -236,7 +238,7 @@ export function Chat() {
         model: selectedModel,
         isAuthenticated,
         systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-        ...(currentAgent?.id && { agentId: currentAgent.id }),
+        ...(effectiveAgentId && { agentId: effectiveAgentId }),
       },
       experimental_attachments: attachments || undefined,
     }
@@ -343,6 +345,14 @@ export function Chat() {
     reload(options)
   }
 
+  // Handle search agent toggle
+  const handleSearchToggle = useCallback(
+    (enabled: boolean, agentId: string | null) => {
+      setSearchAgentId(enabled ? agentId : null)
+    },
+    []
+  )
+
   // not user chatId and no messages
   if (hydrated && chatId && !isChatsLoading && !currentChat) {
     return redirect("/")
@@ -421,6 +431,7 @@ export function Chat() {
           isUserAuthenticated={isAuthenticated}
           stop={stop}
           status={status}
+          onSearchToggle={handleSearchToggle}
         />
       </motion.div>
 

@@ -1,3 +1,4 @@
+import { filterLocalAgentId } from "@/lib/agents/utils"
 import { readFromIndexedDB, writeToIndexedDB } from "@/lib/chat-store/persist"
 import type { Chat, Chats } from "@/lib/chat-store/types"
 import { createClient } from "@/lib/supabase/client"
@@ -189,6 +190,7 @@ export async function createNewChat(
   agentId?: string
 ): Promise<Chats> {
   try {
+    // Note: Local agent IDs are filtered out at the API level (create-chat route)
     const payload: any = {
       userId,
       title: title || (agentId ? `Conversation with agent` : "New Chat"),
@@ -237,10 +239,18 @@ export async function updateChatAgent(
   isAuthenticated: boolean
 ) {
   try {
+    // Filter out local agent IDs for database operations
+    const dbAgentId = filterLocalAgentId(agentId)
+
     const res = await fetchClient(API_ROUTE_UPDATE_CHAT_AGENT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, chatId, agentId, isAuthenticated }),
+      body: JSON.stringify({
+        userId,
+        chatId,
+        agentId: dbAgentId,
+        isAuthenticated,
+      }),
     })
     const responseData = await res.json()
 
@@ -253,7 +263,7 @@ export async function updateChatAgent(
 
     const all = await getCachedChats()
     const updated = (all as Chats[]).map((c) =>
-      c.id === chatId ? { ...c, agent_id: agentId } : c
+      c.id === chatId ? { ...c, agent_id: dbAgentId } : c
     )
     await writeToIndexedDB("chats", updated)
 

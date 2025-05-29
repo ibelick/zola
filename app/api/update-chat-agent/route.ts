@@ -1,3 +1,4 @@
+import { filterLocalAgentId } from "@/lib/agents/utils"
 import { validateUserIdentity } from "@/lib/server/api"
 
 export async function POST(request: Request) {
@@ -11,12 +12,15 @@ export async function POST(request: Request) {
       )
     }
 
+    // Filter out local agent IDs for database operations
+    const dbAgentId = filterLocalAgentId(agentId)
+
     const supabase = await validateUserIdentity(userId, isAuthenticated)
 
     if (!supabase) {
       console.log("Supabase not enabled, skipping agent update")
       return new Response(
-        JSON.stringify({ chat: { id: chatId, agent_id: agentId } }),
+        JSON.stringify({ chat: { id: chatId, agent_id: dbAgentId } }),
         {
           status: 200,
         }
@@ -25,7 +29,7 @@ export async function POST(request: Request) {
 
     const { data, error: updateError } = await supabase
       .from("chats")
-      .update({ agent_id: agentId || null })
+      .update({ agent_id: dbAgentId || null })
       .eq("id", chatId)
       .select()
       .single()

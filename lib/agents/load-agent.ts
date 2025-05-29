@@ -7,26 +7,11 @@ export async function loadAgent(agentId: string) {
   if (localAgents[agentId as keyof typeof localAgents]) {
     const localAgent = localAgents[agentId as keyof typeof localAgents]
 
-    // For local agents, map the tool objects to the tool registry entries
-    const activeTools: Record<string, any> = {}
-
-    if (localAgent.tools) {
-      localAgent.tools.forEach((tool) => {
-        // Find the matching tool in the registry by comparing the tool objects
-        for (const [toolId, registryTool] of Object.entries(TOOL_REGISTRY)) {
-          if (registryTool === tool) {
-            if (registryTool.isAvailable?.() !== false) {
-              activeTools[toolId] = registryTool
-            }
-            break
-          }
-        }
-      })
-    }
+    console.log("localAgent", localAgent)
 
     return {
       systemPrompt: localAgent.system_prompt,
-      tools: activeTools,
+      tools: localAgent.tools,
       maxSteps: 5,
       mcpConfig: null,
     }

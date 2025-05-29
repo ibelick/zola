@@ -1,3 +1,4 @@
+import { filterLocalAgentId } from "@/lib/agents/utils"
 import { validateUserIdentity } from "@/lib/server/api"
 import { checkUsageByModel } from "@/lib/usage"
 
@@ -16,6 +17,9 @@ export async function createChatInDb({
   isAuthenticated,
   agentId,
 }: CreateChatInput) {
+  // Filter out local agent IDs for database operations
+  const dbAgentId = filterLocalAgentId(agentId)
+
   const supabase = await validateUserIdentity(userId, isAuthenticated)
   if (!supabase) {
     return {
@@ -25,7 +29,7 @@ export async function createChatInDb({
       model,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      agent_id: agentId || null,
+      agent_id: dbAgentId,
     }
   }
 
@@ -37,8 +41,8 @@ export async function createChatInDb({
     model,
   }
 
-  if (agentId) {
-    insertData.agent_id = agentId
+  if (dbAgentId) {
+    insertData.agent_id = dbAgentId
   }
 
   const { data, error } = await supabase
