@@ -10,6 +10,7 @@ import {
   trackSpecialAgentUsage,
   validateAndTrackUsage,
 } from "./api"
+import { cleanMessagesForTools } from "./utils"
 
 export const maxDuration = 60
 
@@ -64,8 +65,6 @@ export async function POST(req: Request) {
 
     let agentConfig = null
 
-    console.log("agentId", agentId)
-
     if (supabase && agentId) {
       agentConfig = await loadAgent(agentId)
     }
@@ -92,16 +91,16 @@ export async function POST(req: Request) {
       }
     }
 
-    console.log("agentConfig", agentConfig)
-    console.log("effectiveSystemPrompt", effectiveSystemPrompt)
-    console.log("toolsToUse", toolsToUse)
+    // Clean messages when switching between agents with different tool capabilities
+    const hasTools = !!toolsToUse && Object.keys(toolsToUse).length > 0
+    const cleanedMessages = cleanMessagesForTools(messages, hasTools)
 
     let streamError: Error | null = null
 
     const result = streamText({
       model: modelConfig.apiSdk(),
       system: effectiveSystemPrompt,
-      messages,
+      messages: cleanedMessages,
       tools: toolsToUse as ToolSet,
       // @todo: remove this
       // hardcoded for now
