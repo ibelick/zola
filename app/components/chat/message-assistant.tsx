@@ -9,6 +9,7 @@ import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
 import { getSources } from "./get-sources"
 import { Reasoning } from "./reasoning"
+import { SearchImages } from "./search-images"
 import { SourcesList } from "./sources-list"
 import { ToolInvocation } from "./tool-invocation"
 
@@ -34,14 +35,11 @@ export function MessageAssistant({
   status,
 }: MessageAssistantProps) {
   const sources = getSources(parts)
-
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"
   )
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
-
   const contentNullOrEmpty = children === null || children === ""
-
   const isLastStreaming = status === "streaming" && isLast
 
   return (
@@ -59,6 +57,19 @@ export function MessageAssistant({
         {toolInvocationParts && toolInvocationParts.length > 0 && (
           <ToolInvocation toolInvocations={toolInvocationParts} />
         )}
+
+        {parts?.map((part, idx) => {
+          if (
+            part.type === "tool-invocation" &&
+            part.toolInvocation?.state === "result"
+          ) {
+            const content = part.toolInvocation?.result?.content?.[0]
+            if (content?.type === "images" && content.results?.length) {
+              return <SearchImages key={idx} results={content.results} />
+            }
+          }
+          return null
+        })}
 
         {contentNullOrEmpty ? null : (
           <MessageContent
