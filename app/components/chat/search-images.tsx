@@ -32,7 +32,8 @@ export function SearchImages({ results }: { results: ImageResult[] }) {
               src={img.imageUrl}
               alt={img.title}
               onError={() => handleError(i)}
-              className="h-full w-full object-cover"
+              onLoad={(e) => e.currentTarget.classList.remove("opacity-0")}
+              className="h-full max-h-48 min-h-40 w-full object-cover opacity-0 transition-opacity duration-150 ease-out"
             />
             <div className="bg-primary absolute right-0 bottom-0 left-0 flex flex-col gap-0.5 px-2.5 py-1.5 opacity-0 transition-opacity duration-100 ease-out group-hover/image:opacity-100">
               <div className="flex items-center gap-1">
