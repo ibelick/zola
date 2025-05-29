@@ -3,7 +3,6 @@ import { z } from "zod"
 import { runImageSearch } from "./run"
 
 export const imageSearchTool = tool({
-  id: "exa.imageSearch" as const,
   description: "Search for images using Exa.",
   parameters: z.object({
     query: z.string().describe("The topic to search for images"),

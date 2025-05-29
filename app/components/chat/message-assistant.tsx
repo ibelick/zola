@@ -41,6 +41,25 @@ export function MessageAssistant({
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
   const contentNullOrEmpty = children === null || children === ""
   const isLastStreaming = status === "streaming" && isLast
+  const searchImageResults =
+    parts
+      ?.filter(
+        (part) =>
+          part.type === "tool-invocation" &&
+          part.toolInvocation?.state === "result" &&
+          part.toolInvocation?.toolName === "exaImageSearch" &&
+          part.toolInvocation?.result?.content?.[0]?.type === "images"
+      )
+      .flatMap((part) =>
+        part.type === "tool-invocation" &&
+        part.toolInvocation?.state === "result" &&
+        part.toolInvocation?.toolName === "exaImageSearch" &&
+        part.toolInvocation?.result?.content?.[0]?.type === "images"
+          ? (part.toolInvocation?.result?.content?.[0]?.results ?? [])
+          : []
+      ) ?? []
+
+  console.log("searchImageResults", searchImageResults)
 
   return (
     <Message
@@ -58,18 +77,9 @@ export function MessageAssistant({
           <ToolInvocation toolInvocations={toolInvocationParts} />
         )}
 
-        {parts?.map((part, idx) => {
-          if (
-            part.type === "tool-invocation" &&
-            part.toolInvocation?.state === "result"
-          ) {
-            const content = part.toolInvocation?.result?.content?.[0]
-            if (content?.type === "images" && content.results?.length) {
-              return <SearchImages key={idx} results={content.results} />
-            }
-          }
-          return null
-        })}
+        {searchImageResults.length > 0 && (
+          <SearchImages results={searchImageResults} />
+        )}
 
         {contentNullOrEmpty ? null : (
           <MessageContent

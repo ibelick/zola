@@ -10,15 +10,15 @@ const isAvailable = (envVars: string[]) => {
 }
 
 export const exaTools = {
-  "exa.webSearch": {
+  exaWebSearch: {
     ...webSearchTool,
     isAvailable: () => isAvailable(webSearchConfig.envVars),
   },
-  "exa.crawl": {
+  exaCrawl: {
     ...crawlTool,
     isAvailable: () => isAvailable(crawlConfig.envVars),
   },
-  "exa.imageSearch": {
+  exaImageSearch: {
     ...imageSearchTool,
     isAvailable: () => isAvailable(imageSearchConfig.envVars),
   },

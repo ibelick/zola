@@ -19,15 +19,14 @@ export async function loadAgent(agentId: string) {
   }
 
   const activeTools = Array.isArray(agent.tools)
-    ? agent.tools
-        .map((toolId: string) => {
-          const tool = TOOL_REGISTRY[toolId as ToolId]
-          if (!tool) return null
-          if (!tool.isAvailable?.()) return null
-          return tool
-        })
-        .filter(Boolean)
-    : []
+    ? agent.tools.reduce((acc: Record<string, any>, toolId: string) => {
+        const tool = TOOL_REGISTRY[toolId as ToolId]
+        if (!tool) return acc
+        if (tool.isAvailable?.() === false) return acc
+        acc[toolId] = tool
+        return acc
+      }, {})
+    : {}
 
   return {
     systemPrompt: agent.system_prompt,

@@ -313,7 +313,15 @@ export function Chat() {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       setIsSubmitting(false)
     },
-    [ensureChatExists, selectedModel, user, append, checkLimitsAndNotify, isAuthenticated, setMessages]
+    [
+      ensureChatExists,
+      selectedModel,
+      user,
+      append,
+      checkLimitsAndNotify,
+      isAuthenticated,
+      setMessages,
+    ]
   )
 
   const handleReload = async () => {
