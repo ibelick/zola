@@ -59,8 +59,6 @@ export function MessageAssistant({
           : []
       ) ?? []
 
-  console.log("searchImageResults", searchImageResults)
-
   return (
     <Message
       className={cn(

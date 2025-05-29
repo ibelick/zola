@@ -107,11 +107,7 @@ export async function addMessage(
 ): Promise<void> {
   await insertMessageToDb(chatId, message)
   const current = await getCachedMessages(chatId)
-
-  console.log("current", current)
-
   const updated = [...current, message]
-  console.log("updated", updated)
 
   await writeToIndexedDB("messages", { id: chatId, messages: updated })
 }

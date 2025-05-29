@@ -90,8 +90,6 @@ export async function POST(req: Request) {
       }
     }
 
-    console.log("toolsToUse", toolsToUse)
-
     let streamError: Error | null = null
 
     const result = streamText({
