@@ -2,7 +2,8 @@ import { createChatInDb } from "./api"
 
 export async function POST(request: Request) {
   try {
-    const { userId, title, model, isAuthenticated } = await request.json()
+    const { userId, title, model, isAuthenticated, agentId } =
+      await request.json()
 
     if (!userId) {
       return new Response(JSON.stringify({ error: "Missing userId" }), {
@@ -15,6 +16,7 @@ export async function POST(request: Request) {
       title,
       model,
       isAuthenticated,
+      agentId,
     })
 
     if (!chat) {
@@ -36,7 +38,9 @@ export async function POST(request: Request) {
     }
 
     return new Response(
-      JSON.stringify({ error: (err as Error).message || "Internal server error" }),
+      JSON.stringify({
+        error: (err as Error).message || "Internal server error",
+      }),
       { status: 500 }
     )
   }

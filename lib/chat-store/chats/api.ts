@@ -6,7 +6,6 @@ import { MODEL_DEFAULT } from "../../config"
 import { fetchClient } from "../../fetch"
 import {
   API_ROUTE_CREATE_CHAT,
-  API_ROUTE_CREATE_CHAT_WITH_AGENT,
   API_ROUTE_UPDATE_CHAT_AGENT,
   API_ROUTE_UPDATE_CHAT_MODEL,
 } from "../../routes"
@@ -190,27 +189,18 @@ export async function createNewChat(
   agentId?: string
 ): Promise<Chats> {
   try {
-    // @todo: can keep only one route for create chat
-    const apiRoute = agentId
-      ? API_ROUTE_CREATE_CHAT_WITH_AGENT
-      : API_ROUTE_CREATE_CHAT
+    const payload: any = {
+      userId,
+      title: title || (agentId ? `Conversation with agent` : "New Chat"),
+      model: model || MODEL_DEFAULT,
+      isAuthenticated,
+    }
 
-    const payload = agentId
-      ? {
-          userId,
-          agentId,
-          title: title || `Conversation with agent`,
-          model: model || MODEL_DEFAULT,
-          isAuthenticated,
-        }
-      : {
-          userId,
-          title,
-          model: model || MODEL_DEFAULT,
-          isAuthenticated,
-        }
+    if (agentId) {
+      payload.agentId = agentId
+    }
 
-    const res = await fetchClient(apiRoute, {
+    const res = await fetchClient(API_ROUTE_CREATE_CHAT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
