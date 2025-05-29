@@ -1,5 +1,7 @@
 import { config as crawlConfig } from "./crawl/config"
 import { crawlTool } from "./crawl/tool"
+import { config as imageSearchConfig } from "./imageSearch/config"
+import { imageSearchTool } from "./imageSearch/tool"
 import { config as webSearchConfig } from "./webSearch/config"
 import { webSearchTool } from "./webSearch/tool"
 
@@ -15,5 +17,9 @@ export const exaTools = {
   "exa.crawl": {
     ...crawlTool,
     isAvailable: () => isAvailable(crawlConfig.envVars),
+  },
+  "exa.imageSearch": {
+    ...imageSearchTool,
+    isAvailable: () => isAvailable(imageSearchConfig.envVars),
   },
 }
