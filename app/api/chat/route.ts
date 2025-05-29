@@ -3,11 +3,7 @@ import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
 import { getAllModels } from "@/lib/models"
 import { Attachment } from "@ai-sdk/ui-utils"
-import {
-  Message as MessageAISDK,
-  streamText,
-  ToolSet,
-} from "ai"
+import { Message as MessageAISDK, streamText, ToolSet } from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,
@@ -117,7 +113,8 @@ export async function POST(req: Request) {
           await storeAssistantMessage({
             supabase,
             chatId,
-            messages: response.messages as unknown as import("@/app/types/api.types").Message[],
+            messages:
+              response.messages as unknown as import("@/app/types/api.types").Message[],
           })
         }
       },

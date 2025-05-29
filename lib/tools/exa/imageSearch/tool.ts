@@ -4,13 +4,13 @@ import { runImageSearch } from "./run"
 
 export const imageSearchTool = tool({
   id: "exa.imageSearch" as const,
-  description: "Search for relevant images related to a query using Exa.",
+  description: "Search for images using Exa.",
   parameters: z.object({
-    query: z.string().describe("Search topic for fetching images"),
+    query: z.string().describe("The topic to search for images"),
     numResults: z
       .number()
       .optional()
-      .describe("Max number of images to return (default: 3)"),
+      .describe("Max number of images (default 3)"),
   }),
   async execute({ query, numResults }) {
     return await runImageSearch({ query, numResults })

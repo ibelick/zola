@@ -28,10 +28,11 @@ export async function runImageSearch(input: Input) {
       },
       body: JSON.stringify({
         query,
-        type: "image",
+        type: "auto",
         numResults,
         contents: {
-          image: true,
+          text: { maxCharacters: 200 },
+          livecrawl: "always",
         },
       }),
     })
@@ -44,13 +45,13 @@ export async function runImageSearch(input: Input) {
     const data = await res.json()
 
     const imageResults = data.results
-      .filter((r: any) => r.imageUrl)
-      .slice(0, numResults)
       .map((r: any) => ({
         title: r.title,
-        imageUrl: r.imageUrl,
+        imageUrl: r.image || r.imageUrl || null,
         sourceUrl: r.url,
       }))
+      .filter((r: any) => r.imageUrl)
+      .slice(0, numResults)
 
     return {
       content: [
