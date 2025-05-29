@@ -4,6 +4,7 @@ import {
   MessageActions,
   MessageContent,
 } from "@/components/prompt-kit/message"
+import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
@@ -34,6 +35,7 @@ export function MessageAssistant({
   parts,
   status,
 }: MessageAssistantProps) {
+  const { preferences } = useUserPreferences()
   const sources = getSources(parts)
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"
@@ -71,9 +73,11 @@ export function MessageAssistant({
           <Reasoning reasoning={reasoningParts.reasoning} />
         )}
 
-        {toolInvocationParts && toolInvocationParts.length > 0 && (
-          <ToolInvocation toolInvocations={toolInvocationParts} />
-        )}
+        {toolInvocationParts &&
+          toolInvocationParts.length > 0 &&
+          preferences.showToolInvocations && (
+            <ToolInvocation toolInvocations={toolInvocationParts} />
+          )}
 
         {searchImageResults.length > 0 && (
           <SearchImages results={searchImageResults} />

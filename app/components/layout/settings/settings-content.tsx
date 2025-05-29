@@ -45,7 +45,8 @@ export function SettingsContent({
   const { resetChats } = useChats()
   const { resetMessages } = useMessages()
   const { theme, setTheme } = useTheme()
-  const { preferences, setPromptSuggestions } = useUserPreferences()
+  const { preferences, setPromptSuggestions, setShowToolInvocations } =
+    useUserPreferences()
   const [selectedTheme, setSelectedTheme] = useState(theme || "system")
   const [selectedModelId, setSelectedModelId] = useState<string>(
     user?.preferred_model || MODEL_DEFAULT
@@ -263,6 +264,22 @@ export function SettingsContent({
                   />
                 </div>
               </div>
+
+              {/* Tool Invocations */}
+              <div className="py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium">Tool invocations</h3>
+                    <p className="text-muted-foreground text-xs">
+                      Show tool execution details in conversations
+                    </p>
+                  </div>
+                  <Switch
+                    checked={preferences.showToolInvocations}
+                    onCheckedChange={setShowToolInvocations}
+                  />
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="connections" className="py-4">
@@ -433,6 +450,22 @@ export function SettingsContent({
                     <Switch
                       checked={preferences.promptSuggestions}
                       onCheckedChange={setPromptSuggestions}
+                    />
+                  </div>
+                </div>
+
+                {/* Tool Invocations */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium">Tool invocations</h3>
+                      <p className="text-muted-foreground text-xs">
+                        Show tool execution details in conversations
+                      </p>
+                    </div>
+                    <Switch
+                      checked={preferences.showToolInvocations}
+                      onCheckedChange={setShowToolInvocations}
                     />
                   </div>
                 </div>

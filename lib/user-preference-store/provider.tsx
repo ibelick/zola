@@ -7,11 +7,13 @@ export type LayoutType = "sidebar" | "fullscreen"
 type UserPreferences = {
   layout: LayoutType
   promptSuggestions: boolean
+  showToolInvocations: boolean
 }
 
 const defaultPreferences: UserPreferences = {
   layout: "fullscreen",
   promptSuggestions: true,
+  showToolInvocations: true,
 }
 
 const PREFERENCES_STORAGE_KEY = "user-preferences"
@@ -21,6 +23,7 @@ interface UserPreferencesContextType {
   preferences: UserPreferences
   setLayout: (layout: LayoutType) => void
   setPromptSuggestions: (enabled: boolean) => void
+  setShowToolInvocations: (enabled: boolean) => void
 }
 
 const UserPreferencesContext = createContext<
@@ -90,12 +93,17 @@ export function UserPreferencesProvider({
     setPreferences((prev) => ({ ...prev, promptSuggestions: enabled }))
   }
 
+  const setShowToolInvocations = (enabled: boolean) => {
+    setPreferences((prev) => ({ ...prev, showToolInvocations: enabled }))
+  }
+
   return (
     <UserPreferencesContext.Provider
       value={{
         preferences,
         setLayout,
         setPromptSuggestions,
+        setShowToolInvocations,
       }}
     >
       {children}
