@@ -1,7 +1,38 @@
 import { createClient } from "@/lib/supabase/server"
 import { TOOL_REGISTRY, ToolId } from "../tools"
+import { localAgents } from "./local-agents"
 
 export async function loadAgent(agentId: string) {
+  // Check local agents first
+  if (localAgents[agentId as keyof typeof localAgents]) {
+    const localAgent = localAgents[agentId as keyof typeof localAgents]
+
+    // For local agents, map the tool objects to the tool registry entries
+    const activeTools: Record<string, any> = {}
+
+    if (localAgent.tools) {
+      localAgent.tools.forEach((tool) => {
+        // Find the matching tool in the registry by comparing the tool objects
+        for (const [toolId, registryTool] of Object.entries(TOOL_REGISTRY)) {
+          if (registryTool === tool) {
+            if (registryTool.isAvailable?.() !== false) {
+              activeTools[toolId] = registryTool
+            }
+            break
+          }
+        }
+      })
+    }
+
+    return {
+      systemPrompt: localAgent.system_prompt,
+      tools: activeTools,
+      maxSteps: 5,
+      mcpConfig: null,
+    }
+  }
+
+  // Fallback to database agents
   const supabase = await createClient()
 
   if (!supabase) {

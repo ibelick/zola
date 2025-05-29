@@ -6,6 +6,9 @@ import {
   fetchCuratedAgentsFromDb,
   fetchUserAgentsFromDb,
 } from "@/lib/agent-store/api"
+import { convertLocalAgentToAgentDb } from "@/lib/agent-store/utils"
+import { localAgents } from "@/lib/agents/local-agents"
+import { useChats } from "@/lib/chat-store/chats/provider"
 import { useChatSession } from "@/lib/chat-store/session/provider"
 import { usePathname, useSearchParams } from "next/navigation"
 import {
@@ -16,7 +19,6 @@ import {
   useEffect,
   useState,
 } from "react"
-import { useChats } from "../chat-store/chats/provider"
 
 // Create a separate component that uses useSearchParams
 function SearchParamsProvider({
@@ -75,6 +77,22 @@ export const AgentProvider = ({ children, userId }: AgentProviderProps) => {
       return
     }
 
+    // Check local agents first
+    const agentIdentifier = agentSlug || currentChatAgentId
+    if (
+      agentIdentifier &&
+      localAgents[agentIdentifier as keyof typeof localAgents]
+    ) {
+      const localAgent =
+        localAgents[agentIdentifier as keyof typeof localAgents]
+      // Convert local agent to Agent type format
+      const convertedAgent = convertLocalAgentToAgentDb(localAgent)
+
+      setCurrentAgent(convertedAgent)
+      return
+    }
+
+    // Fallback to database agents
     const agent = await fetchAgentBySlugOrId({
       slug: agentSlug || undefined,
       id: currentChatAgentId || undefined,
