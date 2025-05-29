@@ -230,6 +230,7 @@ export function ChatInput({
               <ButtonSearch
                 isSelected={isSearchEnabled}
                 onToggle={handleSearchToggle}
+                isAuthenticated={isUserAuthenticated}
               />
               {currentAgent && !hasToolSupport && (
                 <div className="flex items-center gap-1">
