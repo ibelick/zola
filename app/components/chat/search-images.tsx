@@ -17,7 +17,7 @@ export function SearchImages({ results }: { results: ImageResult[] }) {
   if (!results?.length) return null
 
   return (
-    <div className="my-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="my-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
       {results.map((img, i) => {
         const favicon = getFavicon(img.sourceUrl)
         return hiddenIndexes.has(i) ? null : (

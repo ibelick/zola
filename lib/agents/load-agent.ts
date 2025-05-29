@@ -7,8 +7,6 @@ export async function loadAgent(agentId: string) {
   if (localAgents[agentId as keyof typeof localAgents]) {
     const localAgent = localAgents[agentId as keyof typeof localAgents]
 
-    console.log("localAgent", localAgent)
-
     return {
       systemPrompt: localAgent.system_prompt,
       tools: localAgent.tools,

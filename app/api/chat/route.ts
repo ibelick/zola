@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
     let agentConfig = null
 
-    if (supabase && agentId) {
+    if (agentId) {
       agentConfig = await loadAgent(agentId)
     }
 
