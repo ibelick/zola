@@ -10,6 +10,16 @@ const nextConfig: NextConfig = withBundleAnalyzer({
     optimizePackageImports: ["@phosphor-icons/react"],
     nodeMiddleware: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
   eslint: {
     // @todo: remove before going live
     ignoreDuringBuilds: true,
