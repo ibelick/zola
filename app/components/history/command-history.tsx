@@ -11,6 +11,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import {
   Tooltip,
@@ -22,8 +29,11 @@ import type { Chats } from "@/lib/chat-store/types"
 import { cn } from "@/lib/utils"
 import { Check, PencilSimple, TrashSimple, X } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState, useRef } from "react"
 import { formatDate, groupChatsByDate } from "./utils"
+import { ChatPreviewPanel } from "./chat-preview-panel"
+import { useUserPreferences } from "@/lib/user-preference-store/provider"
+import { useChatPreview } from "@/lib/hooks/use-chat-preview"
 
 type CommandHistoryProps = {
   chatHistory: Chats[]
@@ -206,66 +216,79 @@ function CommandItemRow({
         {isCurrentChat && <Badge variant="outline">current</Badge>}
       </div>
 
-      {/* Date and actions container */}
       <div className="relative flex min-w-[140px] flex-shrink-0 items-center justify-end">
-        {/* Date that shows by default but hides on selection */}
-        <span
-          className={cn(
-            "text-muted-foreground text-sm font-normal transition-opacity duration-150",
-            "group-data-[selected=true]:opacity-0",
-            Boolean(editingId || deletingId) && "opacity-100"
-          )}
-        >
-          {formatDate(chat?.created_at)}
-        </span>
+        <div className="group-hover:opacity-0 mr-2 text-xs text-muted-foreground transition-opacity duration-200">
+          {formatDate(chat.created_at)}
+        </div>
 
-        {/* Action buttons that appear on selection */}
-        <div
-          className={cn(
-            "absolute right-0 flex items-center gap-1 opacity-0 transition-opacity duration-150",
-            "group-data-[selected=true]:opacity-100",
-            Boolean(editingId || deletingId) && "opacity-0"
-          )}
-        >
+        <div className="absolute right-0 flex translate-x-1 gap-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="group/edit hover:bg-primary/10 size-8 transition-colors duration-150"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  if (chat) onEdit(chat)
-                }}
-                type="button"
-                aria-label="Edit"
-              >
-                <PencilSimple className="text-muted-foreground group-hover/edit:text-primary size-4 transition-colors duration-150" />
-              </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+                className="group/edit text-muted-foreground hover:bg-primary/10 size-8 transition-colors duration-150"
+              onClick={(e) => {
+                e.stopPropagation()
+                  onEdit(chat)
+              }}
+                disabled={!!editingId || !!deletingId}
+              aria-label="Edit"
+            >
+                <PencilSimple className="group-hover/edit:text-primary size-4 transition-colors duration-150" />
+            </Button>
             </TooltipTrigger>
             <TooltipContent>Edit</TooltipContent>
           </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="group/delete text-muted-foreground hover:text-destructive hover:bg-destructive/10 size-8 transition-colors duration-150"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  if (chat?.id) onDelete(chat.id)
-                }}
-                type="button"
-                aria-label="Delete"
-              >
-                <TrashSimple className="text-muted-foreground group-hover/delete:text-destructive size-4 transition-colors duration-150" />
-              </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+                className="group/delete text-muted-foreground hover:text-destructive-foreground hover:bg-primary/10 size-8 transition-colors duration-150"
+              onClick={(e) => {
+                e.stopPropagation()
+                  onDelete(chat.id)
+              }}
+                disabled={!!editingId || !!deletingId}
+              aria-label="Delete"
+            >
+                <TrashSimple className="group-hover/delete:text-primary size-4 transition-colors duration-150" />
+            </Button>
             </TooltipTrigger>
             <TooltipContent>Delete</TooltipContent>
           </Tooltip>
         </div>
       </div>
     </>
+  )
+}
+
+// Custom CommandDialog with className support
+function CustomCommandDialog({
+  title = "Command Palette",
+  description = "Search for a command to run...",
+  children,
+  className,
+  ...props
+}: React.ComponentProps<typeof Dialog> & {
+  title?: string
+  description?: string
+  className?: string
+}) {
+  return (
+    <Dialog {...props}>
+      <DialogHeader className="sr-only">
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
+      </DialogHeader>
+      <DialogContent className={cn("overflow-hidden border-none p-0", className)}>
+        <Command className="[&_[cmdk-group-heading]]:text-muted-foreground border-none **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 [&_[cmdk-item]_svg]:border-none">
+          {children}
+        </Command>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -280,10 +303,18 @@ export function CommandHistory({
 }: CommandHistoryProps) {
   const { chatId } = useChatSession()
   const router = useRouter()
+  const { preferences } = useUserPreferences()
+  
   const [searchQuery, setSearchQuery] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState("")
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
+  const [hoveredChatId, setHoveredChatId] = useState<string | null>(null)
+  const { messages, isLoading, error, fetchPreview, clearPreview } = useChatPreview()
+  
+  // Add ref for hover timeout to prevent flickering
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
@@ -292,8 +323,55 @@ export function CommandHistory({
       setEditingId(null)
       setEditTitle("")
       setDeletingId(null)
+      setSelectedChatId(null)
+      setHoveredChatId(null)
+      clearPreview()
+      
+      // Clear any pending hover timeout
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+        hoverTimeoutRef.current = null
     }
   }
+  }
+
+  // Enhanced hover handlers with timeout for better UX
+  const handleChatHover = useCallback((chatId: string | null) => {
+    if (!preferences.showConversationPreviews) return
+    
+    // Clear any existing timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+      hoverTimeoutRef.current = null
+    }
+    
+    if (chatId) {
+      // Immediate hover in
+      setHoveredChatId(chatId)
+    } else {
+      // Delayed hover out to allow moving to preview panel
+      hoverTimeoutRef.current = setTimeout(() => {
+        setHoveredChatId(null)
+      }, 100)
+    }
+  }, [preferences.showConversationPreviews])
+
+  const handlePreviewHover = useCallback((isHovering: boolean) => {
+    if (!preferences.showConversationPreviews) return
+    
+    if (isHovering) {
+      // Clear timeout when entering preview panel
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+        hoverTimeoutRef.current = null
+      }
+    } else {
+      // Set timeout when leaving preview panel
+      hoverTimeoutRef.current = setTimeout(() => {
+        setHoveredChatId(null)
+      }, 100)
+    }
+  }, [preferences.showConversationPreviews])
 
   const handleEdit = useCallback((chat: Chats) => {
     setEditingId(chat.id)
@@ -338,7 +416,6 @@ export function CommandHistory({
       : chatHistory
   }, [chatHistory, searchQuery])
 
-  // Group chats by time periods
   const groupedChats = useMemo(
     () => groupChatsByDate(chatHistory, searchQuery),
     [chatHistory, searchQuery]
@@ -350,11 +427,16 @@ export function CommandHistory({
       const isCurrentChatEditOrDelete =
         chat.id === editingId || chat.id === deletingId
       const isEditOrDeleteMode = editingId || deletingId
+      const isSelected = chat.id === selectedChatId
 
       return (
         <CommandItem
           key={chat.id}
           onSelect={() => {
+            if (preferences.showConversationPreviews) {
+              setSelectedChatId(chat.id)
+            }
+
             if (isCurrentChatSession) {
               setIsOpen(false)
               return
@@ -370,10 +452,12 @@ export function CommandHistory({
               "bg-accent data-[selected=true]:bg-accent",
             !isCurrentChatEditOrDelete &&
               isEditOrDeleteMode &&
-              "data-[selected=true]:bg-transparent"
+              "data-[selected=true]:bg-transparent",
+            isSelected && preferences.showConversationPreviews && "bg-accent/50"
           )}
           value={chat.id}
-          data-value-id={chat.id}
+          onMouseEnter={() => handleChatHover(chat.id)}
+          onMouseLeave={() => handleChatHover(null)}
         >
           {editingId === chat.id ? (
             <CommandItemEdit
@@ -408,24 +492,37 @@ export function CommandHistory({
       editingId,
       deletingId,
       editTitle,
+      selectedChatId,
+      preferences.showConversationPreviews,
       handleSaveEdit,
       handleCancelEdit,
       handleConfirmDelete,
       handleCancelDelete,
       handleEdit,
       handleDelete,
+      handleChatHover,
     ]
   )
 
-  // Prefetch chat pages, later we will do pagination + infinite scroll
+  // Prefetch routes when dialog opens for better performance
   useEffect(() => {
-    if (!isOpen) return
-
-    // Simply prefetch all the chat routes when dialog opens
-    chatHistory.forEach((chat) => {
+    if (isOpen) {
+      // Prefetch the most recent chat routes
+      const recentChats = chatHistory.slice(0, 10)
+      recentChats.forEach((chat) => {
       router.prefetch(`/c/${chat.id}`)
     })
+    }
   }, [isOpen, chatHistory, router])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Add keyboard shortcut to open dialog with Command+K
   useEffect(() => {
@@ -450,30 +547,39 @@ export function CommandHistory({
       ) : (
         trigger
       )}
-      <CommandDialog
+      
+      <CustomCommandDialog
         open={isOpen}
         onOpenChange={handleOpenChange}
         title="Chat History"
         description="Search through your past conversations"
+        className={cn(
+          preferences.showConversationPreviews 
+            ? "sm:max-w-[900px]" 
+            : "sm:max-w-3xl"
+        )}
       >
-        <Command shouldFilter={false} className="border-none">
           <CommandInput
             placeholder="Search history..."
             value={searchQuery}
             onValueChange={(value) => setSearchQuery(value)}
           />
+        
+        <div className="flex">
+          <div className={cn(
+            "flex-1",
+            preferences.showConversationPreviews ? "max-w-[700px]" : ""
+          )}>
           <CommandList className="max-h-[480px] min-h-[480px] flex-1 [&>[cmdk-list-sizer]]:space-y-6 [&>[cmdk-list-sizer]]:py-2">
             {filteredChat.length === 0 && (
               <CommandEmpty>No chat history found.</CommandEmpty>
             )}
 
             {searchQuery ? (
-              // When searching, display a flat list without grouping
               <CommandGroup className="p-1.5">
                 {filteredChat.map((chat) => renderChatItem(chat))}
               </CommandGroup>
             ) : (
-              // When not searching, display grouped by date
               groupedChats?.map((group) => (
                 <CommandGroup
                   key={group.name}
@@ -485,8 +591,21 @@ export function CommandHistory({
               ))
             )}
           </CommandList>
+          </div>
 
-          {/* indicator command bar */}
+          {preferences.showConversationPreviews && (
+            <ChatPreviewPanel
+              chatId={hoveredChatId}
+              isVisible={true}
+              onHover={handlePreviewHover}
+              messages={messages}
+              isLoading={isLoading}
+              error={error}
+              onFetchPreview={fetchPreview}
+            />
+          )}
+        </div>
+
           <div className="bg-card border-input right-0 bottom-0 left-0 flex items-center justify-between border-t px-4 py-3">
             <div className="text-muted-foreground flex w-full items-center gap-2 text-xs">
               <div className="flex w-full flex-row items-center justify-between gap-1">
@@ -529,8 +648,8 @@ export function CommandHistory({
               </div>
             </div>
           </div>
-        </Command>
-      </CommandDialog>
+      </CustomCommandDialog>
     </>
   )
 }
+
