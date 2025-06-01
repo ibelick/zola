@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react"
+import { getCachedMessages, getMessagesFromDb } from "@/lib/chat-store/messages/api"
 
 interface ChatMessage {
   id: string
@@ -58,23 +59,35 @@ export function useChatPreview(): UseChatPreviewReturn {
       setError(null)
 
       try {
-        const response = await fetch(`/api/chat-preview?chatId=${chatId}`, {
-          signal: controller.signal
-        })
-        
-        const data: ChatPreviewResponse = await response.json()
+        // Cache-first approach as suggested
+        // 1. First load cached messages for instant display
+        const cached = await getCachedMessages(chatId)
+        if (cached && cached.length > 0 && currentRequestRef.current === chatId && !controller.signal.aborted) {
+          // Convert to the format expected by the preview panel and get last 5 messages
+          const cachedMessages = cached
+            .slice(-5) // Get last 5 messages
+            .map(msg => ({
+              id: msg.id,
+              content: msg.content,
+              role: msg.role as "user" | "assistant",
+              created_at: msg.createdAt?.toISOString() || new Date().toISOString()
+            }))
+          setMessages(cachedMessages)
+        }
 
-        // Only update state if this is still the current request
-        if (currentRequestRef.current === chatId && !controller.signal.aborted) {
-          if (!response.ok) {
-            throw new Error(data.error || `HTTP error! status: ${response.status}`)
-          }
-
-          if (data.success) {
-            setMessages(data.messages)
-          } else {
-            throw new Error(data.error || "Failed to fetch chat preview")
-          }
+        // 2. Then fetch fresh messages from database to ensure accuracy
+        const fresh = await getMessagesFromDb(chatId)
+        if (fresh && currentRequestRef.current === chatId && !controller.signal.aborted) {
+          // Convert to the format expected by the preview panel and get last 5 messages  
+          const freshMessages = fresh
+            .slice(-5) // Get last 5 messages
+            .map(msg => ({
+              id: msg.id,
+              content: msg.content,
+              role: msg.role as "user" | "assistant", 
+              created_at: msg.createdAt?.toISOString() || new Date().toISOString()
+            }))
+          setMessages(freshMessages)
         }
       } catch (err) {
         // Only update error state if this is still the current request and not aborted
