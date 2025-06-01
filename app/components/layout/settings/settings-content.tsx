@@ -45,7 +45,7 @@ export function SettingsContent({
   const { resetChats } = useChats()
   const { resetMessages } = useMessages()
   const { theme, setTheme } = useTheme()
-  const { preferences, setPromptSuggestions, setShowToolInvocations } =
+  const { preferences, setPromptSuggestions, setShowToolInvocations, setShowConversationPreviews } =
     useUserPreferences()
   const [selectedTheme, setSelectedTheme] = useState(theme || "system")
   const [selectedModelId, setSelectedModelId] = useState<string>(
@@ -280,6 +280,22 @@ export function SettingsContent({
                   />
                 </div>
               </div>
+
+              {/* Conversation Previews */}
+              <div className="py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium">Conversation previews</h3>
+                    <p className="text-muted-foreground text-xs">
+                      Show conversation previews in history
+                    </p>
+                  </div>
+                  <Switch
+                    checked={preferences.showConversationPreviews}
+                    onCheckedChange={setShowConversationPreviews}
+                  />
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="connections" className="py-4">
@@ -466,6 +482,22 @@ export function SettingsContent({
                     <Switch
                       checked={preferences.showToolInvocations}
                       onCheckedChange={setShowToolInvocations}
+                    />
+                  </div>
+                </div>
+
+                {/* Conversation Previews */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium">Conversation previews</h3>
+                      <p className="text-muted-foreground text-xs">
+                        Show conversation previews in history
+                      </p>
+                    </div>
+                    <Switch
+                      checked={preferences.showConversationPreviews}
+                      onCheckedChange={setShowConversationPreviews}
                     />
                   </div>
                 </div>

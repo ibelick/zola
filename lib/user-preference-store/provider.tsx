@@ -8,12 +8,14 @@ type UserPreferences = {
   layout: LayoutType
   promptSuggestions: boolean
   showToolInvocations: boolean
+  showConversationPreviews: boolean
 }
 
 const defaultPreferences: UserPreferences = {
   layout: "fullscreen",
   promptSuggestions: true,
   showToolInvocations: true,
+  showConversationPreviews: true,
 }
 
 const PREFERENCES_STORAGE_KEY = "user-preferences"
@@ -24,6 +26,7 @@ interface UserPreferencesContextType {
   setLayout: (layout: LayoutType) => void
   setPromptSuggestions: (enabled: boolean) => void
   setShowToolInvocations: (enabled: boolean) => void
+  setShowConversationPreviews: (enabled: boolean) => void
 }
 
 const UserPreferencesContext = createContext<
@@ -97,6 +100,10 @@ export function UserPreferencesProvider({
     setPreferences((prev) => ({ ...prev, showToolInvocations: enabled }))
   }
 
+  const setShowConversationPreviews = (enabled: boolean) => {
+    setPreferences((prev) => ({ ...prev, showConversationPreviews: enabled }))
+  }
+
   return (
     <UserPreferencesContext.Provider
       value={{
@@ -104,6 +111,7 @@ export function UserPreferencesProvider({
         setLayout,
         setPromptSuggestions,
         setShowToolInvocations,
+        setShowConversationPreviews,
       }}
     >
       {children}
