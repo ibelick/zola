@@ -211,14 +211,18 @@ export function ChatPreviewPanel({
         
         {chatId && !isLoading && !error && messages.length > 0 && (
           <ScrollArea className="h-full">
-            <div className="space-y-4 p-6">
-              <div className="flex justify-center">
+            <div 
+              className="space-y-4 p-6"
+            >
+              <div 
+                className="flex justify-center"
+              >
                 <div className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
                   Last {messages.length} messages
                 </div>
               </div>
               
-              {messages.map((message) => (
+              {messages.map((message, index) => (
                 <MessageBubble
                   key={message.id}
                   content={message.content}
