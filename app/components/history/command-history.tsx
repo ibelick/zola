@@ -207,58 +207,60 @@ function CommandItemRow({
       </div>
 
       {/* Date and actions container */}
-      <div className="relative flex min-w-[120px] flex-shrink-0 justify-end">
+      <div className="relative flex min-w-[140px] flex-shrink-0 items-center justify-end">
         {/* Date that shows by default but hides on selection */}
         <span
           className={cn(
-            "text-muted-foreground text-sm font-normal opacity-100 transition-opacity duration-0",
-            "group-data-[selected=true]:opacity-100",
-            Boolean(editingId || deletingId) &&
-              "group-data-[selected=true]:opacity-0"
+            "text-muted-foreground text-sm font-normal transition-opacity duration-150",
+            "group-data-[selected=true]:opacity-0",
+            Boolean(editingId || deletingId) && "opacity-100"
           )}
         >
           {formatDate(chat?.created_at)}
         </span>
 
-        {/* Action buttons that appear on selection, positioned over the date */}
+        {/* Action buttons that appear on selection */}
         <div
           className={cn(
-            "absolute inset-0 flex items-center justify-end gap-1 opacity-0 transition-opacity duration-0",
+            "absolute right-0 flex items-center gap-1 opacity-0 transition-opacity duration-150",
             "group-data-[selected=true]:opacity-100",
-            Boolean(editingId || deletingId) &&
-              "group-data-[selected=true]:opacity-0"
+            Boolean(editingId || deletingId) && "opacity-0"
           )}
         >
           <Tooltip>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="group/edit hover:bg-primary/10 size-8 transition-colors duration-150"
-              onClick={(e) => {
-                e.stopPropagation()
-                if (chat) onEdit(chat)
-              }}
-              type="button"
-              aria-label="Edit"
-            >
-              <PencilSimple className="text-muted-foreground group-hover/edit:text-primary size-4 transition-colors duration-150" />
-            </Button>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="group/edit hover:bg-primary/10 size-8 transition-colors duration-150"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (chat) onEdit(chat)
+                }}
+                type="button"
+                aria-label="Edit"
+              >
+                <PencilSimple className="text-muted-foreground group-hover/edit:text-primary size-4 transition-colors duration-150" />
+              </Button>
+            </TooltipTrigger>
             <TooltipContent>Edit</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="group/delete text-muted-foreground hover:text-destructive hover:bg-destructive-foreground/10 size-8 transition-colors duration-150"
-              onClick={(e) => {
-                e.stopPropagation()
-                if (chat?.id) onDelete(chat.id)
-              }}
-              type="button"
-              aria-label="Delete"
-            >
-              <TrashSimple className="text-muted-foreground group-hover/delete:text-destructive size-4 transition-colors duration-150" />
-            </Button>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="group/delete text-muted-foreground hover:text-destructive hover:bg-destructive/10 size-8 transition-colors duration-150"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (chat?.id) onDelete(chat.id)
+                }}
+                type="button"
+                aria-label="Delete"
+              >
+                <TrashSimple className="text-muted-foreground group-hover/delete:text-destructive size-4 transition-colors duration-150" />
+              </Button>
+            </TooltipTrigger>
             <TooltipContent>Delete</TooltipContent>
           </Tooltip>
         </div>
