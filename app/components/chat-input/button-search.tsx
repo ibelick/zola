@@ -42,14 +42,14 @@ export function ButtonSearch({
     <Button
       variant="secondary"
       className={cn(
-        "border-border dark:bg-secondary rounded-full border bg-transparent transition-all duration-150",
+        "border-border dark:bg-secondary rounded-full border bg-transparent transition-all duration-150 has-[>svg]:px-1.75 md:has-[>svg]:px-3",
         isSelected &&
           "border-[#0091FF]/20 bg-[#E5F3FE] text-[#0091FF] hover:bg-[#E5F3FE] hover:text-[#0091FF]"
       )}
       onClick={handleClick}
     >
       <GlobeIcon className="size-5" />
-      Search
+      <span className="hidden md:block">Search</span>
     </Button>
   )
 }
