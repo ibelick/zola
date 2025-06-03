@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
 import { PlugsConnected } from "@phosphor-icons/react"
 import { useEffect, useState } from "react"
+import { ByokSection } from "./byok-section"
 import { ProviderSettingsSection } from "./provider-settings-section"
 
 interface DeveloperTool {
@@ -68,11 +69,12 @@ export function ConnectionsSection() {
 
   return (
     <div className="space-y-8">
+      {isDev && <ByokSection />}
       {/* Provider Settings */}
       {isDev && <ProviderSettingsSection />}
 
       {/* Divider */}
-      <div className="border-t" />
+      {isDev && <div className="border-t" />}
 
       {/* Developer Tools Section */}
       {loading ? (
@@ -91,7 +93,7 @@ export function ConnectionsSection() {
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-8">
           {/* Header */}
           <div>
             <h3 className="mb-2 text-lg font-medium">
