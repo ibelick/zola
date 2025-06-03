@@ -26,9 +26,9 @@ import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
-import { ConnectionsSection } from "./connections-section"
-import { LayoutSection } from "./layout-section"
-import { SystemPromptSection } from "./system-prompt-section"
+import { DeveloperTools } from "./connections"
+import { LayoutSettings, InteractionPreferences } from "./appearance"
+import { SystemPromptSection } from "./general"
 
 type SettingsContentProps = {
   onClose: () => void
@@ -45,7 +45,7 @@ export function SettingsContent({
   const { resetChats } = useChats()
   const { resetMessages } = useMessages()
   const { theme, setTheme } = useTheme()
-  const { preferences, setPromptSuggestions, setShowToolInvocations, setShowConversationPreviews } =
+  const { preferences, setPromptSuggestions, setShowToolInvocations } =
     useUserPreferences()
   const [selectedTheme, setSelectedTheme] = useState(theme || "system")
   const [selectedModelId, setSelectedModelId] = useState<string>(
@@ -246,60 +246,17 @@ export function SettingsContent({
 
               {/* Layout */}
               <div className="py-4">
-                <LayoutSection />
+                <LayoutSettings />
               </div>
 
-              {/* Prompt Suggestions */}
+              {/* Interaction Preferences */}
               <div className="py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Prompt suggestions</h3>
-                    <p className="text-muted-foreground text-xs">
-                      Show suggested prompts when starting a new conversation
-                    </p>
-                  </div>
-                  <Switch
-                    checked={preferences.promptSuggestions}
-                    onCheckedChange={setPromptSuggestions}
-                  />
-                </div>
-              </div>
-
-              {/* Tool Invocations */}
-              <div className="py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Tool invocations</h3>
-                    <p className="text-muted-foreground text-xs">
-                      Show tool execution details in conversations
-                    </p>
-                  </div>
-                  <Switch
-                    checked={preferences.showToolInvocations}
-                    onCheckedChange={setShowToolInvocations}
-                  />
-                </div>
-              </div>
-
-              {/* Conversation Previews */}
-              <div className="py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Conversation previews</h3>
-                    <p className="text-muted-foreground text-xs">
-                      Show conversation previews in history
-                    </p>
-                  </div>
-                  <Switch
-                    checked={preferences.showConversationPreviews}
-                    onCheckedChange={setShowConversationPreviews}
-                  />
-                </div>
+                <InteractionPreferences />
               </div>
             </TabsContent>
 
             <TabsContent value="connections" className="py-4">
-              <ConnectionsSection />
+              <DeveloperTools />
             </TabsContent>
           </div>
         ) : (
@@ -450,61 +407,16 @@ export function SettingsContent({
                     ))}
                   </div>
                 </div>
-                <LayoutSection />
+                <LayoutSettings />
 
-                {/* Prompt Suggestions */}
+                {/* Interaction Preferences */}
                 <div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-medium">
-                        Prompt suggestions
-                      </h3>
-                      <p className="text-muted-foreground text-xs">
-                        Show suggested prompts when starting a new conversation
-                      </p>
-                    </div>
-                    <Switch
-                      checked={preferences.promptSuggestions}
-                      onCheckedChange={setPromptSuggestions}
-                    />
-                  </div>
-                </div>
-
-                {/* Tool Invocations */}
-                <div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-medium">Tool invocations</h3>
-                      <p className="text-muted-foreground text-xs">
-                        Show tool execution details in conversations
-                      </p>
-                    </div>
-                    <Switch
-                      checked={preferences.showToolInvocations}
-                      onCheckedChange={setShowToolInvocations}
-                    />
-                  </div>
-                </div>
-
-                {/* Conversation Previews */}
-                <div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-medium">Conversation previews</h3>
-                      <p className="text-muted-foreground text-xs">
-                        Show conversation previews in history
-                      </p>
-                    </div>
-                    <Switch
-                      checked={preferences.showConversationPreviews}
-                      onCheckedChange={setShowConversationPreviews}
-                    />
-                  </div>
+                  <InteractionPreferences />
                 </div>
               </TabsContent>
 
               <TabsContent value="connections" className="mt-0">
-                <ConnectionsSection />
+                <DeveloperTools />
               </TabsContent>
             </div>
           </>
