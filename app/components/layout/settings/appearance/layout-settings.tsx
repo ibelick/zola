@@ -257,13 +257,7 @@ export function LayoutSettings() {
               : "border-border hover:bg-muted/50"
           )}
         >
-          <div className="border-border mb-3 h-20 w-full overflow-hidden rounded border">
-            <LayoutSidebar className="h-full w-full" />
-          </div>
-          <h4 className="text-sm font-medium">Sidebar</h4>
-          <p className="text-muted-foreground text-xs">
-            Fixed sidebar navigation
-          </p>
+          <LayoutSidebar className="h-full w-full" />
         </button>
 
         <button
@@ -276,13 +270,7 @@ export function LayoutSettings() {
               : "border-border hover:bg-muted/50"
           )}
         >
-          <div className="border-border mb-3 h-20 w-full overflow-hidden rounded border">
-            <LayoutFullscreen className="h-full w-full" />
-          </div>
-          <h4 className="text-sm font-medium">Fullscreen</h4>
-          <p className="text-muted-foreground text-xs">
-            Fullscreen conversation view
-          </p>
+          <LayoutFullscreen className="h-full w-full" />
         </button>
       </div>
     </div>

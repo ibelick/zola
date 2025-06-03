@@ -3,13 +3,14 @@
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
-import { cn } from "@/lib/utils"
+import { cn, isDev } from "@/lib/utils"
 import { GearSix, PaintBrush, PlugsConnected, X } from "@phosphor-icons/react"
 import { useState } from "react"
 import { InteractionPreferences } from "./appearance/interaction-preferences"
 import { LayoutSettings } from "./appearance/layout-settings"
 // Appearance tab components
 import { ThemeSelection } from "./appearance/theme-selection"
+import { ConnectionsPlaceholder } from "./connections/connections-placeholder"
 // Connections tab components
 import { DeveloperTools } from "./connections/developer-tools"
 import { ProviderSettings } from "./connections/provider-settings"
@@ -97,8 +98,9 @@ export function SettingsContent({
             </TabsContent>
 
             <TabsContent value="connections" className="space-y-6">
-              <ProviderSettings />
-              <DeveloperTools />
+              {!isDev && <ConnectionsPlaceholder />}
+              {isDev && <ProviderSettings />}
+              {isDev && <DeveloperTools />}
             </TabsContent>
           </div>
         ) : (
@@ -157,8 +159,9 @@ export function SettingsContent({
               </TabsContent>
 
               <TabsContent value="connections" className="mt-0 space-y-6">
-                <ProviderSettings />
-                <DeveloperTools />
+                {!isDev && <ConnectionsPlaceholder />}
+                {isDev && <ProviderSettings />}
+                {isDev && <DeveloperTools />}
               </TabsContent>
             </div>
           </>

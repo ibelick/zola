@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
-import { PlugsConnected } from "@phosphor-icons/react"
 import { useEffect, useState } from "react"
 
 interface DeveloperTool {
@@ -23,7 +22,6 @@ interface DeveloperToolsResponse {
 export function DeveloperTools() {
   const [tools, setTools] = useState<DeveloperTool[]>([])
   const [loading, setLoading] = useState(true)
-  const isDev = process.env.NODE_ENV === "development"
 
   useEffect(() => {
     const fetchTools = async () => {
@@ -40,12 +38,8 @@ export function DeveloperTools() {
       }
     }
 
-    if (isDev) {
-      fetchTools()
-    } else {
-      setLoading(false)
-    }
-  }, [isDev])
+    fetchTools()
+  }, [])
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -67,20 +61,6 @@ export function DeveloperTools() {
     return (
       <div className="py-8 text-center">
         <div className="text-muted-foreground">Loading connections...</div>
-      </div>
-    )
-  }
-
-  if (!isDev) {
-    return (
-      <div className="py-8 text-center">
-        <PlugsConnected className="text-muted-foreground mx-auto mb-2 size-12" />
-        <h3 className="mb-1 text-sm font-medium">
-          No developer tools available
-        </h3>
-        <p className="text-muted-foreground text-sm">
-          Third-party service connections will appear here in development mode.
-        </p>
       </div>
     )
   }

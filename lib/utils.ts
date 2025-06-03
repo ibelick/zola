@@ -32,3 +32,5 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     }, wait)
   }
 }
+
+export const isDev = process.env.NODE_ENV === "development"
