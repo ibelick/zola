@@ -11,7 +11,6 @@ import { LayoutSettings } from "./appearance/layout-settings"
 // Appearance tab components
 import { ThemeSelection } from "./appearance/theme-selection"
 // Connections tab components
-import { ByokSettings } from "./connections/byok-settings"
 import { DeveloperTools } from "./connections/developer-tools"
 import { ProviderSettings } from "./connections/provider-settings"
 import { AccountManagement } from "./general/account-management"
@@ -98,7 +97,6 @@ export function SettingsContent({
             </TabsContent>
 
             <TabsContent value="connections" className="space-y-6">
-              <ByokSettings />
               <ProviderSettings />
               <DeveloperTools />
             </TabsContent>
@@ -159,7 +157,6 @@ export function SettingsContent({
               </TabsContent>
 
               <TabsContent value="connections" className="mt-0 space-y-6">
-                <ByokSettings />
                 <ProviderSettings />
                 <DeveloperTools />
               </TabsContent>
