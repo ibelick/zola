@@ -14,7 +14,7 @@ import type {
   SupportedModel,
   XaiModel,
 } from "./types"
-import { createEnvWithUserKeys } from "./env"
+
 
 type OpenAIChatSettings = Parameters<typeof openai>[1]
 type MistralProviderSettings = Parameters<typeof mistral>[1]
