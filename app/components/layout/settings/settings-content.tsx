@@ -10,6 +10,7 @@ import { InteractionPreferences } from "./appearance/interaction-preferences"
 import { LayoutSettings } from "./appearance/layout-settings"
 // Appearance tab components
 import { ThemeSelection } from "./appearance/theme-selection"
+import { ByokSection } from "./connections/byok-section"
 import { ConnectionsPlaceholder } from "./connections/connections-placeholder"
 // Connections tab components
 import { DeveloperTools } from "./connections/developer-tools"
@@ -98,9 +99,10 @@ export function SettingsContent({
             </TabsContent>
 
             <TabsContent value="connections" className="space-y-6">
-              {!isDev && <ConnectionsPlaceholder />}
+              <ByokSection />
+              {/* {!isDev && <ConnectionsPlaceholder />}
               {isDev && <ProviderSettings />}
-              {isDev && <DeveloperTools />}
+              {isDev && <DeveloperTools />} */}
             </TabsContent>
           </div>
         ) : (
@@ -159,9 +161,10 @@ export function SettingsContent({
               </TabsContent>
 
               <TabsContent value="connections" className="mt-0 space-y-6">
-                {!isDev && <ConnectionsPlaceholder />}
+                <ByokSection />
+                {/* {!isDev && <ConnectionsPlaceholder />}
                 {isDev && <ProviderSettings />}
-                {isDev && <DeveloperTools />}
+                {isDev && <DeveloperTools />} */}
               </TabsContent>
             </div>
           </>
