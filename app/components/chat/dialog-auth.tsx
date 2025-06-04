@@ -12,7 +12,7 @@ import {
 import { signInWithGoogle } from "@/lib/api"
 import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
-import Image from "next/image"
+
 import { useState } from "react"
 
 type DialogAuthProps = {

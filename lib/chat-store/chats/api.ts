@@ -191,7 +191,7 @@ export async function createNewChat(
 ): Promise<Chats> {
   try {
     // Note: Local agent IDs are filtered out at the API level (create-chat route)
-    const payload: any = {
+    const payload: { userId: string; title: string; model: string; isAuthenticated?: boolean; agentId?: string } = {
       userId,
       title: title || (agentId ? `Conversation with agent` : "New Chat"),
       model: model || MODEL_DEFAULT,

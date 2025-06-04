@@ -61,8 +61,7 @@ export function ChatInput({
   const {
     isSearchEnabled,
     toggleSearch,
-    getActiveAgentId,
-    isSearchAgentAvailable,
+
   } = useSearchAgent()
 
   const agentCommand = useAgentCommand({

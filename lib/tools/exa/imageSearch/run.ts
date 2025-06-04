@@ -45,12 +45,12 @@ export async function runImageSearch(input: Input) {
     const data = await res.json()
 
     const imageResults = data.results
-      .map((r: any) => ({
+      .map((r: { title: string; image?: string; imageUrl?: string; url: string }) => ({
         title: r.title,
         imageUrl: r.image || r.imageUrl || null,
         sourceUrl: r.url,
       }))
-      .filter((r: any) => r.imageUrl)
+      .filter((r: { imageUrl: string | null }) => r.imageUrl)
       .slice(0, numResults)
 
     return {

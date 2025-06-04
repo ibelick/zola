@@ -33,7 +33,7 @@ export async function loadAgent(agentId: string) {
   }
 
   const activeTools = Array.isArray(agent.tools)
-    ? agent.tools.reduce((acc: Record<string, any>, toolId: string) => {
+    ? agent.tools.reduce((acc: Record<string, unknown>, toolId: string) => {
         const tool = TOOL_REGISTRY[toolId as ToolId]
         if (!tool) return acc
         if (tool.isAvailable?.() === false) return acc
