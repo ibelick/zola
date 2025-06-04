@@ -14,7 +14,7 @@ import type {
   SupportedModel,
   XaiModel,
 } from "./types"
-import { env, createEnvWithUserKeys } from "./env"
+import { createEnvWithUserKeys } from "./env"
 import { getEffectiveApiKey } from "../user-keys"
 
 type OpenAIChatSettings = Parameters<typeof openai>[1]
