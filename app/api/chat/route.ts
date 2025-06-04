@@ -2,14 +2,6 @@ import { loadAgent } from "@/lib/agents/load-agent"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
 import { getAllModels } from "@/lib/models"
-import { openproviders } from "@/lib/openproviders"
-import { getProviderForModel } from "@/lib/openproviders/provider-map"
-import { getEffectiveApiKey, Provider } from "@/lib/user-keys"
-import { createOpenAI } from "@ai-sdk/openai"
-import { mistral } from "@ai-sdk/mistral"
-import { google } from "@ai-sdk/google"
-import { anthropic } from "@ai-sdk/anthropic"
-import { xai } from "@ai-sdk/xai"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { Message as MessageAISDK, streamText, ToolSet } from "ai"
 import {
@@ -80,40 +72,8 @@ export async function POST(req: Request) {
     const allModels = await getAllModels()
     const modelConfig = allModels.find((m) => m.id === model)
 
-    if (!modelConfig) {
+    if (!modelConfig || !modelConfig.apiSdk) {
       throw new Error(`Model ${model} not found`)
-    }
-
-    const provider = getProviderForModel(model)
-    let modelInstance
-
-    if (isAuthenticated && userId) {
-      const userApiKey = await getEffectiveApiKey(userId, provider as Provider)
-      
-      if (userApiKey) {
-        if (provider === "openai") {
-          const openaiProvider = createOpenAI({ apiKey: userApiKey })
-          modelInstance = openaiProvider(model as any)
-        } else if (provider === "mistral") {
-          process.env.MISTRAL_API_KEY = userApiKey
-          modelInstance = mistral(model as any)
-        } else if (provider === "google") {
-          process.env.GOOGLE_GENERATIVE_AI_API_KEY = userApiKey
-          modelInstance = google(model as any)
-        } else if (provider === "anthropic") {
-          process.env.ANTHROPIC_API_KEY = userApiKey
-          modelInstance = anthropic(model as any)
-        } else if (provider === "xai") {
-          process.env.XAI_API_KEY = userApiKey
-          modelInstance = xai(model as any)
-        } else {
-          modelInstance = openproviders(model as any)
-        }
-      } else {
-        modelInstance = openproviders(model as any)
-      }
-    } else {
-      modelInstance = openproviders(model as any)
     }
 
     const effectiveSystemPrompt =
@@ -138,7 +98,7 @@ export async function POST(req: Request) {
     let streamError: Error | null = null
 
     const result = streamText({
-      model: modelInstance,
+      model: modelConfig.apiSdk(),
       system: effectiveSystemPrompt,
       messages: cleanedMessages,
       tools: toolsToUse as ToolSet,
