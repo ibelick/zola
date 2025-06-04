@@ -26,7 +26,7 @@ const grokModels: ModelConfig[] = [
     apiDocs: "https://docs.x.ai/docs/models",
     modelPage: "https://x.ai/news/grok-2",
     releasedAt: "2024-01-21",
-    apiSdk: () => openproviders("grok-2"),
+    apiSdk: (apiKey?: string) => openproviders("grok-2", undefined, apiKey),
   },
   {
     id: "grok-2-vision",
@@ -50,7 +50,7 @@ const grokModels: ModelConfig[] = [
     website: "https://x.ai",
     apiDocs: "https://docs.x.ai/docs/models",
     modelPage: "https://x.ai/news/grok-2",
-    apiSdk: () => openproviders("grok-2-vision"),
+    apiSdk: (apiKey?: string) => openproviders("grok-2-vision", undefined, apiKey),
   },
   {
     id: "grok-3",
@@ -74,7 +74,7 @@ const grokModels: ModelConfig[] = [
     website: "https://x.ai",
     apiDocs: "https://docs.x.ai/docs/models",
     releasedAt: "2024-05-01",
-    apiSdk: () => openproviders("grok-3"),
+    apiSdk: (apiKey?: string) => openproviders("grok-3", undefined, apiKey),
   },
   {
     id: "grok-3-fast",
@@ -99,7 +99,7 @@ const grokModels: ModelConfig[] = [
     website: "https://x.ai",
     apiDocs: "https://docs.x.ai/docs/models",
     releasedAt: "2024-05-01",
-    apiSdk: () => openproviders("grok-3-fast"),
+    apiSdk: (apiKey?: string) => openproviders("grok-3-fast", undefined, apiKey),
   },
   {
     id: "grok-3-mini",
@@ -122,7 +122,7 @@ const grokModels: ModelConfig[] = [
     intelligence: "Low",
     website: "https://x.ai",
     apiDocs: "https://docs.x.ai/docs/models",
-    apiSdk: () => openproviders("grok-3-mini"),
+    apiSdk: (apiKey?: string) => openproviders("grok-3-mini", undefined, apiKey),
   },
   {
     id: "grok-3-mini-fast",
@@ -146,7 +146,7 @@ const grokModels: ModelConfig[] = [
     intelligence: "Low",
     website: "https://x.ai",
     apiDocs: "https://docs.x.ai/docs/models",
-    apiSdk: () => openproviders("grok-3-mini-fast"),
+    apiSdk: (apiKey?: string) => openproviders("grok-3-mini-fast", undefined, apiKey),
   },
 ]
 

@@ -22,7 +22,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     modelPage: "https://platform.openai.com/docs/models/gpt-3-5-turbo",
-    apiSdk: () => openproviders("gpt-3.5-turbo"),
+    apiSdk: (apiKey?: string) => openproviders("gpt-3.5-turbo", undefined, apiKey),
   },
   {
     id: "gpt-3.5-turbo-instruct",
@@ -45,7 +45,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     modelPage: "https://platform.openai.com/docs/models/gpt-3-5-turbo",
-    apiSdk: () => openproviders("gpt-3.5-turbo-instruct"),
+    apiSdk: (apiKey?: string) => openproviders("gpt-3.5-turbo-instruct", undefined, apiKey),
   },
   {
     id: "gpt-4-turbo",
@@ -67,7 +67,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     modelPage: "https://platform.openai.com/docs/models/gpt-4-turbo-and-gpt-4",
-    apiSdk: () => openproviders("gpt-4-turbo"),
+    apiSdk: (apiKey?: string) => openproviders("gpt-4-turbo", undefined, apiKey),
   },
   {
     id: "gpt-4.1",
@@ -88,7 +88,7 @@ const openaiModels: ModelConfig[] = [
     speed: "Medium",
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
-    apiSdk: () => openproviders("gpt-4.1"),
+    apiSdk: (apiKey?: string) => openproviders("gpt-4.1", undefined, apiKey),
   },
   {
     id: "gpt-4.1-mini",
@@ -110,7 +110,7 @@ const openaiModels: ModelConfig[] = [
     speed: "Fast",
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
-    apiSdk: () => openproviders("gpt-4.1-mini"),
+    apiSdk: (apiKey?: string) => openproviders("gpt-4.1-mini", undefined, apiKey),
   },
   {
     id: "gpt-4.1-nano",
@@ -131,7 +131,7 @@ const openaiModels: ModelConfig[] = [
     speed: "Fast",
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
-    apiSdk: () => openproviders("gpt-4.1-nano"),
+    apiSdk: (apiKey?: string) => openproviders("gpt-4.1-nano", undefined, apiKey),
   },
   {
     id: "gpt-4.5-preview",
@@ -153,7 +153,7 @@ const openaiModels: ModelConfig[] = [
     speed: "Fast",
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
-    apiSdk: () => openproviders("gpt-4.5-preview"),
+    apiSdk: (apiKey?: string) => openproviders("gpt-4.5-preview", undefined, apiKey),
   },
   {
     id: "gpt-4o",
@@ -176,7 +176,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     modelPage: "https://platform.openai.com/docs/models/gpt-4o",
-    apiSdk: () => openproviders("gpt-4o"),
+    apiSdk: (apiKey?: string) => openproviders("gpt-4o", undefined, apiKey),
   },
   {
     id: "gpt-4o-mini",
@@ -199,7 +199,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     modelPage: "https://platform.openai.com/docs/models/gpt-4o-mini",
-    apiSdk: () => openproviders("gpt-4o-mini"),
+    apiSdk: (apiKey?: string) => openproviders("gpt-4o-mini", undefined, apiKey),
   },
   {
     id: "o1",
@@ -222,7 +222,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
-    apiSdk: () => openproviders("o1"),
+    apiSdk: (apiKey?: string) => openproviders("o1", undefined, apiKey),
   },
   {
     id: "o3-mini",
@@ -244,7 +244,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
-    apiSdk: () => openproviders("o3-mini"),
+    apiSdk: (apiKey?: string) => openproviders("o3-mini", undefined, apiKey),
   },
   {
     id: "o1-mini",
@@ -267,7 +267,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
-    apiSdk: () => openproviders("o1-mini"),
+    apiSdk: (apiKey?: string) => openproviders("o1-mini", undefined, apiKey),
   },
   {
     id: "o3-mini-high",
@@ -290,7 +290,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
-    apiSdk: () => openproviders("o3-mini"),
+    apiSdk: (apiKey?: string) => openproviders("o3-mini", undefined, apiKey),
   },
   {
     id: "o3-mini-low",
@@ -313,7 +313,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
-    apiSdk: () => openproviders("o3-mini"),
+    apiSdk: (apiKey?: string) => openproviders("o3-mini", undefined, apiKey),
   },
   {
     id: "o3-mini-medium",
@@ -336,7 +336,7 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
     releasedAt: "2024-12-20",
-    apiSdk: () => openproviders("o3-mini"),
+    apiSdk: (apiKey?: string) => openproviders("o3-mini", undefined, apiKey),
   },
   {
     id: "o4-mini",
@@ -358,7 +358,7 @@ const openaiModels: ModelConfig[] = [
     speed: "Medium",
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/api-reference",
-    apiSdk: () => openproviders("gpt-4o-mini"),
+    apiSdk: (apiKey?: string) => openproviders("gpt-4o-mini", undefined, apiKey),
   },
 ]
 

@@ -30,7 +30,7 @@ type ModelConfig = {
   releasedAt?: string // "2024-12-01" (optional, for tracking changes)
 
   // apiSdk?: () => LanguageModelV1 // "openai("gpt-4.1-nano")"
-  apiSdk?: () => LanguageModelV1
+  apiSdk?: (apiKey?: string) => LanguageModelV1
 }
 
 export type { ModelConfig }

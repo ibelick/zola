@@ -25,7 +25,7 @@ const claudeModels: ModelConfig[] = [
     website: "https://www.anthropic.com",
     apiDocs: "https://docs.anthropic.com",
     modelPage: "https://www.anthropic.com/news/claude-3-5-haiku",
-    apiSdk: () => openproviders("claude-3-5-haiku-latest"),
+    apiSdk: (apiKey?: string) => openproviders("claude-3-5-haiku-latest", undefined, apiKey),
   },
   {
     id: "claude-3-5-sonnet-latest",
@@ -51,7 +51,7 @@ const claudeModels: ModelConfig[] = [
     apiDocs: "https://docs.anthropic.com",
     modelPage: "https://www.anthropic.com/news/claude-3-5-sonnet",
     releasedAt: "2024-06-20",
-    apiSdk: () => openproviders("claude-3-5-sonnet-latest"),
+    apiSdk: (apiKey?: string) => openproviders("claude-3-5-sonnet-latest", undefined, apiKey),
   },
   {
     id: "claude-3-7-sonnet-20250219",
@@ -74,7 +74,7 @@ const claudeModels: ModelConfig[] = [
     intelligence: "High",
     website: "https://www.anthropic.com",
     apiDocs: "https://docs.anthropic.com",
-    apiSdk: () => openproviders("claude-3-7-sonnet-20250219"),
+    apiSdk: (apiKey?: string) => openproviders("claude-3-7-sonnet-20250219", undefined, apiKey),
   },
   {
     id: "claude-3-7-sonnet-rea",
@@ -97,7 +97,7 @@ const claudeModels: ModelConfig[] = [
     intelligence: "High",
     website: "https://www.anthropic.com",
     apiDocs: "https://docs.anthropic.com",
-    apiSdk: () => openproviders("claude-3-7-sonnet-20250219"),
+    apiSdk: (apiKey?: string) => openproviders("claude-3-7-sonnet-20250219", undefined, apiKey),
   },
   {
     id: "claude-3-haiku-20240307",
@@ -122,7 +122,7 @@ const claudeModels: ModelConfig[] = [
     apiDocs: "https://docs.anthropic.com",
     modelPage: "https://www.anthropic.com/news/claude-3-family",
     releasedAt: "2024-03-04",
-    apiSdk: () => openproviders("claude-3-haiku-20240307"),
+    apiSdk: (apiKey?: string) => openproviders("claude-3-haiku-20240307", undefined, apiKey),
   },
   {
     id: "claude-3-opus-latest",
@@ -147,7 +147,7 @@ const claudeModels: ModelConfig[] = [
     apiDocs: "https://docs.anthropic.com",
     modelPage: "https://www.anthropic.com/news/claude-3-family",
     releasedAt: "2024-03-04",
-    apiSdk: () => openproviders("claude-3-opus-latest"),
+    apiSdk: (apiKey?: string) => openproviders("claude-3-opus-latest", undefined, apiKey),
   },
   {
     id: "claude-3-sonnet-20240229",
@@ -173,7 +173,7 @@ const claudeModels: ModelConfig[] = [
     apiDocs: "https://docs.anthropic.com",
     modelPage: "https://www.anthropic.com/news/claude-3-family",
     releasedAt: "2024-03-04",
-    apiSdk: () => openproviders("claude-3-sonnet-20240229"),
+    apiSdk: (apiKey?: string) => openproviders("claude-3-sonnet-20240229", undefined, apiKey),
   },
   {
     id: "claude-4-opus",

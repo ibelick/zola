@@ -1,10 +1,11 @@
-import { anthropic } from "@ai-sdk/anthropic"
-import { google } from "@ai-sdk/google"
-import { mistral } from "@ai-sdk/mistral"
+import { anthropic, createAnthropic } from "@ai-sdk/anthropic"
+import { google, createGoogleGenerativeAI } from "@ai-sdk/google"
+import { mistral, createMistral } from "@ai-sdk/mistral"
 import { openai, createOpenAI } from "@ai-sdk/openai"
 import type { LanguageModelV1 } from "@ai-sdk/provider"
-import { xai } from "@ai-sdk/xai"
+import { xai, createXai } from "@ai-sdk/xai"
 import { getProviderForModel } from "./provider-map"
+
 import type {
   AnthropicModel,
   GeminiModel,
@@ -61,27 +62,51 @@ const createOllamaProvider = () => {
 
 export function openproviders<T extends SupportedModel>(
   modelId: T,
-  settings?: OpenProvidersOptions<T>
+  settings?: OpenProvidersOptions<T>,
+  apiKey?: string
 ): LanguageModelV1 {
   const provider = getProviderForModel(modelId)
 
   if (provider === "openai") {
+    if (apiKey) {
+      const openaiProvider = createOpenAI({ 
+        apiKey,
+        compatibility: 'strict'
+      })
+      return openaiProvider(modelId as OpenAIModel, settings as OpenAIChatSettings)
+    }
     return openai(modelId as OpenAIModel, settings as OpenAIChatSettings)
   }
 
   if (provider === "mistral") {
+    if (apiKey) {
+      const mistralProvider = createMistral({ apiKey })
+      return mistralProvider(modelId as MistralModel, settings as MistralProviderSettings)
+    }
     return mistral(modelId as MistralModel, settings as MistralProviderSettings)
   }
 
   if (provider === "google") {
+    if (apiKey) {
+      const googleProvider = createGoogleGenerativeAI({ apiKey })
+      return googleProvider(modelId as GeminiModel, settings as GoogleGenerativeAIProviderSettings)
+    }
     return google(modelId as GeminiModel, settings as GoogleGenerativeAIProviderSettings)
   }
 
   if (provider === "anthropic") {
+    if (apiKey) {
+      const anthropicProvider = createAnthropic({ apiKey })
+      return anthropicProvider(modelId as AnthropicModel, settings as AnthropicProviderSettings)
+    }
     return anthropic(modelId as AnthropicModel, settings as AnthropicProviderSettings)
   }
 
   if (provider === "xai") {
+    if (apiKey) {
+      const xaiProvider = createXai({ apiKey })
+      return xaiProvider(modelId as XaiModel, settings as XaiProviderSettings)
+    }
     return xai(modelId as XaiModel, settings as XaiProviderSettings)
   }
 

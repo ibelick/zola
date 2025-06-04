@@ -89,7 +89,7 @@ async function detectOllamaModels(): Promise<ModelConfig[]> {
         website: "https://ollama.com",
         apiDocs: "https://github.com/ollama/ollama/blob/main/docs/api.md",
         modelPage: `https://ollama.com/library/${modelName.split(':')[0]}`,
-        apiSdk: () => openproviders(modelName as string),
+        apiSdk: (apiKey?: string) => openproviders(modelName as string, undefined, apiKey),
       }
     })
   } catch (error) {
@@ -256,7 +256,7 @@ const staticOllamaModels: ModelConfig[] = [
     website: "https://ollama.com",
     apiDocs: "https://github.com/ollama/ollama/blob/main/docs/api.md",
     modelPage: "https://ollama.com/library/llama3.2",
-    apiSdk: () => openproviders("llama3.2:latest" as string),
+    apiSdk: (apiKey?: string) => openproviders("llama3.2:latest" as string, undefined, apiKey),
   },
   {
     id: "qwen2.5-coder:latest",
@@ -280,7 +280,7 @@ const staticOllamaModels: ModelConfig[] = [
     website: "https://ollama.com",
     apiDocs: "https://github.com/ollama/ollama/blob/main/docs/api.md",
     modelPage: "https://ollama.com/library/qwen2.5-coder",
-    apiSdk: () => openproviders("qwen2.5-coder:latest" as string),
+    apiSdk: (apiKey?: string) => openproviders("qwen2.5-coder:latest" as string, undefined, apiKey),
   },
 ]
 
@@ -299,4 +299,4 @@ export async function getOllamaModels(): Promise<ModelConfig[]> {
 }
 
 // For backward compatibility, export static models
-export const ollamaModels = staticOllamaModels 
+export const ollamaModels = staticOllamaModels    

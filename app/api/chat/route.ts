@@ -2,6 +2,8 @@ import { loadAgent } from "@/lib/agents/load-agent"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
 import { getAllModels } from "@/lib/models"
+import { getProviderForModel } from "@/lib/openproviders/provider-map"
+import { Provider } from "@/lib/user-keys"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { Message as MessageAISDK, streamText, ToolSet } from "ai"
 import {
@@ -97,8 +99,15 @@ export async function POST(req: Request) {
 
     let streamError: Error | null = null
 
+    let apiKey: string | undefined
+    if (isAuthenticated && userId) {
+      const { getEffectiveApiKey } = await import("@/lib/user-keys")
+      const provider = getProviderForModel(model)
+      apiKey = await getEffectiveApiKey(userId, provider as Provider) || undefined
+    }
+
     const result = streamText({
-      model: modelConfig.apiSdk(),
+      model: modelConfig.apiSdk(apiKey),
       system: effectiveSystemPrompt,
       messages: cleanedMessages,
       tools: toolsToUse as ToolSet,
