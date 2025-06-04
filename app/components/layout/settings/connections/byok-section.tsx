@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toast"
 import { fetchClient } from "@/lib/fetch"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export function ByokSection() {
   const [openRouterAPIKey, setOpenRouterAPIKey] = useState("")
+  const [hasUserKey, setHasUserKey] = useState(false)
 
   const handleSave = async () => {
     const response = await fetchClient("/api/user-keys", {
@@ -33,6 +34,23 @@ export function ByokSection() {
 
     setOpenRouterAPIKey("")
   }
+
+  useEffect(() => {
+    const fetchUserKeys = async () => {
+      const response = await fetchClient("/api/user-keys")
+      const data = await response.json()
+
+      console.log(data)
+
+      setOpenRouterAPIKey(
+        data.keys.find(
+          (key: { provider: string }) => key.provider === "openrouter"
+        )?.maskedKey || ""
+      )
+    }
+
+    fetchUserKeys()
+  }, [])
 
   return (
     <div>

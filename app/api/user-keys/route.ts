@@ -1,49 +1,6 @@
-import { decryptKey, encryptKey, maskKey } from "@/lib/encryption"
+import { encryptKey } from "@/lib/encryption"
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
-
-export async function GET() {
-  try {
-    const supabase = await createClient()
-    if (!supabase) {
-      return NextResponse.json(
-        { error: "Supabase not available" },
-        { status: 500 }
-      )
-    }
-
-    const { data: authData } = await supabase.auth.getUser()
-    if (!authData?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const { data: userKeys, error } = await supabase
-      .from("user_keys")
-      .select("provider, encrypted_key, iv")
-      .eq("user_id", authData.user.id)
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    const maskedKeys =
-      userKeys?.map((key) => {
-        const decryptedKey = decryptKey(key.encrypted_key, key.iv)
-        return {
-          provider: key.provider,
-          maskedKey: maskKey(decryptedKey),
-        }
-      }) || []
-
-    return NextResponse.json({ keys: maskedKeys })
-  } catch (error) {
-    console.error("Error in GET /api/user-keys:", error)
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    )
-  }
-}
 
 export async function POST(request: Request) {
   try {
