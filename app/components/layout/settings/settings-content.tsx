@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
 import { DeveloperTools } from "./connections"
-import { LayoutSettings, InteractionPreferences } from "./appearance"
+import { LayoutSettings } from "./appearance"
 import { SystemPromptSection } from "./general"
 
 type SettingsContentProps = {
@@ -249,9 +249,36 @@ export function SettingsContent({
                 <LayoutSettings />
               </div>
 
-              {/* Interaction Preferences */}
+              {/* Prompt Suggestions */}
               <div className="py-4">
-                <InteractionPreferences />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium">Prompt suggestions</h3>
+                    <p className="text-muted-foreground text-xs">
+                      Show suggested prompts when starting a new conversation
+                    </p>
+                  </div>
+                  <Switch
+                    checked={preferences.promptSuggestions}
+                    onCheckedChange={setPromptSuggestions}
+                  />
+                </div>
+              </div>
+
+              {/* Tool Invocations */}
+              <div className="py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium">Tool invocations</h3>
+                    <p className="text-muted-foreground text-xs">
+                      Show tool execution details in conversations
+                    </p>
+                  </div>
+                  <Switch
+                    checked={preferences.showToolInvocations}
+                    onCheckedChange={setShowToolInvocations}
+                  />
+                </div>
               </div>
             </TabsContent>
 
@@ -409,9 +436,38 @@ export function SettingsContent({
                 </div>
                 <LayoutSettings />
 
-                {/* Interaction Preferences */}
+                {/* Prompt Suggestions */}
                 <div>
-                  <InteractionPreferences />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium">
+                        Prompt suggestions
+                      </h3>
+                      <p className="text-muted-foreground text-xs">
+                        Show suggested prompts when starting a new conversation
+                      </p>
+                    </div>
+                    <Switch
+                      checked={preferences.promptSuggestions}
+                      onCheckedChange={setPromptSuggestions}
+                    />
+                  </div>
+                </div>
+
+                {/* Tool Invocations */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium">Tool invocations</h3>
+                      <p className="text-muted-foreground text-xs">
+                        Show tool execution details in conversations
+                      </p>
+                    </div>
+                    <Switch
+                      checked={preferences.showToolInvocations}
+                      onCheckedChange={setShowToolInvocations}
+                    />
+                  </div>
                 </div>
               </TabsContent>
 
