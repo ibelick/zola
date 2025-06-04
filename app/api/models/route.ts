@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server"
 import { getAllModels, refreshModelsCache } from "@/lib/models"
+import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
@@ -13,15 +13,12 @@ export async function GET() {
     })
   } catch (error) {
     console.error("Error fetching models:", error)
-    return new Response(
-      JSON.stringify({ error: "Failed to fetch models" }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
+    return new Response(JSON.stringify({ error: "Failed to fetch models" }), {
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
   }
 }
 
@@ -30,7 +27,7 @@ export async function POST() {
     // Refresh the models cache
     refreshModelsCache()
     const models = await getAllModels()
-    
+
     return NextResponse.json({
       message: "Models cache refreshed",
       models,
@@ -44,4 +41,4 @@ export async function POST() {
       { status: 500 }
     )
   }
-} 
+}

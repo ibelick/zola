@@ -1,11 +1,11 @@
 import { anthropic, createAnthropic } from "@ai-sdk/anthropic"
-import { google, createGoogleGenerativeAI } from "@ai-sdk/google"
-import { mistral, createMistral } from "@ai-sdk/mistral"
-import { openai, createOpenAI } from "@ai-sdk/openai"
+import { createGoogleGenerativeAI, google } from "@ai-sdk/google"
+import { createMistral, mistral } from "@ai-sdk/mistral"
+import { createOpenAI, openai } from "@ai-sdk/openai"
 import type { LanguageModelV1 } from "@ai-sdk/provider"
-import { xai, createXai } from "@ai-sdk/xai"
+import { createXai, xai } from "@ai-sdk/xai"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { getProviderForModel } from "./provider-map"
-
 import type {
   AnthropicModel,
   GeminiModel,
@@ -15,7 +15,6 @@ import type {
   SupportedModel,
   XaiModel,
 } from "./types"
-
 
 type OpenAIChatSettings = Parameters<typeof openai>[1]
 type MistralProviderSettings = Parameters<typeof mistral>[1]
@@ -42,13 +41,16 @@ export type OpenProvidersOptions<T extends SupportedModel> = ModelSettings<T>
 
 // Get Ollama base URL from environment or use default
 const getOllamaBaseURL = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     // Client-side: use localhost
     return "http://localhost:11434/v1"
   }
-  
+
   // Server-side: check environment variables
-  return process.env.OLLAMA_BASE_URL?.replace(/\/+$/, '') + "/v1" || "http://localhost:11434/v1"
+  return (
+    process.env.OLLAMA_BASE_URL?.replace(/\/+$/, "") + "/v1" ||
+    "http://localhost:11434/v1"
+  )
 }
 
 // Create Ollama provider instance with configurable baseURL
@@ -69,11 +71,14 @@ export function openproviders<T extends SupportedModel>(
 
   if (provider === "openai") {
     if (apiKey) {
-      const openaiProvider = createOpenAI({ 
+      const openaiProvider = createOpenAI({
         apiKey,
-        compatibility: 'strict'
+        compatibility: "strict",
       })
-      return openaiProvider(modelId as OpenAIModel, settings as OpenAIChatSettings)
+      return openaiProvider(
+        modelId as OpenAIModel,
+        settings as OpenAIChatSettings
+      )
     }
     return openai(modelId as OpenAIModel, settings as OpenAIChatSettings)
   }
@@ -81,7 +86,10 @@ export function openproviders<T extends SupportedModel>(
   if (provider === "mistral") {
     if (apiKey) {
       const mistralProvider = createMistral({ apiKey })
-      return mistralProvider(modelId as MistralModel, settings as MistralProviderSettings)
+      return mistralProvider(
+        modelId as MistralModel,
+        settings as MistralProviderSettings
+      )
     }
     return mistral(modelId as MistralModel, settings as MistralProviderSettings)
   }
@@ -89,17 +97,29 @@ export function openproviders<T extends SupportedModel>(
   if (provider === "google") {
     if (apiKey) {
       const googleProvider = createGoogleGenerativeAI({ apiKey })
-      return googleProvider(modelId as GeminiModel, settings as GoogleGenerativeAIProviderSettings)
+      return googleProvider(
+        modelId as GeminiModel,
+        settings as GoogleGenerativeAIProviderSettings
+      )
     }
-    return google(modelId as GeminiModel, settings as GoogleGenerativeAIProviderSettings)
+    return google(
+      modelId as GeminiModel,
+      settings as GoogleGenerativeAIProviderSettings
+    )
   }
 
   if (provider === "anthropic") {
     if (apiKey) {
       const anthropicProvider = createAnthropic({ apiKey })
-      return anthropicProvider(modelId as AnthropicModel, settings as AnthropicProviderSettings)
+      return anthropicProvider(
+        modelId as AnthropicModel,
+        settings as AnthropicProviderSettings
+      )
     }
-    return anthropic(modelId as AnthropicModel, settings as AnthropicProviderSettings)
+    return anthropic(
+      modelId as AnthropicModel,
+      settings as AnthropicProviderSettings
+    )
   }
 
   if (provider === "xai") {
@@ -112,7 +132,10 @@ export function openproviders<T extends SupportedModel>(
 
   if (provider === "ollama") {
     const ollamaProvider = createOllamaProvider()
-    return ollamaProvider(modelId as OllamaModel, settings as OllamaProviderSettings)
+    return ollamaProvider(
+      modelId as OllamaModel,
+      settings as OllamaProviderSettings
+    )
   }
 
   throw new Error(`Unsupported model: ${modelId}`)
