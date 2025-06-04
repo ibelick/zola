@@ -7,13 +7,16 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+
 
 export function ProviderSettings() {
   const [openRouterAPIKey, setOpenRouterAPIKey] = useState("")
   const [enableOpenRouter, setEnableOpenRouter] = useState(false)
   const [openaiAPIKey, setOpenaiAPIKey] = useState("")
   const [enableOpenAI, setEnableOpenAI] = useState(false)
+  const [mistralAPIKey, setMistralAPIKey] = useState("")
+  const [enableMistral, setEnableMistral] = useState(false)
   const [anthropicAPIKey, setAnthropicAPIKey] = useState("")
   const [enableAnthropic, setEnableAnthropic] = useState(false)
   const [xaiAPIKey, setXaiAPIKey] = useState("")
@@ -23,9 +26,97 @@ export function ProviderSettings() {
   const [ollamaEndpoint, setOllamaEndpoint] = useState("http://localhost:11434")
   const [enableOllama, setEnableOllama] = useState(false)
 
-  const handleSave = () => {
-    // Save logic here
-    console.log("Saving provider settings...")
+  const [isLoading, setIsLoading] = useState(false)
+  const [csrfToken, setCsrfToken] = useState("")
+
+  useEffect(() => {
+    const fetchCsrfToken = async () => {
+      try {
+        const response = await fetch("/api/csrf")
+        if (response.ok) {
+          const cookies = document.cookie.split(";")
+          const csrfCookie = cookies.find(c => c.trim().startsWith("csrf_token="))
+          if (csrfCookie) {
+            setCsrfToken(csrfCookie.split("=")[1])
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch CSRF token:", error)
+      }
+    }
+
+    const fetchUserKeys = async () => {
+      try {
+        const response = await fetch("/api/user-keys")
+        if (response.ok) {
+          const data = await response.json()
+          data.keys.forEach((key: { provider: string; maskedKey: string }) => {
+            switch (key.provider) {
+              case "openai":
+                setOpenaiAPIKey(key.maskedKey)
+                break
+              case "mistral":
+                setMistralAPIKey(key.maskedKey)
+                break
+              case "google":
+                setGoogleAPIKey(key.maskedKey)
+                break
+              case "anthropic":
+                setAnthropicAPIKey(key.maskedKey)
+                break
+              case "xai":
+                setXaiAPIKey(key.maskedKey)
+                break
+            }
+          })
+        }
+      } catch (error) {
+        console.error("Failed to fetch user keys:", error)
+      }
+    }
+
+    fetchCsrfToken()
+    fetchUserKeys()
+  }, [])
+
+  const handleSave = async () => {
+    if (!csrfToken) {
+      console.error("CSRF token not available")
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const keysToSave = [
+        { provider: "openai", key: openaiAPIKey },
+        { provider: "mistral", key: mistralAPIKey },
+        { provider: "google", key: googleAPIKey },
+        { provider: "anthropic", key: anthropicAPIKey },
+        { provider: "xai", key: xaiAPIKey },
+      ]
+
+      for (const { provider, key } of keysToSave) {
+        if (key && !key.includes("*")) {
+          await fetch("/api/user-keys", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              provider,
+              apiKey: key,
+              csrfToken,
+            }),
+          })
+        }
+      }
+
+      console.log("Provider settings saved successfully")
+    } catch (error) {
+      console.error("Failed to save provider settings:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -38,9 +129,10 @@ export function ProviderSettings() {
       </div>
 
       <Tabs defaultValue="openrouter" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="openrouter">OpenRouter</TabsTrigger>
           <TabsTrigger value="openai">OpenAI</TabsTrigger>
+          <TabsTrigger value="mistral">Mistral</TabsTrigger>
           <TabsTrigger value="anthropic">Anthropic</TabsTrigger>
           <TabsTrigger value="xai">xAI</TabsTrigger>
           <TabsTrigger value="google">Google</TabsTrigger>
@@ -95,6 +187,33 @@ export function ProviderSettings() {
                   value={openaiAPIKey}
                   onChange={(e) => setOpenaiAPIKey(e.target.value)}
                   disabled={!enableOpenAI}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="mistral" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Mistral</span>
+                <Switch
+                  checked={enableMistral}
+                  onCheckedChange={setEnableMistral}
+                />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="mistral-key">API Key</Label>
+                <Input
+                  id="mistral-key"
+                  type="password"
+                  placeholder="your-mistral-api-key"
+                  value={mistralAPIKey}
+                  onChange={(e) => setMistralAPIKey(e.target.value)}
+                  disabled={!enableMistral}
                 />
               </div>
             </CardContent>
@@ -208,7 +327,9 @@ export function ProviderSettings() {
       </Tabs>
 
       <div className="flex justify-end">
-        <Button onClick={handleSave}>Save Settings</Button>
+        <Button onClick={handleSave} disabled={isLoading}>
+          {isLoading ? "Saving..." : "Save Settings"}
+        </Button>
       </div>
     </div>
   )

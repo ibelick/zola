@@ -216,6 +216,18 @@ CREATE TABLE feedback (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- User keys table for BYOK (Bring Your Own Key) integration
+CREATE TABLE user_keys (
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider TEXT NOT NULL,
+  encrypted_key TEXT NOT NULL,
+  iv TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (user_id, provider)
+);
+
 -- RLS (Row Level Security) Reminder
 -- Ensure RLS is enabled on these tables in your Supabase dashboard
 -- and appropriate policies are created.
