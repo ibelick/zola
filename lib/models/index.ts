@@ -15,6 +15,7 @@ export const STATIC_MODELS: ModelConfig[] = [
   ...claudeModels,
   ...grokModels,
   ...ollamaModels, // Static fallback Ollama models
+  ...openrouterModels,
 
   // not ready
   // ...llamaModels,
