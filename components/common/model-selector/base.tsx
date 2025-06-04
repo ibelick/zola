@@ -80,15 +80,15 @@ export function ModelSelector({
 
   const currentModel = models.find((model) => model.id === selectedModelId)
   const currentProvider = PROVIDERS.find(
-    (provider) => provider.id === currentModel?.providerId
+    (provider) => provider.id === currentModel?.icon
   )
 
-  // Treat all Ollama models as free models
-  const freeModels = models.filter(
-    (model) =>
-      FREE_MODELS_IDS.includes(model.id) || model.providerId === "ollama"
-  )
-  const proModels = models.filter((model) => !freeModels.includes(model))
+  // // Treat all Ollama models as free models
+  // const freeModels = models.filter(
+  //   (model) =>
+  //     FREE_MODELS_IDS.includes(model.id) || model.providerId === "ollama"
+  // )
+  // const proModels = models.filter((model) => !freeModels.includes(model))
 
   const isMobile = useBreakpoint(768)
 
@@ -135,10 +135,8 @@ export function ModelSelector({
   }, [isDropdownOpen, selectedModelId])
 
   const renderModelItem = (model: ModelConfig) => {
-    const isPro = proModels.some((proModel) => proModel.id === model.id)
-    const provider = PROVIDERS.find(
-      (provider) => provider.id === model.provider
-    )
+    // const isPro = proModels.some((proModel) => proModel.id === model.id)
+    const provider = PROVIDERS.find((provider) => provider.id === model.icon)
 
     return (
       <div
@@ -148,11 +146,11 @@ export function ModelSelector({
           selectedModelId === model.id && "bg-accent"
         )}
         onClick={() => {
-          if (isPro) {
-            setSelectedProModel(model.id)
-            setIsProDialogOpen(true)
-            return
-          }
+          // if (isPro) {
+          //   setSelectedProModel(model.id)
+          //   setIsProDialogOpen(true)
+          //   return
+          // }
 
           setSelectedModelId(model.id)
           if (isMobile) {
@@ -168,12 +166,12 @@ export function ModelSelector({
             <span className="text-sm">{model.name}</span>
           </div>
         </div>
-        {isPro && (
+        {/* {isPro && (
           <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
             <Star className="size-2" />
             <span>Pro</span>
           </div>
-        )}
+        )} */}
       </div>
     )
   }
@@ -357,11 +355,11 @@ export function ModelSelector({
                 </div>
               ) : filteredModels.length > 0 ? (
                 filteredModels.map((model) => {
-                  const isPro = proModels.some(
-                    (proModel) => proModel.id === model.id
-                  )
+                  // const isPro = proModels.some(
+                  //   (proModel) => proModel.id === model.id
+                  // )
                   const provider = PROVIDERS.find(
-                    (provider) => provider.id === model.providerId
+                    (provider) => provider.id === model.icon
                   )
 
                   return (
@@ -372,11 +370,11 @@ export function ModelSelector({
                         selectedModelId === model.id && "bg-accent"
                       )}
                       onSelect={() => {
-                        if (isPro) {
-                          setSelectedProModel(model.id)
-                          setIsProDialogOpen(true)
-                          return
-                        }
+                        // if (isPro) {
+                        //   setSelectedProModel(model.id)
+                        //   setIsProDialogOpen(true)
+                        //   return
+                        // }
 
                         setSelectedModelId(model.id)
                         setIsDropdownOpen(false)
@@ -398,11 +396,11 @@ export function ModelSelector({
                           <span className="text-sm">{model.name}</span>
                         </div>
                       </div>
-                      {isPro && (
+                      {/* {isPro && (
                         <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
                           <span>Pro</span>
                         </div>
-                      )}
+                      )} */}
                     </DropdownMenuItem>
                   )
                 })

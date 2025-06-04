@@ -9,7 +9,7 @@ type SubMenuProps = {
 
 export function SubMenu({ hoveredModelData }: SubMenuProps) {
   const provider = PROVIDERS.find(
-    (provider) => provider.id === hoveredModelData.providerId
+    (provider) => provider.id === hoveredModelData.icon
   )
 
   return (

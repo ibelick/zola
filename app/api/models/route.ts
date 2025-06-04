@@ -1,8 +1,64 @@
-import { getAllModels, refreshModelsCache } from "@/lib/models"
+import {
+  getAllModels,
+  getAllOpenRouterModels,
+  refreshModelsCache,
+} from "@/lib/models"
+import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
+    const supabase = await createClient()
+    if (!supabase) {
+      const models = await getAllModels()
+      return new Response(JSON.stringify({ models }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    }
+
+    const { data: authData } = await supabase.auth.getUser()
+
+    if (!authData?.user?.id) {
+      const models = await getAllModels()
+      return new Response(JSON.stringify({ models }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    }
+
+    const { data, error } = await supabase
+      .from("user_keys")
+      .select("provider")
+      .eq("user_id", authData.user.id)
+
+    if (error) {
+      console.error("Error fetching user keys:", error)
+      const models = await getAllModels()
+      return new Response(JSON.stringify({ models }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    }
+
+    const hasOpenRouterKey = data?.some((k) => k.provider === "openrouter")
+
+    if (hasOpenRouterKey) {
+      const models = await getAllOpenRouterModels()
+      return new Response(JSON.stringify({ models }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    }
+
     const models = await getAllModels()
 
     return new Response(JSON.stringify({ models }), {

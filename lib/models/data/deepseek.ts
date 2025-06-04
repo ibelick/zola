@@ -27,6 +27,7 @@ const deepseekModels: ModelConfig[] = [
     apiDocs: "https://platform.deepseek.com/api-docs",
     modelPage: "https://deepseek.com",
     releasedAt: "2024-04-01",
+    icon: "deepseek",
     apiSdk: () =>
       createOpenRouter({
         apiKey: process.env.OPENROUTER_API_KEY,
@@ -55,6 +56,7 @@ const deepseekModels: ModelConfig[] = [
     apiDocs: "https://github.com/deepseek-ai/deepseek",
     modelPage: "https://github.com/deepseek-ai",
     releasedAt: "2024-12-26",
+    icon: "deepseek",
     apiSdk: () =>
       createOpenRouter({
         apiKey: process.env.OPENROUTER_API_KEY,

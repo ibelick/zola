@@ -3,7 +3,7 @@ import { ModelConfig } from "../types"
 
 export const openrouterModels: ModelConfig[] = [
   {
-    id: "deepseek/deepseek-r1:free",
+    id: "openrouter:deepseek/deepseek-r1:free",
     name: "DeepSeek R1",
     provider: "OpenRouter",
     providerId: "openrouter",
@@ -26,13 +26,14 @@ export const openrouterModels: ModelConfig[] = [
     apiDocs: "https://platform.deepseek.com/api-docs",
     modelPage: "https://deepseek.com",
     releasedAt: "2024-04-01",
+    icon: "deepseek",
     apiSdk: (apiKey?: string) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
       }).chat("deepseek/deepseek-r1:free"),
   },
   {
-    id: "anthropic/claude-3.7-sonnet:thinking",
+    id: "openrouter:anthropic/claude-3.7-sonnet:thinking",
     name: "Claude 3.7 Sonnet (Thinking)",
     provider: "OpenRouter",
     providerId: "openrouter",
@@ -55,13 +56,14 @@ export const openrouterModels: ModelConfig[] = [
     apiDocs: "https://docs.anthropic.com",
     modelPage: "https://www.anthropic.com/claude",
     releasedAt: "2025-02-24",
+    icon: "claude",
     apiSdk: (apiKey?: string) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
       }).chat("anthropic/claude-3.7-sonnet:thinking"),
   },
   {
-    id: "google/gemini-2.5-pro-preview",
+    id: "openrouter:google/gemini-2.5-pro-preview",
     name: "Gemini 2.5 Pro",
     provider: "OpenRouter",
     providerId: "openrouter",
@@ -84,13 +86,14 @@ export const openrouterModels: ModelConfig[] = [
     apiDocs: "https://ai.google.dev/docs",
     modelPage: "https://ai.google.dev/models/gemini",
     releasedAt: "2025-03-20",
+    icon: "gemini",
     apiSdk: (apiKey?: string) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
       }).chat("google/gemini-2.5-pro-preview"),
   },
   {
-    id: "openai/gpt-4.1",
+    id: "openrouter:openai/gpt-4.1",
     name: "GPT-4.1",
     provider: "OpenRouter",
     providerId: "openrouter",
@@ -113,13 +116,14 @@ export const openrouterModels: ModelConfig[] = [
     apiDocs: "https://platform.openai.com/docs",
     modelPage: "https://openai.com/gpt-4",
     releasedAt: "2025-04-14",
+    icon: "openai",
     apiSdk: (apiKey?: string) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
       }).chat("openai/gpt-4.1"),
   },
   {
-    id: "openai/o4-mini",
+    id: "openrouter:openai/o4-mini",
     name: "O4 Mini",
     provider: "OpenRouter",
     providerId: "openrouter",
@@ -142,13 +146,14 @@ export const openrouterModels: ModelConfig[] = [
     apiDocs: "https://platform.openai.com/docs",
     modelPage: "https://openai.com",
     releasedAt: "2025-04-01",
+    icon: "openai",
     apiSdk: (apiKey?: string) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
       }).chat("openai/o4-mini"),
   },
   {
-    id: "x-ai/grok-3-mini-beta",
+    id: "openrouter:x-ai/grok-3-mini-beta",
     name: "Grok-3-Mini-Beta",
     provider: "OpenRouter",
     providerId: "openrouter",
@@ -171,13 +176,14 @@ export const openrouterModels: ModelConfig[] = [
     apiDocs: "https://x.ai/docs",
     modelPage: "https://x.ai/grok",
     releasedAt: "2025-02-15",
+    icon: "xai",
     apiSdk: (apiKey?: string) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
       }).chat("x-ai/grok-3-mini-beta"),
   },
   {
-    id: "google/gemini-2.5-flash-preview-05-20",
+    id: "openrouter:google/gemini-2.5-flash-preview-05-20",
     name: "Gemini 2.5 Flash",
     provider: "OpenRouter",
     providerId: "openrouter",
@@ -200,6 +206,7 @@ export const openrouterModels: ModelConfig[] = [
     apiDocs: "https://ai.google.dev/docs",
     modelPage: "https://ai.google.dev/models/gemini",
     releasedAt: "2025-03-25",
+    icon: "gemini",
     apiSdk: (apiKey?: string) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,

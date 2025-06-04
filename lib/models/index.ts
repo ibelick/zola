@@ -2,8 +2,9 @@ import { claudeModels } from "./data/claude"
 import { deepseekModels } from "./data/deepseek"
 import { grokModels } from "./data/grok"
 import { mistralModels } from "./data/mistral"
-import { ollamaModels, getOllamaModels } from "./data/ollama"
+import { getOllamaModels, ollamaModels } from "./data/ollama"
 import { openaiModels } from "./data/openai"
+import { openrouterModels } from "./data/openrouter"
 import { ModelConfig } from "./types"
 
 // Static models (always available)
@@ -27,26 +28,23 @@ const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 // Function to get all models including dynamically detected ones
 export async function getAllModels(): Promise<ModelConfig[]> {
   const now = Date.now()
-  
+
   // Use cache if it's still valid
-  if (dynamicModelsCache && (now - lastFetchTime) < CACHE_DURATION) {
+  if (dynamicModelsCache && now - lastFetchTime < CACHE_DURATION) {
     return dynamicModelsCache
   }
 
   try {
     // Get dynamically detected Ollama models
     const detectedOllamaModels = await getOllamaModels()
-    
+
     // Combine static models (excluding static Ollama models) with detected ones
     const staticModelsWithoutOllama = STATIC_MODELS.filter(
-      model => model.providerId !== "ollama"
+      (model) => model.providerId !== "ollama"
     )
-    
-    dynamicModelsCache = [
-      ...staticModelsWithoutOllama,
-      ...detectedOllamaModels,
-    ]
-    
+
+    dynamicModelsCache = [...staticModelsWithoutOllama, ...detectedOllamaModels]
+
     lastFetchTime = now
     return dynamicModelsCache
   } catch (error) {
@@ -55,16 +53,22 @@ export async function getAllModels(): Promise<ModelConfig[]> {
   }
 }
 
+export async function getAllOpenRouterModels(): Promise<ModelConfig[]> {
+  const models = [...openrouterModels]
+
+  return models
+}
+
 // Synchronous function to get model info for simple lookups
 // This uses cached data if available, otherwise falls back to static models
 export function getModelInfo(modelId: string): ModelConfig | undefined {
   // First check the cache if it exists
   if (dynamicModelsCache) {
-    return dynamicModelsCache.find(model => model.id === modelId)
+    return dynamicModelsCache.find((model) => model.id === modelId)
   }
-  
+
   // Fall back to static models for immediate lookup
-  return STATIC_MODELS.find(model => model.id === modelId)
+  return STATIC_MODELS.find((model) => model.id === modelId)
 }
 
 // For backward compatibility - static models only
