@@ -9,6 +9,7 @@ import { NextResponse } from "next/server"
 export async function GET() {
   try {
     const supabase = await createClient()
+
     if (!supabase) {
       const models = await getAllModels()
       return new Response(JSON.stringify({ models }), {

@@ -315,6 +315,7 @@ ollama serve
 Zola automatically detects all models available in your Ollama installation. No additional configuration is needed!
 
 **Features:**
+
 - **Automatic Model Detection**: Zola scans your Ollama instance and makes all models available
 - **Intelligent Categorization**: Models are automatically categorized by family (Llama, Gemma, Qwen, etc.)
 - **Smart Tagging**: Models get appropriate tags (local, open-source, coding, size-based)
@@ -324,9 +325,11 @@ Zola automatically detects all models available in your Ollama installation. No 
 ### Configuration Options
 
 #### Default Configuration
+
 By default, Zola connects to Ollama at `http://localhost:11434`. This works for local installations.
 
 #### Custom Ollama URL
+
 To use a remote Ollama instance or custom port:
 
 ```bash
@@ -335,6 +338,7 @@ OLLAMA_BASE_URL=http://192.168.1.100:11434
 ```
 
 #### Runtime Configuration
+
 You can also set the Ollama URL at runtime:
 
 ```bash
@@ -342,7 +346,9 @@ OLLAMA_BASE_URL=http://your-ollama-server:11434 npm run dev
 ```
 
 #### Settings UI
+
 Zola includes a settings interface where you can:
+
 - Enable/disable Ollama integration
 - Configure custom Ollama base URLs
 - Add multiple Ollama instances
@@ -364,6 +370,7 @@ docker run -p 3000:3000 -e OLLAMA_BASE_URL=http://ollama:11434 zola
 ```
 
 The `docker-compose.ollama.yml` file includes:
+
 - Ollama service with GPU support (if available)
 - Automatic model pulling
 - Health checks
@@ -372,37 +379,63 @@ The `docker-compose.ollama.yml` file includes:
 ### Troubleshooting Ollama
 
 #### Ollama not detected
+
 1. Ensure Ollama is running: `ollama serve`
 2. Check the URL: `curl http://localhost:11434/api/tags`
 3. Verify firewall settings if using remote Ollama
 
 #### Models not appearing
+
 1. Refresh the models list in Zola settings
 2. Check Ollama has models: `ollama list`
 3. Restart Zola if models were added after startup
 
 #### Performance optimization
+
 1. Use smaller models for faster responses (1B-3B parameters)
 2. Enable GPU acceleration if available
 3. Adjust Ollama's `OLLAMA_NUM_PARALLEL` environment variable
 
+## Disabling Ollama
+
+Ollama is automatically enabled in development and disabled in production. If you want to disable it in development, you can use an environment variable:
+
+### Environment Variable
+
+Add this to your `.env.local` file:
+
+```bash
+# Disable Ollama in development
+DISABLE_OLLAMA=true
+```
+
+### Note
+
+- In **production**, Ollama is disabled by default to avoid connection errors
+- In **development**, Ollama is enabled by default for local AI model testing
+- Use `DISABLE_OLLAMA=true` to disable it in development
+
 ### Recommended Models by Use Case
 
 #### General Chat
+
 - `llama3.2:3b` - Good balance of quality and speed
 - `gemma2:2b` - Fast and efficient
 - `qwen2.5:3b` - Excellent multilingual support
 
 #### Coding
+
 - `codellama:7b` - Specialized for code generation
 - `deepseek-coder:6.7b` - Strong coding capabilities
 - `phi3.5:3.8b` - Good for code explanation
 
 #### Creative Writing
+
 - `llama3.2:8b` - Better for creative tasks
 - `mistral:7b` - Good instruction following
 
 #### Fast Responses
+
 - `llama3.2:1b` - Ultra-fast, basic capabilities
 - `gemma2:2b` - Quick and capable
 
@@ -590,6 +623,7 @@ docker-compose -f docker-compose.ollama.yml down
 ```
 
 This setup includes:
+
 - **Ollama service** with GPU support (if available)
 - **Automatic model pulling** (llama3.2:3b by default)
 - **Health checks** for both services

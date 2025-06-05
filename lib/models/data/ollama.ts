@@ -23,18 +23,32 @@ interface OllamaListResponse {
 }
 
 // Get Ollama base URL from environment or use default
-const getOllamaBaseURL = () => {
-  if (typeof window !== 'undefined') {
+const getOllamaBaseURL = (): string => {
+  if (typeof window !== "undefined") {
     // Client-side: use localhost
     return "http://localhost:11434"
   }
-  
+
   // Server-side: check environment variables
-  return process.env.OLLAMA_BASE_URL?.replace(/\/+$/, '') || "http://localhost:11434"
+  return (
+    process.env.OLLAMA_BASE_URL?.replace(/\/+$/, "") || "http://localhost:11434"
+  )
+}
+
+// Simple check: disabled in production or if DISABLE_OLLAMA=true
+const shouldEnableOllama = (): boolean => {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    process.env.DISABLE_OLLAMA !== "true"
+  )
 }
 
 // Function to detect available Ollama models
 async function detectOllamaModels(): Promise<ModelConfig[]> {
+  if (!shouldEnableOllama()) {
+    return []
+  }
+
   try {
     const baseURL = getOllamaBaseURL()
     const response = await fetch(`${baseURL}/api/tags`, {
@@ -50,23 +64,24 @@ async function detectOllamaModels(): Promise<ModelConfig[]> {
     }
 
     const data: OllamaListResponse = await response.json()
-    
+
     return data.models.map((model): ModelConfig => {
       // Extract model family and size info
       const modelName = model.name
       const family = model.details.family || extractFamilyFromName(modelName)
-      const parameterSize = model.details.parameter_size || extractSizeFromName(modelName)
+      const parameterSize =
+        model.details.parameter_size || extractSizeFromName(modelName)
       const sizeInGB = Math.round(model.size / (1024 * 1024 * 1024))
-      
+
       // Determine provider based on model family
       const provider = getProviderFromFamily(family)
-      
+
       // Generate tags based on model characteristics
       const tags = generateTags(modelName, family, parameterSize, sizeInGB)
-      
+
       // Estimate context window based on model family
       const contextWindow = estimateContextWindow(family, modelName)
-      
+
       return {
         id: modelName,
         name: formatModelName(modelName),
@@ -88,8 +103,9 @@ async function detectOllamaModels(): Promise<ModelConfig[]> {
         intelligence: estimateIntelligence(family, parameterSize),
         website: "https://ollama.com",
         apiDocs: "https://github.com/ollama/ollama/blob/main/docs/api.md",
-        modelPage: `https://ollama.com/library/${modelName.split(':')[0]}`,
-        apiSdk: (apiKey?: string) => openproviders(modelName as string, undefined, apiKey),
+        modelPage: `https://ollama.com/library/${modelName.split(":")[0]}`,
+        apiSdk: (apiKey?: string) =>
+          openproviders(modelName as string, undefined, apiKey),
       }
     })
   } catch (error) {
@@ -147,35 +163,40 @@ function getProviderFromFamily(family: string): string {
   }
 }
 
-function generateTags(modelName: string, family: string, parameterSize: string, sizeInGB: number): string[] {
+function generateTags(
+  modelName: string,
+  family: string,
+  parameterSize: string,
+  sizeInGB: number
+): string[] {
   const tags = ["local", "open-source"]
-  
+
   // Add size-based tags
   if (sizeInGB < 2) tags.push("lightweight")
   if (sizeInGB < 5) tags.push("fast")
   if (sizeInGB > 20) tags.push("large")
-  
+
   // Add parameter size tag
   if (parameterSize !== "Unknown") tags.push(parameterSize.toLowerCase())
-  
+
   // Add capability tags
   const name = modelName.toLowerCase()
   if (name.includes("code") || name.includes("coder")) tags.push("coding")
   if (name.includes("instruct") || name.includes("chat")) tags.push("chat")
   if (name.includes("vision") || name.includes("visual")) tags.push("vision")
   if (name.includes("math")) tags.push("math")
-  
+
   return tags
 }
 
 function estimateContextWindow(family: string, modelName: string): number {
   const name = modelName.toLowerCase()
-  
+
   // Check for explicit context window indicators
   if (name.includes("32k")) return 32768
   if (name.includes("128k")) return 131072
   if (name.includes("1m")) return 1048576
-  
+
   // Family-based estimates
   switch (family) {
     case "Llama":
@@ -197,8 +218,11 @@ function estimateContextWindow(family: string, modelName: string): number {
 
 function checkVisionCapability(modelName: string, family: string): boolean {
   const name = modelName.toLowerCase()
-  return name.includes("vision") || name.includes("visual") || 
-         (family === "Llama" && name.includes("3.2"))
+  return (
+    name.includes("vision") ||
+    name.includes("visual") ||
+    (family === "Llama" && name.includes("3.2"))
+  )
 }
 
 function checkReasoningCapability(family: string): boolean {
@@ -206,17 +230,23 @@ function checkReasoningCapability(family: string): boolean {
   return ["Llama", "Qwen", "DeepSeek", "Mistral", "Phi"].includes(family)
 }
 
-function estimateSpeed(parameterSize: string, sizeInGB: number): "Fast" | "Medium" | "Slow" {
+function estimateSpeed(
+  parameterSize: string,
+  sizeInGB: number
+): "Fast" | "Medium" | "Slow" {
   if (sizeInGB < 5) return "Fast"
   if (sizeInGB < 15) return "Medium"
   return "Slow"
 }
 
-function estimateIntelligence(family: string, parameterSize: string): "Low" | "Medium" | "High" {
+function estimateIntelligence(
+  family: string,
+  parameterSize: string
+): "Low" | "Medium" | "High" {
   const sizeNum = parseFloat(parameterSize.replace(/[^0-9.]/g, ""))
-  
+
   if (isNaN(sizeNum)) return "Medium"
-  
+
   // Size-based intelligence estimation
   if (sizeNum < 3) return "Medium"
   if (sizeNum < 8) return "High"
@@ -226,10 +256,10 @@ function estimateIntelligence(family: string, parameterSize: string): "Low" | "M
 function formatModelName(modelName: string): string {
   // Convert model name to a more readable format
   return modelName
-    .split(':')[0] // Remove tag part
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
+    .split(":")[0] // Remove tag part
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
 }
 
 // Static fallback models for when Ollama is not available
@@ -256,7 +286,8 @@ const staticOllamaModels: ModelConfig[] = [
     website: "https://ollama.com",
     apiDocs: "https://github.com/ollama/ollama/blob/main/docs/api.md",
     modelPage: "https://ollama.com/library/llama3.2",
-    apiSdk: (apiKey?: string) => openproviders("llama3.2:latest" as string, undefined, apiKey),
+    apiSdk: (apiKey?: string) =>
+      openproviders("llama3.2:latest" as string, undefined, apiKey),
   },
   {
     id: "qwen2.5-coder:latest",
@@ -264,7 +295,8 @@ const staticOllamaModels: ModelConfig[] = [
     provider: "Alibaba",
     providerId: "ollama",
     modelFamily: "Qwen 2.5",
-    description: "Specialized coding model based on Qwen 2.5, optimized for programming tasks",
+    description:
+      "Specialized coding model based on Qwen 2.5, optimized for programming tasks",
     tags: ["local", "open-source", "coding", "7b"],
     contextWindow: 32768,
     inputCost: 0.0,
@@ -280,23 +312,27 @@ const staticOllamaModels: ModelConfig[] = [
     website: "https://ollama.com",
     apiDocs: "https://github.com/ollama/ollama/blob/main/docs/api.md",
     modelPage: "https://ollama.com/library/qwen2.5-coder",
-    apiSdk: (apiKey?: string) => openproviders("qwen2.5-coder:latest" as string, undefined, apiKey),
+    apiSdk: (apiKey?: string) =>
+      openproviders("qwen2.5-coder:latest" as string, undefined, apiKey),
   },
 ]
 
-// Export function to get Ollama models (with auto-detection)
+// Export function to get Ollama models
 export async function getOllamaModels(): Promise<ModelConfig[]> {
   const detectedModels = await detectOllamaModels()
-  
-  // If no models detected, return static fallback models
-  if (detectedModels.length === 0) {
+
+  // If no models detected and Ollama is enabled, return static fallback models
+  if (detectedModels.length === 0 && shouldEnableOllama()) {
     console.info("Using static Ollama models as fallback")
     return staticOllamaModels
   }
-  
-  console.info(`Detected ${detectedModels.length} Ollama models`)
+
+  if (detectedModels.length > 0) {
+    console.info(`Detected ${detectedModels.length} Ollama models`)
+  }
+
   return detectedModels
 }
 
 // For backward compatibility, export static models
-export const ollamaModels = staticOllamaModels    
+export const ollamaModels = staticOllamaModels

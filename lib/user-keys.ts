@@ -3,6 +3,7 @@ import { env } from "./openproviders/env"
 import { Provider } from "./openproviders/types"
 import { createClient } from "./supabase/server"
 
+export type { Provider } from "./openproviders/types"
 export type ProviderWithoutOllama = Exclude<Provider, "ollama">
 
 export async function getUserKey(

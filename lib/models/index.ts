@@ -36,7 +36,7 @@ export async function getAllModels(): Promise<ModelConfig[]> {
   }
 
   try {
-    // Get dynamically detected Ollama models
+    // Get dynamically detected Ollama models (includes enabled check internally)
     const detectedOllamaModels = await getOllamaModels()
 
     // Combine static models (excluding static Ollama models) with detected ones

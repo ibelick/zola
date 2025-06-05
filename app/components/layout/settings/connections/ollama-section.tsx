@@ -6,86 +6,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/components/ui/toast"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export function OllamaSection() {
   const [ollamaEndpoint, setOllamaEndpoint] = useState("http://localhost:11434")
-  const [enableOllama, setEnableOllama] = useState(false)
+  const [enableOllama, setEnableOllama] = useState(true) // Default enabled in dev
   const [isLoading, setIsLoading] = useState(false)
-  const [csrfToken, setCsrfToken] = useState("")
 
-  useEffect(() => {
-    const fetchCsrfToken = async () => {
-      try {
-        const response = await fetch("/api/csrf")
-        if (response.ok) {
-          const cookies = document.cookie.split(";")
-          const csrfCookie = cookies.find((c) =>
-            c.trim().startsWith("csrf_token=")
-          )
-          if (csrfCookie) {
-            setCsrfToken(csrfCookie.split("=")[1])
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch CSRF token:", error)
-      }
-    }
-
-    const fetchOllamaSettings = async () => {
-      try {
-        const response = await fetch("/api/ollama-settings")
-        if (response.ok) {
-          const data = await response.json()
-          if (data.endpoint) {
-            setOllamaEndpoint(data.endpoint)
-          }
-          if (data.enabled !== undefined) {
-            setEnableOllama(data.enabled)
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch Ollama settings:", error)
-      }
-    }
-
-    fetchCsrfToken()
-    fetchOllamaSettings()
-  }, [])
-
-  const handleSave = async () => {
-    if (!csrfToken) {
-      console.error("CSRF token not available")
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      await fetch("/api/ollama-settings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          endpoint: ollamaEndpoint,
-          enabled: enableOllama,
-          csrfToken,
-        }),
-      })
-
-      toast({
-        title: "Ollama settings saved successfully",
-        description: "You can now use Ollama to run models locally.",
-      })
-    } catch (error) {
-      toast({
-        title: "Failed to save Ollama settings",
-        description: "Please check your Ollama endpoint and try again.",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // In client-side, we assume development mode (Ollama enabled) unless it's a production build
+  const isLocked =
+    typeof window !== "undefined" && window.location.hostname !== "localhost"
 
   const testConnection = async () => {
     if (!ollamaEndpoint) return
@@ -120,6 +50,11 @@ export function OllamaSection() {
         <h3 className="mb-2 text-lg font-medium">Local Model Settings</h3>
         <p className="text-muted-foreground text-sm">
           Configure your local Ollama instance for running models locally.
+          {isLocked && (
+            <span className="mt-1 block text-orange-600 dark:text-orange-400">
+              Ollama is disabled in production mode.
+            </span>
+          )}
         </p>
       </div>
 
@@ -127,7 +62,11 @@ export function OllamaSection() {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Ollama</span>
-            <Switch checked={enableOllama} onCheckedChange={setEnableOllama} />
+            <Switch
+              checked={enableOllama && !isLocked}
+              onCheckedChange={setEnableOllama}
+              disabled={isLocked}
+            />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -139,14 +78,16 @@ export function OllamaSection() {
               placeholder="http://localhost:11434"
               value={ollamaEndpoint}
               onChange={(e) => setOllamaEndpoint(e.target.value)}
-              disabled={!enableOllama}
+              disabled={!enableOllama || isLocked}
             />
             <p className="text-muted-foreground mt-1 text-xs">
-              Default Ollama endpoint. Make sure Ollama is running locally.
+              {isLocked
+                ? "Endpoint is read-only in production mode."
+                : "Default Ollama endpoint. Make sure Ollama is running locally."}
             </p>
           </div>
 
-          {enableOllama && (
+          {enableOllama && !isLocked && (
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -158,14 +99,17 @@ export function OllamaSection() {
               </Button>
             </div>
           )}
+
+          {isLocked && (
+            <div className="rounded-md bg-orange-50 p-3 dark:bg-orange-950/20">
+              <p className="text-sm text-orange-800 dark:text-orange-200">
+                Ollama is disabled in production deployments for performance and
+                security.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save Settings"}
-        </Button>
-      </div>
     </div>
   )
 }
