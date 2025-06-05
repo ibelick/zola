@@ -9,7 +9,6 @@ export function cleanMessagesForTools(
   messages: MessageAISDK[],
   hasTools: boolean
 ): MessageAISDK[] {
-  // If tools are available, return messages as-is
   if (hasTools) {
     return messages
   }
@@ -23,30 +22,27 @@ export function cleanMessagesForTools(
         return null
       }
 
-      // For assistant messages, clean tool invocations and tool calls
       if (message.role === "assistant") {
         const cleanedMessage: MessageAISDK = { ...message }
 
-        // Remove tool invocations if present
         if (message.toolInvocations && message.toolInvocations.length > 0) {
           delete cleanedMessage.toolInvocations
         }
 
-        // Clean content if it's an array (remove tool-call parts)
         if (Array.isArray(message.content)) {
-          const filteredContent = (message.content as Array<{ type?: string; text?: string }>).filter(
-            (part: { type?: string }) => {
-              if (part && typeof part === "object" && part.type) {
-                // Remove tool-call, tool-result, and tool-invocation parts
-                const isToolPart =
-                  part.type === "tool-call" ||
-                  part.type === "tool-result" ||
-                  part.type === "tool-invocation"
-                return !isToolPart
-              }
-              return true
+          const filteredContent = (
+            message.content as Array<{ type?: string; text?: string }>
+          ).filter((part: { type?: string }) => {
+            if (part && typeof part === "object" && part.type) {
+              // Remove tool-call, tool-result, and tool-invocation parts
+              const isToolPart =
+                part.type === "tool-call" ||
+                part.type === "tool-result" ||
+                part.type === "tool-invocation"
+              return !isToolPart
             }
-          )
+            return true
+          })
 
           // Extract text content
           const textParts = filteredContent.filter(
@@ -84,20 +80,22 @@ export function cleanMessagesForTools(
 
       // For user messages, clean any tool-related content from array content
       if (message.role === "user" && Array.isArray(message.content)) {
-        const filteredContent = (message.content as Array<{ type?: string }>).filter(
-          (part: { type?: string }) => {
-            if (part && typeof part === "object" && part.type) {
-              const isToolPart =
-                part.type === "tool-call" ||
-                part.type === "tool-result" ||
-                part.type === "tool-invocation"
-              return !isToolPart
-            }
-            return true
+        const filteredContent = (
+          message.content as Array<{ type?: string }>
+        ).filter((part: { type?: string }) => {
+          if (part && typeof part === "object" && part.type) {
+            const isToolPart =
+              part.type === "tool-call" ||
+              part.type === "tool-result" ||
+              part.type === "tool-invocation"
+            return !isToolPart
           }
-        )
+          return true
+        })
 
-        if (filteredContent.length !== (message.content as Array<unknown>).length) {
+        if (
+          filteredContent.length !== (message.content as Array<unknown>).length
+        ) {
           return {
             ...message,
             content:

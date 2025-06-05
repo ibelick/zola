@@ -74,8 +74,6 @@ export async function POST(req: Request) {
     const allModels = await getAllModels()
     const modelConfig = allModels.find((m) => m.id === model)
 
-    console.log("modelConfig", modelConfig)
-
     if (!modelConfig || !modelConfig.apiSdk) {
       throw new Error(`Model ${model} not found`)
     }
@@ -144,16 +142,12 @@ export async function POST(req: Request) {
       sendReasoning: true,
       sendSources: true,
     })
-    const headers = new Headers(originalResponse.headers)
-    headers.set("X-Chat-Id", chatId)
 
     return new Response(originalResponse.body, {
       status: originalResponse.status,
-      headers,
     })
   } catch (err: unknown) {
     console.error("Error in /api/chat:", err)
-    // Return a structured error response if the error is a UsageLimitError.
     const error = err as { code?: string; message?: string }
     if (error.code === "DAILY_LIMIT_REACHED") {
       return new Response(
