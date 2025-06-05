@@ -1,16 +1,20 @@
 "use client"
 
+import OpenRouterIcon from "@/components/icons/openrouter"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toast"
 import { fetchClient } from "@/lib/fetch"
+import { cn } from "@/lib/utils"
+import { PlusIcon } from "@phosphor-icons/react"
 import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 
 export function ByokSection() {
   const [isLoading, setIsLoading] = useState(false)
   const [openRouterAPIKey, setOpenRouterAPIKey] = useState("")
+  const [showOpenRouterInput, setShowOpenRouterInput] = useState(false)
 
   const handleSave = async () => {
     setIsLoading(true)
@@ -62,35 +66,66 @@ export function ByokSection() {
         </span>
       </h3>
       <p className="text-muted-foreground text-sm">
-        Configure your AI model providers and API keys.
+        Add your own API keys to unlock access to models.
       </p>
       <p className="text-muted-foreground text-sm">
-        API keys are stored with end-to-end encryption.
+        Your keys are stored securely with end-to-end encryption.
       </p>
-      <div className="mt-4 flex flex-col">
-        <Label htmlFor="openrouter-key" className="mb-3">
-          OpenRouter API Key
-        </Label>
-        <Input
-          id="openrouter-key"
-          type="password"
-          placeholder={"sk-open-..."}
-          value={openRouterAPIKey}
-          onChange={(e) => setOpenRouterAPIKey(e.target.value)}
-          disabled={isLoading}
-        />
-      </div>
-      <div className="mt-0 flex justify-between pl-1">
-        <a
-          href="https://openrouter.ai/api-keys"
-          target="_blank"
-          className="text-muted-foreground mt-1 text-xs hover:underline"
+      <div className="mt-4 flex flex-row items-start justify-start gap-2">
+        <button
+          key="openrouter"
+          type="button"
+          onClick={() => {
+            setShowOpenRouterInput(!showOpenRouterInput)
+          }}
+          className={cn(
+            "flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border p-4",
+            showOpenRouterInput
+              ? "border-primary ring-primary/30 ring-2"
+              : "border-border"
+          )}
         >
-          Get API key
-        </a>
-        <Button onClick={handleSave} type="button" size="sm" className="mt-2">
-          {isLoading ? <Loader2 className="size-4 animate-spin" /> : "Save"}
-        </Button>
+          <OpenRouterIcon className="size-4" />
+          <span>OpenRouter</span>
+        </button>
+      </div>
+      <div className="mt-4">
+        {showOpenRouterInput && (
+          <div className="flex flex-col">
+            <Label htmlFor="openrouter-key" className="mb-3">
+              OpenRouter API Key
+            </Label>
+            <Input
+              id="openrouter-key"
+              type="password"
+              placeholder={"sk-open-..."}
+              value={openRouterAPIKey}
+              onChange={(e) => setOpenRouterAPIKey(e.target.value)}
+              disabled={isLoading}
+            />
+            <div className="mt-0 flex justify-between pl-1">
+              <a
+                href="https://openrouter.ai/settings/keys"
+                target="_blank"
+                className="text-muted-foreground mt-1 text-xs hover:underline"
+              >
+                Get API key
+              </a>
+              <Button
+                onClick={handleSave}
+                type="button"
+                size="sm"
+                className="mt-2"
+              >
+                {isLoading ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
