@@ -12,7 +12,11 @@ export async function GET() {
     const supabase = await createClient()
 
     if (!supabase) {
-      const models = await getAllModels()
+      const allModels = await getAllModels()
+      const models = allModels.map((model) => ({
+        ...model,
+        accessible: true,
+      }))
       return new Response(JSON.stringify({ models }), {
         status: 200,
         headers: {
