@@ -1,3 +1,4 @@
+import { FREE_MODELS_IDS } from "../config"
 import { claudeModels } from "./data/claude"
 import { deepseekModels } from "./data/deepseek"
 import { grokModels } from "./data/grok"
@@ -52,6 +53,29 @@ export async function getAllModels(): Promise<ModelConfig[]> {
     console.warn("Failed to load dynamic models, using static models:", error)
     return STATIC_MODELS
   }
+}
+
+export async function getModelsWithAccessFlags(): Promise<ModelConfig[]> {
+  const models = await getAllModels()
+
+  const freeModels = models
+    .filter(
+      (model) =>
+        FREE_MODELS_IDS.includes(model.id) || model.providerId === "ollama"
+    )
+    .map((model) => ({
+      ...model,
+      accessible: true,
+    }))
+
+  const proModels = models
+    .filter((model) => !freeModels.map((m) => m.id).includes(model.id))
+    .map((model) => ({
+      ...model,
+      accessible: false,
+    }))
+
+  return [...freeModels, ...proModels]
 }
 
 export async function getAllOpenRouterModels(): Promise<ModelConfig[]> {

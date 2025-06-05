@@ -1,6 +1,7 @@
 import {
   getAllModels,
   getAllOpenRouterModels,
+  getModelsWithAccessFlags,
   refreshModelsCache,
 } from "@/lib/models"
 import { createClient } from "@/lib/supabase/server"
@@ -23,7 +24,7 @@ export async function GET() {
     const { data: authData } = await supabase.auth.getUser()
 
     if (!authData?.user?.id) {
-      const models = await getAllModels()
+      const models = await getModelsWithAccessFlags()
       return new Response(JSON.stringify({ models }), {
         status: 200,
         headers: {
@@ -39,7 +40,7 @@ export async function GET() {
 
     if (error) {
       console.error("Error fetching user keys:", error)
-      const models = await getAllModels()
+      const models = await getModelsWithAccessFlags()
       return new Response(JSON.stringify({ models }), {
         status: 200,
         headers: {
@@ -60,7 +61,7 @@ export async function GET() {
       })
     }
 
-    const models = await getAllModels()
+    const models = await getModelsWithAccessFlags()
 
     return new Response(JSON.stringify({ models }), {
       status: 200,

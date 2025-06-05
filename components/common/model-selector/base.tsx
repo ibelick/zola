@@ -28,7 +28,11 @@ import { fetchClient } from "@/lib/fetch"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { cn } from "@/lib/utils"
-import { CaretDown, MagnifyingGlass, Star } from "@phosphor-icons/react"
+import {
+  CaretDownIcon,
+  MagnifyingGlassIcon,
+  StarIcon,
+} from "@phosphor-icons/react"
 import { useEffect, useRef, useState } from "react"
 import { ProModelDialog } from "./pro-dialog"
 import { SubMenu } from "./sub-menu"
@@ -82,14 +86,6 @@ export function ModelSelector({
   const currentProvider = PROVIDERS.find(
     (provider) => provider.id === currentModel?.icon
   )
-
-  // // Treat all Ollama models as free models
-  // const freeModels = models.filter(
-  //   (model) =>
-  //     FREE_MODELS_IDS.includes(model.id) || model.providerId === "ollama"
-  // )
-  // const proModels = models.filter((model) => !freeModels.includes(model))
-
   const isMobile = useBreakpoint(768)
 
   const [hoveredModel, setHoveredModel] = useState<string | null>(null)
@@ -135,7 +131,7 @@ export function ModelSelector({
   }, [isDropdownOpen, selectedModelId])
 
   const renderModelItem = (model: ModelConfig) => {
-    // const isPro = proModels.some((proModel) => proModel.id === model.id)
+    const isPro = !model.accessible
     const provider = PROVIDERS.find((provider) => provider.id === model.icon)
 
     return (
@@ -146,11 +142,11 @@ export function ModelSelector({
           selectedModelId === model.id && "bg-accent"
         )}
         onClick={() => {
-          // if (isPro) {
-          //   setSelectedProModel(model.id)
-          //   setIsProDialogOpen(true)
-          //   return
-          // }
+          if (isPro) {
+            setSelectedProModel(model.id)
+            setIsProDialogOpen(true)
+            return
+          }
 
           setSelectedModelId(model.id)
           if (isMobile) {
@@ -166,12 +162,12 @@ export function ModelSelector({
             <span className="text-sm">{model.name}</span>
           </div>
         </div>
-        {/* {isPro && (
+        {isPro && (
           <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
-            <Star className="size-2" />
+            <StarIcon className="size-2" />
             <span>Pro</span>
           </div>
-        )} */}
+        )}
       </div>
     )
   }
@@ -203,7 +199,7 @@ export function ModelSelector({
         {currentProvider?.icon && <currentProvider.icon className="size-5" />}
         <span>{currentModel?.name || "Select model"}</span>
       </div>
-      <CaretDown className="size-4 opacity-50" />
+      <CaretDownIcon className="size-4 opacity-50" />
     </Button>
   )
 
@@ -233,7 +229,7 @@ export function ModelSelector({
                   <currentProvider.icon className="size-5" />
                 )}
                 {currentModel?.name}
-                <CaretDown className="size-4" />
+                <CaretDownIcon className="size-4" />
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
@@ -260,7 +256,7 @@ export function ModelSelector({
             </DrawerHeader>
             <div className="px-4 pb-2">
               <div className="relative">
-                <MagnifyingGlass className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                <MagnifyingGlassIcon className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
                 <Input
                   ref={searchInputRef}
                   placeholder="Search models..."
@@ -333,7 +329,7 @@ export function ModelSelector({
           >
             <div className="bg-background sticky top-0 z-10 rounded-t-md border-b px-0 pt-0 pb-0">
               <div className="relative">
-                <MagnifyingGlass className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                <MagnifyingGlassIcon className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
                 <Input
                   ref={searchInputRef}
                   placeholder="Search models..."
@@ -355,9 +351,7 @@ export function ModelSelector({
                 </div>
               ) : filteredModels.length > 0 ? (
                 filteredModels.map((model) => {
-                  // const isPro = proModels.some(
-                  //   (proModel) => proModel.id === model.id
-                  // )
+                  const isPro = !model.accessible
                   const provider = PROVIDERS.find(
                     (provider) => provider.id === model.icon
                   )
@@ -370,11 +364,11 @@ export function ModelSelector({
                         selectedModelId === model.id && "bg-accent"
                       )}
                       onSelect={() => {
-                        // if (isPro) {
-                        //   setSelectedProModel(model.id)
-                        //   setIsProDialogOpen(true)
-                        //   return
-                        // }
+                        if (isPro) {
+                          setSelectedProModel(model.id)
+                          setIsProDialogOpen(true)
+                          return
+                        }
 
                         setSelectedModelId(model.id)
                         setIsDropdownOpen(false)
@@ -396,11 +390,11 @@ export function ModelSelector({
                           <span className="text-sm">{model.name}</span>
                         </div>
                       </div>
-                      {/* {isPro && (
+                      {isPro && (
                         <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
                           <span>Pro</span>
                         </div>
-                      )} */}
+                      )}
                     </DropdownMenuItem>
                   )
                 })
