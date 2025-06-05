@@ -10,20 +10,14 @@ type UseChatHandlersProps = {
     messages: Message[] | ((messages: Message[]) => Message[])
   ) => void
   setInput: (input: string) => void
-  selectedModel: string
   chatId: string | null
-  updateChatModel: (chatId: string, model: string) => Promise<void>
-  user: UserProfile | null
 }
 
 export function useChatHandlers({
   messages,
   setMessages,
   setInput,
-  selectedModel,
   chatId,
-  updateChatModel,
-  user,
 }: UseChatHandlersProps) {
   const { setDraftValue } = useChatDraft(chatId)
 
@@ -33,29 +27,6 @@ export function useChatHandlers({
       setDraftValue(value)
     },
     [setInput, setDraftValue]
-  )
-
-  const handleModelChange = useCallback(
-    async (model: string) => {
-      if (!user?.id) {
-        return
-      }
-
-      if (!chatId && user?.id) {
-        return
-      }
-
-      try {
-        await updateChatModel(chatId!, model)
-      } catch (err) {
-        console.error("Failed to update chat model:", err)
-        toast({
-          title: "Failed to update chat model",
-          status: "error",
-        })
-      }
-    },
-    [chatId, selectedModel, updateChatModel, user?.id]
   )
 
   const handleDelete = useCallback(
@@ -78,7 +49,6 @@ export function useChatHandlers({
 
   return {
     handleInputChange,
-    handleModelChange,
     handleDelete,
     handleEdit,
   }
