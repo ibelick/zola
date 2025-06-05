@@ -2,12 +2,11 @@ import { addUTM } from "@/app/components/chat/utils"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import {
-  ArrowSquareOut,
   ArrowSquareOutIcon,
-  Brain,
-  Image as ImageIcon,
+  BrainIcon,
+  ImageIcon,
+  WrenchIcon,
 } from "@phosphor-icons/react"
-import { ArrowUpRight, Wrench } from "lucide-react"
 
 type SubMenuProps = {
   hoveredModelData: ModelConfig
@@ -41,14 +40,14 @@ export function SubMenu({ hoveredModelData }: SubMenuProps) {
 
             {hoveredModelData.tools && (
               <div className="flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-700 dark:bg-purple-800 dark:text-purple-100">
-                <Wrench className="size-3" />
+                <WrenchIcon className="size-3" />
                 <span>Tools</span>
               </div>
             )}
 
             {hoveredModelData.reasoning && (
               <div className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-800 dark:text-amber-100">
-                <Brain className="size-3" />
+                <BrainIcon className="size-3" />
                 <span>Reasoning</span>
               </div>
             )}
@@ -58,7 +57,12 @@ export function SubMenu({ hoveredModelData }: SubMenuProps) {
         <div className="mt-4 flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2 text-sm">
             <span className="font-medium">Context</span>
-            <span>{hoveredModelData.contextWindow} tokens</span>
+            <span>
+              {Intl.NumberFormat("fr-FR", {
+                style: "decimal",
+              }).format(hoveredModelData.contextWindow ?? 0)}{" "}
+              tokens
+            </span>
           </div>
 
           <div className="flex flex-col gap-2">
