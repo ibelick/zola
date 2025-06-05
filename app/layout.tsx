@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { AgentProvider } from "@/lib/agent-store/provider"
 import { ChatsProvider } from "@/lib/chat-store/chats/provider"
 import { ChatSessionProvider } from "@/lib/chat-store/session/provider"
-import { APP_DESCRIPTION, APP_NAME } from "@/lib/config"
 import { UserPreferencesProvider } from "@/lib/user-preference-store/provider"
 import { UserProvider } from "@/lib/user-store/provider"
 import { getUserProfile } from "@/lib/user/api"
@@ -26,8 +25,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: APP_NAME,
-  description: APP_DESCRIPTION,
+  title: "Zola",
+  description:
+    "Zola is the open-source interface for AI chat. Multi-model, BYOK-ready, and fully self-hostable. Use Claude, OpenAI, Gemini, local models, and more, all in one place.",
 }
 
 export default async function RootLayout({
