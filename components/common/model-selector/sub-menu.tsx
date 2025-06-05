@@ -1,7 +1,13 @@
+import { addUTM } from "@/app/components/chat/utils"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
-import { Brain, Image as ImageIcon } from "@phosphor-icons/react"
-import { Wrench } from "lucide-react"
+import {
+  ArrowSquareOut,
+  ArrowSquareOutIcon,
+  Brain,
+  Image as ImageIcon,
+} from "@phosphor-icons/react"
+import { ArrowUpRight, Wrench } from "lucide-react"
 
 type SubMenuProps = {
   hoveredModelData: ModelConfig
@@ -49,17 +55,67 @@ export function SubMenu({ hoveredModelData }: SubMenuProps) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between text-sm">
+        <div className="mt-4 flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <span className="font-medium">Context</span>
+            <span>{hoveredModelData.contextWindow} tokens</span>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="font-medium">Input Pricing</span>
+              <span>
+                {Intl.NumberFormat("ja-JP", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(hoveredModelData.inputCost ?? 0)}{" "}
+                / 1M tokens
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="font-medium">Output Pricing</span>
+              <span>
+                {Intl.NumberFormat("ja-JP", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(hoveredModelData.outputCost ?? 0)}{" "}
+                / 1M tokens
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-2 text-sm">
             <span className="font-medium">Provider</span>
             <span>{hoveredModelData.provider}</span>
           </div>
 
-          <div className="flex justify-between text-sm">
-            <span className="text-sm font-medium">Id</span>
-            <span className="text-muted-foreground text-xs">
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <span className="flex-1 font-medium">Id</span>
+            <span className="text-muted-foreground truncate text-xs">
               {String(hoveredModelData.id)}
             </span>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between gap-2 text-xs">
+            <a
+              href={addUTM(hoveredModelData.apiDocs ?? "")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-0.5"
+            >
+              <span className="">API Docs</span>
+              <ArrowSquareOutIcon className="size-3" />
+            </a>
+            <a
+              href={addUTM(hoveredModelData.modelPage ?? "")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-0.5"
+            >
+              <span className="">Model Page</span>
+              <ArrowSquareOutIcon className="size-3" />
+            </a>
           </div>
         </div>
       </div>
