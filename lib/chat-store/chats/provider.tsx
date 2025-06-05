@@ -172,7 +172,14 @@ export function ChatsProvider({
   }
 
   const updateChatModel = async (id: string, model: string) => {
-    await updateChatModelFromDb(id, model)
+    const prev = [...chats]
+    setChats((prev) => prev.map((c) => (c.id === id ? { ...c, model } : c)))
+    try {
+      await updateChatModelFromDb(id, model)
+    } catch {
+      setChats(prev)
+      toast({ title: "Failed to update model", status: "error" })
+    }
   }
 
   const updateChatAgent = async (

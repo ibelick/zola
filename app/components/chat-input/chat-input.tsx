@@ -58,11 +58,7 @@ export function ChatInput({
   onSearchToggle,
 }: ChatInputProps) {
   const { currentAgent, curatedAgents, userAgents } = useAgent()
-  const {
-    isSearchEnabled,
-    toggleSearch,
-
-  } = useSearchAgent()
+  const { isSearchEnabled, toggleSearch } = useSearchAgent()
 
   const agentCommand = useAgentCommand({
     value,
