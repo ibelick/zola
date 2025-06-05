@@ -6,9 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-import { useState, useEffect } from "react"
-
+import { useEffect, useState } from "react"
 
 export function ProviderSettings() {
   const [openRouterAPIKey, setOpenRouterAPIKey] = useState("")
@@ -35,7 +33,9 @@ export function ProviderSettings() {
         const response = await fetch("/api/csrf")
         if (response.ok) {
           const cookies = document.cookie.split(";")
-          const csrfCookie = cookies.find(c => c.trim().startsWith("csrf_token="))
+          const csrfCookie = cookies.find((c) =>
+            c.trim().startsWith("csrf_token=")
+          )
           if (csrfCookie) {
             setCsrfToken(csrfCookie.split("=")[1])
           }
