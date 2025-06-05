@@ -10,7 +10,7 @@ const Icon = (props: SVGProps<SVGSVGElement>) => (
     fill="none"
     {...props}
   >
-    <g clipPath="url(#a)">
+    <g clipPath="url(#mistral)">
       <path
         fill="gold"
         d="M9.141 9.067h9.144v9.141H9.141zm36.571 0h9.147v9.141h-9.147z"
@@ -30,7 +30,7 @@ const Icon = (props: SVGProps<SVGSVGElement>) => (
       />
     </g>
     <defs>
-      <clipPath id="a">
+      <clipPath id="mistral">
         <path fill="#fff" d="M0 0h64v64H0z" />
       </clipPath>
     </defs>

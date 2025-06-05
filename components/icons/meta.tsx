@@ -11,7 +11,7 @@ export default function MetaIcon(props: SVGProps<SVGSVGElement>) {
       fill="none"
       {...props}
     >
-      <g clipPath="url(#a)">
+      <g clipPath="url(#meta)">
         <path
           fill="url(#b)"
           d="M55.176 32h-.192l-.248 20.92h.176c13.72 0 24.368 10.856 47.52 49.968l1.4 2.376.096.16 12.96-19.504-.096-.152a390 390 0 0 0-8.784-13.728 224 224 0 0 0-9.4-13.032C83.304 39.456 70.504 32 55.176 32"
@@ -218,7 +218,7 @@ export default function MetaIcon(props: SVGProps<SVGSVGElement>) {
           <stop offset={0.277} stopColor="#0867DF" />
           <stop offset={1} stopColor="#0471E9" />
         </linearGradient>
-        <clipPath id="a">
+        <clipPath id="meta">
           <path fill="#fff" d="M0 0h192v192H0z" />
         </clipPath>
       </defs>
