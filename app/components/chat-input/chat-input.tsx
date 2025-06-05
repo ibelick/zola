@@ -222,11 +222,11 @@ export function ChatInput({
                 isUserAuthenticated={isUserAuthenticated}
                 className="rounded-full"
               />
-              <ButtonSearch
+              {/* <ButtonSearch
                 isSelected={isSearchEnabled}
                 onToggle={handleSearchToggle}
                 isAuthenticated={isUserAuthenticated}
-              />
+              /> */}
               {currentAgent && !hasToolSupport && (
                 <div className="flex items-center gap-1">
                   <Warning className="size-4" />
