@@ -79,7 +79,10 @@ export async function getModelsWithAccessFlags(): Promise<ModelConfig[]> {
 }
 
 export async function getAllOpenRouterModels(): Promise<ModelConfig[]> {
-  const models = [...openrouterModels]
+  const models = openrouterModels.map((model) => ({
+    ...model,
+    accessible: true,
+  }))
 
   return models
 }

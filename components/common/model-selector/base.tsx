@@ -131,7 +131,7 @@ export function ModelSelector({
   }, [isDropdownOpen, selectedModelId])
 
   const renderModelItem = (model: ModelConfig) => {
-    const isPro = !model.accessible
+    const isLocked = !model.accessible
     const provider = PROVIDERS.find((provider) => provider.id === model.icon)
 
     return (
@@ -142,7 +142,7 @@ export function ModelSelector({
           selectedModelId === model.id && "bg-accent"
         )}
         onClick={() => {
-          if (isPro) {
+          if (isLocked) {
             setSelectedProModel(model.id)
             setIsProDialogOpen(true)
             return
@@ -162,10 +162,10 @@ export function ModelSelector({
             <span className="text-sm">{model.name}</span>
           </div>
         </div>
-        {isPro && (
+        {isLocked && (
           <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
             <StarIcon className="size-2" />
-            <span>Pro</span>
+            <span>Locked</span>
           </div>
         )}
       </div>
@@ -351,7 +351,7 @@ export function ModelSelector({
                 </div>
               ) : filteredModels.length > 0 ? (
                 filteredModels.map((model) => {
-                  const isPro = !model.accessible
+                  const isLocked = !model.accessible
                   const provider = PROVIDERS.find(
                     (provider) => provider.id === model.icon
                   )
@@ -364,7 +364,7 @@ export function ModelSelector({
                         selectedModelId === model.id && "bg-accent"
                       )}
                       onSelect={() => {
-                        if (isPro) {
+                        if (isLocked) {
                           setSelectedProModel(model.id)
                           setIsProDialogOpen(true)
                           return
@@ -390,9 +390,9 @@ export function ModelSelector({
                           <span className="text-sm">{model.name}</span>
                         </div>
                       </div>
-                      {isPro && (
+                      {isLocked && (
                         <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
-                          <span>Pro</span>
+                          <span>Locked</span>
                         </div>
                       )}
                     </DropdownMenuItem>

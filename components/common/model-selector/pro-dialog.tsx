@@ -3,8 +3,18 @@
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer"
 import { APP_NAME } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
 import { useUser } from "@/lib/user-store/provider"
@@ -66,46 +76,45 @@ export function ProModelDialog({
       </div>
 
       <div className="px-6 pt-4 text-center text-lg leading-tight font-medium">
-        This model is Pro-only on Zola
+        This model is locked
       </div>
 
       <div className="flex-grow overflow-y-auto">
         <div className="px-6 py-4">
-          <p className="text-muted-foreground text-sm">
-            Zola is free and open-source. Some models require self-hosted
-            access.
+          <p className="text-muted-foreground">
+            To use it, connect your own API key. Zola supports BYOK via{" "}
+            <span className="text-primary inline-flex font-medium">
+              OpenRouter
+            </span>
+            .
           </p>
-          <p className="text-muted-foreground mt-1 text-sm">
-            If you want to use this model, you can fork Zola and add your own
-            key. Or let us know you want access.
+          <p className="text-muted-foreground mt-1">
+            Go to{" "}
+            <span className="text-primary inline-flex font-medium">
+              Settings → API Keys
+            </span>{" "}
+            to add your key securely.
           </p>
-
-          <div className="mt-5 flex justify-center gap-3">
-            {submitted ? (
+          <p className="text-muted-foreground mt-5">
+            We don't support this model yet?
+          </p>
+          {submitted ? (
+            <div className="mt-5 flex justify-center gap-3">
               <Badge className="bg-green-600 text-white">
                 Thanks! We&apos;ll keep you updated
               </Badge>
-            ) : (
-              <>
-                <Button
-                  onClick={handleSubmitInterest}
-                  className="flex-1"
-                  variant="default"
-                >
-                  I want this model
-                </Button>
-                <Button variant="outline" className="flex-1" asChild>
-                  <a
-                    href="https://github.com/ibelick/zola"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View setup
-                  </a>
-                </Button>
-              </>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="mt-5 flex justify-center gap-3">
+              <Button
+                className="w-full"
+                onClick={handleSubmitInterest}
+                size="sm"
+              >
+                Ask for access
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
