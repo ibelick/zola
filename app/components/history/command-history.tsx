@@ -313,6 +313,7 @@ export function CommandHistory({
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
   const [hoveredChatId, setHoveredChatId] = useState<string | null>(null)
+  const [isPreviewPanelHovered, setIsPreviewPanelHovered] = useState(false)
   const { messages, isLoading, error, fetchPreview, clearPreview } =
     useChatPreview()
 
@@ -325,6 +326,7 @@ export function CommandHistory({
       setDeletingId(null)
       setSelectedChatId(null)
       setHoveredChatId(null)
+      setIsPreviewPanelHovered(false)
       clearPreview()
     }
   }
@@ -332,20 +334,30 @@ export function CommandHistory({
   const handleChatHover = useCallback(
     (chatId: string | null) => {
       if (!preferences.showConversationPreviews) return
+
       setHoveredChatId(chatId)
+
+      // Fetch preview when hovering over a chat
+      if (chatId) {
+        fetchPreview(chatId)
+      }
     },
-    [preferences.showConversationPreviews]
+    [preferences.showConversationPreviews, fetchPreview]
   )
 
   const handlePreviewHover = useCallback(
     (isHovering: boolean) => {
       if (!preferences.showConversationPreviews) return
 
-      if (!isHovering) {
+      setIsPreviewPanelHovered(isHovering)
+
+      // Only clear the hovered chat if we're not hovering the preview panel
+      // and there are already loaded messages
+      if (!isHovering && !hoveredChatId) {
         setHoveredChatId(null)
       }
     },
-    [preferences.showConversationPreviews]
+    [preferences.showConversationPreviews, hoveredChatId]
   )
 
   const handleEdit = useCallback((chat: Chats) => {
@@ -396,6 +408,9 @@ export function CommandHistory({
     [chatHistory, searchQuery]
   )
 
+  const activePreviewChatId =
+    hoveredChatId || (isPreviewPanelHovered ? hoveredChatId : null)
+
   const renderChatItem = useCallback(
     (chat: Chats) => {
       const isCurrentChatSession = chat.id === chatId
@@ -432,7 +447,6 @@ export function CommandHistory({
           )}
           value={chat.id}
           onMouseEnter={() => handleChatHover(chat.id)}
-          onMouseLeave={() => handleChatHover(null)}
         >
           {editingId === chat.id ? (
             <CommandItemEdit
@@ -469,6 +483,7 @@ export function CommandHistory({
       editTitle,
       selectedChatId,
       preferences.showConversationPreviews,
+      isPreviewPanelHovered,
       handleSaveEdit,
       handleCancelEdit,
       handleConfirmDelete,
@@ -563,8 +578,7 @@ export function CommandHistory({
 
           {preferences.showConversationPreviews && (
             <ChatPreviewPanel
-              chatId={hoveredChatId}
-              isVisible={true}
+              chatId={activePreviewChatId}
               onHover={handlePreviewHover}
               messages={messages}
               isLoading={isLoading}
