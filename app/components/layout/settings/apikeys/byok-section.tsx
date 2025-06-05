@@ -14,7 +14,7 @@ import { useEffect, useState } from "react"
 export function ByokSection() {
   const [isLoading, setIsLoading] = useState(false)
   const [openRouterAPIKey, setOpenRouterAPIKey] = useState("")
-  const [showOpenRouterInput, setShowOpenRouterInput] = useState(false)
+  const [showOpenRouterInput, setShowOpenRouterInput] = useState(true)
 
   const handleSave = async () => {
     setIsLoading(true)
@@ -38,7 +38,7 @@ export function ByokSection() {
       })
     }
 
-    setOpenRouterAPIKey("")
+    setOpenRouterAPIKey("sk-or-v1-............")
     setIsLoading(false)
   }
 
@@ -71,15 +71,12 @@ export function ByokSection() {
       <p className="text-muted-foreground text-sm">
         Your keys are stored securely with end-to-end encryption.
       </p>
-      <div className="mt-4 flex flex-row items-start justify-start gap-2">
+      <div className="mt-4 flex flex-row items-start justify-start gap-3">
         <button
           key="openrouter"
           type="button"
-          onClick={() => {
-            setShowOpenRouterInput(!showOpenRouterInput)
-          }}
           className={cn(
-            "flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border p-4",
+            "flex aspect-square w-28 flex-col items-center justify-center gap-2 rounded-lg border p-4",
             showOpenRouterInput
               ? "border-primary ring-primary/30 ring-2"
               : "border-border"
@@ -87,6 +84,17 @@ export function ByokSection() {
         >
           <OpenRouterIcon className="size-4" />
           <span>OpenRouter</span>
+        </button>
+        <button
+          key="openrouter"
+          type="button"
+          disabled
+          className={cn(
+            "flex aspect-square w-28 flex-col items-center justify-center gap-2 rounded-lg border p-4 opacity-20",
+            "border-primary border-dashed"
+          )}
+        >
+          <PlusIcon className="size-4" />
         </button>
       </div>
       <div className="mt-4">
