@@ -15,15 +15,12 @@ import { useState } from "react"
 import { ByokSection } from "./apikeys/byok-section"
 import { InteractionPreferences } from "./appearance/interaction-preferences"
 import { LayoutSettings } from "./appearance/layout-settings"
-// Appearance tab components
 import { ThemeSelection } from "./appearance/theme-selection"
 import { ConnectionsPlaceholder } from "./connections/connections-placeholder"
-// Connections tab components
 import { DeveloperTools } from "./connections/developer-tools"
-import { ProviderSettings } from "./connections/provider-settings"
+import { OllamaSection } from "./connections/ollama-section"
 import { AccountManagement } from "./general/account-management"
 import { ModelPreferences } from "./general/model-preferences"
-// General tab components
 import { UserProfile } from "./general/user-profile"
 
 type SettingsContentProps = {
@@ -122,7 +119,7 @@ export function SettingsContent({
 
             <TabsContent value="connections" className="space-y-6 px-6">
               {!isDev && <ConnectionsPlaceholder />}
-              {isDev && <ProviderSettings />}
+              {isDev && <OllamaSection />}
               {isDev && <DeveloperTools />}
             </TabsContent>
           </div>
@@ -196,7 +193,7 @@ export function SettingsContent({
 
               <TabsContent value="connections" className="mt-0 space-y-6">
                 {!isDev && <ConnectionsPlaceholder />}
-                {isDev && <ProviderSettings />}
+                {isDev && <OllamaSection />}
                 {isDev && <DeveloperTools />}
               </TabsContent>
             </div>
