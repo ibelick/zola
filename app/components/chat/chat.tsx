@@ -80,13 +80,11 @@ export function Chat() {
     handleFileUpload,
     handleFileRemove,
   } = useFileUpload()
-  const [selectedModel, setSelectedModel] = useState(
+  const selectedModel =
     currentChat?.model || user?.preferred_model || MODEL_DEFAULT
-  )
   const { currentAgent } = useAgent()
   const systemPrompt =
     currentAgent?.system_prompt || user?.system_prompt || SYSTEM_PROMPT_DEFAULT
-
   const [hydrated, setHydrated] = useState(false)
   const hasSentFirstMessageRef = useRef(false)
 
@@ -132,7 +130,7 @@ export function Chat() {
       messages,
       setMessages,
       setInput,
-      setSelectedModel,
+      // setSelectedModel,
       selectedModel,
       chatId,
       updateChatModel,
