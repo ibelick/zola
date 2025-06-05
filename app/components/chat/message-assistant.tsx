@@ -120,16 +120,22 @@ export function MessageAssistant({
                 )}
               </button>
             </MessageAction>
-            <MessageAction tooltip="Regenerate" side="bottom" delayDuration={0}>
-              <button
-                className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
-                aria-label="Regenerate"
-                onClick={onReload}
-                type="button"
+            {isLast ? (
+              <MessageAction
+                tooltip="Regenerate"
+                side="bottom"
+                delayDuration={0}
               >
-                <ArrowClockwise className="size-4" />
-              </button>
-            </MessageAction>
+                <button
+                  className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
+                  aria-label="Regenerate"
+                  onClick={onReload}
+                  type="button"
+                >
+                  <ArrowClockwise className="size-4" />
+                </button>
+              </MessageAction>
+            ) : null}
           </MessageActions>
         )}
       </div>
