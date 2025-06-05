@@ -393,7 +393,7 @@ export function Chat() {
       </AnimatePresence>
       <motion.div
         className={cn(
-          "relative inset-x-0 bottom-0 z-50 mx-auto w-full max-w-3xl"
+          "relative inset-x-0 bottom-0 z-50 mx-auto w-full max-w-2xl"
         )}
         layout="position"
         layoutId="chat-input-container"
