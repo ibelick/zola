@@ -26,14 +26,14 @@ import {
 } from "@/components/ui/tooltip"
 import { useChatSession } from "@/lib/chat-store/session/provider"
 import type { Chats } from "@/lib/chat-store/types"
+import { useChatPreview } from "@/lib/hooks/use-chat-preview"
+import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import { Check, PencilSimple, TrashSimple, X } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState, useRef } from "react"
-import { formatDate, groupChatsByDate } from "./utils"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChatPreviewPanel } from "./chat-preview-panel"
-import { useUserPreferences } from "@/lib/user-preference-store/provider"
-import { useChatPreview } from "@/lib/hooks/use-chat-preview"
+import { formatDate, groupChatsByDate } from "./utils"
 
 type CommandHistoryProps = {
   chatHistory: Chats[]
@@ -217,45 +217,45 @@ function CommandItemRow({
       </div>
 
       <div className="relative flex min-w-[140px] flex-shrink-0 items-center justify-end">
-        <div className="group-hover:opacity-0 mr-2 text-xs text-muted-foreground transition-opacity duration-200">
+        <div className="text-muted-foreground mr-2 text-xs transition-opacity duration-200 group-hover:opacity-0">
           {formatDate(chat.created_at)}
         </div>
 
         <div className="absolute right-0 flex translate-x-1 gap-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
           <Tooltip>
             <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant="ghost"
+              <Button
+                size="icon"
+                variant="ghost"
                 className="group/edit text-muted-foreground hover:bg-primary/10 size-8 transition-colors duration-150"
-              onClick={(e) => {
-                e.stopPropagation()
+                onClick={(e) => {
+                  e.stopPropagation()
                   onEdit(chat)
-              }}
+                }}
                 disabled={!!editingId || !!deletingId}
-              aria-label="Edit"
-            >
+                aria-label="Edit"
+              >
                 <PencilSimple className="group-hover/edit:text-primary size-4 transition-colors duration-150" />
-            </Button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent>Edit</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant="ghost"
+              <Button
+                size="icon"
+                variant="ghost"
                 className="group/delete text-muted-foreground hover:text-destructive-foreground hover:bg-primary/10 size-8 transition-colors duration-150"
-              onClick={(e) => {
-                e.stopPropagation()
+                onClick={(e) => {
+                  e.stopPropagation()
                   onDelete(chat.id)
-              }}
+                }}
                 disabled={!!editingId || !!deletingId}
-              aria-label="Delete"
-            >
+                aria-label="Delete"
+              >
                 <TrashSimple className="group-hover/delete:text-primary size-4 transition-colors duration-150" />
-            </Button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent>Delete</TooltipContent>
           </Tooltip>
@@ -283,7 +283,9 @@ function CustomCommandDialog({
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
-      <DialogContent className={cn("overflow-hidden border-none p-0", className)}>
+      <DialogContent
+        className={cn("overflow-hidden border-none p-0", className)}
+      >
         <Command className="[&_[cmdk-group-heading]]:text-muted-foreground border-none **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 [&_[cmdk-item]_svg]:border-none">
           {children}
         </Command>
@@ -304,17 +306,15 @@ export function CommandHistory({
   const { chatId } = useChatSession()
   const router = useRouter()
   const { preferences } = useUserPreferences()
-  
+
   const [searchQuery, setSearchQuery] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState("")
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
   const [hoveredChatId, setHoveredChatId] = useState<string | null>(null)
-  const { messages, isLoading, error, fetchPreview, clearPreview } = useChatPreview()
-  
-  // Add ref for hover timeout to prevent flickering
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const { messages, isLoading, error, fetchPreview, clearPreview } =
+    useChatPreview()
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
@@ -326,52 +326,27 @@ export function CommandHistory({
       setSelectedChatId(null)
       setHoveredChatId(null)
       clearPreview()
-      
-      // Clear any pending hover timeout
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current)
-        hoverTimeoutRef.current = null
     }
-  }
   }
 
-  // Enhanced hover handlers with timeout for better UX
-  const handleChatHover = useCallback((chatId: string | null) => {
-    if (!preferences.showConversationPreviews) return
-    
-    // Clear any existing timeout
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current)
-      hoverTimeoutRef.current = null
-    }
-    
-    if (chatId) {
-      // Immediate hover in
+  const handleChatHover = useCallback(
+    (chatId: string | null) => {
+      if (!preferences.showConversationPreviews) return
       setHoveredChatId(chatId)
-    } else {
-      // Delayed hover out to allow moving to preview panel
-      hoverTimeoutRef.current = setTimeout(() => {
-        setHoveredChatId(null)
-      }, 100)
-    }
-  }, [preferences.showConversationPreviews])
+    },
+    [preferences.showConversationPreviews]
+  )
 
-  const handlePreviewHover = useCallback((isHovering: boolean) => {
-    if (!preferences.showConversationPreviews) return
-    
-    if (isHovering) {
-      // Clear timeout when entering preview panel
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current)
-        hoverTimeoutRef.current = null
-      }
-    } else {
-      // Set timeout when leaving preview panel
-      hoverTimeoutRef.current = setTimeout(() => {
+  const handlePreviewHover = useCallback(
+    (isHovering: boolean) => {
+      if (!preferences.showConversationPreviews) return
+
+      if (!isHovering) {
         setHoveredChatId(null)
-      }, 100)
-    }
-  }, [preferences.showConversationPreviews])
+      }
+    },
+    [preferences.showConversationPreviews]
+  )
 
   const handleEdit = useCallback((chat: Chats) => {
     setEditingId(chat.id)
@@ -510,19 +485,10 @@ export function CommandHistory({
       // Prefetch the most recent chat routes
       const recentChats = chatHistory.slice(0, 10)
       recentChats.forEach((chat) => {
-      router.prefetch(`/c/${chat.id}`)
-    })
+        router.prefetch(`/c/${chat.id}`)
+      })
     }
   }, [isOpen, chatHistory, router])
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current)
-      }
-    }
-  }, [])
 
   // Add keyboard shortcut to open dialog with Command+K
   useEffect(() => {
@@ -547,50 +513,52 @@ export function CommandHistory({
       ) : (
         trigger
       )}
-      
+
       <CustomCommandDialog
         open={isOpen}
         onOpenChange={handleOpenChange}
         title="Chat History"
         description="Search through your past conversations"
         className={cn(
-          preferences.showConversationPreviews 
-            ? "sm:max-w-[900px]" 
+          preferences.showConversationPreviews
+            ? "sm:max-w-[900px]"
             : "sm:max-w-3xl"
         )}
       >
-          <CommandInput
-            placeholder="Search history..."
-            value={searchQuery}
-            onValueChange={(value) => setSearchQuery(value)}
-          />
-        
-        <div className="flex">
-          <div className={cn(
-            "flex-1",
-            preferences.showConversationPreviews ? "max-w-[700px]" : ""
-          )}>
-          <CommandList className="max-h-[480px] min-h-[480px] flex-1 [&>[cmdk-list-sizer]]:space-y-6 [&>[cmdk-list-sizer]]:py-2">
-            {filteredChat.length === 0 && (
-              <CommandEmpty>No chat history found.</CommandEmpty>
-            )}
+        <CommandInput
+          placeholder="Search history..."
+          value={searchQuery}
+          onValueChange={(value) => setSearchQuery(value)}
+        />
 
-            {searchQuery ? (
-              <CommandGroup className="p-1.5">
-                {filteredChat.map((chat) => renderChatItem(chat))}
-              </CommandGroup>
-            ) : (
-              groupedChats?.map((group) => (
-                <CommandGroup
-                  key={group.name}
-                  heading={group.name}
-                  className="space-y-0 px-1.5"
-                >
-                  {group.chats.map((chat) => renderChatItem(chat))}
-                </CommandGroup>
-              ))
+        <div className="flex">
+          <div
+            className={cn(
+              "flex-1",
+              preferences.showConversationPreviews ? "max-w-[700px]" : ""
             )}
-          </CommandList>
+          >
+            <CommandList className="max-h-[480px] min-h-[480px] flex-1 [&>[cmdk-list-sizer]]:space-y-6 [&>[cmdk-list-sizer]]:py-2">
+              {filteredChat.length === 0 && (
+                <CommandEmpty>No chat history found.</CommandEmpty>
+              )}
+
+              {searchQuery ? (
+                <CommandGroup className="p-1.5">
+                  {filteredChat.map((chat) => renderChatItem(chat))}
+                </CommandGroup>
+              ) : (
+                groupedChats?.map((group) => (
+                  <CommandGroup
+                    key={group.name}
+                    heading={group.name}
+                    className="space-y-0 px-1.5"
+                  >
+                    {group.chats.map((chat) => renderChatItem(chat))}
+                  </CommandGroup>
+                ))
+              )}
+            </CommandList>
           </div>
 
           {preferences.showConversationPreviews && (
@@ -606,50 +574,49 @@ export function CommandHistory({
           )}
         </div>
 
-          <div className="bg-card border-input right-0 bottom-0 left-0 flex items-center justify-between border-t px-4 py-3">
-            <div className="text-muted-foreground flex w-full items-center gap-2 text-xs">
-              <div className="flex w-full flex-row items-center justify-between gap-1">
-                <div className="flex w-full flex-1 flex-row items-center gap-4">
-                  <div className="flex flex-row items-center gap-1.5">
-                    <div className="flex flex-row items-center gap-0.5">
-                      <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
-                        ↑
-                      </span>
-                      <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
-                        ↓
-                      </span>
-                    </div>
-                    <span>Navigate</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
+        <div className="bg-card border-input right-0 bottom-0 left-0 flex items-center justify-between border-t px-4 py-3">
+          <div className="text-muted-foreground flex w-full items-center gap-2 text-xs">
+            <div className="flex w-full flex-row items-center justify-between gap-1">
+              <div className="flex w-full flex-1 flex-row items-center gap-4">
+                <div className="flex flex-row items-center gap-1.5">
+                  <div className="flex flex-row items-center gap-0.5">
                     <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
-                      ⏎
+                      ↑
                     </span>
-                    <span>Go to chat</span>
+                    <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
+                      ↓
+                    </span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex flex-row items-center gap-0.5">
-                      <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
-                        ⌘
-                      </span>
-                      <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
-                        K
-                      </span>
-                    </div>
-                    <span>Toggle</span>
+                  <span>Navigate</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
+                    ⏎
+                  </span>
+                  <span>Go to chat</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="flex flex-row items-center gap-0.5">
+                    <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
+                      ⌘
+                    </span>
+                    <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
+                      K
+                    </span>
                   </div>
+                  <span>Toggle</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="border-border bg-muted inline-flex h-5 items-center justify-center rounded-sm border px-1">
-                  Esc
-                </span>
-                <span>Close</span>
-              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="border-border bg-muted inline-flex h-5 items-center justify-center rounded-sm border px-1">
+                Esc
+              </span>
+              <span>Close</span>
             </div>
           </div>
+        </div>
       </CustomCommandDialog>
     </>
   )
 }
-
