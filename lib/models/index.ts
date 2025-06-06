@@ -40,15 +40,11 @@ export async function getAllModels(): Promise<ModelConfig[]> {
     const detectedOllamaModels = await getOllamaModels()
 
     // Combine static models (excluding static Ollama models) with detected ones
-    const staticModelsWithoutOllamaAndOpenRouter = STATIC_MODELS.filter(
-      (model) =>
-        model.providerId !== "ollama" && model.providerId !== "openrouter"
+    const staticModelsWithoutOllama = STATIC_MODELS.filter(
+      (model) => model.providerId !== "ollama"
     )
 
-    dynamicModelsCache = [
-      ...staticModelsWithoutOllamaAndOpenRouter,
-      ...detectedOllamaModels,
-    ]
+    dynamicModelsCache = [...staticModelsWithoutOllama, ...detectedOllamaModels]
 
     lastFetchTime = now
     return dynamicModelsCache
