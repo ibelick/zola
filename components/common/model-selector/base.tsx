@@ -24,7 +24,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { FREE_MODELS_IDS } from "@/lib/config"
-import { fetchClient } from "@/lib/fetch"
+import { useModel } from "@/lib/model-store/provider"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { cn } from "@/lib/utils"
@@ -50,37 +50,7 @@ export function ModelSelector({
   className,
   isUserAuthenticated = true,
 }: ModelSelectorProps) {
-  const [models, setModels] = useState<ModelConfig[]>([])
-  const [isLoadingModels, setIsLoadingModels] = useState(true)
-
-  // Load models on component mount
-  useEffect(() => {
-    // Only run on client side
-    if (typeof window === "undefined") return
-
-    const loadModels = async () => {
-      try {
-        setIsLoadingModels(true)
-
-        // Use the API endpoint directly to avoid SSR issues
-        const response = await fetchClient("/api/models")
-        if (!response.ok) {
-          throw new Error("Failed to fetch models")
-        }
-
-        const data = await response.json()
-        setModels(data.models || [])
-      } catch (error) {
-        console.error("Failed to load models:", error)
-        // Fallback to empty array if loading fails
-        setModels([])
-      } finally {
-        setIsLoadingModels(false)
-      }
-    }
-
-    loadModels()
-  }, [])
+  const { models, isLoading: isLoadingModels } = useModel()
 
   const currentModel = models.find((model) => model.id === selectedModelId)
   const currentProvider = PROVIDERS.find(
