@@ -21,8 +21,8 @@ import {
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
 import { cn } from "@/lib/utils"
-import { useChat } from "@ai-sdk/react"
-import { defaultChatStore, UIMessage } from "ai"
+import { Chat as ReactChat, useChat } from "@ai-sdk/react"
+import { DefaultChatTransport, UIMessage } from "ai"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
@@ -68,11 +68,6 @@ export type MessageMetadata = z.infer<typeof messageMetadataSchema>
 
 export type UIMessageWithMetadata = UIMessage<MessageMetadata>
 
-const chatStore = defaultChatStore({
-  api: API_ROUTE_CHAT,
-  messageMetadataSchema,
-})
-
 export function Chat() {
   const { chatId } = useChatSession()
   const {
@@ -115,21 +110,25 @@ export function Chat() {
     }
   }, [initialMessages])
 
+  const [input, setInput] = useState("")
+
   const {
-    chatId: chatIdFromUseChat,
+    // id: chatIdFromUseChat,
     messages,
-    input,
-    handleSubmit,
     status,
     error,
     reload,
     stop,
     setMessages,
-    setInput,
-    append,
+    sendMessage,
   } = useChat({
-    chatStore,
-    chatId: chatId || "default",
+    chat: new ReactChat({
+      messageMetadataSchema: messageMetadataSchema,
+      id: chatId || "default",
+      transport: new DefaultChatTransport({
+        api: API_ROUTE_CHAT,
+      }),
+    }),
     onFinish: async (data) => {
       console.log("onFinish", { data })
       await cacheAndAddMessage(data.message)
@@ -157,7 +156,7 @@ export function Chat() {
 
   const { handleInputChange, handleModelChange, handleDelete, handleEdit } =
     useChatHandlers({
-      messages,
+      messages: messages,
       setMessages,
       setInput,
       setSelectedModel,
@@ -271,8 +270,8 @@ export function Chat() {
     }
 
     try {
-      handleSubmit(undefined, options)
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+      sendMessage({ text: input }, options)
+      // setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
@@ -356,8 +355,8 @@ export function Chat() {
     }
 
     try {
-      handleSubmit(undefined, options)
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+      sendMessage({ text: input }, options)
+      // setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
       clearDraft()

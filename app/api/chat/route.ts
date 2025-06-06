@@ -8,7 +8,7 @@ import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
 import type { LanguageModelV2 } from "@ai-sdk/provider"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import { convertToModelMessages, maxSteps, streamText, UIMessage } from "ai"
+import { convertToModelMessages, stepCountIs, streamText, UIMessage } from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
       system: effectiveSystemPrompt,
       messages: convertToModelMessages(messages),
       tools: toolsToUse,
-      continueUntil: (ops) => maxSteps(10)(ops),
+      stopWhen: (ops) => stepCountIs(10)(ops),
       onError: (err: any) => {
         console.error("🛑 streamText error:", err)
         streamError = new Error(
