@@ -70,7 +70,10 @@ export function MessageAssistant({
     >
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
         {reasoningParts && reasoningParts.reasoning && (
-          <Reasoning reasoning={reasoningParts.reasoning} />
+          <Reasoning
+            reasoning={reasoningParts.reasoning}
+            isStreaming={status === "streaming"}
+          />
         )}
 
         {toolInvocationParts &&
