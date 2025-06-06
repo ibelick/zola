@@ -1,6 +1,7 @@
 import { FREE_MODELS_IDS } from "../config"
 import { claudeModels } from "./data/claude"
 import { deepseekModels } from "./data/deepseek"
+import { geminiModels } from "./data/gemini"
 import { grokModels } from "./data/grok"
 import { mistralModels } from "./data/mistral"
 import { getOllamaModels, ollamaModels } from "./data/ollama"
@@ -9,17 +10,15 @@ import { openrouterModels } from "./data/openrouter"
 import { ModelConfig } from "./types"
 
 // Static models (always available)
-export const STATIC_MODELS: ModelConfig[] = [
+const STATIC_MODELS: ModelConfig[] = [
   ...openaiModels,
   ...mistralModels,
   ...deepseekModels,
   ...claudeModels,
   ...grokModels,
+  ...geminiModels,
   ...ollamaModels, // Static fallback Ollama models
   ...openrouterModels,
-
-  // not ready
-  // ...llamaModels,
 ]
 
 // Dynamic models cache
@@ -27,7 +26,7 @@ let dynamicModelsCache: ModelConfig[] | null = null
 let lastFetchTime = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
-// Function to get all models including dynamically detected ones
+// // Function to get all models including dynamically detected ones
 export async function getAllModels(): Promise<ModelConfig[]> {
   const now = Date.now()
 
@@ -41,11 +40,15 @@ export async function getAllModels(): Promise<ModelConfig[]> {
     const detectedOllamaModels = await getOllamaModels()
 
     // Combine static models (excluding static Ollama models) with detected ones
-    const staticModelsWithoutOllama = STATIC_MODELS.filter(
-      (model) => model.providerId !== "ollama"
+    const staticModelsWithoutOllamaAndOpenRouter = STATIC_MODELS.filter(
+      (model) =>
+        model.providerId !== "ollama" && model.providerId !== "openrouter"
     )
 
-    dynamicModelsCache = [...staticModelsWithoutOllama, ...detectedOllamaModels]
+    dynamicModelsCache = [
+      ...staticModelsWithoutOllamaAndOpenRouter,
+      ...detectedOllamaModels,
+    ]
 
     lastFetchTime = now
     return dynamicModelsCache

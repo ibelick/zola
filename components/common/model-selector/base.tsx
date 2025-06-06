@@ -267,7 +267,7 @@ export function ModelSelector({
                 />
               </div>
             </div>
-            <div className="flex h-full flex-col space-y-0.5 overflow-y-auto px-4 pb-6">
+            <div className="flex h-full flex-col space-y-0 overflow-y-auto px-4 pb-6">
               {isLoadingModels ? (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                   <p className="text-muted-foreground mb-2 text-sm">
@@ -342,7 +342,7 @@ export function ModelSelector({
                 />
               </div>
             </div>
-            <div className="flex h-full flex-col space-y-0.5 overflow-y-auto px-1 pt-1 pb-0">
+            <div className="flex h-full flex-col space-y-0 overflow-y-auto px-1 pt-1 pb-0">
               {isLoadingModels ? (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                   <p className="text-muted-foreground mb-2 text-sm">
