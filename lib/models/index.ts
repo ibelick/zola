@@ -74,7 +74,12 @@ export async function getModelsWithAccessFlags(): Promise<ModelConfig[]> {
       accessible: false,
     }))
 
-  return [...freeModels, ...proModels]
+  // to avoid model duplication
+  const removeOpenRouterModels = [...freeModels, ...proModels].filter(
+    (model) => model.providerId !== "openrouter"
+  )
+
+  return removeOpenRouterModels
 }
 
 export async function getAllOpenRouterModels(): Promise<ModelConfig[]> {
