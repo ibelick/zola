@@ -2,6 +2,7 @@
 
 import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
+import { useModel } from "@/app/components/chat/use-model"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
 import { useAgent } from "@/lib/agent-store/provider"
@@ -9,11 +10,7 @@ import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import { useChatSession } from "@/lib/chat-store/session/provider"
-import {
-  MESSAGE_MAX_LENGTH,
-  MODEL_DEFAULT,
-  SYSTEM_PROMPT_DEFAULT,
-} from "@/lib/config"
+import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
@@ -80,13 +77,17 @@ export function Chat() {
     handleFileUpload,
     handleFileRemove,
   } = useFileUpload()
-  const [selectedModel, setSelectedModel] = useState(
-    currentChat?.model || user?.preferred_model || MODEL_DEFAULT
-  )
+
+  const { selectedModel, handleModelChange } = useModel({
+    currentChat: currentChat || null,
+    user,
+    updateChatModel,
+    chatId,
+  })
+
   const { currentAgent } = useAgent()
   const systemPrompt =
     currentAgent?.system_prompt || user?.system_prompt || SYSTEM_PROMPT_DEFAULT
-
   const [hydrated, setHydrated] = useState(false)
   const hasSentFirstMessageRef = useRef(false)
 
@@ -127,24 +128,12 @@ export function Chat() {
     setHasDialogAuth,
   })
 
-  const { handleInputChange, handleModelChange, handleDelete, handleEdit } =
-    useChatHandlers({
-      messages,
-      setMessages,
-      setInput,
-      setSelectedModel,
-      selectedModel,
-      chatId,
-      updateChatModel,
-      user,
-    })
-
-  // when chatId is null, set messages to an empty array
-  useEffect(() => {
-    if (chatId === null) {
-      setMessages([])
-    }
-  }, [chatId, setMessages])
+  const { handleInputChange, handleDelete, handleEdit } = useChatHandlers({
+    messages,
+    setMessages,
+    setInput,
+    chatId,
+  })
 
   useEffect(() => {
     setHydrated(true)

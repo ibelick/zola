@@ -12,9 +12,8 @@ export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5
 export const AUTH_DAILY_MESSAGE_LIMIT = 1000
 export const REMAINING_QUERY_ALERT_THRESHOLD = 2
 export const DAILY_FILE_UPLOAD_LIMIT = 5
-// @todo: remove this
 export const DAILY_SPECIAL_AGENT_LIMIT = 5
-export const DAILY_LIMIT_PRO_MODELS = 5
+export const DAILY_LIMIT_PRO_MODELS = 500
 
 export const FREE_MODELS_IDS = [
   "deepseek-r1",
@@ -27,8 +26,6 @@ export const MODEL_DEFAULT = "gpt-4.1-nano"
 
 export const APP_NAME = "Zola"
 export const APP_DOMAIN = "https://zola.chat"
-export const APP_DESCRIPTION =
-  "Zola is a free, open-source AI chat app with multi-model support."
 
 export const SUGGESTIONS = [
   {

@@ -58,11 +58,7 @@ export function ChatInput({
   onSearchToggle,
 }: ChatInputProps) {
   const { currentAgent, curatedAgents, userAgents } = useAgent()
-  const {
-    isSearchEnabled,
-    toggleSearch,
-
-  } = useSearchAgent()
+  const { isSearchEnabled, toggleSearch } = useSearchAgent()
 
   const agentCommand = useAgentCommand({
     value,
@@ -226,11 +222,11 @@ export function ChatInput({
                 isUserAuthenticated={isUserAuthenticated}
                 className="rounded-full"
               />
-              <ButtonSearch
+              {/* <ButtonSearch
                 isSelected={isSearchEnabled}
                 onToggle={handleSearchToggle}
                 isAuthenticated={isUserAuthenticated}
-              />
+              /> */}
               {currentAgent && !hasToolSupport && (
                 <div className="flex items-center gap-1">
                   <Warning className="size-4" />

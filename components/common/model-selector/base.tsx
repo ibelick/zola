@@ -24,11 +24,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { FREE_MODELS_IDS } from "@/lib/config"
-import { fetchClient } from "@/lib/fetch"
+import { useModel } from "@/lib/model-store/provider"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { cn } from "@/lib/utils"
-import { CaretDown, MagnifyingGlass, Star } from "@phosphor-icons/react"
+import {
+  CaretDownIcon,
+  MagnifyingGlassIcon,
+  StarIcon,
+} from "@phosphor-icons/react"
 import { useEffect, useRef, useState } from "react"
 import { ProModelDialog } from "./pro-dialog"
 import { SubMenu } from "./sub-menu"
@@ -46,50 +50,12 @@ export function ModelSelector({
   className,
   isUserAuthenticated = true,
 }: ModelSelectorProps) {
-  const [models, setModels] = useState<ModelConfig[]>([])
-  const [isLoadingModels, setIsLoadingModels] = useState(true)
-
-  // Load models on component mount
-  useEffect(() => {
-    // Only run on client side
-    if (typeof window === "undefined") return
-
-    const loadModels = async () => {
-      try {
-        setIsLoadingModels(true)
-
-        // Use the API endpoint directly to avoid SSR issues
-        const response = await fetchClient("/api/models")
-        if (!response.ok) {
-          throw new Error("Failed to fetch models")
-        }
-
-        const data = await response.json()
-        setModels(data.models || [])
-      } catch (error) {
-        console.error("Failed to load models:", error)
-        // Fallback to empty array if loading fails
-        setModels([])
-      } finally {
-        setIsLoadingModels(false)
-      }
-    }
-
-    loadModels()
-  }, [])
+  const { models, isLoading: isLoadingModels } = useModel()
 
   const currentModel = models.find((model) => model.id === selectedModelId)
   const currentProvider = PROVIDERS.find(
-    (provider) => provider.id === currentModel?.providerId
+    (provider) => provider.id === currentModel?.icon
   )
-
-  // Treat all Ollama models as free models
-  const freeModels = models.filter(
-    (model) =>
-      FREE_MODELS_IDS.includes(model.id) || model.providerId === "ollama"
-  )
-  const proModels = models.filter((model) => !freeModels.includes(model))
-
   const isMobile = useBreakpoint(768)
 
   const [hoveredModel, setHoveredModel] = useState<string | null>(null)
@@ -135,10 +101,8 @@ export function ModelSelector({
   }, [isDropdownOpen, selectedModelId])
 
   const renderModelItem = (model: ModelConfig) => {
-    const isPro = proModels.some((proModel) => proModel.id === model.id)
-    const provider = PROVIDERS.find(
-      (provider) => provider.id === model.provider
-    )
+    const isLocked = !model.accessible
+    const provider = PROVIDERS.find((provider) => provider.id === model.icon)
 
     return (
       <div
@@ -148,7 +112,7 @@ export function ModelSelector({
           selectedModelId === model.id && "bg-accent"
         )}
         onClick={() => {
-          if (isPro) {
+          if (isLocked) {
             setSelectedProModel(model.id)
             setIsProDialogOpen(true)
             return
@@ -168,10 +132,10 @@ export function ModelSelector({
             <span className="text-sm">{model.name}</span>
           </div>
         </div>
-        {isPro && (
+        {isLocked && (
           <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
-            <Star className="size-2" />
-            <span>Pro</span>
+            <StarIcon className="size-2" />
+            <span>Locked</span>
           </div>
         )}
       </div>
@@ -205,7 +169,7 @@ export function ModelSelector({
         {currentProvider?.icon && <currentProvider.icon className="size-5" />}
         <span>{currentModel?.name || "Select model"}</span>
       </div>
-      <CaretDown className="size-4 opacity-50" />
+      <CaretDownIcon className="size-4 opacity-50" />
     </Button>
   )
 
@@ -235,7 +199,7 @@ export function ModelSelector({
                   <currentProvider.icon className="size-5" />
                 )}
                 {currentModel?.name}
-                <CaretDown className="size-4" />
+                <CaretDownIcon className="size-4" />
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
@@ -262,7 +226,7 @@ export function ModelSelector({
             </DrawerHeader>
             <div className="px-4 pb-2">
               <div className="relative">
-                <MagnifyingGlass className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                <MagnifyingGlassIcon className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
                 <Input
                   ref={searchInputRef}
                   placeholder="Search models..."
@@ -273,7 +237,7 @@ export function ModelSelector({
                 />
               </div>
             </div>
-            <div className="flex h-full flex-col space-y-0.5 overflow-y-auto px-4 pb-6">
+            <div className="flex h-full flex-col space-y-0 overflow-y-auto px-4 pb-6">
               {isLoadingModels ? (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                   <p className="text-muted-foreground mb-2 text-sm">
@@ -335,7 +299,7 @@ export function ModelSelector({
           >
             <div className="bg-background sticky top-0 z-10 rounded-t-md border-b px-0 pt-0 pb-0">
               <div className="relative">
-                <MagnifyingGlass className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                <MagnifyingGlassIcon className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
                 <Input
                   ref={searchInputRef}
                   placeholder="Search models..."
@@ -348,7 +312,7 @@ export function ModelSelector({
                 />
               </div>
             </div>
-            <div className="flex h-full flex-col space-y-0.5 overflow-y-auto px-1 pt-1 pb-0">
+            <div className="flex h-full flex-col space-y-0 overflow-y-auto px-1 pt-1 pb-0">
               {isLoadingModels ? (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                   <p className="text-muted-foreground mb-2 text-sm">
@@ -357,11 +321,9 @@ export function ModelSelector({
                 </div>
               ) : filteredModels.length > 0 ? (
                 filteredModels.map((model) => {
-                  const isPro = proModels.some(
-                    (proModel) => proModel.id === model.id
-                  )
+                  const isLocked = !model.accessible
                   const provider = PROVIDERS.find(
-                    (provider) => provider.id === model.providerId
+                    (provider) => provider.id === model.icon
                   )
 
                   return (
@@ -372,7 +334,7 @@ export function ModelSelector({
                         selectedModelId === model.id && "bg-accent"
                       )}
                       onSelect={() => {
-                        if (isPro) {
+                        if (isLocked) {
                           setSelectedProModel(model.id)
                           setIsProDialogOpen(true)
                           return
@@ -398,9 +360,9 @@ export function ModelSelector({
                           <span className="text-sm">{model.name}</span>
                         </div>
                       </div>
-                      {isPro && (
+                      {isLocked && (
                         <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
-                          <span>Pro</span>
+                          <span>Locked</span>
                         </div>
                       )}
                     </DropdownMenuItem>

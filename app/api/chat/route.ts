@@ -3,7 +3,7 @@ import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
 import { getAllModels } from "@/lib/models"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
-import { Provider } from "@/lib/user-keys"
+import { ProviderWithoutOllama } from "@/lib/user-keys"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { Message as MessageAISDK, streamText, ToolSet } from "ai"
 import {
@@ -12,7 +12,12 @@ import {
   trackSpecialAgentUsage,
   validateAndTrackUsage,
 } from "./api"
-import { cleanMessagesForTools } from "./utils"
+import {
+  ApiError,
+  cleanMessagesForTools,
+  createErrorResponse,
+  handleStreamError,
+} from "./utils"
 
 export const maxDuration = 60
 
@@ -97,13 +102,15 @@ export async function POST(req: Request) {
     const hasTools = !!toolsToUse && Object.keys(toolsToUse).length > 0
     const cleanedMessages = cleanMessagesForTools(messages, hasTools)
 
-    let streamError: Error | null = null
+    let streamError: ApiError | null = null
 
     let apiKey: string | undefined
     if (isAuthenticated && userId) {
       const { getEffectiveApiKey } = await import("@/lib/user-keys")
       const provider = getProviderForModel(model)
-      apiKey = await getEffectiveApiKey(userId, provider as Provider) || undefined
+      apiKey =
+        (await getEffectiveApiKey(userId, provider as ProviderWithoutOllama)) ||
+        undefined
     }
 
     const result = streamText({
@@ -113,11 +120,7 @@ export async function POST(req: Request) {
       tools: toolsToUse as ToolSet,
       maxSteps: 10,
       onError: (err: unknown) => {
-        console.error("🛑 streamText error:", err)
-        streamError = new Error(
-          (err as { error?: string })?.error ||
-            "AI generation failed. Please check your model or API key."
-        )
+        streamError = handleStreamError(err)
       },
 
       onFinish: async ({ response }) => {
@@ -142,28 +145,18 @@ export async function POST(req: Request) {
       sendReasoning: true,
       sendSources: true,
     })
-    // Optionally attach chatId in a custom header.
-    const headers = new Headers(originalResponse.headers)
-    headers.set("X-Chat-Id", chatId)
 
     return new Response(originalResponse.body, {
       status: originalResponse.status,
-      headers,
     })
   } catch (err: unknown) {
     console.error("Error in /api/chat:", err)
-    // Return a structured error response if the error is a UsageLimitError.
-    const error = err as { code?: string; message?: string }
-    if (error.code === "DAILY_LIMIT_REACHED") {
-      return new Response(
-        JSON.stringify({ error: error.message, code: error.code }),
-        { status: 403 }
-      )
+    const error = err as {
+      code?: string
+      message?: string
+      statusCode?: number
     }
 
-    return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
-      { status: 500 }
-    )
+    return createErrorResponse(error)
   }
 }

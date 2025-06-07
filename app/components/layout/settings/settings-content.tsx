@@ -4,19 +4,23 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { cn, isDev } from "@/lib/utils"
-import { GearSix, PaintBrush, PlugsConnected, X } from "@phosphor-icons/react"
+import {
+  GearSixIcon,
+  KeyIcon,
+  PaintBrushIcon,
+  PlugsConnectedIcon,
+  XIcon,
+} from "@phosphor-icons/react"
 import { useState } from "react"
+import { ByokSection } from "./apikeys/byok-section"
 import { InteractionPreferences } from "./appearance/interaction-preferences"
 import { LayoutSettings } from "./appearance/layout-settings"
-// Appearance tab components
 import { ThemeSelection } from "./appearance/theme-selection"
 import { ConnectionsPlaceholder } from "./connections/connections-placeholder"
-// Connections tab components
 import { DeveloperTools } from "./connections/developer-tools"
-import { ProviderSettings } from "./connections/provider-settings"
+import { OllamaSection } from "./connections/ollama-section"
 import { AccountManagement } from "./general/account-management"
 import { ModelPreferences } from "./general/model-preferences"
-// General tab components
 import { UserProfile } from "./general/user-profile"
 
 type SettingsContentProps = {
@@ -43,7 +47,7 @@ export function SettingsContent({
         <div className="border-border mb-2 flex items-center justify-between border-b px-4 pb-2">
           <h2 className="text-lg font-medium">Settings</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
+            <XIcon className="size-4" />
           </Button>
         </div>
       )}
@@ -58,30 +62,42 @@ export function SettingsContent({
       >
         {isDrawer ? (
           // Mobile version - tabs on top
-          <div className="w-full px-6 py-4">
-            <TabsList className="mb-4 grid w-full grid-cols-3 bg-transparent">
-              <TabsTrigger value="general" className="flex items-center gap-2">
-                <GearSix className="size-4" />
-                <span>General</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="appearance"
-                className="flex items-center gap-2"
-              >
-                <PaintBrush className="size-4" />
-                <span>Appearance</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="connections"
-                className="flex items-center gap-2"
-              >
-                <PlugsConnected className="size-4" />
-                <span>Connections</span>
-              </TabsTrigger>
-            </TabsList>
+          <div className="w-full items-start justify-start overflow-hidden py-4">
+            <div>
+              <TabsList className="mb-4 flex w-full min-w-0 flex-nowrap items-center justify-start overflow-x-auto bg-transparent px-0">
+                <TabsTrigger
+                  value="general"
+                  className="ml-6 flex shrink-0 items-center gap-2"
+                >
+                  <GearSixIcon className="size-4" />
+                  <span>General</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="appearance"
+                  className="flex shrink-0 items-center gap-2"
+                >
+                  <PaintBrushIcon className="size-4" />
+                  <span>Appearance</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="apikeys"
+                  className="flex shrink-0 items-center gap-2"
+                >
+                  <KeyIcon className="size-4" />
+                  <span>API Keys</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="connections"
+                  className="flex shrink-0 items-center gap-2"
+                >
+                  <PlugsConnectedIcon className="size-4" />
+                  <span>Connections</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             {/* Mobile tabs content */}
-            <TabsContent value="general" className="space-y-6">
+            <TabsContent value="general" className="space-y-6 px-6">
               <UserProfile />
               {isSupabaseEnabled && (
                 <>
@@ -91,15 +107,19 @@ export function SettingsContent({
               )}
             </TabsContent>
 
-            <TabsContent value="appearance" className="space-y-6">
+            <TabsContent value="appearance" className="space-y-6 px-6">
               <ThemeSelection />
               <LayoutSettings />
               <InteractionPreferences />
             </TabsContent>
 
-            <TabsContent value="connections" className="space-y-6">
+            <TabsContent value="apikeys" className="px-6">
+              <ByokSection />
+            </TabsContent>
+
+            <TabsContent value="connections" className="space-y-6 px-6">
               {!isDev && <ConnectionsPlaceholder />}
-              {isDev && <ProviderSettings />}
+              {isDev && <OllamaSection />}
               {isDev && <DeveloperTools />}
             </TabsContent>
           </div>
@@ -113,7 +133,7 @@ export function SettingsContent({
                   className="w-full justify-start rounded-md px-3 py-2 text-left"
                 >
                   <div className="flex items-center gap-2">
-                    <GearSix className="size-4" />
+                    <GearSixIcon className="size-4" />
                     <span>General</span>
                   </div>
                 </TabsTrigger>
@@ -123,17 +143,26 @@ export function SettingsContent({
                   className="w-full justify-start rounded-md px-3 py-2 text-left"
                 >
                   <div className="flex items-center gap-2">
-                    <PaintBrush className="size-4" />
+                    <PaintBrushIcon className="size-4" />
                     <span>Appearance</span>
                   </div>
                 </TabsTrigger>
 
                 <TabsTrigger
+                  value="apikeys"
+                  className="w-full justify-start rounded-md px-3 py-2 text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <KeyIcon className="size-4" />
+                    <span>API Keys</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger
                   value="connections"
                   className="w-full justify-start rounded-md px-3 py-2 text-left"
                 >
                   <div className="flex items-center gap-2">
-                    <PlugsConnected className="size-4" />
+                    <PlugsConnectedIcon className="size-4" />
                     <span>Connections</span>
                   </div>
                 </TabsTrigger>
@@ -158,9 +187,13 @@ export function SettingsContent({
                 <InteractionPreferences />
               </TabsContent>
 
+              <TabsContent value="apikeys" className="mt-0 space-y-6">
+                <ByokSection />
+              </TabsContent>
+
               <TabsContent value="connections" className="mt-0 space-y-6">
                 {!isDev && <ConnectionsPlaceholder />}
-                {isDev && <ProviderSettings />}
+                {isDev && <OllamaSection />}
                 {isDev && <DeveloperTools />}
               </TabsContent>
             </div>

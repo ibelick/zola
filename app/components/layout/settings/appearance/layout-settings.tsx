@@ -16,7 +16,7 @@ const LayoutSidebar = (props: SVGProps<SVGSVGElement>) => {
       fill="none"
       {...props}
     >
-      <g clipPath="url(#a)">
+      <g clipPath="url(#layout-sidebar)">
         {/* Main background */}
         <path d="M0 0h1028v578H0z" strokeWidth={1} />
         {/* Main content area */}
@@ -113,7 +113,7 @@ const LayoutSidebar = (props: SVGProps<SVGSVGElement>) => {
         />
       </g>
       <defs>
-        <clipPath id="a">
+        <clipPath id="layout-sidebar">
           <path fill="var(--background)" d="M0 0h1028v578H0z" />
         </clipPath>
       </defs>
@@ -131,7 +131,7 @@ const LayoutFullscreen = (props: SVGProps<SVGSVGElement>) => {
       fill="none"
       {...props}
     >
-      <g clipPath="url(#a)">
+      <g clipPath="url(#layout-fullscreen)">
         {/* Main background */}
         <path d="M0 0h1028v578H0z" strokeWidth={1} />
         <mask id="b" fill="var(--background)">
@@ -228,7 +228,7 @@ const LayoutFullscreen = (props: SVGProps<SVGSVGElement>) => {
         <path stroke="var(--border)" d="M305 386.5h414" />
       </g>
       <defs>
-        <clipPath id="a">
+        <clipPath id="layout-fullscreen">
           <path fill="var(--background)" d="M0 0h1028v578H0z" />
         </clipPath>
       </defs>

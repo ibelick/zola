@@ -1,7 +1,7 @@
 import * as React from "react"
 import type { SVGProps } from "react"
 
-const Icon = (props: SVGProps<SVGSVGElement>) => (
+const OpenRouterIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     fill="none"
     fillRule="evenodd"
@@ -19,5 +19,4 @@ const Icon = (props: SVGProps<SVGSVGElement>) => (
     ></path>
   </svg>
 )
-
-export default Icon
+export default OpenRouterIcon
