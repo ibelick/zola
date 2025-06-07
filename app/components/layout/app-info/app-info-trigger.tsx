@@ -20,6 +20,7 @@ import {
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { APP_NAME } from "@/lib/config"
 import { Info } from "@phosphor-icons/react"
+import Image from "next/image"
 import { AppInfoContent } from "./app-info-content"
 
 type AppInfoTriggerProps = {
@@ -42,9 +43,11 @@ export function AppInfoTrigger({ trigger }: AppInfoTriggerProps) {
         <DrawerTrigger asChild>{trigger || defaultTrigger}</DrawerTrigger>
         <DrawerContent className="bg-background border-border">
           <DrawerHeader>
-            <img
+            <Image
               src="/banner_ocean.jpg"
               alt={`calm paint generate by ${APP_NAME}`}
+              width={400}
+              height={128}
               className="h-32 w-full object-cover"
             />
             <DrawerTitle className="hidden">{APP_NAME}</DrawerTitle>
@@ -65,9 +68,11 @@ export function AppInfoTrigger({ trigger }: AppInfoTriggerProps) {
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
       <DialogContent className="[&>button:last-child]:bg-background gap-0 overflow-hidden rounded-3xl p-0 shadow-xs sm:max-w-md [&>button:last-child]:rounded-full [&>button:last-child]:p-1">
         <DialogHeader className="p-0">
-          <img
+          <Image
             src="/banner_ocean.jpg"
             alt={`calm paint generate by ${APP_NAME}`}
+            width={400}
+            height={128}
             className="h-32 w-full object-cover"
           />
           <DialogTitle className="hidden">{APP_NAME}</DialogTitle>

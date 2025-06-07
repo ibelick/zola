@@ -15,23 +15,24 @@ import {
   ChatTeardropText,
   GithubLogo,
   MagnifyingGlass,
+  NotePencilIcon,
   X,
 } from "@phosphor-icons/react"
-import { AnimatePresence, motion } from "motion/react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { HistoryTrigger } from "../../history/history-trigger"
 import { SidebarList } from "./sidebar-list"
 
 export function AppSidebar() {
   const isMobile = useBreakpoint(768)
-  const { open, setOpenMobile } = useSidebar()
+  const { setOpenMobile } = useSidebar()
   const { chats, isLoading } = useChats()
   const params = useParams<{ chatId: string }>()
   const currentChatId = params.chatId
 
   const groupedChats = useMemo(() => groupChatsByDate(chats, ""), [chats])
   const hasChats = chats.length > 0
+  const router = useRouter()
 
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" className="border-none">
@@ -48,27 +49,39 @@ export function AppSidebar() {
           ) : (
             <div className="h-full" />
           )}
-          <AnimatePresence mode="sync" initial={false}>
-            {open && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.15, delay: 0.1, ease: "easeOut" }}
-                className="pt-0"
-              >
-                <HistoryTrigger
-                  hasSidebar={false}
-                  classNameTrigger="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-9 items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none bg-transparent"
-                  icon={<MagnifyingGlass size={24} />}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </SidebarHeader>
       <SidebarContent className="mask-t-from-98% mask-t-to-100% mask-b-from-98% mask-b-to-100% px-3">
         <ScrollArea className="flex h-full [&>div>div]:!block">
+          <div className="mt-3 mb-5 flex w-full flex-col items-start gap-0">
+            <button
+              className="hover:bg-accent/80 hover:text-foreground text-primary group/new-chat relative inline-flex w-full items-center rounded-md bg-transparent px-2 py-2 text-sm transition-colors"
+              type="button"
+              onClick={() => router.push("/")}
+            >
+              <div className="flex items-center gap-2">
+                <NotePencilIcon size={20} />
+                New Chat
+              </div>
+              <div className="text-muted-foreground ml-auto text-xs opacity-0 duration-150 group-hover/new-chat:opacity-100">
+                ⌘⇧U
+              </div>
+            </button>
+            <HistoryTrigger
+              hasSidebar={false}
+              classNameTrigger="bg-transparent hover:bg-accent/80 hover:text-foreground text-primary relative inline-flex w-full items-center rounded-md px-2 py-2 text-sm transition-colors group/search"
+              icon={<MagnifyingGlass size={24} className="mr-2" />}
+              label={
+                <div className="flex w-full items-center gap-2">
+                  <span>Search</span>
+                  <div className="text-muted-foreground ml-auto text-xs opacity-0 duration-150 group-hover/search:opacity-100">
+                    ⌘+K
+                  </div>
+                </div>
+              }
+              hasPopover={false}
+            />
+          </div>
           {isLoading ? (
             <div className="h-full" />
           ) : hasChats ? (

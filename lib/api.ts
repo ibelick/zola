@@ -111,7 +111,7 @@ export async function signInWithGoogle(supabase: SupabaseClient) {
     const isDev = process.env.NODE_ENV === "development"
 
     // Get base URL dynamically (will work in both browser and server environments)
-    let baseUrl = isDev
+    const baseUrl = isDev
       ? "http://localhost:3000"
       : typeof window !== "undefined"
         ? window.location.origin

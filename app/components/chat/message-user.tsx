@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Check, Copy, Trash } from "@phosphor-icons/react"
+import Image from "next/image"
 import { useRef, useState } from "react"
 import type { UIMessageWithMetadata } from "./chat"
 
@@ -91,11 +92,13 @@ export function MessageUser({
               }}
             >
               <MorphingDialogTrigger className="z-10">
-                <img
+                <Image
                   className="mb-1 w-40 rounded-md"
                   key={file.filename}
                   src={file.url}
-                  alt={file.filename}
+                  alt={file.filename || "Attachment"}
+                  width={160}
+                  height={120}
                 />
               </MorphingDialogTrigger>
               <MorphingDialogContainer>

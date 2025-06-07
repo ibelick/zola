@@ -1,6 +1,9 @@
 import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
-import type { Database } from "@/app/types/database.types"
+import type { ContentPart, Message } from "@/app/types/api.types"
+import type { Database, Json } from "@/app/types/database.types"
 import type { SupabaseClient } from "@supabase/supabase-js"
+
+const DEFAULT_STEP = 0
 
 export async function saveFinalAssistantMessage(
   supabase: SupabaseClient<Database>,

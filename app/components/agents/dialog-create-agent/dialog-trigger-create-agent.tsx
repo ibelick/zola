@@ -1,7 +1,6 @@
 "use client"
 
 import { PopoverContentAuth } from "@/app/components/chat-input/popover-content-auth"
-import { useUser } from "@/app/providers/user-provider"
 import {
   Dialog,
   DialogContent,
@@ -12,12 +11,12 @@ import {
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
 import {
   Popover,
-  PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { toast } from "@/components/ui/toast"
 import { fetchClient } from "@/lib/fetch"
 import { API_ROUTE_CREATE_AGENT } from "@/lib/routes"
+import { useUser } from "@/lib/user-store/provider"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
@@ -30,6 +29,7 @@ type AgentFormData = {
   systemPrompt: string
   mcp: "none" | "git-mcp"
   repository?: string
+  tools: string[]
 }
 
 type DialogCreateAgentTrigger = {
@@ -48,6 +48,7 @@ export function DialogCreateAgentTrigger({
     description: "",
     systemPrompt: "",
     mcp: "none",
+    tools: [],
   })
   const [repository, setRepository] = useState("")
   const [error, setError] = useState<{ [key: string]: string }>({})
@@ -116,6 +117,10 @@ Never invent answers. Use tools and return what you find.`
         systemPrompt: generateSystemPrompt(owner, repo),
       }))
     }
+  }
+
+  const handleToolsChange = (selectedTools: string[]) => {
+    setFormData({ ...formData, tools: selectedTools })
   }
 
   const validateRepository = (repo: string) => {
@@ -210,6 +215,7 @@ Never invent answers. Use tools and return what you find.`
                 "where is the main code located?",
               ]
             : null,
+          tools: formData.tools,
           remixable: false,
           is_public: true,
           max_steps: 5,
@@ -226,12 +232,12 @@ Never invent answers. Use tools and return what you find.`
       // Close the dialog and redirect
       setOpen(false)
       router.push(`/?agent=${agent.slug}`)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Agent creation error:", error)
       toast({
         title: "Error creating agent",
         description:
-          error.message || "Failed to create agent. Please try again.",
+          (error as Error).message || "Failed to create agent. Please try again.",
       })
       setError({ form: "Failed to create agent. Please try again." })
     } finally {
@@ -248,6 +254,7 @@ Never invent answers. Use tools and return what you find.`
       isLoading={isLoading}
       handleInputChange={handleInputChange}
       handleSelectChange={handleSelectChange}
+      handleToolsChange={handleToolsChange}
       handleSubmit={handleSubmit}
       onClose={() => setOpen(false)}
       isDrawer={isMobile}

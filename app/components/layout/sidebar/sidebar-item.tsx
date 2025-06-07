@@ -1,6 +1,7 @@
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import useClickOutside from "@/app/hooks/use-click-outside"
 import { useChats } from "@/lib/chat-store/chats/provider"
+import { Chat } from "@/lib/chat-store/types"
 import { cn } from "@/lib/utils"
 import { Check, X } from "@phosphor-icons/react"
 import Link from "next/link"
@@ -8,13 +9,13 @@ import { useEffect, useRef, useState } from "react"
 import { SidebarItemMenu } from "./sidebar-item-menu"
 
 type SidebarItemProps = {
-  chat: any
+  chat: Chat
   currentChatId: string
 }
 
 export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [editTitle, setEditTitle] = useState(chat.title)
+  const [editTitle, setEditTitle] = useState(chat.title || "")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateTitle } = useChats()
@@ -28,7 +29,7 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
   })
 
   useEffect(() => {
-    setEditTitle(chat.title)
+    setEditTitle(chat.title || "")
   }, [chat.title])
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export function SidebarItem({ chat, currentChatId }: SidebarItemProps) {
   }
 
   const handleCancel = () => {
-    setEditTitle(chat.title)
+    setEditTitle(chat.title || "")
     setIsEditing(false)
     setIsMenuOpen(false)
   }

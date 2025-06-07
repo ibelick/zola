@@ -51,3 +51,4 @@ next-env.d.ts
 bun.lockb
 bun.lock
 
+/.cursor

@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { X } from "@phosphor-icons/react"
+import Image from "next/image"
 import { useState } from "react"
 
 type FileItemProps = {
@@ -37,9 +38,11 @@ export function FileItem({ file, onRemove }: FileItemProps) {
           <div className="bg-background hover:bg-accent border-input flex w-full items-center gap-3 rounded-2xl border p-2 pr-3 transition-colors">
             <div className="bg-accent-foreground flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-md">
               {file.type.includes("image") ? (
-                <img
+                <Image
                   src={URL.createObjectURL(file)}
                   alt={file.name}
+                  width={40}
+                  height={40}
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -57,9 +60,11 @@ export function FileItem({ file, onRemove }: FileItemProps) {
           </div>
         </HoverCardTrigger>
         <HoverCardContent side="top">
-          <img
+          <Image
             src={URL.createObjectURL(file)}
             alt={file.name}
+            width={200}
+            height={200}
             className="h-full w-full object-cover"
           />
         </HoverCardContent>

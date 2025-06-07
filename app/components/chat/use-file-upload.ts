@@ -17,9 +17,10 @@ export const useFileUpload = () => {
 
     try {
       await checkFileUploadLimit(uid)
-    } catch (err: any) {
-      if (err.code === "DAILY_FILE_LIMIT_REACHED") {
-        toast({ title: err.message, status: "error" })
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string }
+      if (error.code === "DAILY_FILE_LIMIT_REACHED") {
+        toast({ title: error.message || "Daily file limit reached", status: "error" })
         return null
       }
     }
@@ -28,7 +29,7 @@ export const useFileUpload = () => {
       const processed = await processFiles(files, chatId, uid)
       setFiles([])
       return processed
-    } catch (err) {
+    } catch {
       toast({ title: "Failed to process files", status: "error" })
       return null
     }
@@ -42,7 +43,7 @@ export const useFileUpload = () => {
     }))
   }
 
-  const cleanupOptimisticAttachments = (attachments?: any[]) => {
+  const cleanupOptimisticAttachments = (attachments?: Array<{ url?: string }>) => {
     if (!attachments) return
     attachments.forEach((attachment) => {
       if (attachment.url?.startsWith("blob:")) {

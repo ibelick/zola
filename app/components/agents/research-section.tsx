@@ -1,10 +1,11 @@
 import { AgentSummary } from "@/app/types/agent"
 import { ArrowUpRight } from "@phosphor-icons/react"
+import Image from "next/image"
 import { DialogAgent } from "./dialog-agent"
 
 type ResearchSectionProps = {
   researchAgent: AgentSummary
-  handleAgentClick: (agentId: string) => void
+  handleAgentClick: (agentId: string | null) => void
   openAgentId: string | null
   setOpenAgentId: (agentId: string | null) => void
   randomAgents: AgentSummary[]
@@ -45,10 +46,11 @@ export function ResearchSection({
           >
             <div className="relative min-h-[140px] w-full overflow-hidden rounded-2xl shadow-lg md:aspect-[4/1]">
               <div className="absolute inset-0">
-                <img
+                <Image
                   src="/banner_cloud.jpg"
                   alt="Cloud background"
-                  className="h-full w-full object-cover transition-all duration-300 group-hover:scale-105"
+                  fill
+                  className="object-cover transition-all duration-300 group-hover:scale-105"
                 />
               </div>
 

@@ -309,6 +309,41 @@ export type Database = {
           },
         ]
       }
+      user_keys: {
+        Row: {
+          user_id: string
+          provider: string
+          encrypted_key: string
+          iv: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          user_id: string
+          provider: string
+          encrypted_key: string
+          iv: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          user_id?: string
+          provider?: string
+          encrypted_key?: string
+          iv?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -316,7 +351,7 @@ export type Database = {
     Functions: {
       [_ in never]: never
     }
-    Enums: {}
+    Enums: Record<string, never>
     CompositeTypes: {
       [_ in never]: never
     }

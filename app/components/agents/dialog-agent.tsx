@@ -15,7 +15,7 @@ type DialogAgentProps = {
   className?: string
   isAvailable: boolean
   slug: string
-  onAgentClick?: (agentId: string) => void
+  onAgentClick?: (agentId: string | null) => void
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   randomAgents: AgentSummary[]
@@ -24,6 +24,7 @@ type DialogAgentProps = {
   tools?: string[] | null
   mcp_config?: Tables<"agents">["mcp_config"] | null
   isCardLight?: boolean
+  creator_id?: string | null
 }
 
 export function DialogAgent({
@@ -44,6 +45,7 @@ export function DialogAgent({
   tools,
   mcp_config,
   isCardLight = false,
+  creator_id,
 }: DialogAgentProps) {
   const isMobile = useBreakpoint(768)
 
@@ -83,6 +85,7 @@ export function DialogAgent({
       mcp_config={mcp_config}
       onAgentClick={onAgentClick}
       randomAgents={randomAgents}
+      creator_id={creator_id}
     />
   )
 
@@ -101,6 +104,7 @@ export function DialogAgent({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
       <DialogContent
+        hasCloseButton={false}
         className="[&>button:last-child]:bg-background flex gap-0 overflow-hidden rounded-3xl p-0 shadow-xs [&>button:last-child]:rounded-full [&>button:last-child]:p-1"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >

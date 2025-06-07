@@ -8,7 +8,7 @@ import { DialogCreateAgentTrigger } from "./dialog-create-agent/dialog-trigger-c
 type UserAgentsSectionProps = {
   agents: Agent[] | null
   userId?: string | null
-  handleAgentClick: (agentId: string) => void
+  handleAgentClick: (agentId: string | null) => void
   openAgentId: string | null
   setOpenAgentId: (agentId: string | null) => void
   moreAgents: Agent[]
@@ -49,7 +49,7 @@ export function UserAgentsSection({
       <div className="mt-8 border-dashed">
         <CardContent className="flex flex-col items-center justify-center py-6 text-center">
           <h3 className="mb-2 text-lg font-medium">
-            You haven't created any agents yet
+            You haven&apos;t created any agents yet
           </h3>
           <p className="text-muted-foreground mb-4">
             Create your first custom agent to get started
@@ -84,6 +84,7 @@ export function UserAgentsSection({
             system_prompt={agent.system_prompt}
             tools={agent.tools}
             mcp_config={agent.mcp_config}
+            creator_id={agent.creator_id}
           />
         ))}
       </div>

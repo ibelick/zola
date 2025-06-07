@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { signInWithGoogle } from "@/lib/api"
 import { createClient } from "@/lib/supabase/client"
+
 import Link from "next/link"
 import { useState } from "react"
 import { HeaderGoBack } from "../components/header-go-back"
@@ -28,9 +29,12 @@ export default function LoginPage() {
       if (data?.url) {
         window.location.href = data.url
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error signing in with Google:", err)
-      setError(err.message || "An unexpected error occurred. Please try again.")
+      setError(
+        (err as Error).message ||
+          "An unexpected error occurred. Please try again."
+      )
     } finally {
       setIsLoading(false)
     }

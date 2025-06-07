@@ -1,6 +1,7 @@
 "use client"
 
 import { useAgentCommand } from "@/app/components/chat-input/use-agent-command"
+import { ModelSelector } from "@/components/common/model-selector/base"
 import {
   PromptInput,
   PromptInputAction,
@@ -9,16 +10,16 @@ import {
 } from "@/components/prompt-kit/prompt-input"
 import { Button } from "@/components/ui/button"
 import { useAgent } from "@/lib/agent-store/provider"
-import { MODELS_OPTIONS } from "@/lib/config"
-import { isSupabaseEnabled } from "@/lib/supabase/config"
+import { getModelInfo } from "@/lib/models"
 import { ArrowUp, Stop, Warning } from "@phosphor-icons/react"
 import React, { useCallback, useEffect } from "react"
 import { PromptSystem } from "../suggestions/prompt-system"
 import { AgentCommand } from "./agent-command"
 import { ButtonFileUpload } from "./button-file-upload"
+import { ButtonSearch } from "./button-search"
 import { FileList } from "./file-list"
-import { SelectModel } from "./select-model"
 import { SelectedAgent } from "./selected-agent"
+import { useSearchAgent } from "./use-search-agent"
 
 type ChatInputProps = {
   value: string
@@ -36,6 +37,7 @@ type ChatInputProps = {
   isUserAuthenticated: boolean
   stop: () => void
   status?: "submitted" | "streaming" | "ready" | "error"
+  onSearchToggle?: (enabled: boolean, agentId: string | null) => void
 }
 
 export function ChatInput({
@@ -53,8 +55,14 @@ export function ChatInput({
   isUserAuthenticated,
   stop,
   status,
+  onSearchToggle,
 }: ChatInputProps) {
   const { currentAgent, curatedAgents, userAgents } = useAgent()
+  const {
+    isSearchEnabled,
+    toggleSearch,
+
+  } = useSearchAgent()
 
   const agentCommand = useAgentCommand({
     value,
@@ -63,11 +71,18 @@ export function ChatInput({
     defaultAgent: currentAgent,
   })
 
-  const selectModelConfig = MODELS_OPTIONS.find(
-    (model) => model.id === selectedModel
-  )
-  const noToolSupport = selectModelConfig?.features?.some(
-    (feature) => feature.id === "tool-use" && !feature.enabled
+  const selectModelConfig = getModelInfo(selectedModel)
+  const hasToolSupport = Boolean(selectModelConfig?.tools)
+  const isOnlyWhitespace = (text: string) => !/[^\s]/.test(text)
+
+  // Handle search toggle
+  const handleSearchToggle = useCallback(
+    (enabled: boolean) => {
+      toggleSearch(enabled)
+      const agentId = enabled ? "search" : null
+      onSearchToggle?.(enabled, agentId)
+    },
+    [toggleSearch, onSearchToggle]
   )
 
   const handleSend = useCallback(() => {
@@ -99,11 +114,15 @@ export function ChatInput({
       }
 
       if (e.key === "Enter" && !e.shiftKey && !agentCommand.showAgentCommand) {
+        if (isOnlyWhitespace(value)) {
+          return
+        }
+
         e.preventDefault()
         onSend()
       }
     },
-    [agentCommand, isSubmitting, onSend, status]
+    [agentCommand, isSubmitting, onSend, status, value]
   )
 
   const handlePaste = useCallback(
@@ -189,9 +208,7 @@ export function ChatInput({
           />
           <FileList files={files} onFileRemove={onFileRemove} />
           <PromptInputTextarea
-            placeholder={
-              isSupabaseEnabled ? "Ask Zola or @mention an agent" : "Ask Zola"
-            }
+            placeholder="Ask Zola"
             onKeyDown={handleKeyDown}
             className="min-h-[44px] pt-3 pl-4 text-base leading-[1.3] sm:text-base md:text-base"
             ref={agentCommand.textareaRef}
@@ -203,12 +220,18 @@ export function ChatInput({
                 isUserAuthenticated={isUserAuthenticated}
                 model={selectedModel}
               />
-              <SelectModel
-                selectedModel={selectedModel}
-                onSelectModel={onSelectModel}
+              <ModelSelector
+                selectedModelId={selectedModel}
+                setSelectedModelId={onSelectModel}
                 isUserAuthenticated={isUserAuthenticated}
+                className="rounded-full"
               />
-              {currentAgent && noToolSupport && (
+              <ButtonSearch
+                isSelected={isSearchEnabled}
+                onToggle={handleSearchToggle}
+                isAuthenticated={isUserAuthenticated}
+              />
+              {currentAgent && !hasToolSupport && (
                 <div className="flex items-center gap-1">
                   <Warning className="size-4" />
                   <p className="line-clamp-2 text-xs">
@@ -224,7 +247,7 @@ export function ChatInput({
               <Button
                 size="sm"
                 className="size-9 rounded-full transition-all duration-300 ease-out"
-                disabled={!value || isSubmitting}
+                disabled={!value || isSubmitting || isOnlyWhitespace(value)}
                 type="button"
                 onClick={handleSend}
                 aria-label={status === "streaming" ? "Stop" : "Send message"}

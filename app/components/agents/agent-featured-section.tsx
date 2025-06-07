@@ -4,7 +4,7 @@ import { DialogAgent } from "./dialog-agent"
 
 type AgentFeaturedSectionProps = {
   agents: Agent[]
-  handleAgentClick: (agentId: string) => void
+  handleAgentClick: (agentId: string | null) => void
   openAgentId: string | null
   setOpenAgentId: (agentId: string | null) => void
   moreAgents: Agent[]

@@ -1,5 +1,11 @@
 import { saveFinalAssistantMessage } from "@/app/api/chat/db"
 import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
+import type {
+  ChatApiParams,
+  LogUserMessageParams,
+  StoreAssistantMessageParams,
+  SupabaseClientType,
+} from "@/app/types/api.types"
 import { checkSpecialAgentUsage, incrementSpecialAgentUsage } from "@/lib/api"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
@@ -10,11 +16,7 @@ export async function validateAndTrackUsage({
   userId,
   model,
   isAuthenticated,
-}: {
-  userId: string
-  model: string
-  isAuthenticated: boolean
-}) {
+}: ChatApiParams): Promise<SupabaseClientType | null> {
   const supabase = await validateUserIdentity(userId, isAuthenticated)
   if (!supabase) return null
 
@@ -39,14 +41,7 @@ export async function logUserMessage({
   model,
   isAuthenticated,
   parts,
-}: {
-  supabase: SupabaseClient
-  userId: string
-  chatId: string
-  model: string
-  isAuthenticated: boolean
-  parts: UIMessageWithMetadata["parts"]
-}) {
+}: LogUserMessageParams): Promise<void> {
   if (!supabase) return
 
   const { error } = await supabase.from("messages").insert({
@@ -64,9 +59,9 @@ export async function logUserMessage({
 }
 
 export async function trackSpecialAgentUsage(
-  supabase: SupabaseClient,
+  supabase: SupabaseClientType,
   userId: string
-) {
+): Promise<void> {
   if (!supabase) return
   await checkSpecialAgentUsage(supabase, userId)
   await incrementSpecialAgentUsage(supabase, userId)
@@ -76,11 +71,7 @@ export async function storeAssistantMessage({
   supabase,
   chatId,
   parts,
-}: {
-  supabase: SupabaseClient
-  chatId: string
-  parts: UIMessageWithMetadata["parts"]
-}) {
+}: StoreAssistantMessageParams): Promise<void> {
   if (!supabase) return
   try {
     await saveFinalAssistantMessage(supabase, chatId, parts)

@@ -3,20 +3,42 @@
 import { AgentSummary } from "@/app/types/agent"
 import type { Tables } from "@/app/types/database.types"
 import { ButtonCopy } from "@/components/common/button-copy"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { toast } from "@/components/ui/toast"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { fetchClient } from "@/lib/fetch"
+import { API_ROUTE_DELETE_AGENT } from "@/lib/routes"
+import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import {
   ChatCircle,
   Check,
   CopySimple,
   Cube,
-  User,
+  DotsThree,
+  Trash,
+  X,
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -70,6 +92,7 @@ export function AgentDetail({
   name,
   description,
   example_inputs,
+  creator_id,
   avatar_url,
   onAgentClick,
   randomAgents,
@@ -79,7 +102,10 @@ export function AgentDetail({
   mcp_config,
 }: AgentDetailProps) {
   const [copied, setCopied] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
+  const { user } = useUser()
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(`${window.location.origin}/agents/${slug}`)
@@ -111,6 +137,71 @@ export function AgentDetail({
     router.push(`/?agent=${slug}`)
   }
 
+  const handleDelete = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to delete an agent.",
+        status: "error",
+      })
+      return
+    }
+
+    if (creator_id !== user.id) {
+      toast({
+        title: "Error",
+        description: "You can only delete agents that you created.",
+        status: "error",
+      })
+      return
+    }
+
+    setIsDeleting(true)
+    try {
+      const response = await fetchClient(API_ROUTE_DELETE_AGENT, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}`)
+      }
+
+      toast({
+        title: "Success",
+        description: "Agent deleted successfully.",
+        status: "success",
+      })
+
+      setShowDeleteDialog(false)
+
+      // If we're in a dialog (not full page), close it first
+      if (!isFullPage && onAgentClick) {
+        onAgentClick("")
+      }
+
+      // Navigate to agents page
+      router.push("/agents")
+    } catch (error) {
+      console.error("Failed to delete agent:", error)
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to delete agent. Please try again.",
+        status: "error",
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const canDelete = user?.id && creator_id === user.id
+
   return (
     <div
       className={cn(
@@ -124,21 +215,65 @@ export function AgentDetail({
           isFullPage ? "pb-0" : "pb-20"
         )}
       >
-        <div className="mb-6 flex items-center gap-4 pt-8 pl-8">
-          {avatar_url ? (
-            <Avatar className="size-16">
-              <AvatarImage
-                src={avatar_url}
-                alt={name}
-                className="h-full w-full object-cover"
-              />
-            </Avatar>
-          ) : (
-            <div className="bg-background flex size-16 items-center justify-center rounded-full border border-dashed">
-              <Cube className="size-8" />
-            </div>
-          )}
-          <h1 className="text-2xl font-medium">{name}</h1>
+        <div className="mb-6 flex items-center justify-between gap-4 pt-8 pr-8 pl-8">
+          <div className="flex items-center gap-4">
+            {avatar_url ? (
+              <Avatar className="size-16">
+                <AvatarImage
+                  src={avatar_url}
+                  alt={name}
+                  className="h-full w-full object-cover"
+                />
+              </Avatar>
+            ) : (
+              <div className="bg-background flex size-16 items-center justify-center rounded-full border border-dashed">
+                <Cube className="size-8" />
+              </div>
+            )}
+            <h1 className="text-2xl font-medium">{name}</h1>
+          </div>
+
+          <div
+            className={cn(
+              isFullPage ? "relative" : "absolute top-0 right-0 p-4"
+            )}
+          >
+            {isFullPage && canDelete && (
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    type="button"
+                  >
+                    <DotsThree className="size-4" weight="bold" />
+                    <span className="sr-only">Open menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={() => setShowDeleteDialog(true)}
+                  >
+                    <Trash className="fill-destructive size-4" />
+                    Delete agent
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {!isFullPage && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                type="button"
+                onClick={() => onAgentClick?.("")}
+              >
+                <X className="size-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="px-4 md:px-8">
@@ -281,6 +416,27 @@ export function AgentDetail({
           Chat with {name}
         </Button>
       </div>
+
+      {/* Only show AlertDialog in full page mode to avoid nesting issues */}
+      {isFullPage && (
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Agent</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete &quot;{name}&quot;? This action cannot be
+                undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                {isDeleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   )
 }

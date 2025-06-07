@@ -19,10 +19,6 @@ type FeedbackFormProps = {
 }
 
 export function FeedbackForm({ authUserId, onClose }: FeedbackFormProps) {
-  if (!isSupabaseEnabled) {
-    return null
-  }
-
   const [status, setStatus] = useState<
     "idle" | "submitting" | "success" | "error"
   >("idle")
@@ -32,6 +28,10 @@ export function FeedbackForm({ authUserId, onClose }: FeedbackFormProps) {
     setStatus("idle")
     setFeedback("")
   }, [])
+
+  if (!isSupabaseEnabled) {
+    return null
+  }
 
   const handleClose = () => {
     setFeedback("")

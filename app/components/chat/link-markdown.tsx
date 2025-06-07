@@ -1,3 +1,5 @@
+
+
 export function LinkMarkdown({
   href,
   children,
@@ -10,7 +12,7 @@ export function LinkMarkdown({
   try {
     const url = new URL(href)
     domain = url.hostname
-  } catch (error) {
+  } catch {
     // If href is not a valid URL (likely a relative path)
     domain = href.split("/").pop() || href
   }
@@ -25,6 +27,8 @@ export function LinkMarkdown({
       <img
         src={`https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(href)}`}
         alt="favicon"
+        width={14}
+        height={14}
         className="size-3.5 rounded-full"
       />
       <span className="overflow-hidden font-normal text-ellipsis whitespace-nowrap">

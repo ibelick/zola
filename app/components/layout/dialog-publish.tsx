@@ -1,8 +1,6 @@
 "use client"
 
-import { AgentHeader } from "@/app/components/layout/header"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
-import { useChatSession } from "@/app/providers/chat-session-provider"
 import XIcon from "@/components/icons/x"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,6 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useChatSession } from "@/lib/chat-store/session/provider"
 import { APP_DOMAIN } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
@@ -34,15 +33,15 @@ import type React from "react"
 import { useState } from "react"
 
 export function DialogPublish() {
-  if (!isSupabaseEnabled) {
-    return null
-  }
-
   const [openDialog, setOpenDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { chatId } = useChatSession()
   const isMobile = useBreakpoint(768)
   const [copied, setCopied] = useState(false)
+
+  if (!isSupabaseEnabled) {
+    return null
+  }
 
   if (!chatId) {
     return null

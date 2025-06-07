@@ -10,7 +10,7 @@ Zola is a free, open-source AI chat app with multi-model support. This guide cov
 - npm or yarn
 - Git
 - Supabase account (for auth and storage)
-- API keys for supported AI models (OpenAI, Mistral, etc.)
+- API keys for supported AI models (OpenAI, Mistral, etc.) OR Ollama for local models
 
 ## Environment Setup
 
@@ -34,7 +34,6 @@ OPENROUTER_API_KEY=your_openrouter_api_key
 # CSRF Protection
 CSRF_SECRET=your_csrf_secret_key
 
-
 # Exa
 EXA_API_KEY=your_exa_api_key
 
@@ -47,6 +46,8 @@ ANTHROPIC_API_KEY=your_anthropic_api_key
 # Xai
 XAI_API_KEY=your_xai_api_key
 
+# Ollama (for local AI models)
+OLLAMA_BASE_URL=http://localhost:11434
 
 # Optional: Set the URL for production
 # NEXT_PUBLIC_VERCEL_URL=your_production_url
@@ -213,6 +214,18 @@ CREATE TABLE feedback (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- User keys table for BYOK (Bring Your Own Key) integration
+CREATE TABLE user_keys (
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider TEXT NOT NULL,
+  encrypted_key TEXT NOT NULL,
+  iv TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (user_id, provider)
+);
+
 -- RLS (Row Level Security) Reminder
 -- Ensure RLS is enabled on these tables in your Supabase dashboard
 -- and appropriate policies are created.
@@ -249,6 +262,147 @@ For agent profile pictures to work properly:
    CREATE POLICY "Public Read Access" ON storage.objects
    FOR SELECT USING (bucket_id = 'avatars');
    ```
+
+## Ollama Setup (Local AI Models)
+
+Ollama allows you to run AI models locally on your machine. Zola has built-in support for Ollama with automatic model detection.
+
+### Installing Ollama
+
+#### macOS and Linux
+
+```bash
+curl -fsSL https://ollama.ai/install.sh | sh
+```
+
+#### Windows
+
+Download and install from [ollama.ai](https://ollama.ai/download)
+
+#### Docker
+
+```bash
+docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+```
+
+### Setting up Models
+
+After installing Ollama, you can download and run models:
+
+```bash
+# Popular models to get started
+ollama pull llama3.2          # Meta's Llama 3.2 (3B)
+ollama pull llama3.2:1b       # Smaller, faster version
+ollama pull gemma2:2b         # Google's Gemma 2 (2B)
+ollama pull qwen2.5:3b        # Alibaba's Qwen 2.5 (3B)
+ollama pull phi3.5:3.8b       # Microsoft's Phi 3.5 (3.8B)
+
+# Coding-focused models
+ollama pull codellama:7b      # Meta's Code Llama
+ollama pull deepseek-coder:6.7b # DeepSeek Coder
+
+# List available models
+ollama list
+
+# Start the Ollama service (if not running)
+ollama serve
+```
+
+### Zola + Ollama Integration
+
+Zola automatically detects all models available in your Ollama installation. No additional configuration is needed!
+
+**Features:**
+- **Automatic Model Detection**: Zola scans your Ollama instance and makes all models available
+- **Intelligent Categorization**: Models are automatically categorized by family (Llama, Gemma, Qwen, etc.)
+- **Smart Tagging**: Models get appropriate tags (local, open-source, coding, size-based)
+- **No Pro Restrictions**: All Ollama models are free to use
+- **Custom Endpoints**: Support for remote Ollama instances
+
+### Configuration Options
+
+#### Default Configuration
+By default, Zola connects to Ollama at `http://localhost:11434`. This works for local installations.
+
+#### Custom Ollama URL
+To use a remote Ollama instance or custom port:
+
+```bash
+# In your .env.local file
+OLLAMA_BASE_URL=http://192.168.1.100:11434
+```
+
+#### Runtime Configuration
+You can also set the Ollama URL at runtime:
+
+```bash
+OLLAMA_BASE_URL=http://your-ollama-server:11434 npm run dev
+```
+
+#### Settings UI
+Zola includes a settings interface where you can:
+- Enable/disable Ollama integration
+- Configure custom Ollama base URLs
+- Add multiple Ollama instances
+- Manage other AI providers
+
+Access settings through the gear icon in the interface.
+
+### Docker with Ollama
+
+For a complete Docker setup with both Zola and Ollama:
+
+```bash
+# Use the provided Docker Compose file
+docker-compose -f docker-compose.ollama.yml up
+
+# Or manually with separate containers
+docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+docker run -p 3000:3000 -e OLLAMA_BASE_URL=http://ollama:11434 zola
+```
+
+The `docker-compose.ollama.yml` file includes:
+- Ollama service with GPU support (if available)
+- Automatic model pulling
+- Health checks
+- Proper networking between services
+
+### Troubleshooting Ollama
+
+#### Ollama not detected
+1. Ensure Ollama is running: `ollama serve`
+2. Check the URL: `curl http://localhost:11434/api/tags`
+3. Verify firewall settings if using remote Ollama
+
+#### Models not appearing
+1. Refresh the models list in Zola settings
+2. Check Ollama has models: `ollama list`
+3. Restart Zola if models were added after startup
+
+#### Performance optimization
+1. Use smaller models for faster responses (1B-3B parameters)
+2. Enable GPU acceleration if available
+3. Adjust Ollama's `OLLAMA_NUM_PARALLEL` environment variable
+
+### Recommended Models by Use Case
+
+#### General Chat
+- `llama3.2:3b` - Good balance of quality and speed
+- `gemma2:2b` - Fast and efficient
+- `qwen2.5:3b` - Excellent multilingual support
+
+#### Coding
+- `codellama:7b` - Specialized for code generation
+- `deepseek-coder:6.7b` - Strong coding capabilities
+- `phi3.5:3.8b` - Good for code explanation
+
+#### Creative Writing
+- `llama3.2:8b` - Better for creative tasks
+- `mistral:7b` - Good instruction following
+
+#### Fast Responses
+- `llama3.2:1b` - Ultra-fast, basic capabilities
+- `gemma2:2b` - Quick and capable
 
 ## Local Installation
 
@@ -416,6 +570,37 @@ docker-compose logs -f
 
 # Stop the services
 docker-compose down
+```
+
+### Option 3: Docker Compose with Ollama (Recommended for Local AI)
+
+For a complete setup with both Zola and Ollama running locally, use the provided `docker-compose.ollama.yml`:
+
+```bash
+# Start both Zola and Ollama services
+docker-compose -f docker-compose.ollama.yml up -d
+
+# View logs
+docker-compose -f docker-compose.ollama.yml logs -f
+
+# Stop the services
+docker-compose -f docker-compose.ollama.yml down
+```
+
+This setup includes:
+- **Ollama service** with GPU support (if available)
+- **Automatic model pulling** (llama3.2:3b by default)
+- **Health checks** for both services
+- **Proper networking** between Zola and Ollama
+- **Volume persistence** for Ollama models
+
+The Ollama service will be available at `http://localhost:11434` and Zola will automatically detect all available models.
+
+To customize which models are pulled, edit the `docker-compose.ollama.yml` file and modify the `OLLAMA_MODELS` environment variable:
+
+```yaml
+environment:
+  - OLLAMA_MODELS=llama3.2:3b,gemma2:2b,qwen2.5:3b
 ```
 
 ## Production Deployment

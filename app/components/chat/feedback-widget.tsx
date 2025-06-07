@@ -23,12 +23,12 @@ type FeedbackWidgetProps = {
 }
 
 export function FeedbackWidget({ authUserId }: FeedbackWidgetProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const isMobileOrTablet = useBreakpoint(896)
+
   if (!isSupabaseEnabled) {
     return null
   }
-
-  const [isOpen, setIsOpen] = useState(false)
-  const isMobileOrTablet = useBreakpoint(896)
 
   const closeMenu = () => {
     setIsOpen(false)

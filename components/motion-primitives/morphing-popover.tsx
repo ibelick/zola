@@ -125,7 +125,7 @@ function MorphingPopoverTrigger({
 
   if (asChild && isValidElement(children)) {
     const MotionComponent = motion.create(
-      children.type as React.ForwardRefExoticComponent<any>
+      children.type as React.ForwardRefExoticComponent<Record<string, unknown>>
     )
     const childProps = children.props as Record<string, unknown>
 
@@ -190,7 +190,7 @@ function MorphingPopoverContent({
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [context.isOpen, context.close])
+  }, [context])
 
   return (
     <AnimatePresence>

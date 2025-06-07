@@ -6,7 +6,8 @@ import {
   useChatSession,
 } from "@/app/providers/chat-session-provider"
 import { toast } from "@/components/ui/toast"
-// import type { UIMessage } from "ai"
+// import { useChatSession } from "@/lib/chat-store/session/provider"
+import type { UIMessage } from "ai"
 import { createContext, useContext, useEffect, useState } from "react"
 import { writeToIndexedDB } from "../persist"
 import {
@@ -71,7 +72,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     try {
       const fresh = await getMessagesFromDb(chatId)
       setMessages(fresh)
-    } catch (e) {
+    } catch {
       toast({ title: "Failed to refresh messages", status: "error" })
     }
   }
@@ -86,7 +87,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
         writeToIndexedDB("messages", { id: chatId, messages: updated })
         return updated
       })
-    } catch (e) {
+    } catch {
       toast({ title: "Failed to save message", status: "error" })
     }
   }
@@ -98,7 +99,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     try {
       await saveMessages(chatId, newMessages)
       setMessages(newMessages)
-    } catch (e) {
+    } catch {
       toast({ title: "Failed to save messages", status: "error" })
     }
   }

@@ -4,11 +4,13 @@ import {
   MessageActions,
   MessageContent,
 } from "@/components/prompt-kit/message"
+import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
 import type { UIMessageWithMetadata } from "./chat"
 import { getSources } from "./get-sources"
 import { Reasoning } from "./reasoning"
+import { SearchImages } from "./search-images"
 import { SourcesList } from "./sources-list"
 import { ToolInvocation } from "./tool-invocation"
 
@@ -31,19 +33,34 @@ export function MessageAssistant({
   parts,
   status,
 }: MessageAssistantProps) {
+  const { preferences } = useUserPreferences()
   const sources = getSources(parts || [])
-
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"
   )
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
-
   const textParts = parts?.filter((part) => part.type === "text")
   const textPartsAsText = textParts?.map((part) => part.text).join("") || ""
 
   const contentNullOrEmpty = textPartsAsText === null || textPartsAsText === ""
-
   const isLastStreaming = status === "streaming" && isLast
+  const searchImageResults =
+    parts
+      ?.filter(
+        (part) =>
+          part.type === "tool-invocation" &&
+          part.toolInvocation?.state === "result" &&
+          part.toolInvocation?.toolName === "imageSearch" &&
+          part.toolInvocation?.result?.content?.[0]?.type === "images"
+      )
+      .flatMap((part) =>
+        part.type === "tool-invocation" &&
+        part.toolInvocation?.state === "result" &&
+        part.toolInvocation?.toolName === "imageSearch" &&
+        part.toolInvocation?.result?.content?.[0]?.type === "images"
+          ? (part.toolInvocation?.result?.content?.[0]?.results ?? [])
+          : []
+      ) ?? []
 
   return (
     <Message
@@ -57,8 +74,14 @@ export function MessageAssistant({
           <Reasoning reasoning={reasoningParts.text} />
         )}
 
-        {toolInvocationParts && toolInvocationParts.length > 0 && (
-          <ToolInvocation toolInvocations={toolInvocationParts} />
+        {toolInvocationParts &&
+          toolInvocationParts.length > 0 &&
+          preferences.showToolInvocations && (
+            <ToolInvocation toolInvocations={toolInvocationParts} />
+          )}
+
+        {searchImageResults.length > 0 && (
+          <SearchImages results={searchImageResults} />
         )}
 
         {contentNullOrEmpty ? null : (

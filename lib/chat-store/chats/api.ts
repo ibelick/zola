@@ -1,3 +1,4 @@
+import { filterLocalAgentId } from "@/lib/agents/utils"
 import { readFromIndexedDB, writeToIndexedDB } from "@/lib/chat-store/persist"
 import type { Chat, Chats } from "@/lib/chat-store/types"
 import { createClient } from "@/lib/supabase/client"
@@ -6,7 +7,6 @@ import { MODEL_DEFAULT } from "../../config"
 import { fetchClient } from "../../fetch"
 import {
   API_ROUTE_CREATE_CHAT,
-  API_ROUTE_CREATE_CHAT_WITH_AGENT,
   API_ROUTE_UPDATE_CHAT_AGENT,
   API_ROUTE_UPDATE_CHAT_MODEL,
 } from "../../routes"
@@ -190,27 +190,19 @@ export async function createNewChat(
   agentId?: string
 ): Promise<Chats> {
   try {
-    // @todo: can keep only one route for create chat
-    const apiRoute = agentId
-      ? API_ROUTE_CREATE_CHAT_WITH_AGENT
-      : API_ROUTE_CREATE_CHAT
+    // Note: Local agent IDs are filtered out at the API level (create-chat route)
+    const payload: { userId: string; title: string; model: string; isAuthenticated?: boolean; agentId?: string } = {
+      userId,
+      title: title || (agentId ? `Conversation with agent` : "New Chat"),
+      model: model || MODEL_DEFAULT,
+      isAuthenticated,
+    }
 
-    const payload = agentId
-      ? {
-          userId,
-          agentId,
-          title: title || `Conversation with agent`,
-          model: model || MODEL_DEFAULT,
-          isAuthenticated,
-        }
-      : {
-          userId,
-          title,
-          model: model || MODEL_DEFAULT,
-          isAuthenticated,
-        }
+    if (agentId) {
+      payload.agentId = agentId
+    }
 
-    const res = await fetchClient(apiRoute, {
+    const res = await fetchClient(API_ROUTE_CREATE_CHAT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -247,10 +239,18 @@ export async function updateChatAgent(
   isAuthenticated: boolean
 ) {
   try {
+    // Filter out local agent IDs for database operations
+    const dbAgentId = filterLocalAgentId(agentId)
+
     const res = await fetchClient(API_ROUTE_UPDATE_CHAT_AGENT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, chatId, agentId, isAuthenticated }),
+      body: JSON.stringify({
+        userId,
+        chatId,
+        agentId: dbAgentId,
+        isAuthenticated,
+      }),
     })
     const responseData = await res.json()
 
@@ -263,7 +263,7 @@ export async function updateChatAgent(
 
     const all = await getCachedChats()
     const updated = (all as Chats[]).map((c) =>
-      c.id === chatId ? { ...c, agent_id: agentId } : c
+      c.id === chatId ? { ...c, agent_id: dbAgentId } : c
     )
     await writeToIndexedDB("chats", updated)
 

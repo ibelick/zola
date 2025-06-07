@@ -31,24 +31,8 @@ export function AgentCommand({
   curatedAgents,
   userAgents,
 }: AgentCommandProps) {
-  if (!isSupabaseEnabled) {
-    return null
-  }
-
   const containerRef = useRef<HTMLDivElement>(null)
   const activeItemRef = useRef<HTMLLIElement>(null)
-
-  // Filter agents based on search term
-  const filteredAgents = searchTerm
-    ? [...curatedAgents, ...userAgents].filter((agent) =>
-        agent.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : [...curatedAgents, ...userAgents]
-
-  // Helper function to check if an agent is curated
-  const isCuratedAgent = (agentId: string) => {
-    return curatedAgents.some((curatedAgent) => curatedAgent.id === agentId)
-  }
 
   // Handle clicks outside
   useEffect(() => {
@@ -77,6 +61,22 @@ export function AgentCommand({
     }
   }, [isOpen, activeIndex])
 
+  if (!isSupabaseEnabled) {
+    return null
+  }
+
+  // Filter agents based on search term
+  const filteredAgents = searchTerm
+    ? [...curatedAgents, ...userAgents].filter((agent) =>
+        agent.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [...curatedAgents, ...userAgents]
+
+  // Helper function to check if an agent is curated
+  const isCuratedAgent = (agentId: string) => {
+    return curatedAgents.some((curatedAgent) => curatedAgent.id === agentId)
+  }
+
   if (!isOpen) return null
 
   return (
@@ -85,7 +85,7 @@ export function AgentCommand({
       className="bg-popover absolute bottom-full z-50 mb-2 flex w-full max-w-sm flex-col rounded-lg border shadow-md"
     >
       <div className="text-muted-foreground px-3 py-2 text-xs font-medium">
-        Agents
+        Agents (experimental)
       </div>
       {filteredAgents.length === 0 ? (
         <div className="py-6 text-center text-sm">No agent found.</div>

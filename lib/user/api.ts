@@ -1,7 +1,6 @@
 import type { UserProfile } from "@/app/types/user"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { createClient } from "@/lib/supabase/server"
-import { MODEL_DEFAULT } from "../config"
 
 export async function getSupabaseUser() {
   const supabase = await createClient()
@@ -16,23 +15,14 @@ export async function getSupabaseUser() {
 
 export async function getUserProfile(): Promise<UserProfile | null> {
   if (!isSupabaseEnabled) {
+    // return fake user profile for no supabase
     return {
       id: "guest",
       email: "guest@zola.chat",
       display_name: "Guest",
       profile_image: "",
       anonymous: true,
-      created_at: "",
-      daily_message_count: 0,
-      daily_reset: "",
-      message_count: 0,
-      preferred_model: MODEL_DEFAULT,
-      premium: false,
-      last_active_at: "",
-      daily_pro_message_count: 0,
-      daily_pro_reset: "",
-      system_prompt: "",
-    }
+    } as UserProfile
   }
 
   const { supabase, user } = await getSupabaseUser()
@@ -43,6 +33,9 @@ export async function getUserProfile(): Promise<UserProfile | null> {
     .select("*")
     .eq("id", user.id)
     .single()
+
+  // Don't load anonymous users in the user store
+  if (userProfileData?.anonymous) return null
 
   return {
     ...userProfileData,

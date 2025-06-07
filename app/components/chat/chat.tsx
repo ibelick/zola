@@ -13,6 +13,7 @@ import { useAgent } from "@/lib/agent-store/provider"
 import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
+import { useChatSession } from "@/lib/chat-store/session/provider"
 import {
   MESSAGE_MAX_LENGTH,
   MODEL_DEFAULT,
@@ -20,6 +21,8 @@ import {
 } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
+import { useUserPreferences } from "@/lib/user-preference-store/provider"
+import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import { Chat as ReactChat, useChat } from "@ai-sdk/react"
 import { DefaultChatTransport, UIMessage } from "ai"
@@ -80,7 +83,9 @@ export function Chat() {
   const { messages: initialMessages, cacheAndAddMessage } = useMessages()
   const { user } = useUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { preferences } = useUserPreferences()
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
+  const [searchAgentId, setSearchAgentId] = useState<string | null>(null)
   const {
     files,
     setFiles,
@@ -149,7 +154,7 @@ export function Chat() {
     input,
     selectedModel,
     systemPrompt,
-    selectedAgentId: currentAgent?.id || null,
+    selectedAgentId: searchAgentId || currentAgent?.id || null,
     createNewChat,
     setHasDialogAuth,
   })
@@ -171,7 +176,7 @@ export function Chat() {
     if (chatId === null) {
       setMessages([])
     }
-  }, [chatId])
+  }, [chatId, setMessages])
 
   useEffect(() => {
     setHydrated(true)
@@ -257,6 +262,7 @@ export function Chat() {
       }
     }
 
+    const effectiveAgentId = searchAgentId || currentAgent?.id
     const options = {
       body: {
         chatId: currentChatId,
@@ -264,7 +270,7 @@ export function Chat() {
         model: selectedModel,
         isAuthenticated,
         systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-        ...(currentAgent?.id && { agentId: currentAgent.id }),
+        ...(effectiveAgentId && { agentId: effectiveAgentId }),
       },
       experimental_attachments: attachments || undefined,
     }
@@ -367,8 +373,18 @@ export function Chat() {
       toast({ title: "Failed to send message", status: "error" })
     } finally {
       setIsSubmitting(false)
-    }
-  }
+    },
+    [
+      ensureChatExists,
+      selectedModel,
+      user,
+      append,
+      checkLimitsAndNotify,
+      isAuthenticated,
+      setMessages,
+    ]
+  )
+
   const handleReload = async () => {
     const uid = await getOrCreateGuestUserId(user)
     if (!uid) {
@@ -387,6 +403,14 @@ export function Chat() {
 
     reload(options)
   }
+
+  // Handle search agent toggle
+  const handleSearchToggle = useCallback(
+    (enabled: boolean, agentId: string | null) => {
+      setSearchAgentId(enabled ? agentId : null)
+    },
+    []
+  )
 
   // not user chatId and no messages
   if (hydrated && chatId && !isChatsLoading && !currentChat) {
@@ -459,12 +483,15 @@ export function Chat() {
           files={files}
           onFileUpload={handleFileUpload}
           onFileRemove={handleFileRemove}
-          hasSuggestions={!chatId && messages.length === 0}
+          hasSuggestions={
+            preferences.promptSuggestions && !chatId && messages.length === 0
+          }
           onSelectModel={handleModelChange}
           selectedModel={selectedModel}
           isUserAuthenticated={isAuthenticated}
           stop={stop}
           status={status}
+          onSearchToggle={handleSearchToggle}
         />
       </motion.div>
 

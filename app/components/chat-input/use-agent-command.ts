@@ -1,12 +1,11 @@
 "use client"
 
-import { useChatSession } from "@/app/providers/chat-session-provider"
-import { useUser } from "@/app/providers/user-provider"
 import { Agent } from "@/app/types/agent"
 import { useChats } from "@/lib/chat-store/chats/provider"
-import { debounce } from "@/lib/utils"
+import { useChatSession } from "@/lib/chat-store/session/provider"
+import { useUser } from "@/lib/user-store/provider"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState, useMemo } from "react"
 
 export function useAgentCommand({
   value,
@@ -56,19 +55,30 @@ export function useAgentCommand({
       if (!searchParams) return
 
       const params = new URLSearchParams(searchParams.toString())
-      agent ? params.set("agent", agent.slug) : params.delete("agent")
+      if (agent) {
+        params.set("agent", agent.slug)
+      } else {
+        params.delete("agent")
+      }
       router.push(`${pathname}?${params.toString()}`, { scroll: false })
     },
     [pathname, router, searchParams]
   )
 
-  const updateChatAgentDebounced = useCallback(
-    debounce((agent: Agent | null) => {
-      if (!user || !chatId) return
-      updateChatAgent(user.id, chatId, agent?.id ?? null, !user.anonymous)
-    }, 500),
-    [chatId, user, updateChatAgent]
-  )
+  const updateChatAgentDebounced = useMemo(() => {
+    let timeoutId: NodeJS.Timeout | null = null
+    
+    return (agent: Agent | null) => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+      
+      timeoutId = setTimeout(() => {
+        if (!user || !chatId) return
+        updateChatAgent(user.id, chatId, agent?.id ?? null, !user.anonymous)
+      }, 500)
+    }
+  }, [chatId, user, updateChatAgent])
 
   const handleValueChange = useCallback(
     (newValue: string) => {
@@ -113,17 +123,24 @@ export function useAgentCommand({
     (e: React.KeyboardEvent) => {
       if (!showAgentCommand || !filteredAgents.length) return
 
-      if (["ArrowDown", "ArrowUp", "Enter", "Escape", "Tab"].includes(e.key))
+      if (["ArrowDown", "ArrowUp", "Enter", "Escape", "Tab"].includes(e.key)) {
         e.preventDefault()
+      }
 
-      if (e.key === "ArrowDown")
+      if (e.key === "ArrowDown") {
         setActiveAgentIndex((i) => (i + 1) % filteredAgents.length)
-      if (e.key === "ArrowUp")
+      }
+      if (e.key === "ArrowUp") {
         setActiveAgentIndex(
           (i) => (i - 1 + filteredAgents.length) % filteredAgents.length
         )
-      if (e.key === "Enter") handleAgentSelect(filteredAgents[activeAgentIndex])
-      if (e.key === "Escape") setShowAgentCommand(false)
+      }
+      if (e.key === "Enter") {
+        handleAgentSelect(filteredAgents[activeAgentIndex])
+      }
+      if (e.key === "Escape") {
+        setShowAgentCommand(false)
+      }
     },
     [showAgentCommand, filteredAgents, activeAgentIndex, handleAgentSelect]
   )

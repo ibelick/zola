@@ -13,7 +13,7 @@ export function useBreakpoint(breakpoint: number) {
     mql.addEventListener("change", onChange)
     setIsBelowBreakpoint(window.innerWidth < breakpoint)
     return () => mql.removeEventListener("change", onChange)
-  }, [])
+  }, [breakpoint])
 
   return !!isBelowBreakpoint
 }

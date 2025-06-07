@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { PopoverContent } from "@/components/ui/popover"
+import Image from "next/image"
 import React, { useState } from "react"
 import { signInWithGoogle } from "../../../lib/api"
 import { APP_NAME } from "../../../lib/config"
@@ -9,12 +10,12 @@ import { createClient } from "../../../lib/supabase/client"
 import { isSupabaseEnabled } from "../../../lib/supabase/config"
 
 export function PopoverContentAuth() {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   if (!isSupabaseEnabled) {
     return null
   }
-
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const handleSignInWithGoogle = async () => {
     const supabase = createClient()
@@ -33,9 +34,12 @@ export function PopoverContentAuth() {
       if (data?.url) {
         window.location.href = data.url
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error signing in with Google:", err)
-      setError(err.message || "An unexpected error occurred. Please try again.")
+      setError(
+        (err as Error).message ||
+          "An unexpected error occurred. Please try again."
+      )
     } finally {
       setIsLoading(false)
     }
@@ -46,9 +50,11 @@ export function PopoverContentAuth() {
       side="top"
       align="start"
     >
-      <img
+      <Image
         src="/banner_forest.jpg"
         alt={`calm paint generate by ${APP_NAME}`}
+        width={300}
+        height={128}
         className="h-32 w-full object-cover"
       />
       {error && (

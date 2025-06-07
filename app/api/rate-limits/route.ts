@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     }
 
     return new Response(JSON.stringify(usage), { status: 200 })
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 })
+  } catch (err: unknown) {
+    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500 })
   }
 }

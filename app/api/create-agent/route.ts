@@ -17,6 +17,7 @@ export async function POST(request: Request) {
       mcp_config,
       example_inputs,
       avatar_url,
+      tools = [],
       remixable = false,
       is_public = true,
       max_steps = 5,
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { data: authData, error: authError } = await supabase.auth.getUser()
+    const { data: authData } = await supabase.auth.getUser()
 
     if (!authData?.user?.id) {
       return new Response(JSON.stringify({ error: "Missing userId" }), {
@@ -57,6 +58,7 @@ export async function POST(request: Request) {
         avatar_url,
         mcp_config,
         example_inputs,
+        tools,
         remixable,
         is_public,
         system_prompt: systemPrompt,
@@ -73,11 +75,11 @@ export async function POST(request: Request) {
     }
 
     return new Response(JSON.stringify({ agent }), { status: 201 })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error in create-agent endpoint:", err)
 
     return new Response(
-      JSON.stringify({ error: err.message || "Internal server error" }),
+      JSON.stringify({ error: (err as Error).message || "Internal server error" }),
       { status: 500 }
     )
   }

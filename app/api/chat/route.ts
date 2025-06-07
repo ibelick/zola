@@ -3,18 +3,23 @@ import type {
   UIMessageWithMetadata,
 } from "@/app/components/chat/chat"
 import { loadAgent } from "@/lib/agents/load-agent"
-import { MODELS_OPTIONS, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
+import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
 import type { LanguageModelV2 } from "@ai-sdk/provider"
+import { getAllModels } from "@/lib/models"
+import { getProviderForModel } from "@/lib/openproviders/provider-map"
+import { Provider } from "@/lib/user-keys"
 import { Attachment } from "@ai-sdk/ui-utils"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { convertToModelMessages, stepCountIs, streamText, UIMessage } from "ai"
+import { Message as MessageAISDK, streamText, ToolSet } from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,
   trackSpecialAgentUsage,
   validateAndTrackUsage,
 } from "./api"
+import { cleanMessagesForTools } from "./utils"
 
 export const maxDuration = 60
 
@@ -68,51 +73,56 @@ export async function POST(req: Request) {
 
     let agentConfig = null
 
-    if (supabase && agentId) {
+    if (agentId) {
       agentConfig = await loadAgent(agentId)
     }
 
-    const modelConfig = MODELS_OPTIONS.find((m) => m.id === model)
+    const allModels = await getAllModels()
+    const modelConfig = allModels.find((m) => m.id === model)
 
-    if (!modelConfig) {
+    if (!modelConfig || !modelConfig.apiSdk) {
       throw new Error(`Model ${model} not found`)
     }
-    let modelInstance
-    if (modelConfig.provider === "openrouter") {
-      const openRouter = createOpenRouter({
-        apiKey: process.env.OPENROUTER_API_KEY,
-      })
-      modelInstance = openRouter.chat(modelConfig.api_sdk as string) // this is a special case for openrouter. Normal openrouter models are not supported.
-    } else {
-      modelInstance = modelConfig.api_sdk
-    }
 
-    let effectiveSystemPrompt =
+    const effectiveSystemPrompt =
       agentConfig?.systemPrompt || systemPrompt || SYSTEM_PROMPT_DEFAULT
 
     let toolsToUse = undefined
-    let effectiveMaxSteps = agentConfig?.maxSteps || 3
 
     if (agentConfig?.mcpConfig) {
       const { tools } = await loadMCPToolsFromURL(agentConfig.mcpConfig.server)
       toolsToUse = tools
     } else if (agentConfig?.tools) {
       toolsToUse = agentConfig.tools
-      await trackSpecialAgentUsage(supabase, userId)
+      if (supabase) {
+        await trackSpecialAgentUsage(supabase, userId)
+      }
     }
+
+    // Clean messages when switching between agents with different tool capabilities
+    const hasTools = !!toolsToUse && Object.keys(toolsToUse).length > 0
+    const cleanedMessages = cleanMessagesForTools(messages, hasTools)
 
     let streamError: Error | null = null
 
+    let apiKey: string | undefined
+    if (isAuthenticated && userId) {
+      const { getEffectiveApiKey } = await import("@/lib/user-keys")
+      const provider = getProviderForModel(model)
+      apiKey =
+        (await getEffectiveApiKey(userId, provider as Provider)) || undefined
+    }
+
     const result = streamText({
-      model: modelInstance as unknown as LanguageModelV2, // TODO fix
+      model: modelConfig.apiSdk(apiKey),
       system: effectiveSystemPrompt,
-      messages: convertToModelMessages(messages),
-      tools: toolsToUse,
+      messages: convertToModelMessages(cleanedMessages),
+      tools: toolsToUse as ToolSet,
       stopWhen: (ops) => stepCountIs(10)(ops),
       onError: (err: any) => {
         console.error("🛑 streamText error:", err)
         streamError = new Error(
-          err?.error ||
+          (err as { error?: string })?.error ||
             "AI generation failed. Please check your model or API key."
         )
       },
@@ -128,8 +138,6 @@ export async function POST(req: Request) {
       },
     })
 
-    await result.consumeStream()
-
     if (streamError) {
       throw streamError
     }
@@ -141,8 +149,8 @@ export async function POST(req: Request) {
           createdAt: new Date().toISOString(),
         }
       },
+      sendSources: true,
     })
-    // Optionally attach chatId in a custom header.
     const headers = new Headers(originalResponse.headers)
     headers.set("X-Chat-Id", chatId)
 
@@ -150,18 +158,19 @@ export async function POST(req: Request) {
       status: originalResponse.status,
       headers,
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error in /api/chat:", err)
     // Return a structured error response if the error is a UsageLimitError.
-    if (err.code === "DAILY_LIMIT_REACHED") {
+    const error = err as { code?: string; message?: string }
+    if (error.code === "DAILY_LIMIT_REACHED") {
       return new Response(
-        JSON.stringify({ error: err.message, code: err.code }),
+        JSON.stringify({ error: error.message, code: error.code }),
         { status: 403 }
       )
     }
 
     return new Response(
-      JSON.stringify({ error: err.message || "Internal server error" }),
+      JSON.stringify({ error: error.message || "Internal server error" }),
       { status: 500 }
     )
   }

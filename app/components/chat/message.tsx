@@ -70,7 +70,9 @@ export function Message({
         hasScrollAnchor={hasScrollAnchor}
         parts={parts}
         status={status}
-      />
+      >
+        {children}
+      </MessageAssistant>
     )
   }
 

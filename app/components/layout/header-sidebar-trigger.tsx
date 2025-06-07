@@ -32,7 +32,7 @@ export function HeaderSidebarTrigger({
           )}
           {...props}
         >
-          <SidebarSimple size={24} />
+          <SidebarSimple size={20} />
           <span className="sr-only">Toggle sidebar</span>
         </button>
       </TooltipTrigger>

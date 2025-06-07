@@ -92,7 +92,7 @@ export function ChatsProvider({
     setChats((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)))
     try {
       await updateChatTitle(id, title)
-    } catch (e) {
+    } catch {
       setChats(prev)
       toast({ title: "Failed to update title", status: "error" })
     }
@@ -109,7 +109,7 @@ export function ChatsProvider({
     try {
       await deleteChatFromDb(id)
       if (id === currentChatId && redirect) redirect()
-    } catch (e) {
+    } catch {
       setChats(prev)
       toast({ title: "Failed to delete chat", status: "error" })
     }
@@ -156,7 +156,7 @@ export function ChatsProvider({
           )
       )
       return newChat
-    } catch (e) {
+    } catch {
       setChats(prev)
       toast({ title: "Failed to create chat", status: "error" })
     }

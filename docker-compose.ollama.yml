@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Ollama service for local LLM hosting
+  ollama:
+    image: ollama/ollama:latest
+    container_name: zola-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Zola application
+  zola:
+    build: .
+    container_name: zola-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # Ollama configuration
+      - OLLAMA_BASE_URL=http://ollama:11434
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+    driver: local 

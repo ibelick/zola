@@ -20,7 +20,7 @@ export function getSources(parts: UIMessageWithMetadata["parts"]) {
           part.toolInvocation.toolName === "summarizeSources" &&
           result?.result?.[0]?.citations
         ) {
-          return result.result.flatMap((item: any) => item.citations || [])
+          return result.result.flatMap((item: { citations?: unknown[] }) => item.citations || [])
         }
 
         return Array.isArray(result) ? result.flat() : result

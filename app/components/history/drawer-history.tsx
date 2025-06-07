@@ -43,7 +43,7 @@ export function DrawerHistory({
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const params = useParams<{ chatId: string }>()
 
-  const handleOpenChange = (open: boolean) => {
+  const handleOpenChange = useCallback((open: boolean) => {
     setIsOpen(open)
     if (!open) {
       setSearchQuery("")
@@ -51,7 +51,7 @@ export function DrawerHistory({
       setEditTitle("")
       setDeletingId(null)
     }
-  }
+  }, [setIsOpen])
 
   const handleEdit = useCallback((chat: Chats) => {
     setEditingId(chat.id)
@@ -253,6 +253,8 @@ export function DrawerHistory({
       </div>
     ),
     [
+      handleOpenChange,
+      params.chatId,
       editingId,
       deletingId,
       editTitle,
