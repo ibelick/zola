@@ -103,7 +103,8 @@ export async function POST(req: Request) {
     if (isAuthenticated && userId) {
       const { getEffectiveApiKey } = await import("@/lib/user-keys")
       const provider = getProviderForModel(model)
-      apiKey = await getEffectiveApiKey(userId, provider as Provider) || undefined
+      apiKey =
+        (await getEffectiveApiKey(userId, provider as Provider)) || undefined
     }
 
     const result = streamText({
@@ -132,8 +133,6 @@ export async function POST(req: Request) {
       },
     })
 
-    await result.consumeStream()
-
     if (streamError) {
       throw streamError
     }
@@ -142,7 +141,6 @@ export async function POST(req: Request) {
       sendReasoning: true,
       sendSources: true,
     })
-    // Optionally attach chatId in a custom header.
     const headers = new Headers(originalResponse.headers)
     headers.set("X-Chat-Id", chatId)
 
