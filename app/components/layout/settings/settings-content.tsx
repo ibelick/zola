@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { cn, isDev } from "@/lib/utils"
-import { GearSix, PaintBrush, PlugsConnected, X } from "@phosphor-icons/react"
+import { GearSix, PaintBrush, PlugsConnected, X, Cpu } from "@phosphor-icons/react"
 import { useState } from "react"
 import { InteractionPreferences } from "./appearance/interaction-preferences"
 import { LayoutSettings } from "./appearance/layout-settings"
@@ -16,6 +16,7 @@ import { DeveloperTools } from "./connections/developer-tools"
 import { ProviderSettings } from "./connections/provider-settings"
 import { AccountManagement } from "./general/account-management"
 import { ModelPreferences } from "./general/model-preferences"
+import { ModelManagement } from "./general/model-management"
 // General tab components
 import { UserProfile } from "./general/user-profile"
 
@@ -24,7 +25,7 @@ type SettingsContentProps = {
   isDrawer?: boolean
 }
 
-type TabType = "general" | "appearance" | "connections"
+type TabType = "general" | "models" | "appearance" | "connections"
 
 export function SettingsContent({
   onClose,
@@ -59,10 +60,14 @@ export function SettingsContent({
         {isDrawer ? (
           // Mobile version - tabs on top
           <div className="w-full px-6 py-4">
-            <TabsList className="mb-4 grid w-full grid-cols-3 bg-transparent">
+            <TabsList className="mb-4 grid w-full grid-cols-4 bg-transparent">
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <GearSix className="size-4" />
                 <span>General</span>
+              </TabsTrigger>
+              <TabsTrigger value="models" className="flex items-center gap-2">
+                <Cpu className="size-4" />
+                <span>Models</span>
               </TabsTrigger>
               <TabsTrigger
                 value="appearance"
@@ -91,6 +96,10 @@ export function SettingsContent({
               )}
             </TabsContent>
 
+            <TabsContent value="models" className="space-y-6">
+              <ModelManagement />
+            </TabsContent>
+
             <TabsContent value="appearance" className="space-y-6">
               <ThemeSelection />
               <LayoutSettings />
@@ -115,6 +124,16 @@ export function SettingsContent({
                   <div className="flex items-center gap-2">
                     <GearSix className="size-4" />
                     <span>General</span>
+                  </div>
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="models"
+                  className="w-full justify-start rounded-md px-3 py-2 text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <Cpu className="size-4" />
+                    <span>Models</span>
                   </div>
                 </TabsTrigger>
 
@@ -150,6 +169,10 @@ export function SettingsContent({
                     <AccountManagement />
                   </>
                 )}
+              </TabsContent>
+
+              <TabsContent value="models" className="mt-0 space-y-6">
+                <ModelManagement />
               </TabsContent>
 
               <TabsContent value="appearance" className="mt-0 space-y-6">

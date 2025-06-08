@@ -27,6 +27,7 @@ import { FREE_MODELS_IDS } from "@/lib/config"
 import { fetchClient } from "@/lib/fetch"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
+import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import { CaretDown, MagnifyingGlass, Star } from "@phosphor-icons/react"
 import { useEffect, useRef, useState } from "react"
@@ -48,6 +49,7 @@ export function ModelSelector({
 }: ModelSelectorProps) {
   const [models, setModels] = useState<ModelConfig[]>([])
   const [isLoadingModels, setIsLoadingModels] = useState(true)
+  const { preferences } = useUserPreferences()
 
   // Load models on component mount
   useEffect(() => {
@@ -78,17 +80,25 @@ export function ModelSelector({
     loadModels()
   }, [])
 
-  const currentModel = models.find((model) => model.id === selectedModelId)
+  // Filter models based on user preferences
+  const filteredModelsByPreference = models.filter(model => {
+    // If no preferences set, show all models
+    if (!preferences.enabledModels) return true
+    // Otherwise, only show enabled models
+    return preferences.enabledModels.includes(model.id)
+  })
+
+  const currentModel = filteredModelsByPreference.find((model) => model.id === selectedModelId)
   const currentProvider = PROVIDERS.find(
     (provider) => provider.id === currentModel?.providerId
   )
 
   // Treat all Ollama models as free models
-  const freeModels = models.filter(
+  const freeModels = filteredModelsByPreference.filter(
     (model) =>
       FREE_MODELS_IDS.includes(model.id) || model.providerId === "ollama"
   )
-  const proModels = models.filter((model) => !freeModels.includes(model))
+  const proModels = filteredModelsByPreference.filter((model) => !freeModels.includes(model))
 
   const isMobile = useBreakpoint(768)
 
@@ -181,7 +191,7 @@ export function ModelSelector({
   // Get the hovered model data
   const hoveredModelData = models.find((model) => model.id === hoveredModel)
 
-  const filteredModels = models
+  const filteredModels = filteredModelsByPreference
     .filter((model) =>
       model.name.toLowerCase().includes(searchQuery.toLowerCase())
     )

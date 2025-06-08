@@ -9,6 +9,7 @@ type UserPreferences = {
   promptSuggestions: boolean
   showToolInvocations: boolean
   showConversationPreviews: boolean
+  enabledModels: string[] | null // null means all models enabled (default)
 }
 
 const defaultPreferences: UserPreferences = {
@@ -16,6 +17,7 @@ const defaultPreferences: UserPreferences = {
   promptSuggestions: true,
   showToolInvocations: true,
   showConversationPreviews: true,
+  enabledModels: null, // All models enabled by default
 }
 
 const PREFERENCES_STORAGE_KEY = "user-preferences"
@@ -27,6 +29,7 @@ interface UserPreferencesContextType {
   setPromptSuggestions: (enabled: boolean) => void
   setShowToolInvocations: (enabled: boolean) => void
   setShowConversationPreviews: (enabled: boolean) => void
+  setEnabledModels: (modelIds: string[]) => void
 }
 
 const UserPreferencesContext = createContext<
@@ -104,6 +107,15 @@ export function UserPreferencesProvider({
     setPreferences((prev) => ({ ...prev, showConversationPreviews: enabled }))
   }
 
+  const setEnabledModels = (modelIds: string[]) => {
+    // Ensure at least one model is selected
+    if (modelIds.length === 0) {
+      console.warn("Cannot disable all models. At least one model must be enabled.")
+      return
+    }
+    setPreferences((prev) => ({ ...prev, enabledModels: modelIds }))
+  }
+
   return (
     <UserPreferencesContext.Provider
       value={{
@@ -112,6 +124,7 @@ export function UserPreferencesProvider({
         setPromptSuggestions,
         setShowToolInvocations,
         setShowConversationPreviews,
+        setEnabledModels,
       }}
     >
       {children}
