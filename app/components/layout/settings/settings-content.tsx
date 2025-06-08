@@ -97,7 +97,7 @@ export function SettingsContent({
             </TabsContent>
 
             <TabsContent value="models" className="space-y-6">
-              <ModelManagement />
+              <ModelManagement isDrawer={isDrawer} />
             </TabsContent>
 
             <TabsContent value="appearance" className="space-y-6">
@@ -172,7 +172,7 @@ export function SettingsContent({
               </TabsContent>
 
               <TabsContent value="models" className="mt-0 space-y-6">
-                <ModelManagement />
+                <ModelManagement isDrawer={isDrawer} />
               </TabsContent>
 
               <TabsContent value="appearance" className="mt-0 space-y-6">

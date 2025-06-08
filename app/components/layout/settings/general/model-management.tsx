@@ -25,7 +25,11 @@ import {
 } from "@phosphor-icons/react"
 import { useEffect, useState } from "react"
 
-export function ModelManagement() {
+type ModelManagementProps = {
+  isDrawer?: boolean
+}
+
+export function ModelManagement({ isDrawer = false }: ModelManagementProps) {
   const { preferences, setEnabledModels } = useUserPreferences()
   const [models, setModels] = useState<ModelConfig[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -198,10 +202,12 @@ export function ModelManagement() {
             </Tooltip>
           </div>
           
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Check className="size-3" />
-            <span>{enabledModelIds.length} of {models.length} enabled</span>
-          </div>
+          {!isDrawer && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Check className="size-3" />
+              <span>{enabledModelIds.length} of {models.length} enabled</span>
+            </div>
+          )}
         </div>
       </div>
 
