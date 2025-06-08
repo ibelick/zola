@@ -60,25 +60,25 @@ export function SettingsContent({
         {isDrawer ? (
           // Mobile version - tabs on top
           <div className="w-full px-6 py-4">
-            <TabsList className="mb-4 grid w-full grid-cols-4 bg-transparent">
-              <TabsTrigger value="general" className="flex items-center gap-2">
+            <TabsList className="mb-4 flex w-full justify-start gap-2 overflow-x-auto bg-transparent" style={{ scrollbarWidth: "none" }}>
+              <TabsTrigger value="general" className="flex items-center gap-2 whitespace-nowrap">
                 <GearSix className="size-4" />
                 <span>General</span>
               </TabsTrigger>
-              <TabsTrigger value="models" className="flex items-center gap-2">
+              <TabsTrigger value="models" className="flex items-center gap-2 whitespace-nowrap">
                 <Cpu className="size-4" />
                 <span>Models</span>
               </TabsTrigger>
               <TabsTrigger
                 value="appearance"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 whitespace-nowrap"
               >
                 <PaintBrush className="size-4" />
                 <span>Appearance</span>
               </TabsTrigger>
               <TabsTrigger
                 value="connections"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 whitespace-nowrap"
               >
                 <PlugsConnected className="size-4" />
                 <span>Connections</span>
@@ -102,8 +102,8 @@ export function SettingsContent({
 
             <TabsContent value="appearance" className="space-y-6">
               <ThemeSelection />
-              <LayoutSettings />
-              <InteractionPreferences />
+                <LayoutSettings />
+                <InteractionPreferences />
             </TabsContent>
 
             <TabsContent value="connections" className="space-y-6">
@@ -178,7 +178,7 @@ export function SettingsContent({
               <TabsContent value="appearance" className="mt-0 space-y-6">
                 <ThemeSelection />
                 <LayoutSettings />
-                <InteractionPreferences />
+                  <InteractionPreferences />
               </TabsContent>
 
               <TabsContent value="connections" className="mt-0 space-y-6">
