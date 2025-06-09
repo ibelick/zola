@@ -1,6 +1,7 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createContext, ReactNode, useContext } from "react"
 
 export type LayoutType = "sidebar" | "fullscreen"
 
@@ -37,71 +38,77 @@ export function UserPreferencesProvider({
   children,
   userId,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   userId?: string
 }) {
-  const [preferences, setPreferences] =
-    useState<UserPreferences>(defaultPreferences)
-  const [isInitialized, setIsInitialized] = useState(false)
   const isAuthenticated = !!userId
+  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setPreferences((prev) => ({ ...prev, layout: "fullscreen" }))
-      setIsInitialized(true)
-      return
-    }
-
-    try {
-      const storedPrefs = localStorage.getItem(PREFERENCES_STORAGE_KEY)
-
-      if (storedPrefs) {
-        setPreferences(JSON.parse(storedPrefs))
-      } else {
-        const storedLayout = localStorage.getItem(
-          LAYOUT_STORAGE_KEY
-        ) as LayoutType
-        if (storedLayout) {
-          setPreferences((prev) => ({ ...prev, layout: storedLayout }))
-        }
+  const { data: preferences = defaultPreferences } = useQuery<UserPreferences>({
+    queryKey: ["user-preferences", userId],
+    queryFn: () => {
+      if (!isAuthenticated) {
+        return { ...defaultPreferences, layout: "fullscreen" }
       }
-    } catch (error) {
-      console.error("Failed to load user preferences:", error)
-    } finally {
-      setIsInitialized(true)
-    }
-  }, [isAuthenticated])
 
-  useEffect(() => {
-    if (isInitialized && isAuthenticated) {
-      try {
-        localStorage.setItem(
-          PREFERENCES_STORAGE_KEY,
-          JSON.stringify(preferences)
-        )
-        localStorage.setItem(LAYOUT_STORAGE_KEY, preferences.layout)
-      } catch (error) {
-        console.error("Failed to save user preferences:", error)
+      const stored = localStorage.getItem(PREFERENCES_STORAGE_KEY)
+      if (stored) return JSON.parse(stored)
+
+      const layout = localStorage.getItem(
+        LAYOUT_STORAGE_KEY
+      ) as LayoutType | null
+      return {
+        ...defaultPreferences,
+        ...(layout ? { layout } : {}),
       }
-    }
-  }, [preferences, isInitialized, isAuthenticated])
+    },
+    enabled: typeof window !== "undefined",
+    staleTime: Infinity,
+  })
+
+  const mutation = useMutation({
+    mutationFn: async (update: Partial<UserPreferences>) => {
+      const updated = { ...preferences, ...update }
+      localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(updated))
+      localStorage.setItem(LAYOUT_STORAGE_KEY, updated.layout)
+      return updated
+    },
+    onMutate: async (update) => {
+      const queryKey = ["user-preferences", userId]
+      await queryClient.cancelQueries({ queryKey })
+
+      const previous = queryClient.getQueryData<UserPreferences>(queryKey)
+
+      const optimistic = { ...previous, ...update }
+      queryClient.setQueryData(queryKey, optimistic)
+
+      return { previous }
+    },
+    onError: (_err, _update, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["user-preferences", userId], context.previous)
+      }
+    },
+  })
+
+  const updatePreferences = mutation.mutate
 
   const setLayout = (layout: LayoutType) => {
     if (isAuthenticated || layout === "fullscreen") {
-      setPreferences((prev) => ({ ...prev, layout }))
+      updatePreferences({ layout })
     }
   }
 
   const setPromptSuggestions = (enabled: boolean) => {
-    setPreferences((prev) => ({ ...prev, promptSuggestions: enabled }))
+    updatePreferences({ promptSuggestions: enabled })
   }
 
   const setShowToolInvocations = (enabled: boolean) => {
-    setPreferences((prev) => ({ ...prev, showToolInvocations: enabled }))
+    updatePreferences({ showToolInvocations: enabled })
   }
 
   const setShowConversationPreviews = (enabled: boolean) => {
-    setPreferences((prev) => ({ ...prev, showConversationPreviews: enabled }))
+    updatePreferences({ showConversationPreviews: enabled })
   }
 
   return (
@@ -121,9 +128,9 @@ export function UserPreferencesProvider({
 
 export function useUserPreferences() {
   const context = useContext(UserPreferencesContext)
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
-      "useUserPreferences must be used within a UserPreferencesProvider"
+      "useUserPreferences must be used within UserPreferencesProvider"
     )
   }
   return context
