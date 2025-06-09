@@ -3,20 +3,15 @@
 import { ModelSelector } from "@/components/common/model-selector/base"
 import { MODEL_DEFAULT } from "@/lib/config"
 import { useUser } from "@/lib/user-store/provider"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { SystemPromptSection } from "./system-prompt"
 
 export function ModelPreferences() {
   const { user, updateUser } = useUser()
-  const [selectedModelId, setSelectedModelId] = useState<string>(
-    user?.preferred_model || MODEL_DEFAULT
-  )
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (user?.preferred_model) {
-      setSelectedModelId(user.preferred_model)
-    }
-  }, [user?.preferred_model])
+  const effectiveModelId =
+    selectedModelId ?? user?.preferred_model ?? MODEL_DEFAULT
 
   const handleModelSelection = async (value: string) => {
     setSelectedModelId(value)
@@ -29,7 +24,7 @@ export function ModelPreferences() {
         <h3 className="mb-3 text-sm font-medium">Preferred model</h3>
         <div className="relative">
           <ModelSelector
-            selectedModelId={selectedModelId}
+            selectedModelId={effectiveModelId}
             setSelectedModelId={handleModelSelection}
             className="w-full"
           />

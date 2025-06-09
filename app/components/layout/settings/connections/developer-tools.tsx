@@ -2,9 +2,9 @@
 
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
-import { useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 
-interface DeveloperTool {
+type DeveloperTool = {
   id: string
   name: string
   icon: string
@@ -15,31 +15,21 @@ interface DeveloperTool {
   sampleEnv: string
 }
 
-interface DeveloperToolsResponse {
+type DeveloperToolsResponse = {
   tools: DeveloperTool[]
 }
 
 export function DeveloperTools() {
-  const [tools, setTools] = useState<DeveloperTool[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data, isLoading } = useQuery<DeveloperToolsResponse>({
+    queryKey: ["developer-tools"],
+    queryFn: async () => {
+      const res = await fetch("/api/developer-tools")
+      if (!res.ok) throw new Error("Failed to fetch tools")
+      return res.json()
+    },
+  })
 
-  useEffect(() => {
-    const fetchTools = async () => {
-      try {
-        const response = await fetch("/api/developer-tools")
-        if (response.ok) {
-          const data: DeveloperToolsResponse = await response.json()
-          setTools(data.tools)
-        }
-      } catch (error) {
-        console.error("Failed to fetch developer tools:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchTools()
-  }, [])
+  const tools = data?.tools ?? []
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -57,7 +47,7 @@ export function DeveloperTools() {
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="py-8 text-center">
         <div className="text-muted-foreground">Loading connections...</div>
