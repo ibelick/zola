@@ -16,7 +16,7 @@ import { AlertCircle, Check, Github, X } from "lucide-react"
 import type React from "react"
 import { ToolsSection } from "./tools-section"
 
-type AgentFormData = {
+export type AgentFormData = {
   name: string
   description: string
   systemPrompt: string

@@ -10,136 +10,85 @@ import { convertLocalAgentToAgentDb } from "@/lib/agent-store/utils"
 import { localAgents } from "@/lib/agents/local-agents"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useChatSession } from "@/lib/chat-store/session/provider"
-import { usePathname, useSearchParams } from "next/navigation"
-import {
-  createContext,
-  Suspense,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react"
-
-// Create a separate component that uses useSearchParams
-function SearchParamsProvider({
-  setAgentSlug,
-}: {
-  setAgentSlug: (slug: string | null) => void
-}) {
-  const searchParams = useSearchParams()
-
-  useEffect(() => {
-    const agentSlug = searchParams.get("agent")
-    setAgentSlug(agentSlug)
-  }, [searchParams, setAgentSlug])
-
-  return null
-}
+import { useQuery } from "@tanstack/react-query"
+import { createContext, ReactNode, useContext, useMemo } from "react"
 
 type AgentContextType = {
   currentAgent: Agent | null
   curatedAgents: Agent[] | null
   userAgents: Agent[] | null
+  refetchUserAgents: () => void
 }
 
 const AgentContext = createContext<AgentContextType | undefined>(undefined)
 
-type AgentProviderProps = {
-  children: React.ReactNode
+export function AgentProvider({
+  children,
+  userId,
+  searchAgentSlug,
+}: {
+  children: ReactNode
   userId?: string | null
-}
-
-export const AgentProvider = ({ children, userId }: AgentProviderProps) => {
-  const pathname = usePathname()
-  const [agentSlug, setAgentSlug] = useState<string | null>(null)
+  searchAgentSlug?: string | null
+}) {
   const { getChatById } = useChats()
   const { chatId } = useChatSession()
   const currentChat = chatId ? getChatById(chatId) : null
-  const [currentAgent, setCurrentAgent] = useState<Agent | null>(null)
   const currentChatAgentId = currentChat?.agent_id || null
-  const [curatedAgents, setCuratedAgents] = useState<Agent[] | null>(null)
-  const [userAgents, setUserAgents] = useState<Agent[] | null>(null)
+  const agentIdentifier = searchAgentSlug || currentChatAgentId
 
-  const fetchCuratedAgents = useCallback(async () => {
-    const agents = await fetchCuratedAgentsFromDb()
-    if (agents) setCuratedAgents(agents)
-  }, [])
+  const { data: currentAgent } = useQuery({
+    queryKey: ["current-agent", agentIdentifier],
+    queryFn: async () => {
+      if (!agentIdentifier) return null
 
-  const fetchUserAgents = useCallback(async () => {
-    if (!userId) return
-    const agents = await fetchUserAgentsFromDb(userId)
-    if (agents) setUserAgents(agents)
-  }, [userId])
+      if (localAgents[agentIdentifier as keyof typeof localAgents]) {
+        return convertLocalAgentToAgentDb(
+          localAgents[agentIdentifier as keyof typeof localAgents]
+        )
+      }
 
-  const fetchCurrentAgent = useCallback(async () => {
-    if (!agentSlug && !currentChatAgentId) {
-      setCurrentAgent(null)
-      return
-    }
+      return await fetchAgentBySlugOrId({
+        slug: searchAgentSlug || undefined,
+        id: currentChatAgentId || undefined,
+      })
+    },
+    enabled: !!agentIdentifier,
+    staleTime: Infinity,
+  })
 
-    // Check local agents first
-    const agentIdentifier = agentSlug || currentChatAgentId
-    if (
-      agentIdentifier &&
-      localAgents[agentIdentifier as keyof typeof localAgents]
-    ) {
-      const localAgent =
-        localAgents[agentIdentifier as keyof typeof localAgents]
-      // Convert local agent to Agent type format
-      const convertedAgent = convertLocalAgentToAgentDb(localAgent)
+  const { data: curatedAgents } = useQuery({
+    queryKey: ["curated-agents"],
+    queryFn: fetchCuratedAgentsFromDb,
+    staleTime: Infinity,
+  })
 
-      setCurrentAgent(convertedAgent)
-      return
-    }
+  const { data: userAgents, refetch: refetchUserAgents } = useQuery({
+    queryKey: ["user-agents", userId],
+    queryFn: () => (userId ? fetchUserAgentsFromDb(userId) : []),
+    enabled: !!userId,
+    staleTime: Infinity,
+  })
 
-    // Fallback to database agents
-    const agent = await fetchAgentBySlugOrId({
-      slug: agentSlug || undefined,
-      id: currentChatAgentId || undefined,
-    })
-
-    setCurrentAgent(agent)
-  }, [agentSlug, currentChatAgentId])
-
-  useEffect(() => {
-    if (!agentSlug && !currentChatAgentId) {
-      setCurrentAgent(null)
-      return
-    }
-
-    fetchCurrentAgent()
-  }, [pathname, agentSlug, currentChatAgentId, fetchCurrentAgent])
-
-  useEffect(() => {
-    fetchCuratedAgents()
-  }, [fetchCuratedAgents])
-
-  useEffect(() => {
-    if (!userId) {
-      return
-    }
-
-    fetchUserAgents()
-  }, [fetchUserAgents, userId])
+  const contextValue = useMemo(
+    () => ({
+      currentAgent: currentAgent ?? null,
+      curatedAgents: curatedAgents ?? null,
+      userAgents: userAgents ?? null,
+      refetchUserAgents,
+    }),
+    [currentAgent, curatedAgents, userAgents, refetchUserAgents]
+  )
 
   return (
-    <>
-      <Suspense fallback={null}>
-        <SearchParamsProvider setAgentSlug={setAgentSlug} />
-      </Suspense>
-
-      <AgentContext.Provider
-        value={{ currentAgent, curatedAgents, userAgents }}
-      >
-        {children}
-      </AgentContext.Provider>
-    </>
+    <AgentContext.Provider value={contextValue}>
+      {children}
+    </AgentContext.Provider>
   )
 }
 
-export const useAgent = () => {
+export function useAgent() {
   const context = useContext(AgentContext)
-  if (!context)
-    throw new Error("useAgentContext must be used within AgentProvider")
+  if (!context) throw new Error("useAgent must be used within AgentProvider")
   return context
 }
