@@ -2,6 +2,7 @@
 
 import { PopoverContentAuth } from "@/app/components/chat-input/popover-content-auth"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
+import { useKeyShortcut } from "@/app/hooks/use-key-shortcut"
 import { Button } from "@/components/ui/button"
 import {
   Drawer,
@@ -33,7 +34,7 @@ import {
   MagnifyingGlassIcon,
   StarIcon,
 } from "@phosphor-icons/react"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { ProModelDialog } from "./pro-dialog"
 import { SubMenu } from "./sub-menu"
 
@@ -68,37 +69,14 @@ export function ModelSelector({
   // Ref for input to maintain focus
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Add keyboard shortcut for ⌘⇧P to open model selector
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Using lowercase comparison to ensure it works regardless of case
-      if ((e.key === "p" || e.key === "P") && e.metaKey && e.shiftKey) {
-        e.preventDefault()
-        if (isMobile) {
-          setIsDrawerOpen((prev) => !prev)
-        } else {
-          setIsDropdownOpen((prev) => !prev)
-        }
-      }
+  useKeyShortcut(
+    (e) => (e.key === "p" || e.key === "P") && e.metaKey && e.shiftKey,
+    () => {
+      isMobile
+        ? setIsDrawerOpen((prev) => !prev)
+        : setIsDropdownOpen((prev) => !prev)
     }
-
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [isMobile])
-
-  // Close submenu when dropdown closes
-  useEffect(() => {
-    if (!isDropdownOpen) {
-      setHoveredModel(null)
-    }
-  }, [isDropdownOpen])
-
-  // This will show the submenu for the current model when the dropdown opens
-  useEffect(() => {
-    if (isDropdownOpen && selectedModelId) {
-      setHoveredModel(selectedModelId)
-    }
-  }, [isDropdownOpen, selectedModelId])
+  )
 
   const renderModelItem = (model: ModelConfig) => {
     const isLocked = !model.accessible
@@ -283,6 +261,8 @@ export function ModelSelector({
             if (!open) {
               setHoveredModel(null)
               setSearchQuery("")
+            } else {
+              if (selectedModelId) setHoveredModel(selectedModelId)
             }
           }}
         >
