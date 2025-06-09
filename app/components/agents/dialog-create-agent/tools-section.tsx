@@ -1,9 +1,11 @@
 "use client"
 
 import { Label } from "@/components/ui/label"
+import { fetchClient } from "@/lib/fetch"
 import { getAllTools } from "@/lib/tools"
 import { cn } from "@/lib/utils"
-import React, { useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import React, { useState } from "react"
 
 const isDev = process.env.NODE_ENV === "development"
 
@@ -12,24 +14,19 @@ type ToolsSectionProps = {
 }
 
 export function ToolsSection({ onSelectTools }: ToolsSectionProps) {
-  const [availableTools, setAvailableTools] = useState<string[] | null>(null)
   const [selectedTools, setSelectedTools] = useState<string[]>([])
   const tools = getAllTools()
 
-  useEffect(() => {
-    if (!isDev) return
-
-    const fetchTools = async () => {
-      try {
-        const response = await fetch("/api/tools-available")
-        const data = await response.json()
-        setAvailableTools(data.available || [])
-      } catch (error) {
-        console.error("Failed to fetch available tools:", error)
-      }
-    }
-    fetchTools()
-  }, [])
+  const { data: availableTools } = useQuery<string[]>({
+    queryKey: ["available-tools"],
+    queryFn: async () => {
+      if (!isDev) return []
+      const res = await fetchClient("/api/tools-available")
+      const json = await res.json()
+      return json.available || []
+    },
+    enabled: isDev,
+  })
 
   const handleToolToggle = (toolId: string) => {
     const newSelection = selectedTools.includes(toolId)

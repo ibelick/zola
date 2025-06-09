@@ -52,8 +52,8 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <LayoutClient />
         <TanstackQueryProvider>
+          <LayoutClient />
           <UserProvider initialUser={userProfile}>
             <ModelProvider>
               <ChatsProvider userId={userProfile?.id}>
