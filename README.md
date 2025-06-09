@@ -12,10 +12,10 @@
 
 - Multi-model support: OpenAI, Mistral, Claude, Gemini, Ollama (local models)
 - Bring your own API key (BYOK) support via OpenRouter
-- File uploads with context-aware answers
+- File uploads
 - Clean, responsive UI with light/dark themes
-- Built with Tailwind, shadcn/ui, and prompt-kit
-- Fully open-source and self-hostable
+- Built with Tailwind CSS, shadcn/ui, and prompt-kit
+- Open-source and self-hostable
 - Customizable: user system prompt, multiple layout options
 - Local AI with Ollama: Run models locally with automatic model detection
 - Basic agent (wip)
