@@ -83,7 +83,7 @@ export function ByokSection() {
           <span>OpenRouter</span>
         </button>
         <button
-          key="openrouter"
+          key="soon"
           type="button"
           disabled
           className={cn(

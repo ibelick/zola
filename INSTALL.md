@@ -79,6 +79,40 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 Copy the generated value and add it to your `.env.local` file as the `CSRF_SECRET` value.
 
+### BYOK (Bring Your Own Key) Setup
+
+Zola supports BYOK functionality, allowing users to securely store and use their own API keys for AI providers. To enable this feature, you need to configure an encryption key for secure storage of user API keys.
+
+#### Generating an Encryption Key
+
+The `ENCRYPTION_KEY` is used to encrypt user API keys before storing them in the database. Generate a 32-byte base64-encoded key:
+
+```bash
+# Using Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+# Using OpenSSL
+openssl rand -base64 32
+
+# Using Python
+python -c "import base64, secrets; print(base64.b64encode(secrets.token_bytes(32)).decode())"
+```
+
+Add the generated key to your `.env.local` file:
+
+```bash
+# Required for BYOK functionality
+ENCRYPTION_KEY=your_generated_base64_encryption_key
+```
+
+**Important**:
+
+- Keep this key secure and backed up - losing it will make existing user API keys unrecoverable
+- Use the same key across all your deployment environments
+- The key must be exactly 32 bytes when base64 decoded
+
+With BYOK enabled, users can securely add their own API keys through the settings interface, giving them access to AI models using their personal accounts and usage limits.
+
 #### Google OAuth Authentication
 
 1. Go to your Supabase project dashboard
