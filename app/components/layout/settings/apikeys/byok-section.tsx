@@ -9,50 +9,46 @@ import { fetchClient } from "@/lib/fetch"
 import { useModel } from "@/lib/model-store/provider"
 import { cn } from "@/lib/utils"
 import { PlusIcon } from "@phosphor-icons/react"
+import { useMutation } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export function ByokSection() {
   const { userKeyStatus, refreshUserKeyStatus, refreshModels } = useModel()
-  const [isLoading, setIsLoading] = useState(false)
   const [openRouterAPIKey, setOpenRouterAPIKey] = useState("")
-  const [showOpenRouterInput, setShowOpenRouterInput] = useState(true)
+  const showOpenRouterInput = true
 
-  const handleSave = async () => {
-    setIsLoading(true)
-    const response = await fetchClient("/api/user-keys", {
-      method: "POST",
-      body: JSON.stringify({
-        provider: "openrouter",
-        apiKey: openRouterAPIKey,
-      }),
-    })
+  const defaultKey = "sk-or-v1-............"
+  const fallbackValue = userKeyStatus.openrouter ? defaultKey : ""
+  const value = openRouterAPIKey || fallbackValue
 
-    if (response.ok) {
+  const mutation = useMutation({
+    mutationFn: async (apiKey: string) => {
+      const res = await fetchClient("/api/user-keys", {
+        method: "POST",
+        body: JSON.stringify({
+          provider: "openrouter",
+          apiKey,
+        }),
+      })
+      if (!res.ok) throw new Error("Failed to save key")
+      return res
+    },
+    onSuccess: async () => {
       toast({
         title: "API key saved",
         description: "Your API key has been saved.",
       })
-      // Refresh both user key status and models after saving
       await Promise.all([refreshUserKeyStatus(), refreshModels()])
-    } else {
+      setOpenRouterAPIKey(defaultKey)
+    },
+    onError: () => {
       toast({
         title: "Failed to save API key",
         description: "Please try again.",
       })
-    }
-
-    setOpenRouterAPIKey("sk-or-v1-............")
-    setIsLoading(false)
-  }
-
-  useEffect(() => {
-    if (userKeyStatus.openrouter) {
-      setOpenRouterAPIKey("sk-or-v1-............")
-    } else {
-      setOpenRouterAPIKey("")
-    }
-  }, [userKeyStatus.openrouter])
+    },
+  })
 
   return (
     <div>
@@ -104,9 +100,9 @@ export function ByokSection() {
               id="openrouter-key"
               type="password"
               placeholder={"sk-open-..."}
-              value={openRouterAPIKey}
+              value={value}
               onChange={(e) => setOpenRouterAPIKey(e.target.value)}
-              disabled={isLoading}
+              disabled={mutation.isPending}
             />
             <div className="mt-0 flex justify-between pl-1">
               <a
@@ -117,12 +113,12 @@ export function ByokSection() {
                 Get API key
               </a>
               <Button
-                onClick={handleSave}
+                onClick={() => mutation.mutate(value)}
                 type="button"
                 size="sm"
                 className="mt-2"
               >
-                {isLoading ? (
+                {mutation.isPending ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
                   "Save"
