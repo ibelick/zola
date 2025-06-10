@@ -3,7 +3,7 @@
 import { PromptSuggestion } from "@/components/prompt-kit/prompt-suggestion"
 import { TRANSITION_SUGGESTIONS } from "@/lib/motion"
 import { AnimatePresence, motion } from "motion/react"
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react"
+import React, { memo, useCallback, useMemo, useState } from "react"
 import { SUGGESTIONS as SUGGESTIONS_CONFIG } from "../../../lib/config"
 
 type SuggestionsProps = {
@@ -21,18 +21,16 @@ export const Suggestions = memo(function Suggestions({
 }: SuggestionsProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
+  if (!value && activeCategory !== null) {
+    setActiveCategory(null)
+  }
+
   const activeCategoryData = SUGGESTIONS_CONFIG.find(
     (group) => group.label === activeCategory
   )
 
   const showCategorySuggestions =
     activeCategoryData && activeCategoryData.items.length > 0
-
-  useEffect(() => {
-    if (!value) {
-      setActiveCategory(null)
-    }
-  }, [value])
 
   const handleSuggestionClick = useCallback(
     (suggestion: string) => {
@@ -133,7 +131,12 @@ export const Suggestions = memo(function Suggestions({
         ))}
       </motion.div>
     ),
-    [handleSuggestionClick, activeCategoryData?.highlight, activeCategoryData?.items, activeCategoryData?.label]
+    [
+      handleSuggestionClick,
+      activeCategoryData?.highlight,
+      activeCategoryData?.items,
+      activeCategoryData?.label,
+    ]
   )
 
   return (

@@ -1,5 +1,6 @@
 "use client"
 
+import { useKeyShortcut } from "@/app/hooks/use-key-shortcut"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,7 +32,7 @@ import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import { Check, PencilSimple, TrashSimple, X } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { ChatPreviewPanel } from "./chat-preview-panel"
 import { formatDate, groupChatsByDate } from "./utils"
 
@@ -42,6 +43,10 @@ type CommandHistoryProps = {
   trigger: React.ReactNode
   isOpen: boolean
   setIsOpen: (open: boolean) => void
+  onOpenChange?: (open: boolean) => void
+  onHandleOpenChangeRef?: React.MutableRefObject<
+    ((open: boolean) => void) | null
+  >
   hasPopover?: boolean
 }
 
@@ -265,20 +270,25 @@ function CommandItemRow({
   )
 }
 
+type CustomCommandDialogProps = React.ComponentProps<typeof Dialog> & {
+  title?: string
+  description?: string
+  className?: string
+  onOpenChange?: (open: boolean) => void
+}
+
 // Custom CommandDialog with className support
 function CustomCommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
   children,
   className,
+  onOpenChange,
+  open,
   ...props
-}: React.ComponentProps<typeof Dialog> & {
-  title?: string
-  description?: string
-  className?: string
-}) {
+}: CustomCommandDialogProps) {
   return (
-    <Dialog {...props}>
+    <Dialog {...props} onOpenChange={onOpenChange} open={open}>
       <DialogHeader className="sr-only">
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
@@ -301,11 +311,14 @@ export function CommandHistory({
   trigger,
   isOpen,
   setIsOpen,
+  onOpenChange,
+  onHandleOpenChangeRef,
   hasPopover = true,
 }: CommandHistoryProps) {
   const { chatId } = useChatSession()
   const router = useRouter()
   const { preferences } = useUserPreferences()
+  const hasPrefetchedRef = useRef(false)
 
   const [searchQuery, setSearchQuery] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -317,8 +330,18 @@ export function CommandHistory({
   const { messages, isLoading, error, fetchPreview, clearPreview } =
     useChatPreview()
 
+  if (isOpen && !hasPrefetchedRef.current) {
+    const recentChats = chatHistory.slice(0, 10)
+    recentChats.forEach((chat) => {
+      router.prefetch(`/c/${chat.id}`)
+    })
+    hasPrefetchedRef.current = true
+  }
+
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
+    onOpenChange?.(open)
+
     if (!open) {
       setSearchQuery("")
       setEditingId(null)
@@ -328,8 +351,14 @@ export function CommandHistory({
       setHoveredChatId(null)
       setIsPreviewPanelHovered(false)
       clearPreview()
+      hasPrefetchedRef.current = false
     }
   }
+
+  useKeyShortcut(
+    (e: KeyboardEvent) => e.key === "k" && (e.metaKey || e.ctrlKey),
+    () => handleOpenChange(!isOpen)
+  )
 
   const handleChatHover = useCallback(
     (chatId: string | null) => {
@@ -494,30 +523,6 @@ export function CommandHistory({
     ]
   )
 
-  // Prefetch routes when dialog opens for better performance
-  useEffect(() => {
-    if (isOpen) {
-      // Prefetch the most recent chat routes
-      const recentChats = chatHistory.slice(0, 10)
-      recentChats.forEach((chat) => {
-        router.prefetch(`/c/${chat.id}`)
-      })
-    }
-  }, [isOpen, chatHistory, router])
-
-  // Add keyboard shortcut to open dialog with Command+K
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setIsOpen(!isOpen)
-      }
-    }
-
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [isOpen, setIsOpen])
-
   return (
     <>
       {hasPopover ? (
@@ -530,8 +535,8 @@ export function CommandHistory({
       )}
 
       <CustomCommandDialog
-        open={isOpen}
         onOpenChange={handleOpenChange}
+        open={isOpen}
         title="Chat History"
         description="Search through your past conversations"
         className={cn(
