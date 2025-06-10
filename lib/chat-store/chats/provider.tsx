@@ -89,7 +89,13 @@ export function ChatsProvider({
 
   const updateTitle = async (id: string, title: string) => {
     const prev = [...chats]
-    setChats((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)))
+    const updatedChatWithNewTitle = prev.map((c) =>
+      c.id === id ? { ...c, title, updated_at: new Date().toISOString() } : c
+    )
+    const sorted = updatedChatWithNewTitle.sort(
+      (a, b) => +new Date(b.updated_at || "") - +new Date(a.updated_at || "")
+    )
+    setChats(sorted)
     try {
       await updateChatTitle(id, title)
     } catch {
