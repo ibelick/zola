@@ -1,8 +1,8 @@
 import { Markdown } from "@/components/prompt-kit/markdown"
 import { cn } from "@/lib/utils"
-import { CaretDown } from "@phosphor-icons/react"
+import { CaretDownIcon } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 type ReasoningProps = {
   reasoning: string
@@ -16,13 +16,13 @@ const TRANSITION = {
 }
 
 export function Reasoning({ reasoning, isStreaming }: ReasoningProps) {
-  const [isExpanded, setIsExpanded] = useState(isStreaming ?? true)
+  const [wasStreaming, setWasStreaming] = useState(isStreaming ?? false)
+  const [isExpanded, setIsExpanded] = useState(() => isStreaming ?? true)
 
-  useEffect(() => {
-    if (isStreaming === false && isExpanded) {
-      setIsExpanded(false)
-    }
-  }, [isStreaming])
+  if (wasStreaming && isStreaming === false) {
+    setWasStreaming(false)
+    setIsExpanded(false)
+  }
 
   return (
     <div>
@@ -32,7 +32,7 @@ export function Reasoning({ reasoning, isStreaming }: ReasoningProps) {
         type="button"
       >
         <span>Reasoning</span>
-        <CaretDown
+        <CaretDownIcon
           className={cn(
             "size-3 transition-transform",
             isExpanded ? "rotate-180" : ""

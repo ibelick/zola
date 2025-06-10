@@ -41,7 +41,7 @@ import {
   X,
 } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useRef, useState } from "react"
 
 function SystemPromptDisplay({ prompt }: { prompt: string }) {
   const [expanded, setExpanded] = useState(false)
@@ -106,20 +106,20 @@ export function AgentDetail({
   const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
   const { user } = useUser()
+  const didPrefetch = useRef(false)
+
+  if (!didPrefetch.current && isFullPage && randomAgents.length > 0) {
+    randomAgents.forEach((agent) => {
+      router.prefetch(`/agents/${agent.slug}`)
+    })
+    didPrefetch.current = true
+  }
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(`${window.location.origin}/agents/${slug}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 1000)
   }
-
-  useEffect(() => {
-    if (randomAgents.length > 0 && isFullPage) {
-      randomAgents.forEach((agent) => {
-        router.prefetch(`/agents/${agent.slug}`)
-      })
-    }
-  }, [randomAgents, router, isFullPage])
 
   const handleAgentClick = (agent: AgentSummary) => {
     if (onAgentClick) {
@@ -424,8 +424,8 @@ export function AgentDetail({
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Agent</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete &quot;{name}&quot;? This action cannot be
-                undone.
+                Are you sure you want to delete &quot;{name}&quot;? This action
+                cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
