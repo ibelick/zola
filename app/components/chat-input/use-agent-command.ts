@@ -5,7 +5,7 @@ import { useChats } from "@/lib/chat-store/chats/provider"
 import { useChatSession } from "@/lib/chat-store/session/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useRef, useState, useMemo } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 
 export function useAgentCommand({
   value,
@@ -26,7 +26,10 @@ export function useAgentCommand({
   const pathname = usePathname()
   const router = useRouter()
 
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(defaultAgent)
+  // Track if user has explicitly removed the agent (optimistic state)
+  const [hasExplicitlyRemovedAgent, setHasExplicitlyRemovedAgent] =
+    useState(false)
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [showAgentCommand, setShowAgentCommand] = useState(false)
   const [agentSearchTerm, setAgentSearchTerm] = useState("")
   const [activeAgentIndex, setActiveAgentIndex] = useState(0)
@@ -40,15 +43,32 @@ export function useAgentCommand({
       )
     : agents
 
-  // Sync with defaultAgent always (no localOverride anymore)
-  useEffect(() => {
-    setSelectedAgent(defaultAgent ?? null)
-  }, [defaultAgent])
+  // Determine the effective selected agent
+  const effectiveSelectedAgent = (() => {
+    // If user explicitly removed agent, respect that (optimistic)
+    if (hasExplicitlyRemovedAgent) return null
 
-  // Remove selected agent on root
-  useEffect(() => {
-    if (pathname === "/") setSelectedAgent(null)
-  }, [pathname])
+    // If user selected an agent explicitly, use that
+    if (selectedAgent) return selectedAgent
+
+    // Otherwise fall back to defaultAgent (from URL/chat)
+    return defaultAgent
+  })()
+
+  // Sync selectedAgent when defaultAgent changes (when URL agent loads)
+  // This handles the case where defaultAgent starts as null and then gets populated
+  if (defaultAgent && !selectedAgent && !hasExplicitlyRemovedAgent) {
+    setSelectedAgent(defaultAgent)
+  }
+
+  // Reset explicit removal flag when defaultAgent changes
+  if (
+    defaultAgent &&
+    hasExplicitlyRemovedAgent &&
+    defaultAgent.id !== selectedAgent?.id
+  ) {
+    setHasExplicitlyRemovedAgent(false)
+  }
 
   const updateAgentInUrl = useCallback(
     (agent: Agent | null) => {
@@ -67,12 +87,12 @@ export function useAgentCommand({
 
   const updateChatAgentDebounced = useMemo(() => {
     let timeoutId: NodeJS.Timeout | null = null
-    
+
     return (agent: Agent | null) => {
       if (timeoutId) {
         clearTimeout(timeoutId)
       }
-      
+
       timeoutId = setTimeout(() => {
         if (!user || !chatId) return
         updateChatAgent(user.id, chatId, agent?.id ?? null, !user.anonymous)
@@ -85,8 +105,17 @@ export function useAgentCommand({
       onValueChange(newValue)
       const match = newValue.match(/@([^@\s]*)$/)
       if (match) {
+        const newSearchTerm = match[1]
+        const wasSearchTermDifferent = agentSearchTerm !== newSearchTerm
+
         setShowAgentCommand(true)
-        setAgentSearchTerm(match[1])
+        setAgentSearchTerm(newSearchTerm)
+
+        // Reset active index when search term changes
+        if (wasSearchTermDifferent) {
+          setActiveAgentIndex(0)
+        }
+
         if (mentionStartPosRef.current === null && textareaRef.current) {
           const atIndex = newValue.lastIndexOf("@" + match[1])
           mentionStartPosRef.current = atIndex
@@ -95,14 +124,19 @@ export function useAgentCommand({
         setShowAgentCommand(false)
         setAgentSearchTerm("")
         mentionStartPosRef.current = null
+        setActiveAgentIndex(0)
       }
     },
-    [onValueChange]
+    [onValueChange, agentSearchTerm]
   )
 
   const handleAgentSelect = useCallback(
     (agent: Agent) => {
+      // Optimistic update: set state immediately
       setSelectedAgent(agent)
+      setHasExplicitlyRemovedAgent(false)
+
+      // Then update URL and API
       updateAgentInUrl(agent)
       updateChatAgentDebounced(agent)
 
@@ -146,7 +180,11 @@ export function useAgentCommand({
   )
 
   const removeSelectedAgent = useCallback(() => {
+    // Optimistic update: immediately update UI state
     setSelectedAgent(null)
+    setHasExplicitlyRemovedAgent(true)
+
+    // Then update URL and API (non-blocking)
     updateAgentInUrl(null)
     if (user?.id && chatId) {
       updateChatAgent(user.id, chatId, null, !user.anonymous).catch(
@@ -156,12 +194,10 @@ export function useAgentCommand({
     textareaRef.current?.focus()
   }, [updateAgentInUrl, user, chatId, updateChatAgent])
 
-  useEffect(() => setActiveAgentIndex(0), [filteredAgents.length])
-
   return {
     showAgentCommand,
     agentSearchTerm,
-    selectedAgent,
+    selectedAgent: effectiveSelectedAgent,
     activeAgentIndex,
     filteredAgents,
     mentionStartPos: mentionStartPosRef.current,
