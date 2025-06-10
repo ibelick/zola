@@ -50,6 +50,13 @@ export type MistralModel =
   | "open-mixtral-8x7b"
   | "open-mixtral-8x22b"
 
+export type PerplexityModel = 
+  | "sonar"
+  | "sonar-pro"
+  | "sonar-deep-research"
+  | "sonar-reasoning-pro"
+  | "sonar-reasoning"
+
 export type GeminiModel =
   | "gemini-2.0-flash-001"
   | "gemini-1.5-flash"
@@ -123,6 +130,7 @@ export type OllamaModel = StaticOllamaModel | (string & {})
 export type Provider =
   | "openai"
   | "mistral"
+  | "perplexity"
   | "google"
   | "anthropic"
   | "xai"
@@ -133,6 +141,7 @@ export type SupportedModel =
   | OpenAIModel
   | MistralModel
   | GeminiModel
+  | PerplexityModel
   | AnthropicModel
   | XaiModel
   | OllamaModel

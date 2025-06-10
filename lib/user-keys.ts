@@ -42,6 +42,7 @@ export async function getEffectiveApiKey(
   const envKeyMap: Record<ProviderWithoutOllama, string | undefined> = {
     openai: env.OPENAI_API_KEY,
     mistral: env.MISTRAL_API_KEY,
+    perplexity: env.PERPLEXITY_API_KEY,
     google: env.GOOGLE_GENERATIVE_AI_API_KEY,
     anthropic: env.ANTHROPIC_API_KEY,
     xai: env.XAI_API_KEY,

@@ -10,6 +10,7 @@ import Ollama from "@/components/icons/ollama"
 import OpenAI from "@/components/icons/openai"
 import OpenRouter from "@/components/icons/openrouter"
 import Xai from "@/components/icons/xai"
+import Preplexity from "@/components/icons/perplexity"
 
 export type Provider = {
   id: string
@@ -78,5 +79,10 @@ export const PROVIDERS: Provider[] = [
     id: "meta",
     name: "Meta",
     icon: Meta,
+  },
+  {
+    id: "perplexity",
+    name: "Perplexity",
+    icon: Preplexity,
   },
 ] as Provider[]

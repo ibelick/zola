@@ -57,6 +57,13 @@ const MODEL_PROVIDER_MAP: Record<string, Provider> = {
   "open-mixtral-8x7b": "mistral",
   "open-mixtral-8x22b": "mistral",
 
+  //Perplexity
+  "sonar":"perplexity",
+  "sonar-pro": "perplexity",
+  "sonar-deep-research": "perplexity",
+  "sonar-reasoning-pro": "perplexity",
+  "sonar-reasoning": "perplexity",
+
   // Google
   "gemini-2.0-flash-001": "google",
   "gemini-1.5-flash": "google",

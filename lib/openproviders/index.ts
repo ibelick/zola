@@ -2,12 +2,14 @@ import { anthropic, createAnthropic } from "@ai-sdk/anthropic"
 import { createGoogleGenerativeAI, google } from "@ai-sdk/google"
 import { createMistral, mistral } from "@ai-sdk/mistral"
 import { createOpenAI, openai } from "@ai-sdk/openai"
+import {createPerplexity, perplexity} from "@ai-sdk/perplexity"
 import type { LanguageModelV1 } from "@ai-sdk/provider"
 import { createXai, xai } from "@ai-sdk/xai"
 import { getProviderForModel } from "./provider-map"
 import type {
   AnthropicModel,
   GeminiModel,
+  PerplexityModel,
   MistralModel,
   OllamaModel,
   OpenAIModel,
@@ -18,6 +20,7 @@ import type {
 type OpenAIChatSettings = Parameters<typeof openai>[1]
 type MistralProviderSettings = Parameters<typeof mistral>[1]
 type GoogleGenerativeAIProviderSettings = Parameters<typeof google>[1]
+type PerplexityProviderSettings = Parameters<typeof perplexity>[0]
 type AnthropicProviderSettings = Parameters<typeof anthropic>[1]
 type XaiProviderSettings = Parameters<typeof xai>[1]
 type OllamaProviderSettings = OpenAIChatSettings // Ollama uses OpenAI-compatible API
@@ -26,6 +29,8 @@ type ModelSettings<T extends SupportedModel> = T extends OpenAIModel
   ? OpenAIChatSettings
   : T extends MistralModel
     ? MistralProviderSettings
+    : T extends PerplexityModel
+      ? PerplexityProviderSettings
     : T extends GeminiModel
       ? GoogleGenerativeAIProviderSettings
       : T extends AnthropicModel
@@ -104,6 +109,20 @@ export function openproviders<T extends SupportedModel>(
     return google(
       modelId as GeminiModel,
       settings as GoogleGenerativeAIProviderSettings
+    )
+  }
+
+    if (provider === "perplexity") {
+    if (apiKey) {
+      const perplexityProvider = createPerplexity({ apiKey })
+      return perplexityProvider(
+        modelId as PerplexityModel,
+        // settings as PerplexityProviderSettings
+      )
+    }
+    return perplexity(
+      modelId as PerplexityModel,
+      // settings as PerplexityProviderSettings
     )
   }
 
