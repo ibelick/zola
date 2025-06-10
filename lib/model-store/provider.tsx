@@ -12,6 +12,8 @@ import {
 
 type UserKeyStatus = {
   openrouter: boolean
+  openai: boolean
+  [key: string]: boolean // Allow for additional providers
 }
 
 type ModelContextType = {
@@ -29,6 +31,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   const [models, setModels] = useState<ModelConfig[]>([])
   const [userKeyStatus, setUserKeyStatus] = useState<UserKeyStatus>({
     openrouter: false,
+    openai: false,
   })
   const [isLoading, setIsLoading] = useState(false)
 
@@ -54,7 +57,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Failed to fetch user key status:", error)
       // Set default values on error
-      setUserKeyStatus({ openrouter: false })
+      setUserKeyStatus({ openrouter: false, openai: false })
     }
   }, [])
 

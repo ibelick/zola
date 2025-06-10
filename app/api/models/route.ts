@@ -1,6 +1,6 @@
 import {
   getAllModels,
-  getAllOpenRouterModels,
+  getModelsForUserProviders,
   getModelsWithAccessFlags,
   refreshModelsCache,
 } from "@/lib/models"
@@ -53,10 +53,10 @@ export async function GET() {
       })
     }
 
-    const hasOpenRouterKey = data?.some((k) => k.provider === "openrouter")
+    const userProviders = data?.map((k) => k.provider) || []
 
-    if (hasOpenRouterKey) {
-      const models = await getAllOpenRouterModels()
+    if (userProviders.length === 0) {
+      const models = await getModelsWithAccessFlags()
       return new Response(JSON.stringify({ models }), {
         status: 200,
         headers: {
@@ -65,7 +65,7 @@ export async function GET() {
       })
     }
 
-    const models = await getModelsWithAccessFlags()
+    const models = await getModelsForUserProviders(userProviders)
 
     return new Response(JSON.stringify({ models }), {
       status: 200,
@@ -86,7 +86,6 @@ export async function GET() {
 
 export async function POST() {
   try {
-    // Refresh the models cache
     refreshModelsCache()
     const models = await getAllModels()
 

@@ -74,21 +74,35 @@ export async function getModelsWithAccessFlags(): Promise<ModelConfig[]> {
       accessible: false,
     }))
 
-  // to avoid model duplication
-  const removeOpenRouterModels = [...freeModels, ...proModels].filter(
-    (model) => model.providerId !== "openrouter"
-  )
-
-  return removeOpenRouterModels
+  return [...freeModels, ...proModels]
 }
 
-export async function getAllOpenRouterModels(): Promise<ModelConfig[]> {
-  const models = openrouterModels.map((model) => ({
-    ...model,
-    accessible: true,
-  }))
+export async function getModelsForProvider(
+  provider: string
+): Promise<ModelConfig[]> {
+  const models = STATIC_MODELS
 
-  return models
+  const providerModels = models
+    .filter((model) => model.providerId === provider)
+    .map((model) => ({
+      ...model,
+      accessible: true,
+    }))
+
+  return providerModels
+}
+
+// Function to get models based on user's available providers
+export async function getModelsForUserProviders(
+  providers: string[]
+): Promise<ModelConfig[]> {
+  const providerModels = await Promise.all(
+    providers.map((provider) => getModelsForProvider(provider))
+  )
+
+  const flatProviderModels = providerModels.flat()
+
+  return flatProviderModels
 }
 
 // Synchronous function to get model info for simple lookups
