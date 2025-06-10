@@ -56,6 +56,7 @@ export function Chat() {
     createNewChat,
     getChatById,
     updateChatModel,
+    bumpChat,
     isLoading: isChatsLoading,
   } = useChats()
 
@@ -197,6 +198,9 @@ export function Chat() {
         cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
+
+      // refresh the chat history (in sidebar+command/drawer)
+      bumpChat(currentChatId)
 
       if (input.length > MESSAGE_MAX_LENGTH) {
         toast({
