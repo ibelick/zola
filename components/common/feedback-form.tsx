@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { CaretLeft, SealCheck, Spinner } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 const TRANSITION_CONTENT = {
   ease: "easeOut",
@@ -23,11 +23,6 @@ export function FeedbackForm({ authUserId, onClose }: FeedbackFormProps) {
     "idle" | "submitting" | "success" | "error"
   >("idle")
   const [feedback, setFeedback] = useState("")
-
-  useEffect(() => {
-    setStatus("idle")
-    setFeedback("")
-  }, [])
 
   if (!isSupabaseEnabled) {
     return null

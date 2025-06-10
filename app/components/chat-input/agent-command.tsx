@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { cn } from "@/lib/utils"
 import { Cube, Plus } from "@phosphor-icons/react"
-import { useEffect, useRef } from "react"
+import { useRef } from "react"
 import { DialogCreateAgentTrigger } from "../agents/dialog-create-agent/dialog-trigger-create-agent"
 
 type AgentCommandProps = {
