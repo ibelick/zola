@@ -3,9 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main, develop]
-    tags: ['v*']
-  pull_request:
-    branches: [main, develop]
+    tags: ["v*"]
 
 env:
   REGISTRY: ghcr.io
@@ -19,22 +17,22 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-          
+          node-version: "18"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run ESLint
         run: npm run lint
-      
+
       - name: Run TypeScript checks
         run: npm run type-check
-      
+
       # TODO: Uncomment when tests are added
       # - name: Run Tests
       #   run: npm test
@@ -48,38 +46,38 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-      
+          node-version: "18"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Generate build cache key
         id: build-cache
         run: echo "key=build-${{ hashFiles('**/*.ts', '**/*.tsx', '**/*.js', 'package-lock.json') }}" >> $GITHUB_OUTPUT
-      
+
       - name: Check build cache
         id: check-build-cache
         uses: actions/cache@v4
         with:
           path: .next
           key: ${{ steps.build-cache.outputs.key }}
-      
+
       - name: Build application
         if: steps.check-build-cache.outputs.cache-hit != 'true'
         run: npm run build
-      
+
       - name: Cache build output
         if: steps.check-build-cache.outputs.cache-hit != 'true'
         uses: actions/cache@v4
         with:
           path: .next
           key: ${{ steps.build-cache.outputs.key }}
-      
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -102,23 +100,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-output
           path: .
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: Login to Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -129,7 +127,7 @@ jobs:
             type=semver,pattern={{version}}
             type=sha,format=short
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-      
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
