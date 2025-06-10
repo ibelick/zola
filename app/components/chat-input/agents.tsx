@@ -12,7 +12,7 @@ import { TRANSITION_SUGGESTIONS } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { memo, useEffect, useState } from "react"
+import { memo, useState } from "react"
 
 type ButtonAgentProps = {
   label: string
@@ -70,18 +70,15 @@ export const Agents = memo(function Agents({ sugestedAgents }: AgentsProps) {
   const agentSlug = params.get("agent")
   const [selectedAgent, setSelectedAgent] = useState<string | null>(agentSlug)
 
-  // Keep URL in sync with state
-  useEffect(() => {
-    if (selectedAgent) {
-      router.push(`/?agent=${selectedAgent}`)
+  const handleAgentSelect = (slug: string) => {
+    const newSelectedAgent = selectedAgent === slug ? null : slug
+    setSelectedAgent(newSelectedAgent)
+
+    if (newSelectedAgent) {
+      router.push(`/?agent=${newSelectedAgent}`)
     } else {
       router.push(`/`)
     }
-  }, [selectedAgent, router])
-
-  const handleAgentSelect = (slug: string) => {
-    // Toggle selection: if already selected, deselect it
-    setSelectedAgent((currentSlug) => (currentSlug === slug ? null : slug))
   }
 
   return (
