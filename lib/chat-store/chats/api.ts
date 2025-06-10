@@ -19,7 +19,7 @@ export async function getChatsForUserInDb(userId: string): Promise<Chats[]> {
     .from("chats")
     .select("*")
     .eq("user_id", userId)
-    .order("created_at", { ascending: false })
+    .order("updated_at", { ascending: false })
 
   if (!data || error) {
     console.error("Failed to fetch chats:", error)
@@ -33,7 +33,10 @@ export async function updateChatTitleInDb(id: string, title: string) {
   const supabase = createClient()
   if (!supabase) return
 
-  const { error } = await supabase.from("chats").update({ title }).eq("id", id)
+  const { error } = await supabase
+    .from("chats")
+    .update({ title, updated_at: new Date().toISOString() })
+    .eq("id", id)
   if (error) throw error
 }
 
@@ -191,7 +194,13 @@ export async function createNewChat(
 ): Promise<Chats> {
   try {
     // Note: Local agent IDs are filtered out at the API level (create-chat route)
-    const payload: { userId: string; title: string; model: string; isAuthenticated?: boolean; agentId?: string } = {
+    const payload: {
+      userId: string
+      title: string
+      model: string
+      isAuthenticated?: boolean
+      agentId?: string
+    } = {
       userId,
       title: title || (agentId ? `Conversation with agent` : "New Chat"),
       model: model || MODEL_DEFAULT,
@@ -222,6 +231,7 @@ export async function createNewChat(
       agent_id: responseData.chat.agent_id,
       user_id: responseData.chat.user_id,
       public: responseData.chat.public,
+      updated_at: responseData.chat.updated_at,
     }
 
     await writeToIndexedDB("chats", chat)

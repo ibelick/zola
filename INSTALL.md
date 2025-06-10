@@ -209,6 +209,7 @@ CREATE TABLE chats (
   system_prompt TEXT,
   agent_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at: TIMESTAMPTZ DEFAULT NOW(),
   public BOOLEAN DEFAULT FALSE NOT NULL, -- Added NOT NULL based on TS type
   CONSTRAINT chats_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT chats_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE SET NULL -- Assuming SET NULL, adjust if needed

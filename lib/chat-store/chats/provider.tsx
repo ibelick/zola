@@ -136,6 +136,7 @@ export function ChatsProvider({
       agent_id: agentId || null,
       user_id: userId,
       public: true,
+      updated_at: new Date().toISOString(),
     }
     setChats((prev) => [...prev, optimisticChat])
 
