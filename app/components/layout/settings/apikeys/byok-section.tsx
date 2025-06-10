@@ -1,6 +1,17 @@
 "use client"
 
 import OpenRouterIcon from "@/components/icons/openrouter"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,19 +21,20 @@ import { useModel } from "@/lib/model-store/provider"
 import { cn } from "@/lib/utils"
 import { PlusIcon } from "@phosphor-icons/react"
 import { useMutation } from "@tanstack/react-query"
-import { Loader2 } from "lucide-react"
+import { Loader2, Trash2 } from "lucide-react"
 import { useState } from "react"
 
 export function ByokSection() {
   const { userKeyStatus, refreshUserKeyStatus, refreshModels } = useModel()
   const [openRouterAPIKey, setOpenRouterAPIKey] = useState("")
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const showOpenRouterInput = true
 
   const defaultKey = "sk-or-v1-............"
   const fallbackValue = userKeyStatus.openrouter ? defaultKey : ""
   const value = openRouterAPIKey || fallbackValue
 
-  const mutation = useMutation({
+  const saveMutation = useMutation({
     mutationFn: async (apiKey: string) => {
       const res = await fetchClient("/api/user-keys", {
         method: "POST",
@@ -49,6 +61,39 @@ export function ByokSection() {
       })
     },
   })
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetchClient("/api/user-keys", {
+        method: "DELETE",
+        body: JSON.stringify({
+          provider: "openrouter",
+        }),
+      })
+      if (!res.ok) throw new Error("Failed to delete key")
+      return res
+    },
+    onSuccess: async () => {
+      toast({
+        title: "API key deleted",
+        description: "Your API key has been deleted.",
+      })
+      await Promise.all([refreshUserKeyStatus(), refreshModels()])
+      setOpenRouterAPIKey("")
+      setDeleteDialogOpen(false)
+    },
+    onError: () => {
+      toast({
+        title: "Failed to delete API key",
+        description: "Please try again.",
+      })
+      setDeleteDialogOpen(false)
+    },
+  })
+
+  const handleConfirmDelete = () => {
+    deleteMutation.mutate()
+  }
 
   return (
     <div>
@@ -102,7 +147,7 @@ export function ByokSection() {
               placeholder={"sk-open-..."}
               value={value}
               onChange={(e) => setOpenRouterAPIKey(e.target.value)}
-              disabled={mutation.isPending}
+              disabled={saveMutation.isPending}
             />
             <div className="mt-0 flex justify-between pl-1">
               <a
@@ -112,18 +157,64 @@ export function ByokSection() {
               >
                 Get API key
               </a>
-              <Button
-                onClick={() => mutation.mutate(value)}
-                type="button"
-                size="sm"
-                className="mt-2"
-              >
-                {mutation.isPending ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  "Save"
+              <div className="flex gap-2">
+                {userKeyStatus.openrouter && (
+                  <AlertDialog
+                    open={deleteDialogOpen}
+                    onOpenChange={setDeleteDialogOpen}
+                  >
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="mt-2"
+                        disabled={
+                          deleteMutation.isPending || saveMutation.isPending
+                        }
+                      >
+                        <Trash2 className="mr-1 size-4" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete API Key</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete your OpenRouter API
+                          key? This action cannot be undone and you will lose
+                          access to OpenRouter models.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleConfirmDelete}
+                          disabled={deleteMutation.isPending}
+                        >
+                          {deleteMutation.isPending ? (
+                            <Loader2 className="mr-2 size-4 animate-spin" />
+                          ) : null}
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
-              </Button>
+                <Button
+                  onClick={() => saveMutation.mutate(value)}
+                  type="button"
+                  size="sm"
+                  className="mt-2"
+                  disabled={saveMutation.isPending || deleteMutation.isPending}
+                >
+                  {saveMutation.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         )}
