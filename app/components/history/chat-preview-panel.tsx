@@ -2,9 +2,9 @@ import { MessageContent } from "@/components/prompt-kit/message"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 
-interface ChatPreviewPanelProps {
+type ChatPreviewPanelProps = {
   chatId: string | null
   onHover?: (isHovering: boolean) => void
   messages?: ChatMessage[]
@@ -13,14 +13,14 @@ interface ChatPreviewPanelProps {
   onFetchPreview?: (chatId: string) => Promise<void>
 }
 
-interface ChatMessage {
+type ChatMessage = {
   id: string
   content: string
   role: "user" | "assistant"
   created_at: string
 }
 
-interface MessageBubbleProps {
+type MessageBubbleProps = {
   content: string
   role: "user" | "assistant"
   timestamp: string
@@ -183,10 +183,18 @@ export function ChatPreviewPanel({
   onFetchPreview,
 }: ChatPreviewPanelProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
+  const [lastChatId, setLastChatId] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const maxRetries = 3
 
-  // Handle retry functionality
+  const shouldFetch = chatId && chatId !== lastChatId
+
+  if (shouldFetch && onFetchPreview) {
+    setLastChatId(chatId)
+    setRetryCount(0)
+    onFetchPreview(chatId)
+  }
+
   const handleRetry = () => {
     if (chatId && onFetchPreview && retryCount < maxRetries) {
       setRetryCount((prev) => prev + 1)
@@ -194,23 +202,14 @@ export function ChatPreviewPanel({
     }
   }
 
-  // Reset retry count when chatId changes
-  useEffect(() => {
-    setRetryCount(0)
-  }, [chatId])
-
-  // Fetch preview when chatId changes
-  useEffect(() => {
-    if (chatId && onFetchPreview) {
-      onFetchPreview(chatId)
-    }
-  }, [chatId, onFetchPreview])
-
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
+  const scrollToBottom = () => {
     if (messages.length > 0 && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" })
     }
+  }
+
+  useLayoutEffect(() => {
+    scrollToBottom()
   }, [messages])
 
   return (
@@ -218,23 +217,20 @@ export function ChatPreviewPanel({
       className="bg-background w-[500px] border-l"
       onMouseEnter={() => onHover?.(true)}
       onMouseLeave={() => onHover?.(false)}
+      key={chatId}
     >
       <div className="h-[480px]">
         {!chatId && <DefaultState />}
-
         {chatId && isLoading && <LoadingState />}
-
         {chatId && error && !isLoading && (
           <ErrorState
             error={error}
             onRetry={retryCount < maxRetries ? handleRetry : undefined}
           />
         )}
-
         {chatId && !isLoading && !error && messages.length === 0 && (
           <EmptyState />
         )}
-
         {chatId && !isLoading && !error && messages.length > 0 && (
           <ScrollArea className="h-full">
             <div className="space-y-4 p-6">
@@ -243,7 +239,6 @@ export function ChatPreviewPanel({
                   Last {messages.length} messages
                 </div>
               </div>
-
               {messages.map((message) => (
                 <MessageBubble
                   key={message.id}
