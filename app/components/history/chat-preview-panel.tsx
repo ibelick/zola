@@ -183,6 +183,7 @@ export function ChatPreviewPanel({
   onFetchPreview,
 }: ChatPreviewPanelProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
   const [lastChatId, setLastChatId] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const maxRetries = 3
@@ -202,19 +203,21 @@ export function ChatPreviewPanel({
     }
   }
 
-  const scrollToBottom = () => {
-    if (messages.length > 0 && bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" })
-    }
-  }
-
+  // Immediately scroll to bottom when chatId changes or messages load
   useLayoutEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    if (chatId && messages.length > 0 && scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      )
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight
+      }
+    }
+  }, [chatId, messages.length])
 
   return (
     <div
-      className="bg-background w-[500px] border-l"
+      className="bg-background col-span-3 border-l"
       onMouseEnter={() => onHover?.(true)}
       onMouseLeave={() => onHover?.(false)}
       key={chatId}
@@ -232,7 +235,7 @@ export function ChatPreviewPanel({
           <EmptyState />
         )}
         {chatId && !isLoading && !error && messages.length > 0 && (
-          <ScrollArea className="h-full">
+          <ScrollArea ref={scrollAreaRef} className="h-full">
             <div className="space-y-4 p-6">
               <div className="flex justify-center">
                 <div className="text-muted-foreground bg-muted/50 rounded-full px-2 py-1 text-xs">

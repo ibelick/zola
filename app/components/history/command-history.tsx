@@ -551,11 +551,10 @@ export function CommandHistory({
           onValueChange={(value) => setSearchQuery(value)}
         />
 
-        <div className="flex">
+        <div className="grid grid-cols-5">
           <div
             className={cn(
-              "flex-1",
-              preferences.showConversationPreviews ? "max-w-[700px]" : ""
+              preferences.showConversationPreviews ? "col-span-2" : "col-span-5"
             )}
           >
             <CommandList className="max-h-[480px] min-h-[480px] flex-1 [&>[cmdk-list-sizer]]:space-y-6 [&>[cmdk-list-sizer]]:py-2">
