@@ -422,8 +422,17 @@ export function Chat() {
     ]
   )
 
-  // Check for redirect condition - removed hydrated dependency
-  if (chatId && !isChatsLoading && !currentChat) {
+  // Handle redirect for invalid chatId - only redirect if we're certain the chat doesn't exist
+  // and we're not in a transient state during chat creation
+  if (
+    chatId &&
+    !isChatsLoading &&
+    !currentChat &&
+    !isSubmitting &&
+    status === "ready" &&
+    messages.length === 0 &&
+    !hasSentFirstMessageRef.current // Don't redirect if we've already sent a message in this session
+  ) {
     return redirect("/")
   }
 
