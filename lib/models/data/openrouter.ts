@@ -504,7 +504,7 @@ export const openrouterModels: ModelConfig[] = [
     intelligence: "Medium",
     website: "https://openrouter.ai", 
     apiDocs: "https://openrouter.ai/docs", 
-    modelPage: "https://platform.openai.com/docs/models",
+    modelPage: "https://openrouter.ai/perplexity/sonar",
     releasedAt: "2025-01-27",
     icon: "perplexity",
     apiSdk: (apiKey?: string) =>
@@ -534,7 +534,7 @@ export const openrouterModels: ModelConfig[] = [
   intelligence: "High",
   website: "https://openrouter.ai",
   apiDocs: "https://openrouter.ai/docs",
-  modelPage: "https://platform.openai.com/docs/models",
+  modelPage: "https://openrouter.ai/perplexity/sonar-reasoning",
   releasedAt: "2025-01-29",
   icon: "perplexity",
   apiSdk: (apiKey?: string) =>
@@ -564,7 +564,7 @@ export const openrouterModels: ModelConfig[] = [
   intelligence: "High",
   website: "https://openrouter.ai",
   apiDocs: "https://openrouter.ai/docs",
-  modelPage: "https://platform.openai.com/docs/models",
+  modelPage: "https://openrouter.ai/perplexity/sonar-reasoning-pro",
   releasedAt: "2025-07-25",
   icon: "perplexity",
   apiSdk: (apiKey?: string) =>
@@ -594,7 +594,7 @@ export const openrouterModels: ModelConfig[] = [
   intelligence: "High",
   website: "https://openrouter.ai",
   apiDocs: "https://openrouter.ai/docs",
-  modelPage: "https://platform.openai.com/docs/models",
+  modelPage: "https://openrouter.ai/perplexity/sonar-pro",
   releasedAt: "2025-03-27",
   icon: "perplexity",
   apiSdk: (apiKey?: string) =>
@@ -624,7 +624,7 @@ export const openrouterModels: ModelConfig[] = [
   intelligence: "High",
   website: "https://openrouter.ai",
   apiDocs: "https://openrouter.ai/docs",
-  modelPage: "https://platform.openai.com/docs/models",
+  modelPage: "https://openrouter.ai/perplexity/sonar-deep-research",
   releasedAt: "2025-03-07",
   icon: "perplexity",
   apiSdk: (apiKey?: string) =>
