@@ -99,6 +99,7 @@ export function Chat() {
   )
 
   const hasSentFirstMessageRef = useRef(false)
+  const prevChatIdRef = useRef<string | null>(chatId)
   const isAuthenticated = useMemo(() => !!user?.id, [user?.id])
 
   const { draftValue, clearDraft } = useChatDraft(chatId)
@@ -136,6 +137,16 @@ export function Chat() {
     onFinish: cacheAndAddMessage,
     onError: handleError,
   })
+
+  // Reset messages when navigating from a chat to home (not on every render)
+  if (
+    prevChatIdRef.current !== null &&
+    chatId === null &&
+    messages.length > 0
+  ) {
+    setMessages([])
+  }
+  prevChatIdRef.current = chatId
 
   const { checkLimitsAndNotify, ensureChatExists } = useChatUtils({
     isAuthenticated,
@@ -199,12 +210,6 @@ export function Chat() {
         return
       }
 
-      // Only bump existing chats, not newly created ones
-      // If messages.length === 0, this is a new chat that was just created
-      if (messages.length > 0) {
-        bumpChat(currentChatId)
-      }
-
       if (input.length > MESSAGE_MAX_LENGTH) {
         toast({
           title: `The message you submitted was too long, please submit something shorter. (Max ${MESSAGE_MAX_LENGTH} characters)`,
@@ -246,6 +251,12 @@ export function Chat() {
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
       hasSentFirstMessageRef.current = true
+
+      // Bump existing chats to top (non-blocking, after submit)
+      // If messages.length === 0, this is a new chat that was just created
+      if (messages.length > 0) {
+        bumpChat(currentChatId)
+      }
     } catch (submitError) {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)

@@ -6,7 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { NotePencil } from "@phosphor-icons/react/dist/ssr"
+import { NotePencilIcon } from "@phosphor-icons/react/dist/ssr"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 
@@ -29,7 +29,7 @@ export function ButtonNewChat() {
           prefetch
           aria-label="New Chat"
         >
-          <NotePencil size={24} />
+          <NotePencilIcon size={24} />
         </Link>
       </TooltipTrigger>
       <TooltipContent>New Chat ⌘⇧U</TooltipContent>
