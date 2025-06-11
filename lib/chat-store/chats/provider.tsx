@@ -145,7 +145,7 @@ export function ChatsProvider({
       public: true,
       updated_at: new Date().toISOString(),
     }
-    setChats((prev) => [...prev, optimisticChat])
+    setChats((prev) => [optimisticChat, ...prev])
 
     try {
       const newChat = await createNewChatFromDb(
@@ -155,14 +155,12 @@ export function ChatsProvider({
         isAuthenticated,
         agentId
       )
-      setChats((prev) =>
-        prev
-          .map((c) => (c.id === optimisticId ? newChat : c))
-          .sort(
-            (a, b) =>
-              +new Date(b.created_at || "") - +new Date(a.created_at || "")
-          )
-      )
+
+      setChats((prev) => [
+        newChat,
+        ...prev.filter((c) => c.id !== optimisticId),
+      ])
+
       return newChat
     } catch {
       setChats(prev)

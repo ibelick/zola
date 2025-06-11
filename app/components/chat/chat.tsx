@@ -199,8 +199,11 @@ export function Chat() {
         return
       }
 
-      // refresh the chat history (in sidebar+command/drawer)
-      bumpChat(currentChatId)
+      // Only bump existing chats, not newly created ones
+      // If messages.length === 0, this is a new chat that was just created
+      if (messages.length > 0) {
+        bumpChat(currentChatId)
+      }
 
       if (input.length > MESSAGE_MAX_LENGTH) {
         toast({
@@ -270,6 +273,8 @@ export function Chat() {
     handleSubmit,
     cacheAndAddMessage,
     clearDraft,
+    messages.length,
+    bumpChat,
   ])
 
   const handleSuggestion = useCallback(
