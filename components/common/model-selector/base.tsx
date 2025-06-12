@@ -271,7 +271,7 @@ export function ModelSelector({
           </TooltipTrigger>
           <TooltipContent>Switch model ⌘⇧P</TooltipContent>
           <DropdownMenuContent
-            className="flex h-[320px] w-[300px] flex-col space-y-0.5 overflow-visible px-0 pt-0"
+            className="flex h-[320px] w-[300px] flex-col space-y-0.5 overflow-visible p-0"
             align="start"
             sideOffset={4}
             forceMount
@@ -292,7 +292,7 @@ export function ModelSelector({
                 />
               </div>
             </div>
-            <div className="flex h-full flex-col space-y-0 overflow-y-auto px-1 pt-1 pb-0">
+            <div className="flex h-full flex-col space-y-0 overflow-y-auto px-1 pt-0 pb-0">
               {isLoadingModels ? (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                   <p className="text-muted-foreground mb-2 text-sm">
