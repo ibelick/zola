@@ -447,8 +447,6 @@ export function Chat() {
 
   const showOnboarding = !chatId && messages.length === 0
 
-  console.log("enableSearch", enableSearch)
-
   return (
     <div
       className={cn(

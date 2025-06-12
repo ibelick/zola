@@ -4,6 +4,7 @@ import { PROVIDERS } from "@/lib/providers"
 import {
   ArrowSquareOutIcon,
   BrainIcon,
+  GlobeIcon,
   ImageIcon,
   WrenchIcon,
 } from "@phosphor-icons/react"
@@ -49,6 +50,13 @@ export function SubMenu({ hoveredModelData }: SubMenuProps) {
               <div className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-800 dark:text-amber-100">
                 <BrainIcon className="size-3" />
                 <span>Reasoning</span>
+              </div>
+            )}
+
+            {hoveredModelData.webSearch && (
+              <div className="flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-800 dark:text-blue-100">
+                <GlobeIcon className="size-3" />
+                <span>Web Search</span>
               </div>
             )}
           </div>
