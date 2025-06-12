@@ -70,7 +70,7 @@ export function Chat() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { preferences } = useUserPreferences()
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
-  const [searchAgentId, setSearchAgentId] = useState<string | null>(null)
+  const [enableSearch, setEnableSearch] = useState(false)
 
   const {
     files,
@@ -155,7 +155,7 @@ export function Chat() {
     input,
     selectedModel,
     systemPrompt,
-    selectedAgentId: searchAgentId || currentAgent?.id || null,
+    selectedAgentId: currentAgent?.id || null,
     createNewChat,
     setHasDialogAuth,
   })
@@ -232,7 +232,6 @@ export function Chat() {
         }
       }
 
-      const effectiveAgentId = searchAgentId || currentAgent?.id
       const options = {
         body: {
           chatId: currentChatId,
@@ -240,7 +239,8 @@ export function Chat() {
           model: selectedModel,
           isAuthenticated,
           systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-          ...(effectiveAgentId && { agentId: effectiveAgentId }),
+          agentId: currentAgent?.id || null,
+          enableSearch,
         },
         experimental_attachments: attachments || undefined,
       }
@@ -276,7 +276,6 @@ export function Chat() {
     cleanupOptimisticAttachments,
     ensureChatExists,
     handleFileUploads,
-    searchAgentId,
     currentAgent?.id,
     selectedModel,
     isAuthenticated,
@@ -377,14 +376,6 @@ export function Chat() {
     reload(options)
   }, [user, chatId, selectedModel, isAuthenticated, systemPrompt, reload])
 
-  // Handle search agent toggle
-  const handleSearchToggle = useCallback(
-    (enabled: boolean, agentId: string | null) => {
-      setSearchAgentId(enabled ? agentId : null)
-    },
-    []
-  )
-
   // Memoize the conversation props to prevent unnecessary rerenders
   const conversationProps = useMemo(
     () => ({
@@ -415,7 +406,8 @@ export function Chat() {
       isUserAuthenticated: isAuthenticated,
       stop,
       status,
-      onSearchToggle: handleSearchToggle,
+      setEnableSearch,
+      enableSearch,
     }),
     [
       input,
@@ -434,7 +426,8 @@ export function Chat() {
       isAuthenticated,
       stop,
       status,
-      handleSearchToggle,
+      setEnableSearch,
+      enableSearch,
     ]
   )
 
@@ -453,6 +446,8 @@ export function Chat() {
   }
 
   const showOnboarding = !chatId && messages.length === 0
+
+  console.log("enableSearch", enableSearch)
 
   return (
     <div

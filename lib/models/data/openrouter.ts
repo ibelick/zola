@@ -16,9 +16,10 @@ export const openrouterModels: ModelConfig[] = [
     outputCost: 0,
     priceUnit: "per 1M tokens",
     vision: false,
-    tools: true,
+    tools: false,
     audio: false,
     reasoning: true,
+    webSearch: false,
     openSource: false,
     speed: "Medium",
     intelligence: "High",
@@ -49,6 +50,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Medium",
     intelligence: "High",
@@ -57,9 +59,14 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://www.anthropic.com/claude/sonnet",
     releasedAt: "2025-04-01",
     icon: "claude",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
       }).chat("anthropic/claude-sonnet-4"),
   },
   {
@@ -79,6 +86,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Medium",
     intelligence: "High",
@@ -87,9 +95,14 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://www.anthropic.com/claude",
     releasedAt: "2025-02-24",
     icon: "claude",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
       }).chat("anthropic/claude-3.7-sonnet:thinking"),
   },
   {
@@ -109,6 +122,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: true,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "High",
@@ -117,9 +131,14 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://ai.google.dev",
     releasedAt: "2025-03-20",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
       }).chat("google/gemini-2.5-pro-preview"),
   },
   {
@@ -139,6 +158,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "High",
@@ -147,9 +167,14 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://openai.com",
     releasedAt: "2025-04-14",
     icon: "openai",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
       }).chat("openai/gpt-4.1"),
   },
   {
@@ -169,6 +194,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "High",
@@ -177,9 +203,14 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://platform.openai.com/docs/models/o4-mini",
     releasedAt: "2025-04-01",
     icon: "openai",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
       }).chat("openai/o4-mini"),
   },
   {
@@ -199,6 +230,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "High",
@@ -207,9 +239,14 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://x.ai/api",
     releasedAt: "2025-02-15",
     icon: "xai",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
       }).chat("x-ai/grok-3-mini-beta"),
   },
   {
@@ -229,6 +266,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "High",
@@ -237,9 +275,14 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://ai.google.dev",
     releasedAt: "2025-03-25",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
       }).chat("google/gemini-2.5-flash-preview-05-20"),
   },
   {
@@ -259,6 +302,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "High",
@@ -267,9 +311,14 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://www.llama.com/",
     releasedAt: "2025-04-01",
     icon: "meta",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
       }).chat("meta-llama/llama-3.3-8b-instruct:free"),
   },
   {
@@ -289,6 +338,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "High",
@@ -297,9 +347,14 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://platform.openai.com/docs/models/gpt-4o-mini",
     releasedAt: "2025-04-14",
     icon: "openai",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
       }).chat("openai/gpt-4.1-mini"),
   },
   {
@@ -319,6 +374,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "Medium",
@@ -327,9 +383,14 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://platform.openai.com/docs/models/gpt-4o-mini",
     releasedAt: "2025-04-14",
     icon: "openai",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
       }).chat("openai/gpt-4.1-nano"),
   },
   {
@@ -349,6 +410,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "High",
@@ -357,9 +419,12 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://platform.openai.com/docs/models/o3-mini",
     releasedAt: "2025-04-01",
     icon: "openai",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          plugins: [{ id: "web", max_results: 3 }],
+        }),
       }).chat("openai/o3-mini"),
   },
   {
@@ -379,6 +444,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Medium",
     intelligence: "High",
@@ -387,9 +453,12 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://www.anthropic.com/claude",
     releasedAt: "2024-10-22",
     icon: "claude",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          plugins: [{ id: "web", max_results: 3 }],
+        }),
       }).chat("anthropic/claude-3.5-sonnet"),
   },
   {
@@ -409,6 +478,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: true,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "High",
@@ -417,9 +487,12 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://ai.google.dev",
     releasedAt: "2024-12-11",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          plugins: [{ id: "web", max_results: 3 }],
+        }),
       }).chat("google/gemini-2.0-flash-001"),
   },
   {
@@ -439,6 +512,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: false,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "Medium",
@@ -447,9 +521,12 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://ai.google.dev",
     releasedAt: "2024-12-11",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          plugins: [{ id: "web", max_results: 3 }],
+        }),
       }).chat("google/gemini-2.0-flash-lite-001"),
   },
   {
@@ -469,6 +546,7 @@ export const openrouterModels: ModelConfig[] = [
     tools: true,
     audio: true,
     reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Medium",
     intelligence: "High",
@@ -477,9 +555,12 @@ export const openrouterModels: ModelConfig[] = [
     modelPage: "https://platform.openai.com/docs/models",
     releasedAt: "2025-05-01",
     icon: "openai",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          plugins: [{ id: "web", max_results: 3 }],
+        }),
       }).chat("openai/gpt-4.5-preview"),
   },
   {
@@ -498,141 +579,166 @@ export const openrouterModels: ModelConfig[] = [
     vision: false,
     tools: false,
     audio: false,
-    reasoning: true, 
+    reasoning: true,
+    webSearch: true,
     openSource: false,
     speed: "Fast",
     intelligence: "Medium",
-    website: "https://openrouter.ai", 
-    apiDocs: "https://openrouter.ai/docs", 
+    website: "https://openrouter.ai",
+    apiDocs: "https://openrouter.ai/docs",
     modelPage: "https://openrouter.ai/perplexity/sonar",
     releasedAt: "2025-01-27",
     icon: "perplexity",
-    apiSdk: (apiKey?: string) =>
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
       createOpenRouter({
         apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          plugins: [{ id: "web", max_results: 3 }],
+        }),
       }).chat("perplexity/sonar"),
   },
   {
-  id: "openrouter:perplexity/sonar-reasoning",
-  name: "Perplexity Sonar Reasoning",
-  provider: "OpenRouter",
-  providerId: "openrouter",
-  modelFamily: "Sonar",
-  description:
-    "An enhanced version of Sonar optimized for deeper reasoning and more complex tasks, while retaining fast response times.",
-  tags: ["reasoning", "fast", "QA", "affordable"],
-  contextWindow: 127072,
-  inputCost: 1,
-  outputCost: 5,
-  priceUnit: "per 1M tokens",
-  vision: false,
-  tools: false,
-  audio: false,
-  reasoning: true,
-  openSource: false,
-  speed: "Medium",      
-  intelligence: "High",
-  website: "https://openrouter.ai",
-  apiDocs: "https://openrouter.ai/docs",
-  modelPage: "https://openrouter.ai/perplexity/sonar-reasoning",
-  releasedAt: "2025-01-29",
-  icon: "perplexity",
-  apiSdk: (apiKey?: string) =>
-    createOpenRouter({
-      apiKey: apiKey || process.env.OPENROUTER_API_KEY,
-    }).chat("perplexity/sonar-reasoning"),
-},
-{
-  id: "openrouter:perplexity/sonar-reasoning-pro",
-  name: "Perplexity Sonar Reasoning Pro",
-  provider: "OpenRouter",
-  providerId: "openrouter",
-  modelFamily: "Sonar",
-  description:
-    "Perplexity's most advanced Sonar model with pro-level reasoning, accuracy, and context handling—ideal for complex tasks.",
-  tags: ["reasoning", "pro", "advanced", "QA", "research"],
-  contextWindow: 127072,
-  inputCost: 2,
-  outputCost: 8,
-  priceUnit: "per 1M tokens",
-  vision: false,
-  tools: false,
-  audio: false,
-  reasoning: true,
-  openSource: false,
-  speed: "Medium",  
-  intelligence: "High",
-  website: "https://openrouter.ai",
-  apiDocs: "https://openrouter.ai/docs",
-  modelPage: "https://openrouter.ai/perplexity/sonar-reasoning-pro",
-  releasedAt: "2025-07-25",
-  icon: "perplexity",
-  apiSdk: (apiKey?: string) =>
-    createOpenRouter({
-      apiKey: apiKey || process.env.OPENROUTER_API_KEY,
-    }).chat("perplexity/sonar-reasoning-pro"),
-},
-{
-  id: "openrouter:perplexity/sonar-pro",
-  name: "Perplexity Sonar Pro",
-  provider: "OpenRouter",
-  providerId: "openrouter",
-  modelFamily: "Sonar",
-  description:
-    "A high-performance version of Sonar optimized for speed and accuracy across general tasks, with solid reasoning capabilities.",
-  tags: ["fast", "accurate", "QA", "general-purpose"],
-  contextWindow: 200000,
-  inputCost: 3,
-  outputCost: 15,
-  priceUnit: "per 1M tokens",
-  vision: false,
-  tools: false,
-  audio: false,
-  reasoning: true,
-  openSource: false,
-  speed: "Fast",
-  intelligence: "High",
-  website: "https://openrouter.ai",
-  apiDocs: "https://openrouter.ai/docs",
-  modelPage: "https://openrouter.ai/perplexity/sonar-pro",
-  releasedAt: "2025-03-27",
-  icon: "perplexity",
-  apiSdk: (apiKey?: string) =>
-    createOpenRouter({
-      apiKey: apiKey || process.env.OPENROUTER_API_KEY,
-    }).chat("perplexity/sonar-pro"),
-},
-{
-  id: "openrouter:perplexity/sonar-deep-research",
-  name: "Perplexity Sonar Deep Research",
-  provider: "OpenRouter",
-  providerId: "openrouter",
-  modelFamily: "Sonar",
-  description:
-    "Perplexity's most powerful model for deep research, long-context understanding, and advanced reasoning tasks.",
-  tags: ["deep research", "advanced", "long-context", "reasoning", "QA"],
-  contextWindow: 128000,
-  inputCost: 2,
-  outputCost: 8,
-  priceUnit: "per 1M tokens",
-  vision: false,
-  tools: false,
-  audio: false,
-  reasoning: true,
-  openSource: false,
-  speed: "Medium",       
-  intelligence: "High",
-  website: "https://openrouter.ai",
-  apiDocs: "https://openrouter.ai/docs",
-  modelPage: "https://openrouter.ai/perplexity/sonar-deep-research",
-  releasedAt: "2025-03-07",
-  icon: "perplexity",
-  apiSdk: (apiKey?: string) =>
-    createOpenRouter({
-      apiKey: apiKey || process.env.OPENROUTER_API_KEY,
-    }).chat("perplexity/sonar-deep-research"),
-}
-
-
-
+    id: "openrouter:perplexity/sonar-reasoning",
+    name: "Perplexity Sonar Reasoning",
+    provider: "OpenRouter",
+    providerId: "openrouter",
+    modelFamily: "Sonar",
+    description:
+      "An enhanced version of Sonar optimized for deeper reasoning and more complex tasks, while retaining fast response times.",
+    tags: ["reasoning", "fast", "QA", "affordable"],
+    contextWindow: 127072,
+    inputCost: 1,
+    outputCost: 5,
+    priceUnit: "per 1M tokens",
+    vision: false,
+    tools: false,
+    audio: false,
+    reasoning: true,
+    webSearch: true,
+    openSource: false,
+    speed: "Medium",
+    intelligence: "High",
+    website: "https://openrouter.ai",
+    apiDocs: "https://openrouter.ai/docs",
+    modelPage: "https://openrouter.ai/perplexity/sonar-reasoning",
+    releasedAt: "2025-01-29",
+    icon: "perplexity",
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      createOpenRouter({
+        apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
+      }).chat("perplexity/sonar-reasoning"),
+  },
+  {
+    id: "openrouter:perplexity/sonar-reasoning-pro",
+    name: "Perplexity Sonar Reasoning Pro",
+    provider: "OpenRouter",
+    providerId: "openrouter",
+    modelFamily: "Sonar",
+    description:
+      "Perplexity's most advanced Sonar model with pro-level reasoning, accuracy, and context handling—ideal for complex tasks.",
+    tags: ["reasoning", "pro", "advanced", "QA", "research"],
+    contextWindow: 127072,
+    inputCost: 2,
+    outputCost: 8,
+    priceUnit: "per 1M tokens",
+    vision: false,
+    tools: false,
+    audio: false,
+    reasoning: true,
+    webSearch: true,
+    openSource: false,
+    speed: "Medium",
+    intelligence: "High",
+    website: "https://openrouter.ai",
+    apiDocs: "https://openrouter.ai/docs",
+    modelPage: "https://openrouter.ai/perplexity/sonar-reasoning-pro",
+    releasedAt: "2025-07-25",
+    icon: "perplexity",
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      createOpenRouter({
+        apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
+      }).chat("perplexity/sonar-reasoning-pro"),
+  },
+  {
+    id: "openrouter:perplexity/sonar-pro",
+    name: "Perplexity Sonar Pro",
+    provider: "OpenRouter",
+    providerId: "openrouter",
+    modelFamily: "Sonar",
+    description:
+      "A high-performance version of Sonar optimized for speed and accuracy across general tasks, with solid reasoning capabilities.",
+    tags: ["fast", "accurate", "QA", "general-purpose"],
+    contextWindow: 200000,
+    inputCost: 3,
+    outputCost: 15,
+    priceUnit: "per 1M tokens",
+    vision: false,
+    tools: false,
+    audio: false,
+    reasoning: true,
+    webSearch: true,
+    openSource: false,
+    speed: "Fast",
+    intelligence: "High",
+    website: "https://openrouter.ai",
+    apiDocs: "https://openrouter.ai/docs",
+    modelPage: "https://openrouter.ai/perplexity/sonar-pro",
+    releasedAt: "2025-03-27",
+    icon: "perplexity",
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      createOpenRouter({
+        apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
+      }).chat("perplexity/sonar-pro"),
+  },
+  {
+    id: "openrouter:perplexity/sonar-deep-research",
+    name: "Perplexity Sonar Deep Research",
+    provider: "OpenRouter",
+    providerId: "openrouter",
+    modelFamily: "Sonar",
+    description:
+      "Perplexity's most powerful model for deep research, long-context understanding, and advanced reasoning tasks.",
+    tags: ["deep research", "advanced", "long-context", "reasoning", "QA"],
+    contextWindow: 128000,
+    inputCost: 2,
+    outputCost: 8,
+    priceUnit: "per 1M tokens",
+    vision: false,
+    tools: false,
+    audio: false,
+    reasoning: true,
+    webSearch: true,
+    openSource: false,
+    speed: "Medium",
+    intelligence: "High",
+    website: "https://openrouter.ai",
+    apiDocs: "https://openrouter.ai/docs",
+    modelPage: "https://openrouter.ai/perplexity/sonar-deep-research",
+    releasedAt: "2025-03-07",
+    icon: "perplexity",
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      createOpenRouter({
+        apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+        ...(opts?.enableSearch && {
+          extraBody: {
+            plugins: [{ id: "web", max_results: 3 }],
+          },
+        }),
+      }).chat("perplexity/sonar-deep-research"),
+  },
 ]

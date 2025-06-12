@@ -2,17 +2,17 @@ import { anthropic, createAnthropic } from "@ai-sdk/anthropic"
 import { createGoogleGenerativeAI, google } from "@ai-sdk/google"
 import { createMistral, mistral } from "@ai-sdk/mistral"
 import { createOpenAI, openai } from "@ai-sdk/openai"
-import {createPerplexity, perplexity} from "@ai-sdk/perplexity"
+import { createPerplexity, perplexity } from "@ai-sdk/perplexity"
 import type { LanguageModelV1 } from "@ai-sdk/provider"
 import { createXai, xai } from "@ai-sdk/xai"
 import { getProviderForModel } from "./provider-map"
 import type {
   AnthropicModel,
   GeminiModel,
-  PerplexityModel,
   MistralModel,
   OllamaModel,
   OpenAIModel,
+  PerplexityModel,
   SupportedModel,
   XaiModel,
 } from "./types"
@@ -31,15 +31,15 @@ type ModelSettings<T extends SupportedModel> = T extends OpenAIModel
     ? MistralProviderSettings
     : T extends PerplexityModel
       ? PerplexityProviderSettings
-    : T extends GeminiModel
-      ? GoogleGenerativeAIProviderSettings
-      : T extends AnthropicModel
-        ? AnthropicProviderSettings
-        : T extends XaiModel
-          ? XaiProviderSettings
-          : T extends OllamaModel
-            ? OllamaProviderSettings
-            : never
+      : T extends GeminiModel
+        ? GoogleGenerativeAIProviderSettings
+        : T extends AnthropicModel
+          ? AnthropicProviderSettings
+          : T extends XaiModel
+            ? XaiProviderSettings
+            : T extends OllamaModel
+              ? OllamaProviderSettings
+              : never
 
 export type OpenProvidersOptions<T extends SupportedModel> = ModelSettings<T>
 
@@ -112,16 +112,16 @@ export function openproviders<T extends SupportedModel>(
     )
   }
 
-    if (provider === "perplexity") {
+  if (provider === "perplexity") {
     if (apiKey) {
       const perplexityProvider = createPerplexity({ apiKey })
       return perplexityProvider(
-        modelId as PerplexityModel,
+        modelId as PerplexityModel
         // settings as PerplexityProviderSettings
       )
     }
     return perplexity(
-      modelId as PerplexityModel,
+      modelId as PerplexityModel
       // settings as PerplexityProviderSettings
     )
   }

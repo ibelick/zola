@@ -28,7 +28,8 @@ type ChatRequest = {
   model: string
   isAuthenticated: boolean
   systemPrompt: string
-  agentId?: string
+  agentId: string | null
+  enableSearch: boolean
 }
 
 export async function POST(req: Request) {
@@ -41,6 +42,7 @@ export async function POST(req: Request) {
       isAuthenticated,
       systemPrompt,
       agentId,
+      enableSearch,
     } = (await req.json()) as ChatRequest
 
     if (!messages || !chatId || !userId) {
@@ -114,7 +116,7 @@ export async function POST(req: Request) {
     }
 
     const result = streamText({
-      model: modelConfig.apiSdk(apiKey),
+      model: modelConfig.apiSdk(apiKey, { enableSearch }),
       system: effectiveSystemPrompt,
       messages: cleanedMessages,
       tools: toolsToUse as ToolSet,
