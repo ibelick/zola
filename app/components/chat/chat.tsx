@@ -106,13 +106,17 @@ export function Chat() {
 
   // Handle errors directly in onError callback
   const handleError = useCallback((error: Error) => {
-    let errorMsg = "Something went wrong."
-    try {
-      const parsed = JSON.parse(error.message)
-      errorMsg = parsed.error || errorMsg
-    } catch {
-      errorMsg = error.message || errorMsg
+    console.error("Chat error:", error)
+    console.error("Error message:", error.message)
+    // The server now properly forwards error messages via getErrorMessage
+    // So we can use the error message directly
+    let errorMsg = error.message || "Something went wrong."
+
+    // If the error message is still generic, provide a fallback
+    if (errorMsg === "An error occurred" || errorMsg === "fetch failed") {
+      errorMsg = "Something went wrong. Please try again."
     }
+
     toast({
       title: errorMsg,
       status: "error",

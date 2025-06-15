@@ -13,10 +13,9 @@ import {
   validateAndTrackUsage,
 } from "./api"
 import {
-  ApiError,
   cleanMessagesForTools,
   createErrorResponse,
-  handleStreamError,
+  extractErrorMessage,
 } from "./utils"
 
 export const maxDuration = 60
@@ -104,8 +103,6 @@ export async function POST(req: Request) {
     const hasTools = !!toolsToUse && Object.keys(toolsToUse).length > 0
     const cleanedMessages = cleanMessagesForTools(messages, hasTools)
 
-    let streamError: ApiError | null = null
-
     let apiKey: string | undefined
     if (isAuthenticated && userId) {
       const { getEffectiveApiKey } = await import("@/lib/user-keys")
@@ -122,7 +119,8 @@ export async function POST(req: Request) {
       tools: toolsToUse as ToolSet,
       maxSteps: 10,
       onError: (err: unknown) => {
-        streamError = handleStreamError(err)
+        console.error("Streaming error occurred:", err)
+        // Don't set streamError anymore - let the AI SDK handle it through the stream
       },
 
       onFinish: async ({ response }) => {
@@ -137,17 +135,13 @@ export async function POST(req: Request) {
       },
     })
 
-    if (streamError) {
-      throw streamError
-    }
-
-    const originalResponse = result.toDataStreamResponse({
+    return result.toDataStreamResponse({
       sendReasoning: true,
       sendSources: true,
-    })
-
-    return new Response(originalResponse.body, {
-      status: originalResponse.status,
+      getErrorMessage: (error: unknown) => {
+        console.error("Error forwarded to client:", error)
+        return extractErrorMessage(error)
+      },
     })
   } catch (err: unknown) {
     console.error("Error in /api/chat:", err)

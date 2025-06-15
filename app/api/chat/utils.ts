@@ -141,6 +141,8 @@ export type ApiError = Error & {
 
 /**
  * Parse and handle stream errors from AI SDK
+ * @deprecated Use extractErrorMessage instead for streaming errors with toDataStreamResponse
+ * This is kept for legacy/fallback purposes or non-streaming error scenarios
  * @param err - The error from streamText onError callback
  * @returns Structured error with status code and error code
  */
@@ -151,52 +153,61 @@ export function handleStreamError(err: unknown): ApiError {
   const aiError = (err as { error?: any })?.error
 
   if (aiError) {
+    // Try to extract detailed error message from response body
+    let detailedMessage = ""
+    if (aiError.responseBody) {
+      try {
+        const parsed = JSON.parse(aiError.responseBody)
+        // Handle different error response formats
+        if (parsed.error?.message) {
+          detailedMessage = parsed.error.message
+        } else if (parsed.error && typeof parsed.error === "string") {
+          detailedMessage = parsed.error
+        } else if (parsed.message) {
+          detailedMessage = parsed.message
+        }
+      } catch {
+        // Fallback to generic message if parsing fails
+      }
+    }
+
     // Handle specific API errors with proper status codes
     if (aiError.statusCode === 402) {
       // Payment required
-      let message = "Insufficient credits or payment required"
-
-      // Try to extract more specific message from response body
-      if (aiError.responseBody) {
-        try {
-          const parsed = JSON.parse(aiError.responseBody)
-          message = parsed.error?.message || message
-        } catch {
-          // Fallback to generic message if parsing fails
-        }
-      }
-
+      const message =
+        detailedMessage || "Insufficient credits or payment required"
       return Object.assign(new Error(message), {
         statusCode: 402,
         code: "PAYMENT_REQUIRED",
       })
     } else if (aiError.statusCode === 401) {
-      // Authentication error
-      return Object.assign(
-        new Error("Invalid API key or authentication failed"),
-        {
-          statusCode: 401,
-          code: "AUTHENTICATION_ERROR",
-        }
-      )
+      // Authentication error - use detailed message if available
+      const message =
+        detailedMessage ||
+        "Invalid API key or authentication failed. Please check your API key in settings."
+      return Object.assign(new Error(message), {
+        statusCode: 401,
+        code: "AUTHENTICATION_ERROR",
+      })
     } else if (aiError.statusCode === 429) {
       // Rate limit
-      return Object.assign(
-        new Error("Rate limit exceeded. Please try again later."),
-        {
-          statusCode: 429,
-          code: "RATE_LIMIT_EXCEEDED",
-        }
-      )
+      const message =
+        detailedMessage || "Rate limit exceeded. Please try again later."
+      return Object.assign(new Error(message), {
+        statusCode: 429,
+        code: "RATE_LIMIT_EXCEEDED",
+      })
     } else if (aiError.statusCode >= 400 && aiError.statusCode < 500) {
       // Other client errors
-      return Object.assign(new Error(aiError.message || "Request failed"), {
+      const message = detailedMessage || aiError.message || "Request failed"
+      return Object.assign(new Error(message), {
         statusCode: aiError.statusCode,
         code: "CLIENT_ERROR",
       })
     } else {
       // Server errors or other issues
-      return Object.assign(new Error(aiError.message || "AI service error"), {
+      const message = detailedMessage || aiError.message || "AI service error"
+      return Object.assign(new Error(message), {
         statusCode: aiError.statusCode || 500,
         code: "SERVER_ERROR",
       })
@@ -211,6 +222,73 @@ export function handleStreamError(err: unknown): ApiError {
       }
     )
   }
+}
+
+/**
+ * Extract a user-friendly error message from various error types
+ * Used for streaming errors that need to be forwarded to the client
+ * @param error - The error from AI SDK or other sources
+ * @returns User-friendly error message string
+ */
+export function extractErrorMessage(error: unknown): string {
+  // Handle null/undefined
+  if (error == null) {
+    return "An unknown error occurred."
+  }
+
+  // Handle string errors
+  if (typeof error === "string") {
+    return error
+  }
+
+  // Handle Error objects
+  if (error instanceof Error) {
+    // Check for specific error patterns
+    if (
+      error.message.includes("invalid x-api-key") ||
+      error.message.includes("authentication_error")
+    ) {
+      return "Invalid API key or authentication failed. Please check your API key in settings."
+    } else if (
+      error.message.includes("402") ||
+      error.message.includes("payment") ||
+      error.message.includes("credits")
+    ) {
+      return "Insufficient credits or payment required."
+    } else if (
+      error.message.includes("429") ||
+      error.message.includes("rate limit")
+    ) {
+      return "Rate limit exceeded. Please try again later."
+    }
+
+    return error.message
+  }
+
+  // Handle AI SDK error objects
+  const aiError = (error as any)?.error
+  if (aiError) {
+    if (aiError.statusCode === 401) {
+      return "Invalid API key or authentication failed. Please check your API key in settings."
+    } else if (aiError.statusCode === 402) {
+      return "Insufficient credits or payment required."
+    } else if (aiError.statusCode === 429) {
+      return "Rate limit exceeded. Please try again later."
+    } else if (aiError.responseBody) {
+      try {
+        const parsed = JSON.parse(aiError.responseBody)
+        if (parsed.error?.message) {
+          return parsed.error.message
+        }
+      } catch {
+        // Fall through to generic message
+      }
+    }
+
+    return aiError.message || "Request failed"
+  }
+
+  return "An error occurred. Please try again."
 }
 
 /**
