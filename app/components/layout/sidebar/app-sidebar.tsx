@@ -13,6 +13,7 @@ import {
 import { useChats } from "@/lib/chat-store/chats/provider"
 import {
   ChatTeardropText,
+  FolderIcon,
   GithubLogo,
   MagnifyingGlass,
   NotePencilIcon,
@@ -22,6 +23,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { HistoryTrigger } from "../../history/history-trigger"
 import { SidebarList } from "./sidebar-list"
+import { SidebarProject } from "./sidebar-project"
 
 export function AppSidebar() {
   const isMobile = useBreakpoint(768)
@@ -85,6 +87,7 @@ export function AppSidebar() {
               hasPopover={false}
             />
           </div>
+          <SidebarProject />
           {isLoading ? (
             <div className="h-full" />
           ) : hasChats ? (
