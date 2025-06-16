@@ -47,7 +47,7 @@ export function DialogPublish() {
     return null
   }
 
-  const publicLink = `${APP_DOMAIN}/p/${chatId}`
+  const publicLink = `${APP_DOMAIN}/share/${chatId}`
 
   const openPage = () => {
     setOpenDialog(false)

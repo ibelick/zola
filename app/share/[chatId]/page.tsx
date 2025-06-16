@@ -39,7 +39,7 @@ export async function generateMetadata({
       title,
       description,
       type: "article",
-      url: `${APP_DOMAIN}/p/${chatId}`,
+      url: `${APP_DOMAIN}/share/${chatId}`,
     },
     twitter: {
       card: "summary_large_image",
