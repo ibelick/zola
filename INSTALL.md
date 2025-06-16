@@ -200,19 +200,30 @@ CREATE TABLE agents (
   CONSTRAINT agents_creator_id_fkey FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE SET NULL -- Changed to SET NULL based on schema, could also be CASCADE
 );
 
+-- Projects table
+CREATE TABLE projects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  user_id UUID NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT projects_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Chats table
 CREATE TABLE chats (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL,
+  project_id UUID,
   title TEXT,
   model TEXT,
   system_prompt TEXT,
   agent_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at: TIMESTAMPTZ DEFAULT NOW(),
-  public BOOLEAN DEFAULT FALSE NOT NULL, -- Added NOT NULL based on TS type
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  public BOOLEAN DEFAULT FALSE NOT NULL,
   CONSTRAINT chats_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  CONSTRAINT chats_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE SET NULL -- Assuming SET NULL, adjust if needed
+  CONSTRAINT chats_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE SET NULL,
+  CONSTRAINT chats_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 
 -- Messages table
