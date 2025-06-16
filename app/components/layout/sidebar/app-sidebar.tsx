@@ -13,7 +13,6 @@ import {
 import { useChats } from "@/lib/chat-store/chats/provider"
 import {
   ChatTeardropText,
-  FolderIcon,
   GithubLogo,
   MagnifyingGlass,
   NotePencilIcon,
