@@ -1,12 +1,10 @@
 "use client"
 
-import { cn } from "@/lib/utils"
-import { FolderIcon, FolderPlusIcon } from "@phosphor-icons/react"
+import { FolderPlusIcon } from "@phosphor-icons/react"
 import { useQuery } from "@tanstack/react-query"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
 import React, { useState } from "react"
 import { DialogCreateProject } from "./dialog-create-project"
+import { SidebarProjectItem } from "./sidebar-project-item"
 
 type Project = {
   id: string
@@ -16,7 +14,6 @@ type Project = {
 }
 
 export function SidebarProject() {
-  const pathname = usePathname()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const { data: projects = [], isLoading } = useQuery<Project[]>({
@@ -45,29 +42,9 @@ export function SidebarProject() {
 
       {isLoading ? null : (
         <div className="space-y-1">
-          {projects.map((project) => {
-            const isActive = pathname.startsWith(`/p/${project.id}`)
-
-            return (
-              <Link
-                href={`/p/${project.id}`}
-                className={cn(
-                  "hover:bg-accent/80 hover:text-foreground group/chat relative inline-flex w-full items-center rounded-md transition-colors",
-                  isActive && "bg-accent hover:bg-accent text-foreground"
-                )}
-                prefetch
-              >
-                <div
-                  className="text-primary relative line-clamp-1 flex w-full items-center gap-2 mask-r-from-80% mask-r-to-85% px-2 py-2 text-sm text-ellipsis whitespace-nowrap"
-                  title={project.name}
-                >
-                  <FolderIcon size={20} />
-
-                  {project.name}
-                </div>
-              </Link>
-            )
-          })}
+          {projects.map((project) => (
+            <SidebarProjectItem key={project.id} project={project} />
+          ))}
         </div>
       )}
 

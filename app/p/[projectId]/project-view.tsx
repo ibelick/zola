@@ -5,6 +5,7 @@ import { Conversation } from "@/app/components/chat/conversation"
 import { useChatHandlers } from "@/app/components/chat/use-chat-handlers"
 import { useFileUpload } from "@/app/components/chat/use-file-upload"
 import { useModel } from "@/app/components/chat/use-model"
+import { ProjectChatItem } from "@/app/components/layout/sidebar/project-chat-item"
 import { toast } from "@/components/ui/toast"
 import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
@@ -18,8 +19,6 @@ import { useChat } from "@ai-sdk/react"
 import { ChatCircleIcon } from "@phosphor-icons/react"
 import { useQuery } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "motion/react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
 
 type Project = {
@@ -433,28 +432,11 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           </h2>
           <div className="space-y-2">
             {chats.slice(0, 5).map((chat) => (
-              <Link
+              <ProjectChatItem
                 key={chat.id}
-                href={`/c/${chat.id}`}
-                className="border-border hover:bg-accent/50 block rounded-lg border p-3 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate font-medium">{chat.title}</h3>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      {chat.updated_at
-                        ? formatDate(chat.updated_at)
-                        : chat.created_at
-                          ? formatDate(chat.created_at)
-                          : null}
-                    </p>
-                  </div>
-                  <ChatCircleIcon
-                    size={16}
-                    className="text-muted-foreground ml-2 flex-shrink-0"
-                  />
-                </div>
-              </Link>
+                chat={chat}
+                formatDate={formatDate}
+              />
             ))}
           </div>
         </div>
