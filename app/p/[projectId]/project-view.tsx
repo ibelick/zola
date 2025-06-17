@@ -35,7 +35,7 @@ type ProjectViewProps = {
 
 export function ProjectView({ projectId }: ProjectViewProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const pathname = usePathname()
+  const [enableSearch, setEnableSearch] = useState(false)
   const { user } = useUser()
   const { createNewChat, bumpChat } = useChats()
   const { cacheAndAddMessage } = useMessages()
@@ -245,7 +245,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           isAuthenticated,
           systemPrompt: SYSTEM_PROMPT_DEFAULT,
           agentId: null,
-          enableSearch: false,
+          enableSearch,
         },
         experimental_attachments: attachments || undefined,
       }
@@ -342,6 +342,8 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       isUserAuthenticated: isAuthenticated,
       stop,
       status,
+      setEnableSearch,
+      enableSearch,
     }),
     [
       input,
@@ -356,6 +358,8 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       isAuthenticated,
       stop,
       status,
+      setEnableSearch,
+      enableSearch,
     ]
   )
 

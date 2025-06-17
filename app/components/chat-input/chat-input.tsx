@@ -36,8 +36,8 @@ type ChatInputProps = {
   isUserAuthenticated: boolean
   stop: () => void
   status?: "submitted" | "streaming" | "ready" | "error"
-  setEnableSearch?: (enabled: boolean) => void
-  enableSearch?: boolean
+  setEnableSearch: (enabled: boolean) => void
+  enableSearch: boolean
 }
 
 export function ChatInput({
