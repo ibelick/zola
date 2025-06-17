@@ -1,19 +1,29 @@
 "use client"
 
 import { ChatInput } from "@/app/components/chat-input/chat-input"
+import { Conversation } from "@/app/components/chat/conversation"
+import { useChatHandlers } from "@/app/components/chat/use-chat-handlers"
 import { useFileUpload } from "@/app/components/chat/use-file-upload"
+import { useModel } from "@/app/components/chat/use-model"
+import { toast } from "@/components/ui/toast"
 import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
-import { MODEL_DEFAULT } from "@/lib/config"
-import { useUserPreferences } from "@/lib/user-preference-store/provider"
+import { useMessages } from "@/lib/chat-store/messages/provider"
+import {
+  MESSAGE_MAX_LENGTH,
+  MODEL_DEFAULT,
+  SYSTEM_PROMPT_DEFAULT,
+} from "@/lib/config"
+import { Attachment } from "@/lib/file-handling"
+import { API_ROUTE_CHAT } from "@/lib/routes"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
+import { useChat } from "@ai-sdk/react"
 import { ChatCircleIcon } from "@phosphor-icons/react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 
 type Project = {
   id: string
@@ -37,16 +47,21 @@ type ProjectViewProps = {
 }
 
 export function ProjectView({ projectId }: ProjectViewProps) {
-  const [input, setInput] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
-  const queryClient = useQueryClient()
   const { user } = useUser()
-  const { preferences } = useUserPreferences()
-  const { createNewChat } = useChats()
+  const { createNewChat, bumpChat } = useChats()
+  const { cacheAndAddMessage } = useMessages()
+  const hasSentFirstMessageRef = useRef(false)
 
-  const { files, setFiles, handleFileUpload, handleFileRemove } =
-    useFileUpload()
+  const {
+    files,
+    setFiles,
+    handleFileUploads,
+    createOptimisticAttachments,
+    cleanupOptimisticAttachments,
+    handleFileUpload,
+    handleFileRemove,
+  } = useFileUpload()
 
   // Fetch project details
   const { data: project } = useQuery<Project>({
@@ -66,44 +81,240 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   // Filter chats for this project
   const chats = allChats.filter((chat) => chat.project_id === projectId)
 
-  const handleSubmit = useCallback(async () => {
-    if (!input.trim()) return
+  const isAuthenticated = useMemo(() => !!user?.id, [user?.id])
 
-    setIsSubmitting(true)
+  // Handle errors directly in onError callback
+  const handleError = useCallback((error: Error) => {
+    let errorMsg = "Something went wrong."
     try {
-      const uid = await getOrCreateGuestUserId(user)
-      if (!uid) {
-        throw new Error("Failed to get user ID")
+      const parsed = JSON.parse(error.message)
+      errorMsg = parsed.error || errorMsg
+    } catch {
+      errorMsg = error.message || errorMsg
+    }
+    toast({
+      title: errorMsg,
+      status: "error",
+    })
+  }, [])
+
+  const {
+    messages,
+    input,
+    handleSubmit,
+    status,
+    error,
+    reload,
+    stop,
+    setMessages,
+    setInput,
+    append,
+  } = useChat({
+    api: API_ROUTE_CHAT,
+    initialMessages: [],
+    onFinish: cacheAndAddMessage,
+    onError: handleError,
+  })
+
+  const { selectedModel, handleModelChange } = useModel({
+    currentChat: null,
+    user,
+    updateChatModel: () => Promise.resolve(),
+    chatId: null,
+  })
+
+  // Modified ensureChatExists for project context
+  const ensureChatExists = useCallback(
+    async (userId: string) => {
+      if (!isAuthenticated) {
+        const storedGuestChatId = localStorage.getItem("guestChatId")
+        if (storedGuestChatId) return storedGuestChatId
       }
 
-      // Create new chat with project association
-      const newChat = await createNewChat(
-        uid,
-        input.trim(), // Use the message as the title
-        MODEL_DEFAULT,
-        !!user?.id,
-        undefined, // system prompt
-        undefined, // agent ID
-        projectId // Add projectId parameter
-      )
+      if (messages.length === 0) {
+        try {
+          const newChat = await createNewChat(
+            userId,
+            input,
+            selectedModel,
+            isAuthenticated,
+            SYSTEM_PROMPT_DEFAULT,
+            undefined, // agentId
+            projectId // Add projectId here
+          )
 
-      if (!newChat) {
-        throw new Error("Failed to create chat")
+          if (!newChat) return null
+          if (isAuthenticated) {
+            window.history.pushState(null, "", `/c/${newChat.id}`)
+          } else {
+            localStorage.setItem("guestChatId", newChat.id)
+          }
+
+          return newChat.id
+        } catch (err: unknown) {
+          let errorMessage = "Something went wrong."
+          try {
+            const errorObj = err as { message?: string }
+            if (errorObj.message) {
+              const parsed = JSON.parse(errorObj.message)
+              errorMessage = parsed.error || errorMessage
+            }
+          } catch {
+            const errorObj = err as { message?: string }
+            errorMessage = errorObj.message || errorMessage
+          }
+          toast({
+            title: errorMessage,
+            status: "error",
+          })
+          return null
+        }
       }
 
-      // Navigate to the chat and include the first message as a URL param
-      router.push(`/c/${newChat.id}?prompt=${encodeURIComponent(input)}`)
-      setInput("")
-    } catch (error) {
-      console.error("Failed to create chat:", error)
+      return null
+    },
+    [
+      isAuthenticated,
+      messages.length,
+      createNewChat,
+      input,
+      selectedModel,
+      projectId,
+    ]
+  )
+
+  const { handleInputChange, handleDelete, handleEdit } = useChatHandlers({
+    messages,
+    setMessages,
+    setInput,
+    chatId: null,
+  })
+
+  const submit = useCallback(async () => {
+    setIsSubmitting(true)
+
+    const uid = await getOrCreateGuestUserId(user)
+    if (!uid) {
+      setIsSubmitting(false)
+      return
+    }
+
+    const optimisticId = `optimistic-${Date.now().toString()}`
+    const optimisticAttachments =
+      files.length > 0 ? createOptimisticAttachments(files) : []
+
+    const optimisticMessage = {
+      id: optimisticId,
+      content: input,
+      role: "user" as const,
+      createdAt: new Date(),
+      experimental_attachments:
+        optimisticAttachments.length > 0 ? optimisticAttachments : undefined,
+    }
+
+    setMessages((prev) => [...prev, optimisticMessage])
+    setInput("")
+
+    const submittedFiles = [...files]
+    setFiles([])
+
+    try {
+      const currentChatId = await ensureChatExists(uid)
+      if (!currentChatId) {
+        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        return
+      }
+
+      if (input.length > MESSAGE_MAX_LENGTH) {
+        toast({
+          title: `The message you submitted was too long, please submit something shorter. (Max ${MESSAGE_MAX_LENGTH} characters)`,
+          status: "error",
+        })
+        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        return
+      }
+
+      let attachments: Attachment[] | null = []
+      if (submittedFiles.length > 0) {
+        attachments = await handleFileUploads(uid, currentChatId)
+        if (attachments === null) {
+          setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+          cleanupOptimisticAttachments(
+            optimisticMessage.experimental_attachments
+          )
+          return
+        }
+      }
+
+      const options = {
+        body: {
+          chatId: currentChatId,
+          userId: uid,
+          model: selectedModel,
+          isAuthenticated,
+          systemPrompt: SYSTEM_PROMPT_DEFAULT,
+          agentId: null,
+          enableSearch: false,
+        },
+        experimental_attachments: attachments || undefined,
+      }
+
+      handleSubmit(undefined, options)
+      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      cacheAndAddMessage(optimisticMessage)
+      hasSentFirstMessageRef.current = true
+
+      // Bump existing chats to top (non-blocking, after submit)
+      if (messages.length > 0) {
+        bumpChat(currentChatId)
+      }
+    } catch (submitError) {
+      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      toast({ title: "Failed to send message", status: "error" })
     } finally {
       setIsSubmitting(false)
     }
-  }, [input, createNewChat, user, projectId, router])
+  }, [
+    user,
+    files,
+    createOptimisticAttachments,
+    input,
+    setMessages,
+    setInput,
+    setFiles,
+    cleanupOptimisticAttachments,
+    ensureChatExists,
+    handleFileUploads,
+    selectedModel,
+    isAuthenticated,
+    handleSubmit,
+    cacheAndAddMessage,
+    messages.length,
+    bumpChat,
+  ])
 
-  const handleInputChange = useCallback((value: string) => {
-    setInput(value)
-  }, [])
+  const handleReload = useCallback(async () => {
+    const uid = await getOrCreateGuestUserId(user)
+    if (!uid) {
+      return
+    }
+
+    const options = {
+      body: {
+        chatId: null,
+        userId: uid,
+        model: selectedModel,
+        isAuthenticated,
+        systemPrompt: SYSTEM_PROMPT_DEFAULT,
+      },
+    }
+
+    reload(options)
+  }, [user, selectedModel, isAuthenticated, reload])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -113,37 +324,53 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     })
   }
 
-  // Memoize the chat input props similar to chat.tsx
+  // Memoize the conversation props to prevent unnecessary rerenders
+  const conversationProps = useMemo(
+    () => ({
+      messages,
+      status,
+      onDelete: handleDelete,
+      onEdit: handleEdit,
+      onReload: handleReload,
+    }),
+    [messages, status, handleDelete, handleEdit, handleReload]
+  )
+
+  // Memoize the chat input props
   const chatInputProps = useMemo(
     () => ({
       value: input,
+      onSuggestion: () => {},
       onValueChange: handleInputChange,
-      onSend: handleSubmit,
+      onSend: submit,
       isSubmitting,
       files,
       onFileUpload: handleFileUpload,
       onFileRemove: handleFileRemove,
-      onSuggestion: () => {}, // No suggestions in project view
       hasSuggestions: false,
-      onSelectModel: () => {}, // No model selection in project view
-      selectedModel: MODEL_DEFAULT,
-      isUserAuthenticated: !!user?.id,
-      stop: () => {}, // No stop functionality needed here
-      status: "ready" as const,
+      onSelectModel: handleModelChange,
+      selectedModel,
+      isUserAuthenticated: isAuthenticated,
+      stop,
+      status,
     }),
     [
       input,
       handleInputChange,
-      handleSubmit,
+      submit,
       isSubmitting,
       files,
       handleFileUpload,
       handleFileRemove,
-      user?.id,
+      handleModelChange,
+      selectedModel,
+      isAuthenticated,
+      stop,
+      status,
     ]
   )
 
-  const showOnboarding = chats.length === 0
+  const showOnboarding = messages.length === 0
 
   return (
     <div
@@ -177,56 +404,43 @@ export function ProjectView({ projectId }: ProjectViewProps) {
                 </span>
               </div>
             </div>
-            <h1 className="mb-6 text-center text-3xl font-medium tracking-tight">
-              What&apos;s on your mind?
-            </h1>
+
+            {chats.length > 0 && (
+              <div className="mb-6 max-w-md">
+                <h2 className="text-muted-foreground mb-3 text-sm font-medium">
+                  Recent conversations
+                </h2>
+                <div className="space-y-2">
+                  {chats.slice(0, 3).map((chat) => (
+                    <Link
+                      key={chat.id}
+                      href={`/c/${chat.id}`}
+                      className="border-border hover:bg-accent/50 block rounded-lg border p-3 transition-colors"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="truncate font-medium">{chat.title}</h3>
+                          <p className="text-muted-foreground mt-1 text-sm">
+                            {chat.updated_at
+                              ? formatDate(chat.updated_at)
+                              : chat.created_at
+                                ? formatDate(chat.created_at)
+                                : null}
+                          </p>
+                        </div>
+                        <ChatCircleIcon
+                          size={16}
+                          className="text-muted-foreground ml-2 flex-shrink-0"
+                        />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         ) : (
-          <div key="project-chats" className="w-full max-w-3xl">
-            <div className="mb-6 flex items-center justify-center">
-              <div className="text-muted-foreground flex items-center gap-2">
-                <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-lg">
-                  <ChatCircleIcon size={16} />
-                </div>
-                <span className="text-lg font-medium">
-                  {project?.name || "Project"}
-                </span>
-              </div>
-            </div>
-
-            {/* Recent Chats */}
-            <div className="mb-6">
-              <h2 className="text-muted-foreground mb-3 text-sm font-medium">
-                Recent conversations
-              </h2>
-              <div className="space-y-2">
-                {chats.slice(0, 3).map((chat) => (
-                  <Link
-                    key={chat.id}
-                    href={`/c/${chat.id}`}
-                    className="border-border hover:bg-accent/50 block rounded-lg border p-3 transition-colors"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="truncate font-medium">{chat.title}</h3>
-                        <p className="text-muted-foreground mt-1 text-sm">
-                          {chat.updated_at
-                            ? formatDate(chat.updated_at)
-                            : chat.created_at
-                              ? formatDate(chat.created_at)
-                              : null}
-                        </p>
-                      </div>
-                      <ChatCircleIcon
-                        size={16}
-                        className="text-muted-foreground ml-2 flex-shrink-0"
-                      />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
+          <Conversation key="conversation" {...conversationProps} />
         )}
       </AnimatePresence>
 
@@ -238,7 +452,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
         layoutId="chat-input-container"
         transition={{
           layout: {
-            duration: 0.3,
+            duration: messages.length === 1 ? 0.3 : 0,
           },
         }}
       >

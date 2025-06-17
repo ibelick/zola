@@ -29,6 +29,8 @@ export function groupChatsByDate(
   const olderChats: Record<number, Chats[]> = {}
 
   chats.forEach((chat) => {
+    if (chat.project_id) return
+
     if (!chat.updated_at) {
       todayChats.push(chat)
       return
