@@ -9,20 +9,17 @@ import { toast } from "@/components/ui/toast"
 import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
-import {
-  MESSAGE_MAX_LENGTH,
-  MODEL_DEFAULT,
-  SYSTEM_PROMPT_DEFAULT,
-} from "@/lib/config"
+import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import { useChat } from "@ai-sdk/react"
 import { ChatCircleIcon } from "@phosphor-icons/react"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
 
 type Project = {
@@ -404,40 +401,9 @@ export function ProjectView({ projectId }: ProjectViewProps) {
                 </span>
               </div>
             </div>
-
-            {chats.length > 0 && (
-              <div className="mb-6 max-w-md">
-                <h2 className="text-muted-foreground mb-3 text-sm font-medium">
-                  Recent conversations
-                </h2>
-                <div className="space-y-2">
-                  {chats.slice(0, 3).map((chat) => (
-                    <Link
-                      key={chat.id}
-                      href={`/c/${chat.id}`}
-                      className="border-border hover:bg-accent/50 block rounded-lg border p-3 transition-colors"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="min-w-0 flex-1">
-                          <h3 className="truncate font-medium">{chat.title}</h3>
-                          <p className="text-muted-foreground mt-1 text-sm">
-                            {chat.updated_at
-                              ? formatDate(chat.updated_at)
-                              : chat.created_at
-                                ? formatDate(chat.created_at)
-                                : null}
-                          </p>
-                        </div>
-                        <ChatCircleIcon
-                          size={16}
-                          className="text-muted-foreground ml-2 flex-shrink-0"
-                        />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
+            <h1 className="mb-6 text-center text-3xl font-medium tracking-tight">
+              What&apos;s on your mind?
+            </h1>
           </motion.div>
         ) : (
           <Conversation key="conversation" {...conversationProps} />
@@ -458,6 +424,41 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       >
         <ChatInput {...chatInputProps} />
       </motion.div>
+
+      {/* Recent Chats - Show below ChatInput when no messages */}
+      {showOnboarding && chats.length > 0 && (
+        <div className="mx-auto w-full max-w-3xl px-4 pt-6">
+          <h2 className="text-muted-foreground mb-3 text-sm font-medium">
+            Recent conversations
+          </h2>
+          <div className="space-y-2">
+            {chats.slice(0, 5).map((chat) => (
+              <Link
+                key={chat.id}
+                href={`/c/${chat.id}`}
+                className="border-border hover:bg-accent/50 block rounded-lg border p-3 transition-colors"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-medium">{chat.title}</h3>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      {chat.updated_at
+                        ? formatDate(chat.updated_at)
+                        : chat.created_at
+                          ? formatDate(chat.created_at)
+                          : null}
+                    </p>
+                  </div>
+                  <ChatCircleIcon
+                    size={16}
+                    className="text-muted-foreground ml-2 flex-shrink-0"
+                  />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
