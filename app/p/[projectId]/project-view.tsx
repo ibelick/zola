@@ -72,7 +72,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   })
 
   // Get chats from the chat store and filter for this project
-  const { chats: allChats, isLoading: chatsLoading } = useChats()
+  const { chats: allChats } = useChats()
 
   // Filter chats for this project
   const chats = allChats.filter((chat) => chat.project_id === projectId)
@@ -371,7 +371,12 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   return (
     <div
       className={cn(
-        "@container/main relative flex h-full flex-col items-center justify-end md:justify-center"
+        "relative flex h-full w-full flex-col items-center overflow-x-hidden overflow-y-auto",
+        showOnboarding && chats.length === 0
+          ? "justify-center pt-0"
+          : showOnboarding && chats.length > 0
+            ? "justify-start pt-32"
+            : "justify-end"
       )}
     >
       <AnimatePresence initial={false} mode="popLayout">
@@ -393,7 +398,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
             <div className="mb-6 flex items-center justify-center gap-2">
               <ChatCircleIcon className="text-muted-foreground" size={24} />
               <h1 className="text-center text-3xl font-medium tracking-tight">
-                {project?.name || "Untitled Project"}
+                {project?.name || ""}
               </h1>
             </div>
           </motion.div>
@@ -417,14 +422,13 @@ export function ProjectView({ projectId }: ProjectViewProps) {
         <ChatInput {...chatInputProps} />
       </motion.div>
 
-      {/* Recent Chats - Show below ChatInput when no messages */}
-      {showOnboarding && chats.length > 0 && (
-        <div className="mx-auto w-full max-w-3xl px-4 pt-6">
+      {showOnboarding && chats.length > 0 ? (
+        <div className="mx-auto w-full max-w-3xl px-4 pt-6 pb-20">
           <h2 className="text-muted-foreground mb-3 text-sm font-medium">
-            Recent conversations
+            Recent chats
           </h2>
           <div className="space-y-2">
-            {chats.slice(0, 5).map((chat) => (
+            {chats.map((chat) => (
               <ProjectChatItem
                 key={chat.id}
                 chat={chat}
@@ -433,7 +437,13 @@ export function ProjectView({ projectId }: ProjectViewProps) {
             ))}
           </div>
         </div>
-      )}
+      ) : showOnboarding && chats.length === 0 ? (
+        <div className="mx-auto w-full max-w-3xl px-4 pt-6 pb-20">
+          <h2 className="text-muted-foreground mb-3 text-sm font-medium">
+            No chats yet
+          </h2>
+        </div>
+      ) : null}
     </div>
   )
 }
