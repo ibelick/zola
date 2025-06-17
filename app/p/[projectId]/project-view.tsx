@@ -358,13 +358,8 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     ]
   )
 
-  const showOnboarding = messages.length === 0
-
-  // reset chat when visiting project page fresh (not during chat)
-  if (pathname === `/p/${projectId}`) {
-    setMessages([])
-    reload()
-  }
+  // Always show onboarding when on project page, regardless of messages
+  const showOnboarding = pathname === `/p/${projectId}`
 
   return (
     <div

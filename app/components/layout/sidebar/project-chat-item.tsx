@@ -202,6 +202,7 @@ export function ProjectChatItem({ chat, formatDate }: ProjectChatItemProps) {
         href={`/c/${chat.id}`}
         className="block p-3"
         onClick={handleLinkClick}
+        prefetch
       >
         <div className="flex items-start justify-between">
           <div className="min-w-0 flex-1">
