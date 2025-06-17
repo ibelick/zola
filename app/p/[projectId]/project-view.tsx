@@ -36,6 +36,7 @@ type ProjectViewProps = {
 export function ProjectView({ projectId }: ProjectViewProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [enableSearch, setEnableSearch] = useState(false)
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null)
   const { user } = useUser()
   const { createNewChat, bumpChat } = useChats()
   const { cacheAndAddMessage } = useMessages()
@@ -115,9 +116,17 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   // Modified ensureChatExists for project context
   const ensureChatExists = useCallback(
     async (userId: string) => {
+      // If we already have a current chat ID, return it
+      if (currentChatId) {
+        return currentChatId
+      }
+
       if (!isAuthenticated) {
         const storedGuestChatId = localStorage.getItem("guestChatId")
-        if (storedGuestChatId) return storedGuestChatId
+        if (storedGuestChatId) {
+          setCurrentChatId(storedGuestChatId)
+          return storedGuestChatId
+        }
       }
 
       if (messages.length === 0) {
@@ -133,6 +142,9 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           )
 
           if (!newChat) return null
+
+          setCurrentChatId(newChat.id)
+
           if (isAuthenticated) {
             window.history.pushState(null, "", `/c/${newChat.id}`)
           } else {
@@ -160,9 +172,10 @@ export function ProjectView({ projectId }: ProjectViewProps) {
         }
       }
 
-      return null
+      return currentChatId
     },
     [
+      currentChatId,
       isAuthenticated,
       messages.length,
       createNewChat,
