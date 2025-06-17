@@ -390,19 +390,12 @@ export function ProjectView({ projectId }: ProjectViewProps) {
               },
             }}
           >
-            <div className="mb-2 flex items-center justify-center">
-              <div className="text-muted-foreground flex items-center gap-2">
-                <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-lg">
-                  <ChatCircleIcon size={16} />
-                </div>
-                <span className="text-lg font-medium">
-                  {project?.name || "Project"}
-                </span>
-              </div>
+            <div className="mb-6 flex items-center justify-center gap-2">
+              <ChatCircleIcon className="text-muted-foreground" size={24} />
+              <h1 className="text-center text-3xl font-medium tracking-tight">
+                {project?.name || "Untitled Project"}
+              </h1>
             </div>
-            <h1 className="mb-6 text-center text-3xl font-medium tracking-tight">
-              What&apos;s on your mind?
-            </h1>
           </motion.div>
         ) : (
           <Conversation key="conversation" {...conversationProps} />
