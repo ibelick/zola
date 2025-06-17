@@ -40,8 +40,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   const { user } = useUser()
   const { createNewChat, bumpChat } = useChats()
   const { cacheAndAddMessage } = useMessages()
-  const hasSentFirstMessageRef = useRef(false)
-
+  const pathname = usePathname()
   const {
     files,
     setFiles,
@@ -99,7 +98,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     setInput,
     append,
   } = useChat({
-    id: `project-${projectId}`,
+    id: `project-${projectId}-${currentChatId}`,
     api: API_ROUTE_CHAT,
     initialMessages: [],
     onFinish: cacheAndAddMessage,
@@ -113,7 +112,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     chatId: null,
   })
 
-  // Modified ensureChatExists for project context
+  // Simplified ensureChatExists for authenticated project context
   const ensureChatExists = useCallback(
     async (userId: string) => {
       // If we already have a current chat ID, return it
@@ -121,36 +120,24 @@ export function ProjectView({ projectId }: ProjectViewProps) {
         return currentChatId
       }
 
-      if (!isAuthenticated) {
-        const storedGuestChatId = localStorage.getItem("guestChatId")
-        if (storedGuestChatId) {
-          setCurrentChatId(storedGuestChatId)
-          return storedGuestChatId
-        }
-      }
-
+      // Only create a new chat if we haven't started one yet
       if (messages.length === 0) {
         try {
           const newChat = await createNewChat(
             userId,
             input,
             selectedModel,
-            isAuthenticated,
+            true, // Always authenticated in this context
             SYSTEM_PROMPT_DEFAULT,
             undefined, // agentId
-            projectId // Add projectId here
+            projectId
           )
 
           if (!newChat) return null
 
           setCurrentChatId(newChat.id)
-
-          if (isAuthenticated) {
-            window.history.pushState(null, "", `/c/${newChat.id}`)
-          } else {
-            localStorage.setItem("guestChatId", newChat.id)
-          }
-
+          // Redirect to the chat page as expected
+          window.history.pushState(null, "", `/c/${newChat.id}`)
           return newChat.id
         } catch (err: unknown) {
           let errorMessage = "Something went wrong."
@@ -176,7 +163,6 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     },
     [
       currentChatId,
-      isAuthenticated,
       messages.length,
       createNewChat,
       input,
@@ -195,8 +181,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   const submit = useCallback(async () => {
     setIsSubmitting(true)
 
-    const uid = await getOrCreateGuestUserId(user)
-    if (!uid) {
+    if (!user?.id) {
       setIsSubmitting(false)
       return
     }
@@ -221,7 +206,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     setFiles([])
 
     try {
-      const currentChatId = await ensureChatExists(uid)
+      const currentChatId = await ensureChatExists(user.id)
       if (!currentChatId) {
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
         cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
@@ -240,7 +225,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
 
       let attachments: Attachment[] | null = []
       if (submittedFiles.length > 0) {
-        attachments = await handleFileUploads(uid, currentChatId)
+        attachments = await handleFileUploads(user.id, currentChatId)
         if (attachments === null) {
           setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
           cleanupOptimisticAttachments(
@@ -253,9 +238,9 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       const options = {
         body: {
           chatId: currentChatId,
-          userId: uid,
+          userId: user.id,
           model: selectedModel,
-          isAuthenticated,
+          isAuthenticated: true,
           systemPrompt: SYSTEM_PROMPT_DEFAULT,
           agentId: null,
           enableSearch,
@@ -267,7 +252,6 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
-      hasSentFirstMessageRef.current = true
 
       // Bump existing chats to top (non-blocking, after submit)
       if (messages.length > 0) {
@@ -292,7 +276,6 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     ensureChatExists,
     handleFileUploads,
     selectedModel,
-    isAuthenticated,
     handleSubmit,
     cacheAndAddMessage,
     messages.length,
@@ -300,23 +283,22 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   ])
 
   const handleReload = useCallback(async () => {
-    const uid = await getOrCreateGuestUserId(user)
-    if (!uid) {
+    if (!user?.id) {
       return
     }
 
     const options = {
       body: {
         chatId: null,
-        userId: uid,
+        userId: user.id,
         model: selectedModel,
-        isAuthenticated,
+        isAuthenticated: true,
         systemPrompt: SYSTEM_PROMPT_DEFAULT,
       },
     }
 
     reload(options)
-  }, [user, selectedModel, isAuthenticated, reload])
+  }, [user, selectedModel, reload])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -377,6 +359,12 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   )
 
   const showOnboarding = messages.length === 0
+
+  // reset chat when visiting project page fresh (not during chat)
+  if (pathname === `/p/${projectId}`) {
+    setMessages([])
+    reload()
+  }
 
   return (
     <div

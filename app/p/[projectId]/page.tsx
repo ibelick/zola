@@ -38,7 +38,7 @@ export default async function Page({ params }: Props) {
   return (
     <MessagesProvider>
       <LayoutApp>
-        <ProjectView projectId={projectId} />
+        <ProjectView projectId={projectId} key={projectId} />
       </LayoutApp>
     </MessagesProvider>
   )

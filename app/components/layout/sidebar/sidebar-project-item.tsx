@@ -2,6 +2,7 @@
 
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import useClickOutside from "@/app/hooks/use-click-outside"
+import { fetchClient } from "@/lib/fetch"
 import { cn } from "@/lib/utils"
 import { Check, FolderIcon, X } from "@phosphor-icons/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -45,7 +46,7 @@ export function SidebarProjectItem({ project }: SidebarProjectItemProps) {
       projectId: string
       name: string
     }) => {
-      const response = await fetch(`/api/projects/${projectId}`, {
+      const response = await fetchClient(`/api/projects/${projectId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
