@@ -19,6 +19,7 @@ import { useChat } from "@ai-sdk/react"
 import { ChatCircleIcon } from "@phosphor-icons/react"
 import { useQuery } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "motion/react"
+import { usePathname } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
 
 type Project = {
@@ -28,22 +29,13 @@ type Project = {
   created_at: string
 }
 
-type Chat = {
-  id: string
-  title: string
-  created_at: string
-  updated_at: string
-  project_id: string | null
-  user_id: string
-  model: string
-}
-
 type ProjectViewProps = {
   projectId: string
 }
 
 export function ProjectView({ projectId }: ProjectViewProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const pathname = usePathname()
   const { user } = useUser()
   const { createNewChat, bumpChat } = useChats()
   const { cacheAndAddMessage } = useMessages()
@@ -106,6 +98,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     setInput,
     append,
   } = useChat({
+    id: `project-${projectId}`,
     api: API_ROUTE_CHAT,
     initialMessages: [],
     onFinish: cacheAndAddMessage,
