@@ -8,6 +8,7 @@ type CreateChatInput = {
   model: string
   isAuthenticated: boolean
   agentId?: string
+  projectId?: string
 }
 
 export async function createChatInDb({
@@ -16,6 +17,7 @@ export async function createChatInDb({
   model,
   isAuthenticated,
   agentId,
+  projectId,
 }: CreateChatInput) {
   // Filter out local agent IDs for database operations
   const dbAgentId = filterLocalAgentId(agentId)
@@ -35,7 +37,13 @@ export async function createChatInDb({
 
   await checkUsageByModel(supabase, userId, model, isAuthenticated)
 
-  const insertData: { user_id: string; title: string; model: string; agent_id?: string } = {
+  const insertData: {
+    user_id: string
+    title: string
+    model: string
+    agent_id?: string
+    project_id?: string
+  } = {
     user_id: userId,
     title: title || "New Chat",
     model,
@@ -43,6 +51,10 @@ export async function createChatInDb({
 
   if (dbAgentId) {
     insertData.agent_id = dbAgentId
+  }
+
+  if (projectId) {
+    insertData.project_id = projectId
   }
 
   const { data, error } = await supabase

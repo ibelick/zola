@@ -190,7 +190,8 @@ export async function createNewChat(
   title?: string,
   model?: string,
   isAuthenticated?: boolean,
-  agentId?: string
+  agentId?: string,
+  projectId?: string
 ): Promise<Chats> {
   try {
     // Note: Local agent IDs are filtered out at the API level (create-chat route)
@@ -200,6 +201,7 @@ export async function createNewChat(
       model: string
       isAuthenticated?: boolean
       agentId?: string
+      projectId?: string
     } = {
       userId,
       title: title || (agentId ? `Conversation with agent` : "New Chat"),
@@ -209,6 +211,10 @@ export async function createNewChat(
 
     if (agentId) {
       payload.agentId = agentId
+    }
+
+    if (projectId) {
+      payload.projectId = projectId
     }
 
     const res = await fetchClient(API_ROUTE_CREATE_CHAT, {
@@ -232,6 +238,7 @@ export async function createNewChat(
       user_id: responseData.chat.user_id,
       public: responseData.chat.public,
       updated_at: responseData.chat.updated_at,
+      project_id: responseData.chat.project_id || null,
     }
 
     await writeToIndexedDB("chats", chat)

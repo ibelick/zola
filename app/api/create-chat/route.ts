@@ -2,7 +2,7 @@ import { createChatInDb } from "./api"
 
 export async function POST(request: Request) {
   try {
-    const { userId, title, model, isAuthenticated, agentId } =
+    const { userId, title, model, isAuthenticated, agentId, projectId } =
       await request.json()
 
     if (!userId) {
@@ -17,6 +17,7 @@ export async function POST(request: Request) {
       model,
       isAuthenticated,
       agentId,
+      projectId,
     })
 
     if (!chat) {

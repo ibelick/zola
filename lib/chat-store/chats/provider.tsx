@@ -31,7 +31,8 @@ interface ChatsContextType {
     model?: string,
     isAuthenticated?: boolean,
     systemPrompt?: string,
-    agentId?: string
+    agentId?: string,
+    projectId?: string
   ) => Promise<Chats | undefined>
   resetChats: () => Promise<void>
   getChatById: (id: string) => Chats | undefined
@@ -128,7 +129,8 @@ export function ChatsProvider({
     model?: string,
     isAuthenticated?: boolean,
     systemPrompt?: string,
-    agentId?: string
+    agentId?: string,
+    projectId?: string
   ) => {
     if (!userId) return
     const prev = [...chats]
@@ -144,6 +146,7 @@ export function ChatsProvider({
       user_id: userId,
       public: true,
       updated_at: new Date().toISOString(),
+      project_id: null,
     }
     setChats((prev) => [optimisticChat, ...prev])
 
@@ -153,7 +156,8 @@ export function ChatsProvider({
         title,
         model,
         isAuthenticated,
-        agentId
+        agentId,
+        projectId
       )
 
       setChats((prev) => [
