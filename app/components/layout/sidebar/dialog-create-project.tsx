@@ -10,7 +10,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { fetchClient } from "@/lib/fetch"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 type DialogCreateProjectProps = {
@@ -31,10 +33,10 @@ export function DialogCreateProject({
 }: DialogCreateProjectProps) {
   const [projectName, setProjectName] = useState("")
   const queryClient = useQueryClient()
-
+  const router = useRouter()
   const createProjectMutation = useMutation({
     mutationFn: async (name: string): Promise<CreateProjectData> => {
-      const response = await fetch("/api/projects", {
+      const response = await fetchClient("/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -48,8 +50,9 @@ export function DialogCreateProject({
 
       return response.json()
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] })
+      router.push(`/p/${data.id}`)
       setProjectName("")
       setIsOpen(false)
     },
