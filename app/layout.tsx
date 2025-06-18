@@ -4,7 +4,6 @@ import "./globals.css"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { AgentProvider } from "@/lib/agent-store/provider"
 import { ChatsProvider } from "@/lib/chat-store/chats/provider"
 import { ChatSessionProvider } from "@/lib/chat-store/session/provider"
 import { ModelProvider } from "@/lib/model-store/provider"
@@ -58,26 +57,24 @@ export default async function RootLayout({
             <ModelProvider>
               <ChatsProvider userId={userProfile?.id}>
                 <ChatSessionProvider>
-                  <AgentProvider userId={userProfile?.id}>
-                    <UserPreferencesProvider userId={userProfile?.id}>
-                      <TooltipProvider
-                        delayDuration={200}
-                        skipDelayDuration={500}
+                  <UserPreferencesProvider userId={userProfile?.id}>
+                    <TooltipProvider
+                      delayDuration={200}
+                      skipDelayDuration={500}
+                    >
+                      <ThemeProvider
+                        attribute="class"
+                        defaultTheme="light"
+                        enableSystem
+                        disableTransitionOnChange
                       >
-                        <ThemeProvider
-                          attribute="class"
-                          defaultTheme="light"
-                          enableSystem
-                          disableTransitionOnChange
-                        >
-                          <SidebarProvider defaultOpen>
-                            <Toaster position="top-center" />
-                            {children}
-                          </SidebarProvider>
-                        </ThemeProvider>
-                      </TooltipProvider>
-                    </UserPreferencesProvider>
-                  </AgentProvider>
+                        <SidebarProvider defaultOpen>
+                          <Toaster position="top-center" />
+                          {children}
+                        </SidebarProvider>
+                      </ThemeProvider>
+                    </TooltipProvider>
+                  </UserPreferencesProvider>
                 </ChatSessionProvider>
               </ChatsProvider>
             </ModelProvider>

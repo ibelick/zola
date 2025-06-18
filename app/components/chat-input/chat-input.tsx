@@ -1,6 +1,5 @@
 "use client"
 
-import { useAgentCommand } from "@/app/components/chat-input/use-agent-command"
 import { ModelSelector } from "@/components/common/model-selector/base"
 import {
   PromptInput,
@@ -9,16 +8,13 @@ import {
   PromptInputTextarea,
 } from "@/components/prompt-kit/prompt-input"
 import { Button } from "@/components/ui/button"
-import { useAgent } from "@/lib/agent-store/provider"
 import { getModelInfo } from "@/lib/models"
 import { ArrowUp, Stop, Warning } from "@phosphor-icons/react"
 import React, { useCallback, useEffect, useMemo } from "react"
 import { PromptSystem } from "../suggestions/prompt-system"
-import { AgentCommand } from "./agent-command"
 import { ButtonFileUpload } from "./button-file-upload"
 import { ButtonSearch } from "./button-search"
 import { FileList } from "./file-list"
-import { SelectedAgent } from "./selected-agent"
 
 type ChatInputProps = {
   value: string
@@ -58,15 +54,6 @@ export function ChatInput({
   setEnableSearch,
   enableSearch,
 }: ChatInputProps) {
-  const { currentAgent, curatedAgents, userAgents } = useAgent()
-
-  const agentCommand = useAgentCommand({
-    value,
-    onValueChange,
-    agents: [...(curatedAgents || []), ...(userAgents || [])],
-    defaultAgent: currentAgent,
-  })
-
   const selectModelConfig = getModelInfo(selectedModel)
   const hasToolSupport = Boolean(selectModelConfig?.tools)
   const hasSearchSupport = Boolean(selectModelConfig?.webSearch)
@@ -87,9 +74,6 @@ export function ChatInput({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      // First process agent command related key handling
-      agentCommand.handleKeyDown(e)
-
       if (isSubmitting) {
         e.preventDefault()
         return
@@ -100,7 +84,7 @@ export function ChatInput({
         return
       }
 
-      if (e.key === "Enter" && !e.shiftKey && !agentCommand.showAgentCommand) {
+      if (e.key === "Enter" && !e.shiftKey) {
         if (isOnlyWhitespace(value)) {
           return
         }
@@ -109,7 +93,7 @@ export function ChatInput({
         onSend()
       }
     },
-    [agentCommand, isSubmitting, onSend, status, value]
+    [isSubmitting, onSend, status, value]
   )
 
   const handlePaste = useCallback(
@@ -152,13 +136,6 @@ export function ChatInput({
     [isUserAuthenticated, onFileUpload]
   )
 
-  useEffect(() => {
-    const el = agentCommand.textareaRef.current
-    if (!el) return
-    el.addEventListener("paste", handlePaste)
-    return () => el.removeEventListener("paste", handlePaste)
-  }, [agentCommand.textareaRef, handlePaste])
-
   useMemo(() => {
     if (!hasSearchSupport && enableSearch) {
       setEnableSearch?.(false)
@@ -179,32 +156,13 @@ export function ChatInput({
           className="bg-popover relative z-10 p-0 pt-1 shadow-xs backdrop-blur-xl"
           maxHeight={200}
           value={value}
-          onValueChange={agentCommand.handleValueChange}
+          onValueChange={onValueChange}
         >
-          {agentCommand.showAgentCommand && (
-            <div className="absolute bottom-full left-0 w-full">
-              <AgentCommand
-                isOpen={agentCommand.showAgentCommand}
-                searchTerm={agentCommand.agentSearchTerm}
-                onSelect={agentCommand.handleAgentSelect}
-                onClose={agentCommand.closeAgentCommand}
-                activeIndex={agentCommand.activeAgentIndex}
-                onActiveIndexChange={agentCommand.setActiveAgentIndex}
-                curatedAgents={curatedAgents || []}
-                userAgents={userAgents || []}
-              />
-            </div>
-          )}
-          <SelectedAgent
-            selectedAgent={agentCommand.selectedAgent}
-            removeSelectedAgent={agentCommand.removeSelectedAgent}
-          />
           <FileList files={files} onFileRemove={onFileRemove} />
           <PromptInputTextarea
             placeholder="Ask Zola"
             onKeyDown={handleKeyDown}
             className="min-h-[44px] pt-3 pl-4 text-base leading-[1.3] sm:text-base md:text-base"
-            ref={agentCommand.textareaRef}
           />
           <PromptInputActions className="mt-5 w-full justify-between px-3 pb-3">
             <div className="flex gap-2">
@@ -226,15 +184,6 @@ export function ChatInput({
                   isAuthenticated={isUserAuthenticated}
                 />
               ) : null}
-              {currentAgent && !hasToolSupport && (
-                <div className="flex items-center gap-1">
-                  <Warning className="size-4" />
-                  <p className="line-clamp-2 text-xs">
-                    {selectedModel} does not support tools. Agents may not work
-                    as expected.
-                  </p>
-                </div>
-              )}
             </div>
             <PromptInputAction
               tooltip={status === "streaming" ? "Stop" : "Send"}

@@ -5,7 +5,6 @@ import { Conversation } from "@/app/components/chat/conversation"
 import { useModel } from "@/app/components/chat/use-model"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
-import { useAgent } from "@/lib/agent-store/provider"
 import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
@@ -89,13 +88,9 @@ export function Chat() {
     chatId,
   })
 
-  const { currentAgent } = useAgent()
   const systemPrompt = useMemo(
-    () =>
-      currentAgent?.system_prompt ||
-      user?.system_prompt ||
-      SYSTEM_PROMPT_DEFAULT,
-    [currentAgent?.system_prompt, user?.system_prompt]
+    () => user?.system_prompt || SYSTEM_PROMPT_DEFAULT,
+    [user?.system_prompt]
   )
 
   const hasSentFirstMessageRef = useRef(false)
@@ -159,7 +154,7 @@ export function Chat() {
     input,
     selectedModel,
     systemPrompt,
-    selectedAgentId: currentAgent?.id || null,
+    selectedAgentId: null,
     createNewChat,
     setHasDialogAuth,
   })
@@ -243,7 +238,7 @@ export function Chat() {
           model: selectedModel,
           isAuthenticated,
           systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-          agentId: currentAgent?.id || null,
+          agentId: null,
           enableSearch,
         },
         experimental_attachments: attachments || undefined,
@@ -280,7 +275,6 @@ export function Chat() {
     cleanupOptimisticAttachments,
     ensureChatExists,
     handleFileUploads,
-    currentAgent?.id,
     selectedModel,
     isAuthenticated,
     systemPrompt,

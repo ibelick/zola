@@ -8,7 +8,6 @@ import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import type { Agent } from "@/app/types/agent"
 import { ZolaIcon } from "@/components/icons/zola"
 import { Button } from "@/components/ui/button"
-import { useAgent } from "@/lib/agent-store/provider"
 import { APP_NAME } from "@/lib/config"
 import { useUser } from "@/lib/user-store/provider"
 import { Info } from "@phosphor-icons/react"
@@ -24,7 +23,6 @@ export type AgentHeader = Pick<
 export function Header({ hasSidebar }: { hasSidebar: boolean }) {
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
-  const { currentAgent } = useAgent()
 
   const isLoggedIn = !!user
 
@@ -68,7 +66,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
             </div>
           ) : (
             <div className="pointer-events-auto flex flex-1 items-center justify-end gap-2">
-              {currentAgent && <DialogPublish />}
+              <DialogPublish />
               <ButtonNewChat />
               {!hasSidebar && <HistoryTrigger hasSidebar={hasSidebar} />}
               <UserMenu />
