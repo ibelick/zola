@@ -5,7 +5,6 @@ import { AppInfoTrigger } from "@/app/components/layout/app-info/app-info-trigge
 import { ButtonNewChat } from "@/app/components/layout/button-new-chat"
 import { UserMenu } from "@/app/components/layout/user-menu"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
-import type { Agent } from "@/app/types/agent"
 import { ZolaIcon } from "@/components/icons/zola"
 import { Button } from "@/components/ui/button"
 import { APP_NAME } from "@/lib/config"
@@ -14,11 +13,6 @@ import { Info } from "@phosphor-icons/react"
 import Link from "next/link"
 import { DialogPublish } from "./dialog-publish"
 import { HeaderSidebarTrigger } from "./header-sidebar-trigger"
-
-export type AgentHeader = Pick<
-  Agent,
-  "name" | "description" | "avatar_url" | "slug"
->
 
 export function Header({ hasSidebar }: { hasSidebar: boolean }) {
   const isMobile = useBreakpoint(768)
