@@ -176,30 +176,6 @@ CREATE TABLE users (
   CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE -- Explicit FK definition
 );
 
--- Agents table
-CREATE TABLE agents (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  slug TEXT NOT NULL,
-  description TEXT NOT NULL,
-  avatar_url TEXT,
-  system_prompt TEXT NOT NULL,
-  model_preference TEXT,
-  is_public BOOLEAN DEFAULT false NOT NULL,
-  remixable BOOLEAN DEFAULT false NOT NULL,
-  tools_enabled BOOLEAN DEFAULT false NOT NULL,
-  example_inputs TEXT[],
-  tags TEXT[],
-  category TEXT,
-  creator_id UUID,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ,
-  tools TEXT[],
-  max_steps INTEGER,
-  mcp_config JSONB, -- Representing the object structure as JSONB
-  CONSTRAINT agents_creator_id_fkey FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE SET NULL -- Changed to SET NULL based on schema, could also be CASCADE
-);
-
 -- Projects table
 CREATE TABLE projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -217,12 +193,10 @@ CREATE TABLE chats (
   title TEXT,
   model TEXT,
   system_prompt TEXT,
-  agent_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   public BOOLEAN DEFAULT FALSE NOT NULL,
   CONSTRAINT chats_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  CONSTRAINT chats_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE SET NULL,
   CONSTRAINT chats_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 
@@ -281,7 +255,7 @@ CREATE TABLE user_keys (
 -- ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 -- CREATE POLICY "Users can view their own data." ON users FOR SELECT USING (auth.uid() = id);
 -- CREATE POLICY "Users can update their own data." ON users FOR UPDATE USING (auth.uid() = id);
--- ... add policies for other tables (agents, chats, messages, etc.) ...
+-- ... add policies for other tables (chats, messages, etc.) ...
 ```
 
 ### Storage Setup
@@ -291,25 +265,6 @@ Create the buckets `chat-attachments` and `avatars` in your Supabase dashboard:
 1. Go to Storage in your Supabase dashboard
 2. Click "New bucket" and create two buckets: `chat-attachments` and `avatars`
 3. Configure public access permissions for both buckets
-
-#### Agent Avatar Configuration
-
-For agent profile pictures to work properly:
-
-1. Create an `agents` folder inside your `avatars` bucket:
-
-   - Navigate to the `avatars` bucket
-   - Click "Create folder" and name it `agents`
-
-2. Upload agent avatar images
-
-3. Set up public access for the avatars bucket:
-   - Go to "Configuration" tab for the `avatars` bucket
-   - Under "Row Level Security (RLS)" ensure it's disabled or create a policy:
-   ```sql
-   CREATE POLICY "Public Read Access" ON storage.objects
-   FOR SELECT USING (bucket_id = 'avatars');
-   ```
 
 ## Ollama Setup (Local AI Models)
 

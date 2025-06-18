@@ -56,7 +56,7 @@ docker-compose -f docker-compose.ollama.yml up
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
 
-To unlock features like auth, file uploads, and agents, see [INSTALL.md](./INSTALL.md).
+To unlock features like auth, file uploads, see [INSTALL.md](./INSTALL.md).
 
 ## Built with
 
