@@ -12,7 +12,7 @@ import {
   Wrench,
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
-import { useEffect, useState } from "react"
+import { useMemo, useState } from "react"
 import { ToolInvocationUIPart } from "./message-assistant"
 
 interface ToolInvocationProps {
@@ -219,63 +219,36 @@ function SingleToolCard({
   const isCompleted = state === "output-available"
 
   // Parse the result JSON if available
-  useEffect(() => {
-    let didCancel = false
+  const { parsedResult, parseError } = useMemo(() => {
+    if (!isCompleted || !result) return { parsedResult: null, parseError: null }
 
-    if (isCompleted && result) {
-      // Handle array results (like search results)
-      if (Array.isArray(result)) {
-        if (!didCancel) {
-          setParsedResult(result)
-        }
-        return
-      }
+    try {
+      if (Array.isArray(result))
+        return { parsedResult: result, parseError: null }
 
-      // Handle object results with content property
       if (
         typeof result === "object" &&
         result !== null &&
         "content" in result
       ) {
-        try {
-          const content = result.content
-          const textContent = content.find(
-            (item: { type: string }) => item.type === "text"
-          )
+        const textContent = result.content?.find(
+          (item: { type: string }) => item.type === "text"
+        )
+        if (!textContent?.text) return { parsedResult: null, parseError: null }
 
-          if (textContent && textContent.text) {
-            try {
-              // Try to parse as JSON first
-              const parsed = JSON.parse(textContent.text)
-              if (!didCancel) {
-                setParsedResult(parsed)
-              }
-            } catch {
-              // If not valid JSON, just use the text as is
-              if (!didCancel) {
-                setParsedResult(textContent.text)
-              }
-            }
-            if (!didCancel) {
-              setParseError(null)
-            }
+        try {
+          return {
+            parsedResult: JSON.parse(textContent.text),
+            parseError: null,
           }
-        } catch (error) {
-          if (!didCancel) {
-            setParseError("Failed to parse result")
-          }
-          console.error("Failed to parse result:", error)
-        }
-      } else {
-        // Handle direct object results
-        if (!didCancel) {
-          setParsedResult(result)
+        } catch {
+          return { parsedResult: textContent.text, parseError: null }
         }
       }
-    }
 
-    return () => {
-      didCancel = true
+      return { parsedResult: result, parseError: null }
+    } catch (e) {
+      return { parsedResult: null, parseError: "Failed to parse result" }
     }
   }, [isCompleted, result])
 

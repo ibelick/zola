@@ -2,27 +2,21 @@
 
 [zola.chat](https://zola.chat)
 
-**Zola** is the open-source interface for AI chat.
+**Zola** is the open-source chat interface for all your models.
 
-[![Chat with this repo](https://zola.chat/button/github.svg)](https://zola.chat/?agent=github/ibelick/zola)
-
-![zola screenshot](./public/cover_zola.webp)
+![zola cover](./public/cover_zola.jpg)
 
 ## Features
 
-- Multi-model support: OpenAI, Mistral, Claude, Gemini, **Ollama (local models)**
-- File uploads with context-aware answers
+- Multi-model support: OpenAI, Mistral, Claude, Gemini, Ollama (local models)
+- Bring your own API key (BYOK) support via OpenRouter
+- File uploads
 - Clean, responsive UI with light/dark themes
-- Built with Tailwind, shadcn/ui, and prompt-kit
-- Fully open-source and self-hostable
+- Built with Tailwind CSS, shadcn/ui, and prompt-kit
+- Open-source and self-hostable
 - Customizable: user system prompt, multiple layout options
-- **Local AI with Ollama**: Run models locally with automatic model detection
-
-## Agent Features (WIP)
-
-- `@agent` mentions
-- Early tool and MCP integration for agent workflows
-- Foundation for more powerful, customizable agents (more coming soon)
+- Local AI with Ollama: Run models locally with automatic model detection
+- Full MCP support (wip)
 
 ## Quick Start
 
@@ -62,7 +56,7 @@ docker-compose -f docker-compose.ollama.yml up
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
 
-To unlock features like auth, file uploads, and agents, see [INSTALL.md](./INSTALL.md).
+To unlock features like auth, file uploads, see [INSTALL.md](./INSTALL.md).
 
 ## Built with
 

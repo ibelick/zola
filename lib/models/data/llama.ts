@@ -24,6 +24,7 @@ const llamaModels: ModelConfig[] = [
     website: "https://llama.meta.com",
     apiDocs: "https://docs.groq.com",
     modelPage: "https://ai.meta.com/llama/",
+    icon: "llama",
   },
   {
     id: "llama-3-3-70b-groq",
@@ -49,6 +50,7 @@ const llamaModels: ModelConfig[] = [
     apiDocs: "https://docs.groq.com",
     modelPage: "https://ai.meta.com/llama/",
     releasedAt: "2024-12-06",
+    icon: "llama",
   },
   {
     id: "llama-3-1-8b-groq",
@@ -74,6 +76,7 @@ const llamaModels: ModelConfig[] = [
     apiDocs: "https://docs.groq.com",
     modelPage: "https://ai.meta.com/llama/",
     releasedAt: "2024-07-23",
+    icon: "llama",
   },
   {
     id: "llama-3-70b-groq",
@@ -99,6 +102,7 @@ const llamaModels: ModelConfig[] = [
     apiDocs: "https://docs.groq.com",
     modelPage: "https://ai.meta.com/llama/",
     releasedAt: "2024-04-18",
+    icon: "llama",
   },
   {
     id: "llama-3-1-405b-together",
@@ -124,6 +128,7 @@ const llamaModels: ModelConfig[] = [
     apiDocs: "https://docs.together.ai",
     modelPage: "https://ai.meta.com/llama/",
     releasedAt: "2024-07-23",
+    icon: "llama",
   },
 ]
 

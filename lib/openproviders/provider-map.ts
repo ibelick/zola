@@ -2,7 +2,7 @@ import type { Provider, SupportedModel } from "./types"
 
 // map each model ID to its provider
 const MODEL_PROVIDER_MAP: Record<string, Provider> = {
-  "o1": "openai",
+  o1: "openai",
   "o1-2024-12-17": "openai",
   "o1-mini": "openai",
   "o1-mini-2024-09-12": "openai",
@@ -41,6 +41,10 @@ const MODEL_PROVIDER_MAP: Record<string, Provider> = {
   "gpt-3.5-turbo-1106": "openai",
   "chatgpt-4o-latest": "openai",
   "gpt-3.5-turbo-instruct": "openai",
+  o3: "openai",
+  "o3-2025-04-16": "openai",
+  "o4-mini": "openai",
+  "o4-mini-2025-04-16": "openai",
 
   // Mistral
   "ministral-3b-latest": "mistral",
@@ -52,6 +56,13 @@ const MODEL_PROVIDER_MAP: Record<string, Provider> = {
   "open-mistral-7b": "mistral",
   "open-mixtral-8x7b": "mistral",
   "open-mixtral-8x22b": "mistral",
+
+  //Perplexity
+  "sonar":"perplexity",
+  "sonar-pro": "perplexity",
+  "sonar-deep-research": "perplexity",
+  "sonar-reasoning-pro": "perplexity",
+  "sonar-reasoning": "perplexity",
 
   // Google
   "gemini-2.0-flash-001": "google",
@@ -135,19 +146,23 @@ function isOllamaModel(modelId: string): boolean {
     /:latest$/i,
     /:[\d.]+[bB]?$/i, // version tags like :7b, :13b, :1.5
   ]
-  
-  return ollamaPatterns.some(pattern => pattern.test(modelId))
+
+  return ollamaPatterns.some((pattern) => pattern.test(modelId))
 }
 
 export function getProviderForModel(model: SupportedModel): Provider {
+  if (model.startsWith("openrouter:")) {
+    return "openrouter"
+  }
+
   // First check the static mapping
   const provider = MODEL_PROVIDER_MAP[model]
   if (provider) return provider
-  
+
   // If not found in static mapping, check if it looks like an Ollama model
   if (isOllamaModel(model)) {
     return "ollama"
   }
-  
+
   throw new Error(`Unknown provider for model: ${model}`)
 }

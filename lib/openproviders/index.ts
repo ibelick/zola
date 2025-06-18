@@ -2,7 +2,8 @@ import { anthropic, createAnthropic } from "@ai-sdk/anthropic"
 import { createGoogleGenerativeAI, google } from "@ai-sdk/google"
 import { createMistral, mistral } from "@ai-sdk/mistral"
 import { createOpenAI, openai } from "@ai-sdk/openai"
-import type { LanguageModelV2 } from "@ai-sdk/provider"
+import { createPerplexity, perplexity } from "@ai-sdk/perplexity"
+import type { LanguageModelV1 } from "@ai-sdk/provider"
 import { createXai, xai } from "@ai-sdk/xai"
 import { getProviderForModel } from "./provider-map"
 import type {
@@ -11,6 +12,7 @@ import type {
   MistralModel,
   OllamaModel,
   OpenAIModel,
+  PerplexityModel,
   SupportedModel,
   XaiModel,
 } from "./types"
@@ -18,6 +20,7 @@ import type {
 type OpenAIChatSettings = Parameters<typeof openai>[0]
 type MistralProviderSettings = Parameters<typeof mistral>[0]
 type GoogleGenerativeAIProviderSettings = Parameters<typeof google>[0]
+type PerplexityProviderSettings = Parameters<typeof perplexity>[0]
 type AnthropicProviderSettings = Parameters<typeof anthropic>[0]
 type XaiProviderSettings = Parameters<typeof xai>[0]
 type OllamaProviderSettings = OpenAIChatSettings // Ollama uses OpenAI-compatible API
@@ -26,15 +29,17 @@ type ModelSettings<T extends SupportedModel> = T extends OpenAIModel
   ? OpenAIChatSettings
   : T extends MistralModel
     ? MistralProviderSettings
-    : T extends GeminiModel
-      ? GoogleGenerativeAIProviderSettings
-      : T extends AnthropicModel
-        ? AnthropicProviderSettings
-        : T extends XaiModel
-          ? XaiProviderSettings
-          : T extends OllamaModel
-            ? OllamaProviderSettings
-            : never
+    : T extends PerplexityModel
+      ? PerplexityProviderSettings
+      : T extends GeminiModel
+        ? GoogleGenerativeAIProviderSettings
+        : T extends AnthropicModel
+          ? AnthropicProviderSettings
+          : T extends XaiModel
+            ? XaiProviderSettings
+            : T extends OllamaModel
+              ? OllamaProviderSettings
+              : never
 
 export type OpenProvidersOptions<T extends SupportedModel> = ModelSettings<T>
 
@@ -46,6 +51,10 @@ const getOllamaBaseURL = () => {
   }
 
   // Server-side: check environment variables
+  return (
+    process.env.OLLAMA_BASE_URL?.replace(/\/+$/, "") + "/v1" ||
+    "http://localhost:11434/v1"
+  )
   return (
     process.env.OLLAMA_BASE_URL?.replace(/\/+$/, "") + "/v1" ||
     "http://localhost:11434/v1"
@@ -72,11 +81,11 @@ export function openproviders<T extends SupportedModel>(
     if (apiKey) {
       const openaiProvider = createOpenAI({
         apiKey,
-        // compatibility: "strict",
+        compatibility: "strict",
       })
       return openaiProvider(
-        modelId as OpenAIModel
-        // settings as OpenAIChatSettings
+        modelId as OpenAIModel,
+        settings as OpenAIChatSettings
       )
     }
     return openai(
@@ -89,8 +98,8 @@ export function openproviders<T extends SupportedModel>(
     if (apiKey) {
       const mistralProvider = createMistral({ apiKey })
       return mistralProvider(
-        modelId as MistralModel
-        // settings as MistralProviderSettings
+        modelId as MistralModel,
+        settings as MistralProviderSettings
       )
     }
     return mistral(
@@ -103,13 +112,27 @@ export function openproviders<T extends SupportedModel>(
     if (apiKey) {
       const googleProvider = createGoogleGenerativeAI({ apiKey })
       return googleProvider(
-        modelId as GeminiModel
-        // settings as GoogleGenerativeAIProviderSettings
+        modelId as GeminiModel,
+        settings as GoogleGenerativeAIProviderSettings
       )
     }
     return google(
-      modelId as GeminiModel
-      // settings as GoogleGenerativeAIProviderSettings
+      modelId as GeminiModel,
+      settings as GoogleGenerativeAIProviderSettings
+    )
+  }
+
+  if (provider === "perplexity") {
+    if (apiKey) {
+      const perplexityProvider = createPerplexity({ apiKey })
+      return perplexityProvider(
+        modelId as PerplexityModel
+        // settings as PerplexityProviderSettings
+      )
+    }
+    return perplexity(
+      modelId as PerplexityModel
+      // settings as PerplexityProviderSettings
     )
   }
 
@@ -117,13 +140,13 @@ export function openproviders<T extends SupportedModel>(
     if (apiKey) {
       const anthropicProvider = createAnthropic({ apiKey })
       return anthropicProvider(
-        modelId as AnthropicModel
-        // settings as AnthropicProviderSettings
+        modelId as AnthropicModel,
+        settings as AnthropicProviderSettings
       )
     }
     return anthropic(
-      modelId as AnthropicModel
-      // settings as AnthropicProviderSetting
+      modelId as AnthropicModel,
+      settings as AnthropicProviderSettings
     )
   }
 
@@ -140,8 +163,8 @@ export function openproviders<T extends SupportedModel>(
   if (provider === "ollama") {
     const ollamaProvider = createOllamaProvider()
     return ollamaProvider(
-      modelId as OllamaModel
-      // settings as OllamaProviderSettings
+      modelId as OllamaModel,
+      settings as OllamaProviderSettings
     )
   }
 

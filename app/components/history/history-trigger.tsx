@@ -83,6 +83,7 @@ export function HistoryTrigger({
       trigger={defaultTrigger}
       isOpen={isOpen}
       setIsOpen={setIsOpen}
+      onOpenChange={setIsOpen}
       hasPopover={hasPopover}
     />
   )

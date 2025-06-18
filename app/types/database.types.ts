@@ -12,83 +12,29 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      agents: {
+      projects: {
         Row: {
-          avatar_url: string | null
-          category: string | null
-          created_at: string | null
-          creator_id: string | null
-          description: string
-          example_inputs: string[] | null
           id: string
-          is_public: boolean
-          model_preference: string | null
           name: string
-          remixable: boolean
-          slug: string
-          system_prompt: string
-          tags: string[] | null
-          tools_enabled: boolean
-          updated_at: string | null
-          tools: string[] | null
-          max_steps: number | null
-          mcp_config?: {
-            server: string
-            variables: string[]
-          } | null
+          user_id: string
+          created_at: string | null
         }
         Insert: {
-          avatar_url?: string | null
-          category?: string | null
-          created_at?: string | null
-          creator_id?: string | null
-          description: string
-          example_inputs?: string[] | null
           id?: string
-          is_public?: boolean
-          model_preference?: string | null
           name: string
-          remixable?: boolean
-          slug: string
-          system_prompt: string
-          tags?: string[] | null
-          tools_enabled?: boolean
-          updated_at?: string | null
-          tools?: string[] | null
-          max_steps?: number | null
-          mcp_config?: {
-            server: string
-            variables: string[]
-          } | null
+          user_id: string
+          created_at?: string | null
         }
         Update: {
-          avatar_url?: string | null
-          category?: string | null
-          created_at?: string | null
-          creator_id?: string | null
-          description?: string
-          example_inputs?: string[] | null
           id?: string
-          is_public?: boolean
-          model_preference?: string | null
           name?: string
-          remixable?: boolean
-          slug?: string
-          system_prompt?: string
-          tags?: string[] | null
-          tools_enabled?: boolean
-          updated_at?: string | null
-          tools?: string[] | null
-          max_steps?: number | null
-          mcp_config?: {
-            server: string
-            variables: string[]
-          } | null
+          user_id?: string
+          created_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "agents_creator_id_fkey"
-            columns: ["creator_id"]
+            foreignKeyName: "projects_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -145,38 +91,41 @@ export type Database = {
       }
       chats: {
         Row: {
-          agent_id: string | null
           created_at: string | null
+          updated_at: string | null
           id: string
           model: string | null
+          project_id: string | null
           title: string | null
           user_id: string
           public: boolean
         }
         Insert: {
-          agent_id?: string | null
           created_at?: string | null
+          updated_at?: string | null
           id?: string
           model?: string | null
+          project_id?: string | null
           title?: string | null
           user_id: string
           public?: boolean
         }
         Update: {
-          agent_id?: string | null
           created_at?: string | null
+          updated_at?: string | null
           id?: string
           model?: string | null
+          project_id?: string | null
           title?: string | null
           user_id?: string
           public?: boolean
         }
         Relationships: [
           {
-            foreignKeyName: "chats_agent_id_fkey"
-            columns: ["agent_id"]
+            foreignKeyName: "chats_project_id_fkey"
+            columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "agents"
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
           {

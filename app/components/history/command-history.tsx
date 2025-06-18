@@ -1,5 +1,6 @@
 "use client"
 
+import { useKeyShortcut } from "@/app/hooks/use-key-shortcut"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,8 +32,9 @@ import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import { Check, PencilSimple, TrashSimple, X } from "@phosphor-icons/react"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { ChatPreviewPanel } from "./chat-preview-panel"
+import { CommandFooter } from "./command-footer"
 import { formatDate, groupChatsByDate } from "./utils"
 
 type CommandHistoryProps = {
@@ -42,6 +44,7 @@ type CommandHistoryProps = {
   trigger: React.ReactNode
   isOpen: boolean
   setIsOpen: (open: boolean) => void
+  onOpenChange?: (open: boolean) => void
   hasPopover?: boolean
 }
 
@@ -265,20 +268,25 @@ function CommandItemRow({
   )
 }
 
+type CustomCommandDialogProps = React.ComponentProps<typeof Dialog> & {
+  title?: string
+  description?: string
+  className?: string
+  onOpenChange?: (open: boolean) => void
+}
+
 // Custom CommandDialog with className support
 function CustomCommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
   children,
   className,
+  onOpenChange,
+  open,
   ...props
-}: React.ComponentProps<typeof Dialog> & {
-  title?: string
-  description?: string
-  className?: string
-}) {
+}: CustomCommandDialogProps) {
   return (
-    <Dialog {...props}>
+    <Dialog {...props} onOpenChange={onOpenChange} open={open}>
       <DialogHeader className="sr-only">
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
@@ -301,11 +309,13 @@ export function CommandHistory({
   trigger,
   isOpen,
   setIsOpen,
+  onOpenChange,
   hasPopover = true,
 }: CommandHistoryProps) {
   const { chatId } = useChatSession()
   const router = useRouter()
   const { preferences } = useUserPreferences()
+  const hasPrefetchedRef = useRef(false)
 
   const [searchQuery, setSearchQuery] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -317,8 +327,18 @@ export function CommandHistory({
   const { messages, isLoading, error, fetchPreview, clearPreview } =
     useChatPreview()
 
+  if (isOpen && !hasPrefetchedRef.current) {
+    const recentChats = chatHistory.slice(0, 10)
+    recentChats.forEach((chat) => {
+      router.prefetch(`/c/${chat.id}`)
+    })
+    hasPrefetchedRef.current = true
+  }
+
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
+    onOpenChange?.(open)
+
     if (!open) {
       setSearchQuery("")
       setEditingId(null)
@@ -328,8 +348,14 @@ export function CommandHistory({
       setHoveredChatId(null)
       setIsPreviewPanelHovered(false)
       clearPreview()
+      hasPrefetchedRef.current = false
     }
   }
+
+  useKeyShortcut(
+    (e: KeyboardEvent) => e.key === "k" && (e.metaKey || e.ctrlKey),
+    () => handleOpenChange(!isOpen)
+  )
 
   const handleChatHover = useCallback(
     (chatId: string | null) => {
@@ -446,7 +472,9 @@ export function CommandHistory({
             isSelected && preferences.showConversationPreviews && "bg-accent/50"
           )}
           value={chat.id}
-          onMouseEnter={() => handleChatHover(chat.id)}
+          onMouseEnter={() => {
+            handleChatHover(chat.id)
+          }}
         >
           {editingId === chat.id ? (
             <CommandItemEdit
@@ -494,30 +522,6 @@ export function CommandHistory({
     ]
   )
 
-  // Prefetch routes when dialog opens for better performance
-  useEffect(() => {
-    if (isOpen) {
-      // Prefetch the most recent chat routes
-      const recentChats = chatHistory.slice(0, 10)
-      recentChats.forEach((chat) => {
-        router.prefetch(`/c/${chat.id}`)
-      })
-    }
-  }, [isOpen, chatHistory, router])
-
-  // Add keyboard shortcut to open dialog with Command+K
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setIsOpen(!isOpen)
-      }
-    }
-
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [isOpen, setIsOpen])
-
   return (
     <>
       {hasPopover ? (
@@ -530,8 +534,8 @@ export function CommandHistory({
       )}
 
       <CustomCommandDialog
-        open={isOpen}
         onOpenChange={handleOpenChange}
+        open={isOpen}
         title="Chat History"
         description="Search through your past conversations"
         className={cn(
@@ -546,14 +550,17 @@ export function CommandHistory({
           onValueChange={(value) => setSearchQuery(value)}
         />
 
-        <div className="flex">
+        <div className="grid grid-cols-5">
           <div
             className={cn(
-              "flex-1",
-              preferences.showConversationPreviews ? "max-w-[700px]" : ""
+              preferences.showConversationPreviews ? "col-span-2" : "col-span-5"
             )}
           >
-            <CommandList className="max-h-[480px] min-h-[480px] flex-1 [&>[cmdk-list-sizer]]:space-y-6 [&>[cmdk-list-sizer]]:py-2">
+            <CommandList
+              className={cn(
+                "max-h-[480px] min-h-[480px] flex-1 [&>[cmdk-list-sizer]]:space-y-6 [&>[cmdk-list-sizer]]:py-2"
+              )}
+            >
               {filteredChat.length === 0 && (
                 <CommandEmpty>No chat history found.</CommandEmpty>
               )}
@@ -587,49 +594,7 @@ export function CommandHistory({
             />
           )}
         </div>
-
-        <div className="bg-card border-input right-0 bottom-0 left-0 flex items-center justify-between border-t px-4 py-3">
-          <div className="text-muted-foreground flex w-full items-center gap-2 text-xs">
-            <div className="flex w-full flex-row items-center justify-between gap-1">
-              <div className="flex w-full flex-1 flex-row items-center gap-4">
-                <div className="flex flex-row items-center gap-1.5">
-                  <div className="flex flex-row items-center gap-0.5">
-                    <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
-                      ↑
-                    </span>
-                    <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
-                      ↓
-                    </span>
-                  </div>
-                  <span>Navigate</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
-                    ⏎
-                  </span>
-                  <span>Go to chat</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="flex flex-row items-center gap-0.5">
-                    <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
-                      ⌘
-                    </span>
-                    <span className="border-border bg-muted inline-flex size-5 items-center justify-center rounded-sm border">
-                      K
-                    </span>
-                  </div>
-                  <span>Toggle</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="border-border bg-muted inline-flex h-5 items-center justify-center rounded-sm border px-1">
-                Esc
-              </span>
-              <span>Close</span>
-            </div>
-          </div>
-        </div>
+        <CommandFooter />
       </CustomCommandDialog>
     </>
   )

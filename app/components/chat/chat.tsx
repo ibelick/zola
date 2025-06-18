@@ -2,6 +2,7 @@
 
 import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
+import { useModel } from "@/app/components/chat/use-model"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
 import { useAgent } from "@/lib/agent-store/provider"
@@ -10,11 +11,7 @@ import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import { useChatSession } from "@/lib/chat-store/session/provider"
-import {
-  MESSAGE_MAX_LENGTH,
-  MODEL_DEFAULT,
-  SYSTEM_PROMPT_DEFAULT,
-} from "@/lib/config"
+import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
 import { imageSearchTool } from "@/lib/tools/exa/imageSearch/tool"
@@ -27,7 +24,7 @@ import type { Tool } from "ai"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
-import { Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { Suspense, useCallback, useMemo, useRef, useState } from "react"
 import z3, { z } from "zod"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
@@ -43,20 +40,17 @@ const DialogAuth = dynamic(
   { ssr: false }
 )
 
-// Create a separate component that uses useSearchParams
 function SearchParamsProvider({
   setInput,
 }: {
   setInput: (input: string) => void
 }) {
   const searchParams = useSearchParams()
+  const prompt = searchParams.get("prompt")
 
-  useEffect(() => {
-    const prompt = searchParams.get("prompt")
-    if (prompt) {
-      setInput(prompt)
-    }
-  }, [searchParams, setInput])
+  if (prompt && typeof window !== "undefined") {
+    requestAnimationFrame(() => setInput(prompt))
+  }
 
   return null
 }
@@ -103,15 +97,22 @@ export function Chat() {
     createNewChat,
     getChatById,
     updateChatModel,
+    bumpChat,
     isLoading: isChatsLoading,
   } = useChats()
-  const currentChat = chatId ? getChatById(chatId) : null
+
+  const currentChat = useMemo(
+    () => (chatId ? getChatById(chatId) : null),
+    [chatId, getChatById]
+  )
+
   const { messages: initialMessages, cacheAndAddMessage } = useMessages()
   const { user } = useUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { preferences } = useUserPreferences()
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
-  const [searchAgentId, setSearchAgentId] = useState<string | null>(null)
+  const [enableSearch, setEnableSearch] = useState(false)
+
   const {
     files,
     setFiles,
@@ -121,17 +122,22 @@ export function Chat() {
     handleFileUpload,
     handleFileRemove,
   } = useFileUpload()
-  const [selectedModel, setSelectedModel] = useState(
-    currentChat?.model || user?.preferred_model || MODEL_DEFAULT
+
+  const { selectedModel, handleModelChange } = useModel({
+    currentChat: currentChat || null,
+    user,
+    updateChatModel,
+    chatId,
+  })
+
+  const systemPrompt = useMemo(
+    () => user?.system_prompt || SYSTEM_PROMPT_DEFAULT,
+    [user?.system_prompt]
   )
-  const { currentAgent } = useAgent()
-  const systemPrompt =
-    currentAgent?.system_prompt || user?.system_prompt || SYSTEM_PROMPT_DEFAULT
 
-  const [hydrated, setHydrated] = useState(false)
   const hasSentFirstMessageRef = useRef(false)
-
-  const isAuthenticated = !!user?.id
+  const prevChatIdRef = useRef<string | null>(chatId)
+  const isAuthenticated = useMemo(() => !!user?.id, [user?.id])
 
   const { draftValue, clearDraft } = useChatDraft(chatId)
 
@@ -142,6 +148,25 @@ export function Chat() {
   }, [initialMessages])
 
   const [input, setInput] = useState("")
+
+  // Handle errors directly in onError callback
+  const handleError = useCallback((error: Error) => {
+    console.error("Chat error:", error)
+    console.error("Error message:", error.message)
+    // The server now properly forwards error messages via getErrorMessage
+    // So we can use the error message directly
+    let errorMsg = error.message || "Something went wrong."
+
+    // If the error message is still generic, provide a fallback
+    if (errorMsg === "An error occurred" || errorMsg === "fetch failed") {
+      errorMsg = "Something went wrong. Please try again."
+    }
+
+    toast({
+      title: errorMsg,
+      status: "error",
+    })
+  }, [])
 
   const {
     // id: chatIdFromUseChat,
@@ -180,7 +205,6 @@ export function Chat() {
     input,
     selectedModel,
     systemPrompt,
-    selectedAgentId: searchAgentId || currentAgent?.id || null,
     createNewChat,
     setHasDialogAuth,
   })
@@ -229,7 +253,10 @@ export function Chat() {
     setIsSubmitting(true)
 
     const uid = await getOrCreateGuestUserId(user)
-    if (!uid) return
+    if (!uid) {
+      setIsSubmitting(false)
+      return
+    }
 
     const optimisticId = `optimistic-${Date.now().toString()}`
     // const optimisticAttachments =
@@ -250,65 +277,68 @@ export function Chat() {
     const submittedFiles = [...files]
     setFiles([])
 
-    const allowed = await checkLimitsAndNotify(uid)
-    if (!allowed) {
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
-      setIsSubmitting(false)
-      return
-    }
-
-    const currentChatId = await ensureChatExists(uid)
-    if (!currentChatId) {
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
-      setIsSubmitting(false)
-      return
-    }
-
-    if (input.length > MESSAGE_MAX_LENGTH) {
-      toast({
-        title: `The message you submitted was too long, please submit something shorter. (Max ${MESSAGE_MAX_LENGTH} characters)`,
-        status: "error",
-      })
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
-      setIsSubmitting(false)
-      return
-    }
-
-    let attachments: Attachment[] | null = []
-    if (submittedFiles.length > 0) {
-      attachments = await handleFileUploads(uid, currentChatId)
-      if (attachments === null) {
+    try {
+      const allowed = await checkLimitsAndNotify(uid)
+      if (!allowed) {
         setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-        // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
-        setIsSubmitting(false)
+        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
-    }
 
-    const effectiveAgentId = searchAgentId || currentAgent?.id
-    const options = {
-      body: {
-        chatId: currentChatId,
-        userId: uid,
-        model: selectedModel,
-        isAuthenticated,
-        systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-        ...(effectiveAgentId && { agentId: effectiveAgentId }),
-      },
-      experimental_attachments: attachments || undefined,
-    }
+      const currentChatId = await ensureChatExists(uid)
+      if (!currentChatId) {
+        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        return
+      }
 
-    try {
+      if (input.length > MESSAGE_MAX_LENGTH) {
+        toast({
+          title: `The message you submitted was too long, please submit something shorter. (Max ${MESSAGE_MAX_LENGTH} characters)`,
+          status: "error",
+        })
+        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        return
+      }
+
+      let attachments: Attachment[] | null = []
+      if (submittedFiles.length > 0) {
+        attachments = await handleFileUploads(uid, currentChatId)
+        if (attachments === null) {
+          setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+          cleanupOptimisticAttachments(
+            optimisticMessage.experimental_attachments
+          )
+          return
+        }
+      }
+
+      const options = {
+        body: {
+          chatId: currentChatId,
+          userId: uid,
+          model: selectedModel,
+          isAuthenticated,
+          systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
+          enableSearch,
+        },
+        experimental_attachments: attachments || undefined,
+      }
+
       sendMessage({ text: input }, options)
       // setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
       hasSentFirstMessageRef.current = true
-    } catch {
+
+      // Bump existing chats to top (non-blocking, after submit)
+      // If messages.length === 0, this is a new chat that was just created
+      if (messages.length > 0) {
+        bumpChat(currentChatId)
+      }
+    } catch (submitError) {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       toast({ title: "Failed to send message", status: "error" })
@@ -402,7 +432,7 @@ export function Chat() {
     }
   }
 
-  const handleReload = async () => {
+  const handleReload = useCallback(async () => {
     const uid = await getOrCreateGuestUserId(user)
     if (!uid) {
       return
@@ -421,6 +451,62 @@ export function Chat() {
     regenerate(options)
   }
 
+
+  // Memoize the conversation props to prevent unnecessary rerenders
+  const conversationProps = useMemo(
+    () => ({
+      messages,
+      status,
+      onDelete: handleDelete,
+      onEdit: handleEdit,
+      onReload: handleReload,
+    }),
+    [messages, status, handleDelete, handleEdit, handleReload]
+  )
+
+  // Memoize the chat input props
+  const chatInputProps = useMemo(
+    () => ({
+      value: input,
+      onSuggestion: handleSuggestion,
+      onValueChange: handleInputChange,
+      onSend: submit,
+      isSubmitting,
+      files,
+      onFileUpload: handleFileUpload,
+      onFileRemove: handleFileRemove,
+      hasSuggestions:
+        preferences.promptSuggestions && !chatId && messages.length === 0,
+      onSelectModel: handleModelChange,
+      selectedModel,
+      isUserAuthenticated: isAuthenticated,
+      stop,
+      status,
+      setEnableSearch,
+      enableSearch,
+    }),
+    [
+      input,
+      handleSuggestion,
+      handleInputChange,
+      submit,
+      isSubmitting,
+      files,
+      handleFileUpload,
+      handleFileRemove,
+      preferences.promptSuggestions,
+      chatId,
+      messages.length,
+      handleModelChange,
+      selectedModel,
+      isAuthenticated,
+      stop,
+      status,
+      setEnableSearch,
+      enableSearch,
+    ]
+  )
+
   // Handle search agent toggle
   const handleSearchToggle = useCallback(
     (enabled: boolean, agentId: string | null) => {
@@ -429,10 +515,21 @@ export function Chat() {
     []
   )
 
-  // not user chatId and no messages
-  if (hydrated && chatId && !isChatsLoading && !currentChat) {
+  // Handle redirect for invalid chatId - only redirect if we're certain the chat doesn't exist
+  // and we're not in a transient state during chat creation
+  if (
+    chatId &&
+    !isChatsLoading &&
+    !currentChat &&
+    !isSubmitting &&
+    status === "ready" &&
+    messages.length === 0 &&
+    !hasSentFirstMessageRef.current // Don't redirect if we've already sent a message in this session
+  ) {
     return redirect("/")
   }
+
+  const showOnboarding = !chatId && messages.length === 0
 
   return (
     <div
@@ -442,13 +539,12 @@ export function Chat() {
     >
       <DialogAuth open={hasDialogAuth} setOpen={setHasDialogAuth} />
 
-      {/* Add Suspense boundary for SearchParamsProvider */}
       <Suspense>
         <SearchParamsProvider setInput={setInput} />
       </Suspense>
 
       <AnimatePresence initial={false} mode="popLayout">
-        {!chatId && messages.length === 0 ? (
+        {showOnboarding ? (
           <motion.div
             key="onboarding"
             className="absolute bottom-[60%] mx-auto max-w-[50rem] md:relative md:bottom-auto"
@@ -468,14 +564,7 @@ export function Chat() {
             </h1>
           </motion.div>
         ) : (
-          <Conversation
-            key="conversation"
-            messages={messages}
-            status={status}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-            onReload={handleReload}
-          />
+          <Conversation key="conversation" {...conversationProps} />
         )}
       </AnimatePresence>
 

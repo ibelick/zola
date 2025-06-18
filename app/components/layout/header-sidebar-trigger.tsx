@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { SidebarSimple } from "@phosphor-icons/react"
+import { SidebarSimpleIcon } from "@phosphor-icons/react"
 
 type HeaderSidebarTriggerProps = React.HTMLAttributes<HTMLButtonElement>
 
@@ -15,7 +15,7 @@ export function HeaderSidebarTrigger({
   className,
   ...props
 }: HeaderSidebarTriggerProps) {
-  const { toggleSidebar, open, isMobile } = useSidebar()
+  const { toggleSidebar, open } = useSidebar()
 
   return (
     <Tooltip>
@@ -26,13 +26,12 @@ export function HeaderSidebarTrigger({
           className={cn(
             "pointer-events-auto",
             "text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors",
-            "-ml-5 inline-flex size-9 items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
-            isMobile ? "ml-0" : "-ml-5",
+            "inline-flex size-9 items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
             className
           )}
           {...props}
         >
-          <SidebarSimple size={20} />
+          <SidebarSimpleIcon size={20} />
           <span className="sr-only">Toggle sidebar</span>
         </button>
       </TooltipTrigger>

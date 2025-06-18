@@ -19,6 +19,7 @@ type ModelConfig = {
   tools?: boolean
   audio?: boolean
   reasoning?: boolean
+  webSearch?: boolean
   openSource?: boolean
 
   speed?: "Fast" | "Medium" | "Slow"
@@ -29,8 +30,13 @@ type ModelConfig = {
   modelPage?: string // official product page (e.g. https://x.ai/news/grok-2)
   releasedAt?: string // "2024-12-01" (optional, for tracking changes)
 
+  icon?: string // e.g. "gpt-4", "claude", "mistral", or custom string
+
   // apiSdk?: () => LanguageModelV1 // "openai("gpt-4.1-nano")"
-  apiSdk?: (apiKey?: string) => LanguageModelV2
+  apiSdk?: (
+    apiKey?: string,
+    opts?: { enableSearch?: boolean }
+  ) => LanguageModelV2
 }
 
 export type { ModelConfig }

@@ -9,7 +9,6 @@ import {
   deleteChat as deleteChatFromDb,
   fetchAndCacheChats,
   getCachedChats,
-  updateChatAgent as updateChatAgentFromDb,
   updateChatModel as updateChatModelFromDb,
   updateChatTitle,
 } from "./api"
@@ -31,17 +30,12 @@ interface ChatsContextType {
     model?: string,
     isAuthenticated?: boolean,
     systemPrompt?: string,
-    agentId?: string
+    projectId?: string
   ) => Promise<Chats | undefined>
   resetChats: () => Promise<void>
   getChatById: (id: string) => Chats | undefined
   updateChatModel: (id: string, model: string) => Promise<void>
-  updateChatAgent: (
-    userId: string,
-    chatId: string,
-    agentId: string | null,
-    isAuthenticated: boolean
-  ) => Promise<void>
+  bumpChat: (id: string) => Promise<void>
 }
 const ChatsContext = createContext<ChatsContextType | null>(null)
 
@@ -89,7 +83,13 @@ export function ChatsProvider({
 
   const updateTitle = async (id: string, title: string) => {
     const prev = [...chats]
-    setChats((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)))
+    const updatedChatWithNewTitle = prev.map((c) =>
+      c.id === id ? { ...c, title, updated_at: new Date().toISOString() } : c
+    )
+    const sorted = updatedChatWithNewTitle.sort(
+      (a, b) => +new Date(b.updated_at || "") - +new Date(a.updated_at || "")
+    )
+    setChats(sorted)
     try {
       await updateChatTitle(id, title)
     } catch {
@@ -121,7 +121,7 @@ export function ChatsProvider({
     model?: string,
     isAuthenticated?: boolean,
     systemPrompt?: string,
-    agentId?: string
+    projectId?: string
   ) => {
     if (!userId) return
     const prev = [...chats]
@@ -129,15 +129,16 @@ export function ChatsProvider({
     const optimisticId = `optimistic-${Date.now().toString()}`
     const optimisticChat = {
       id: optimisticId,
-      title: title || (agentId ? `Conversation with agent` : "New Chat"),
+      title: title || "New Chat",
       created_at: new Date().toISOString(),
       model: model || MODEL_DEFAULT,
       system_prompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-      agent_id: agentId || null,
       user_id: userId,
       public: true,
+      updated_at: new Date().toISOString(),
+      project_id: null,
     }
-    setChats((prev) => [...prev, optimisticChat])
+    setChats((prev) => [optimisticChat, ...prev])
 
     try {
       const newChat = await createNewChatFromDb(
@@ -145,16 +146,14 @@ export function ChatsProvider({
         title,
         model,
         isAuthenticated,
-        agentId
+        projectId
       )
-      setChats((prev) =>
-        prev
-          .map((c) => (c.id === optimisticId ? newChat : c))
-          .sort(
-            (a, b) =>
-              +new Date(b.created_at || "") - +new Date(a.created_at || "")
-          )
-      )
+
+      setChats((prev) => [
+        newChat,
+        ...prev.filter((c) => c.id !== optimisticId),
+      ])
+
       return newChat
     } catch {
       setChats(prev)
@@ -172,16 +171,25 @@ export function ChatsProvider({
   }
 
   const updateChatModel = async (id: string, model: string) => {
-    await updateChatModelFromDb(id, model)
+    const prev = [...chats]
+    setChats((prev) => prev.map((c) => (c.id === id ? { ...c, model } : c)))
+    try {
+      await updateChatModelFromDb(id, model)
+    } catch {
+      setChats(prev)
+      toast({ title: "Failed to update model", status: "error" })
+    }
   }
 
-  const updateChatAgent = async (
-    userId: string,
-    chatId: string,
-    agentId: string | null,
-    isAuthenticated: boolean
-  ) => {
-    await updateChatAgentFromDb(userId, chatId, agentId, isAuthenticated)
+  const bumpChat = async (id: string) => {
+    const prev = [...chats]
+    const updatedChatWithNewUpdatedAt = prev.map((c) =>
+      c.id === id ? { ...c, updated_at: new Date().toISOString() } : c
+    )
+    const sorted = updatedChatWithNewUpdatedAt.sort(
+      (a, b) => +new Date(b.updated_at || "") - +new Date(a.updated_at || "")
+    )
+    setChats(sorted)
   }
 
   return (
@@ -196,7 +204,7 @@ export function ChatsProvider({
         resetChats,
         getChatById,
         updateChatModel,
-        updateChatAgent,
+        bumpChat,
         isLoading,
       }}
     >

@@ -79,6 +79,40 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 Copy the generated value and add it to your `.env.local` file as the `CSRF_SECRET` value.
 
+### BYOK (Bring Your Own Key) Setup
+
+Zola supports BYOK functionality, allowing users to securely store and use their own API keys for AI providers. To enable this feature, you need to configure an encryption key for secure storage of user API keys.
+
+#### Generating an Encryption Key
+
+The `ENCRYPTION_KEY` is used to encrypt user API keys before storing them in the database. Generate a 32-byte base64-encoded key:
+
+```bash
+# Using Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+# Using OpenSSL
+openssl rand -base64 32
+
+# Using Python
+python -c "import base64, secrets; print(base64.b64encode(secrets.token_bytes(32)).decode())"
+```
+
+Add the generated key to your `.env.local` file:
+
+```bash
+# Required for BYOK functionality
+ENCRYPTION_KEY=your_generated_base64_encryption_key
+```
+
+**Important**:
+
+- Keep this key secure and backed up - losing it will make existing user API keys unrecoverable
+- Use the same key across all your deployment environments
+- The key must be exactly 32 bytes when base64 decoded
+
+With BYOK enabled, users can securely add their own API keys through the settings interface, giving them access to AI models using their personal accounts and usage limits.
+
 #### Google OAuth Authentication
 
 1. Go to your Supabase project dashboard
@@ -142,42 +176,28 @@ CREATE TABLE users (
   CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE -- Explicit FK definition
 );
 
--- Agents table
-CREATE TABLE agents (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+-- Projects table
+CREATE TABLE projects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  slug TEXT NOT NULL,
-  description TEXT NOT NULL,
-  avatar_url TEXT,
-  system_prompt TEXT NOT NULL,
-  model_preference TEXT,
-  is_public BOOLEAN DEFAULT false NOT NULL,
-  remixable BOOLEAN DEFAULT false NOT NULL,
-  tools_enabled BOOLEAN DEFAULT false NOT NULL,
-  example_inputs TEXT[],
-  tags TEXT[],
-  category TEXT,
-  creator_id UUID,
+  user_id UUID NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ,
-  tools TEXT[],
-  max_steps INTEGER,
-  mcp_config JSONB, -- Representing the object structure as JSONB
-  CONSTRAINT agents_creator_id_fkey FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE SET NULL -- Changed to SET NULL based on schema, could also be CASCADE
+  CONSTRAINT projects_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Chats table
 CREATE TABLE chats (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL,
+  project_id UUID,
   title TEXT,
   model TEXT,
   system_prompt TEXT,
-  agent_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  public BOOLEAN DEFAULT FALSE NOT NULL, -- Added NOT NULL based on TS type
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  public BOOLEAN DEFAULT FALSE NOT NULL,
   CONSTRAINT chats_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  CONSTRAINT chats_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE SET NULL -- Assuming SET NULL, adjust if needed
+  CONSTRAINT chats_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 
 -- Messages table
@@ -233,7 +253,7 @@ CREATE TABLE user_keys (
 -- ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 -- CREATE POLICY "Users can view their own data." ON users FOR SELECT USING (auth.uid() = id);
 -- CREATE POLICY "Users can update their own data." ON users FOR UPDATE USING (auth.uid() = id);
--- ... add policies for other tables (agents, chats, messages, etc.) ...
+-- ... add policies for other tables (chats, messages, etc.) ...
 ```
 
 ### Storage Setup
@@ -243,25 +263,6 @@ Create the buckets `chat-attachments` and `avatars` in your Supabase dashboard:
 1. Go to Storage in your Supabase dashboard
 2. Click "New bucket" and create two buckets: `chat-attachments` and `avatars`
 3. Configure public access permissions for both buckets
-
-#### Agent Avatar Configuration
-
-For agent profile pictures to work properly:
-
-1. Create an `agents` folder inside your `avatars` bucket:
-
-   - Navigate to the `avatars` bucket
-   - Click "Create folder" and name it `agents`
-
-2. Upload agent avatar images
-
-3. Set up public access for the avatars bucket:
-   - Go to "Configuration" tab for the `avatars` bucket
-   - Under "Row Level Security (RLS)" ensure it's disabled or create a policy:
-   ```sql
-   CREATE POLICY "Public Read Access" ON storage.objects
-   FOR SELECT USING (bucket_id = 'avatars');
-   ```
 
 ## Ollama Setup (Local AI Models)
 
@@ -313,6 +314,7 @@ ollama serve
 Zola automatically detects all models available in your Ollama installation. No additional configuration is needed!
 
 **Features:**
+
 - **Automatic Model Detection**: Zola scans your Ollama instance and makes all models available
 - **Intelligent Categorization**: Models are automatically categorized by family (Llama, Gemma, Qwen, etc.)
 - **Smart Tagging**: Models get appropriate tags (local, open-source, coding, size-based)
@@ -322,9 +324,11 @@ Zola automatically detects all models available in your Ollama installation. No 
 ### Configuration Options
 
 #### Default Configuration
+
 By default, Zola connects to Ollama at `http://localhost:11434`. This works for local installations.
 
 #### Custom Ollama URL
+
 To use a remote Ollama instance or custom port:
 
 ```bash
@@ -333,6 +337,7 @@ OLLAMA_BASE_URL=http://192.168.1.100:11434
 ```
 
 #### Runtime Configuration
+
 You can also set the Ollama URL at runtime:
 
 ```bash
@@ -340,7 +345,9 @@ OLLAMA_BASE_URL=http://your-ollama-server:11434 npm run dev
 ```
 
 #### Settings UI
+
 Zola includes a settings interface where you can:
+
 - Enable/disable Ollama integration
 - Configure custom Ollama base URLs
 - Add multiple Ollama instances
@@ -362,6 +369,7 @@ docker run -p 3000:3000 -e OLLAMA_BASE_URL=http://ollama:11434 zola
 ```
 
 The `docker-compose.ollama.yml` file includes:
+
 - Ollama service with GPU support (if available)
 - Automatic model pulling
 - Health checks
@@ -370,37 +378,63 @@ The `docker-compose.ollama.yml` file includes:
 ### Troubleshooting Ollama
 
 #### Ollama not detected
+
 1. Ensure Ollama is running: `ollama serve`
 2. Check the URL: `curl http://localhost:11434/api/tags`
 3. Verify firewall settings if using remote Ollama
 
 #### Models not appearing
+
 1. Refresh the models list in Zola settings
 2. Check Ollama has models: `ollama list`
 3. Restart Zola if models were added after startup
 
 #### Performance optimization
+
 1. Use smaller models for faster responses (1B-3B parameters)
 2. Enable GPU acceleration if available
 3. Adjust Ollama's `OLLAMA_NUM_PARALLEL` environment variable
 
+## Disabling Ollama
+
+Ollama is automatically enabled in development and disabled in production. If you want to disable it in development, you can use an environment variable:
+
+### Environment Variable
+
+Add this to your `.env.local` file:
+
+```bash
+# Disable Ollama in development
+DISABLE_OLLAMA=true
+```
+
+### Note
+
+- In **production**, Ollama is disabled by default to avoid connection errors
+- In **development**, Ollama is enabled by default for local AI model testing
+- Use `DISABLE_OLLAMA=true` to disable it in development
+
 ### Recommended Models by Use Case
 
 #### General Chat
+
 - `llama3.2:3b` - Good balance of quality and speed
 - `gemma2:2b` - Fast and efficient
 - `qwen2.5:3b` - Excellent multilingual support
 
 #### Coding
+
 - `codellama:7b` - Specialized for code generation
 - `deepseek-coder:6.7b` - Strong coding capabilities
 - `phi3.5:3.8b` - Good for code explanation
 
 #### Creative Writing
+
 - `llama3.2:8b` - Better for creative tasks
 - `mistral:7b` - Good instruction following
 
 #### Fast Responses
+
 - `llama3.2:1b` - Ultra-fast, basic capabilities
 - `gemma2:2b` - Quick and capable
 
@@ -588,6 +622,7 @@ docker-compose -f docker-compose.ollama.yml down
 ```
 
 This setup includes:
+
 - **Ollama service** with GPU support (if available)
 - **Automatic model pulling** (llama3.2:3b by default)
 - **Health checks** for both services

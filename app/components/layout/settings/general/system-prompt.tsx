@@ -6,18 +6,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
 import { useUser } from "@/lib/user-store/provider"
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export function SystemPromptSection() {
   const { user, updateUser } = useUser()
-  const [prompt, setPrompt] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    if (user?.system_prompt) {
-      setPrompt(user.system_prompt)
-    }
-  }, [user?.system_prompt])
+  const [prompt, setPrompt] = useState<string | null>(null)
+  const effectivePrompt = prompt ?? user?.system_prompt ?? ""
 
   const savePrompt = async () => {
     if (!user?.id) return
@@ -28,7 +23,7 @@ export function SystemPromptSection() {
 
       toast({
         title: "Prompt saved",
-        description: "It'll be used for new chats unless you select an agent.",
+        description: "It'll be used for new chats.",
         status: "success",
       })
     } catch (error) {
@@ -48,8 +43,7 @@ export function SystemPromptSection() {
     setPrompt(value)
   }
 
-  // Show save button only when prompt differs from saved prompt
-  const hasChanges = prompt !== (user?.system_prompt || "")
+  const hasChanges = effectivePrompt !== (user?.system_prompt || "")
 
   return (
     <div>
@@ -61,7 +55,7 @@ export function SystemPromptSection() {
           id="system-prompt"
           className="min-h-24 w-full"
           placeholder="Enter a default system prompt for new conversations"
-          value={prompt}
+          value={effectivePrompt}
           onChange={handlePromptChange}
         />
 
@@ -87,7 +81,7 @@ export function SystemPromptSection() {
         </AnimatePresence>
       </div>
       <p className="text-muted-foreground mt-2 text-xs">
-        This prompt will be used for new chats unless you select an agent.
+        This prompt will be used for new chats.
       </p>
     </div>
   )
