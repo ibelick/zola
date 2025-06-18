@@ -6,7 +6,6 @@ type CreateChatInput = {
   title?: string
   model: string
   isAuthenticated: boolean
-  agentId?: string
   projectId?: string
 }
 
@@ -15,7 +14,6 @@ export async function createChatInDb({
   title,
   model,
   isAuthenticated,
-  agentId,
   projectId,
 }: CreateChatInput) {
   const supabase = await validateUserIdentity(userId, isAuthenticated)
@@ -36,7 +34,6 @@ export async function createChatInDb({
     user_id: string
     title: string
     model: string
-    agent_id?: string
     project_id?: string
   } = {
     user_id: userId,

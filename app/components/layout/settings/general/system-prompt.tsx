@@ -23,7 +23,7 @@ export function SystemPromptSection() {
 
       toast({
         title: "Prompt saved",
-        description: "It'll be used for new chats unless you select an agent.",
+        description: "It'll be used for new chats.",
         status: "success",
       })
     } catch (error) {
@@ -81,7 +81,7 @@ export function SystemPromptSection() {
         </AnimatePresence>
       </div>
       <p className="text-muted-foreground mt-2 text-xs">
-        This prompt will be used for new chats unless you select an agent.
+        This prompt will be used for new chats.
       </p>
     </div>
   )

@@ -16,8 +16,6 @@ type ArticleProps = {
   title: string
   subtitle: string
   messages: MessageType[]
-  agentSlug?: string
-  agentName?: string
 }
 
 export default function Article({
@@ -25,8 +23,6 @@ export default function Article({
   title,
   subtitle,
   messages,
-  agentSlug,
-  agentName,
 }: ArticleProps) {
   return (
     <>
@@ -43,14 +39,6 @@ export default function Article({
               day: "numeric",
             })}
           </time>
-          {agentSlug ? (
-            <>
-              <span className="mx-2">·</span>
-              <span className="text-muted-foreground hover:text-foreground transition-colors">
-                <Link href={`/agents/${agentSlug}`}>{agentName}</Link>
-              </span>
-            </>
-          ) : null}
         </div>
 
         <h1 className="mb-4 text-center text-4xl font-medium tracking-tight md:text-5xl">

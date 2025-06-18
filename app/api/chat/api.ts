@@ -5,7 +5,6 @@ import type {
   StoreAssistantMessageParams,
   SupabaseClientType,
 } from "@/app/types/api.types"
-import { checkSpecialAgentUsage, incrementSpecialAgentUsage } from "@/lib/api"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
 import { checkUsageByModel, incrementUsageByModel } from "@/lib/usage"
@@ -46,15 +45,6 @@ export async function logUserMessage({
   } else {
     await incrementUsageByModel(supabase, userId, model, isAuthenticated)
   }
-}
-
-export async function trackSpecialAgentUsage(
-  supabase: SupabaseClientType,
-  userId: string
-): Promise<void> {
-  if (!supabase) return
-  await checkSpecialAgentUsage(supabase, userId)
-  await incrementSpecialAgentUsage(supabase, userId)
 }
 
 export async function storeAssistantMessage({

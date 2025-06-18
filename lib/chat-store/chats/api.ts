@@ -6,7 +6,6 @@ import { MODEL_DEFAULT } from "../../config"
 import { fetchClient } from "../../fetch"
 import {
   API_ROUTE_CREATE_CHAT,
-  API_ROUTE_UPDATE_CHAT_AGENT,
   API_ROUTE_UPDATE_CHAT_MODEL,
 } from "../../routes"
 
@@ -189,27 +188,20 @@ export async function createNewChat(
   title?: string,
   model?: string,
   isAuthenticated?: boolean,
-  agentId?: string,
   projectId?: string
 ): Promise<Chats> {
   try {
-    // Note: Local agent IDs are filtered out at the API level (create-chat route)
     const payload: {
       userId: string
       title: string
       model: string
       isAuthenticated?: boolean
-      agentId?: string
       projectId?: string
     } = {
       userId,
-      title: title || (agentId ? `Conversation with agent` : "New Chat"),
+      title: title || "New Chat",
       model: model || MODEL_DEFAULT,
       isAuthenticated,
-    }
-
-    if (agentId) {
-      payload.agentId = agentId
     }
 
     if (projectId) {
@@ -233,7 +225,6 @@ export async function createNewChat(
       title: responseData.chat.title,
       created_at: responseData.chat.created_at,
       model: responseData.chat.model,
-      agent_id: responseData.chat.agent_id,
       user_id: responseData.chat.user_id,
       public: responseData.chat.public,
       updated_at: responseData.chat.updated_at,
@@ -244,45 +235,6 @@ export async function createNewChat(
     return chat
   } catch (error) {
     console.error("Error creating new chat:", error)
-    throw error
-  }
-}
-
-export async function updateChatAgent(
-  userId: string,
-  chatId: string,
-  agentId: string | null,
-  isAuthenticated: boolean
-) {
-  try {
-    const res = await fetchClient(API_ROUTE_UPDATE_CHAT_AGENT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        chatId,
-        agentId,
-        isAuthenticated,
-      }),
-    })
-    const responseData = await res.json()
-
-    if (!res.ok) {
-      throw new Error(
-        responseData.error ||
-          `Failed to update chat agent: ${res.status} ${res.statusText}`
-      )
-    }
-
-    const all = await getCachedChats()
-    const updated = (all as Chats[]).map((c) =>
-      c.id === chatId ? { ...c, agent_id: agentId } : c
-    )
-    await writeToIndexedDB("chats", updated)
-
-    return responseData
-  } catch (error) {
-    console.error("Error updating chat agent:", error)
     throw error
   }
 }

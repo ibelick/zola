@@ -129,7 +129,6 @@ export function ProjectView({ projectId }: ProjectViewProps) {
             selectedModel,
             true, // Always authenticated in this context
             SYSTEM_PROMPT_DEFAULT,
-            undefined, // agentId
             projectId
           )
 
@@ -242,7 +241,6 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           model: selectedModel,
           isAuthenticated: true,
           systemPrompt: SYSTEM_PROMPT_DEFAULT,
-          agentId: null,
           enableSearch,
         },
         experimental_attachments: attachments || undefined,
