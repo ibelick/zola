@@ -1,6 +1,4 @@
-import { loadAgent } from "@/lib/agents/load-agent"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
-import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
 import { getAllModels } from "@/lib/models"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import type { ProviderWithoutOllama } from "@/lib/user-keys"
@@ -9,14 +7,9 @@ import { Message as MessageAISDK, streamText, ToolSet } from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,
-  trackSpecialAgentUsage,
   validateAndTrackUsage,
 } from "./api"
-import {
-  cleanMessagesForTools,
-  createErrorResponse,
-  extractErrorMessage,
-} from "./utils"
+import { createErrorResponse, extractErrorMessage } from "./utils"
 
 export const maxDuration = 60
 
@@ -27,7 +20,6 @@ type ChatRequest = {
   model: string
   isAuthenticated: boolean
   systemPrompt: string
-  agentId: string | null
   enableSearch: boolean
 }
 
@@ -40,7 +32,6 @@ export async function POST(req: Request) {
       model,
       isAuthenticated,
       systemPrompt,
-      agentId,
       enableSearch,
     } = (await req.json()) as ChatRequest
 
@@ -71,12 +62,6 @@ export async function POST(req: Request) {
       })
     }
 
-    let agentConfig = null
-
-    if (agentId) {
-      agentConfig = await loadAgent(agentId)
-    }
-
     const allModels = await getAllModels()
     const modelConfig = allModels.find((m) => m.id === model)
 
@@ -84,24 +69,7 @@ export async function POST(req: Request) {
       throw new Error(`Model ${model} not found`)
     }
 
-    const effectiveSystemPrompt =
-      agentConfig?.systemPrompt || systemPrompt || SYSTEM_PROMPT_DEFAULT
-
-    let toolsToUse = undefined
-
-    if (agentConfig?.mcpConfig) {
-      const { tools } = await loadMCPToolsFromURL(agentConfig.mcpConfig.server)
-      toolsToUse = tools
-    } else if (agentConfig?.tools) {
-      toolsToUse = agentConfig.tools
-      if (supabase) {
-        await trackSpecialAgentUsage(supabase, userId)
-      }
-    }
-
-    // Clean messages when switching between agents with different tool capabilities
-    const hasTools = !!toolsToUse && Object.keys(toolsToUse).length > 0
-    const cleanedMessages = cleanMessagesForTools(messages, hasTools)
+    const effectiveSystemPrompt = systemPrompt || SYSTEM_PROMPT_DEFAULT
 
     let apiKey: string | undefined
     if (isAuthenticated && userId) {
@@ -115,8 +83,8 @@ export async function POST(req: Request) {
     const result = streamText({
       model: modelConfig.apiSdk(apiKey, { enableSearch }),
       system: effectiveSystemPrompt,
-      messages: cleanedMessages,
-      tools: toolsToUse as ToolSet,
+      messages: messages,
+      tools: {} as ToolSet,
       maxSteps: 10,
       onError: (err: unknown) => {
         console.error("Streaming error occurred:", err)

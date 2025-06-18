@@ -16,7 +16,6 @@
 - Open-source and self-hostable
 - Customizable: user system prompt, multiple layout options
 - Local AI with Ollama: Run models locally with automatic model detection
-- Basic agent (wip)
 - Full MCP support (wip)
 
 ## Quick Start

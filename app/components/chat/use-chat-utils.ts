@@ -11,14 +11,12 @@ type UseChatUtilsProps = {
   input: string
   selectedModel: string
   systemPrompt: string
-  selectedAgentId: string | null
   createNewChat: (
     userId: string,
     title?: string,
     model?: string,
     isAuthenticated?: boolean,
-    systemPrompt?: string,
-    agentId?: string
+    systemPrompt?: string
   ) => Promise<Chats | undefined>
   setHasDialogAuth: (value: boolean) => void
 }
@@ -30,7 +28,6 @@ export function useChatUtils({
   input,
   selectedModel,
   systemPrompt,
-  selectedAgentId,
   createNewChat,
   setHasDialogAuth,
 }: UseChatUtilsProps) {
@@ -81,8 +78,7 @@ export function useChatUtils({
           input,
           selectedModel,
           isAuthenticated,
-          selectedAgentId ? undefined : systemPrompt, // if agentId is set, systemPrompt is not used
-          selectedAgentId || undefined
+          systemPrompt
         )
 
         if (!newChat) return null

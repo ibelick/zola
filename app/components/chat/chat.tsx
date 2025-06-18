@@ -154,7 +154,6 @@ export function Chat() {
     input,
     selectedModel,
     systemPrompt,
-    selectedAgentId: null,
     createNewChat,
     setHasDialogAuth,
   })
@@ -238,7 +237,6 @@ export function Chat() {
           model: selectedModel,
           isAuthenticated,
           systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-          agentId: null,
           enableSearch,
         },
         experimental_attachments: attachments || undefined,

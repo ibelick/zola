@@ -1,14 +1,14 @@
 import { saveFinalAssistantMessage } from "@/app/api/chat/db"
+import type {
+  ChatApiParams,
+  LogUserMessageParams,
+  StoreAssistantMessageParams,
+  SupabaseClientType,
+} from "@/app/types/api.types"
 import { checkSpecialAgentUsage, incrementSpecialAgentUsage } from "@/lib/api"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
 import { checkUsageByModel, incrementUsageByModel } from "@/lib/usage"
-import type { 
-  SupabaseClientType, 
-  ChatApiParams, 
-  LogUserMessageParams, 
-  StoreAssistantMessageParams 
-} from "@/app/types/api.types"
 
 export async function validateAndTrackUsage({
   userId,
@@ -48,7 +48,10 @@ export async function logUserMessage({
   }
 }
 
-export async function trackSpecialAgentUsage(supabase: SupabaseClientType, userId: string): Promise<void> {
+export async function trackSpecialAgentUsage(
+  supabase: SupabaseClientType,
+  userId: string
+): Promise<void> {
   if (!supabase) return
   await checkSpecialAgentUsage(supabase, userId)
   await incrementSpecialAgentUsage(supabase, userId)
