@@ -39,7 +39,7 @@ function CodeBlockCode({
   className,
   ...props
 }: CodeBlockCodeProps) {
-  const { theme: appTheme } = useTheme()
+  const { resolvedTheme: appTheme } = useTheme()
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null)
 
   useEffect(() => {
