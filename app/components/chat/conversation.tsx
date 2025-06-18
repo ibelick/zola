@@ -4,12 +4,12 @@ import {
 } from "@/components/prompt-kit/chat-container"
 import { Loader } from "@/components/prompt-kit/loader"
 import { ScrollButton } from "@/components/prompt-kit/scroll-button"
-import { UIMessage } from "@ai-sdk/react"
 import { useRef } from "react"
+import { UIMessageFull } from "./chat"
 import { Message } from "./message"
 
 type ConversationProps = {
-  messages: UIMessage[]
+  messages: UIMessageFull[]
   status?: "streaming" | "ready" | "submitted" | "error"
   onDelete: (id: string) => void
   onEdit: (id: string, newText: string) => void
@@ -48,12 +48,14 @@ export function Conversation({
             const hasScrollAnchor =
               isLast && messages.length > initialMessageCount.current
 
+            const messageAsTextContent = "#TODO"
+
             return (
               <Message
                 key={message.id}
                 id={message.id}
                 variant={message.role}
-                attachments={message.experimental_attachments}
+                // attachments={message.experimental_attachments}
                 isLast={isLast}
                 onDelete={onDelete}
                 onEdit={onEdit}
@@ -62,7 +64,7 @@ export function Conversation({
                 parts={message.parts}
                 status={status}
               >
-                {message.content}
+                {messageAsTextContent}
               </Message>
             )
           })}

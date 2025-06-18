@@ -3,13 +3,9 @@
 import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
-import {
-  getChatIdFromPathname,
-  useChatSession,
-} from "@/app/providers/chat-session-provider"
-import { useUser } from "@/app/providers/user-provider"
 import { toast } from "@/components/ui/toast"
 import { useAgent } from "@/lib/agent-store/provider"
+import type { tools } from "@/lib/agents/tools"
 import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
@@ -21,16 +17,18 @@ import {
 } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
+import { imageSearchTool } from "@/lib/tools/exa/imageSearch/tool"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import { Chat as ReactChat, useChat } from "@ai-sdk/react"
-import { DefaultChatTransport, UIMessage } from "ai"
+import { DefaultChatTransport, UIDataPartSchemas, UIMessage } from "ai"
+import type { Tool } from "ai"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect, useSearchParams } from "next/navigation"
 import { Suspense, useCallback, useEffect, useRef, useState } from "react"
-import { z } from "zod"
+import z3, { z } from "zod"
 import { useChatHandlers } from "./use-chat-handlers"
 import { useChatUtils } from "./use-chat-utils"
 import { useFileUpload } from "./use-file-upload"
@@ -69,7 +67,35 @@ const messageMetadataSchema = z.object({
 
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>
 
-export type UIMessageWithMetadata = UIMessage<MessageMetadata>
+type UIMessageMetadata = MessageMetadata
+
+type UIMessageDataParts = UIDataPartSchemas
+
+type ToolType<T extends Tool> = {
+  input: T["inputSchema"] extends z3.Schema
+    ? z.infer<T["inputSchema"]>
+    : undefined
+  // extract function return type
+  output: T extends { execute: NonNullable<Tool["execute"]> }
+    ? Awaited<ReturnType<T["execute"]>>
+    : undefined
+}
+
+type Prettify<T> = {
+  [K in keyof T]: T[K]
+} & {}
+
+type UIMessageTools = {
+  [K in keyof typeof tools]: Prettify<ToolType<(typeof tools)[K]>>
+} & {
+  imageSearch: Prettify<ToolType<typeof imageSearchTool>>
+}
+
+export type UIMessageFull = UIMessage<
+  UIMessageMetadata,
+  UIMessageDataParts,
+  UIMessageTools
+>
 
 export function Chat() {
   const { chatId } = useChatSession()
@@ -122,7 +148,7 @@ export function Chat() {
     messages,
     status,
     error,
-    reload,
+    regenerate,
     stop,
     setMessages,
     sendMessage,
@@ -209,7 +235,7 @@ export function Chat() {
     // const optimisticAttachments =
     //   files.length > 0 ? createOptimisticAttachments(files) : []
 
-    const optimisticMessage: UIMessageWithMetadata = {
+    const optimisticMessage: UIMessageFull = {
       id: optimisticId,
       role: "user" as const,
       metadata: {
@@ -299,7 +325,7 @@ export function Chat() {
 
     const optimisticId = `optimistic-${Date.now().toString()}`
 
-    const optimisticMessage: UIMessageWithMetadata = {
+    const optimisticMessage: UIMessageFull = {
       id: optimisticId,
       role: "user" as const,
       metadata: {
@@ -373,17 +399,8 @@ export function Chat() {
       toast({ title: "Failed to send message", status: "error" })
     } finally {
       setIsSubmitting(false)
-    },
-    [
-      ensureChatExists,
-      selectedModel,
-      user,
-      append,
-      checkLimitsAndNotify,
-      isAuthenticated,
-      setMessages,
-    ]
-  )
+    }
+  }
 
   const handleReload = async () => {
     const uid = await getOrCreateGuestUserId(user)
@@ -401,7 +418,7 @@ export function Chat() {
       },
     }
 
-    reload(options)
+    regenerate(options)
   }
 
   // Handle search agent toggle

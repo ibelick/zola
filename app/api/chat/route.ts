@@ -1,18 +1,17 @@
-import type {
-  MessageMetadata,
-  UIMessageWithMetadata,
-} from "@/app/components/chat/chat"
+import type { MessageMetadata, UIMessageFull } from "@/app/components/chat/chat"
 import { loadAgent } from "@/lib/agents/load-agent"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { loadMCPToolsFromURL } from "@/lib/mcp/load-mcp-from-url"
-import type { LanguageModelV2 } from "@ai-sdk/provider"
 import { getAllModels } from "@/lib/models"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import { Provider } from "@/lib/user-keys"
-import { Attachment } from "@ai-sdk/ui-utils"
-import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import { convertToModelMessages, stepCountIs, streamText, UIMessage } from "ai"
-import { Message as MessageAISDK, streamText, ToolSet } from "ai"
+import {
+  convertToModelMessages,
+  stepCountIs,
+  streamText,
+  ToolSet,
+  UIMessage,
+} from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,
@@ -24,7 +23,7 @@ import { cleanMessagesForTools } from "./utils"
 export const maxDuration = 60
 
 type ChatRequest = {
-  messages: UIMessage[]
+  messages: UIMessageFull[]
   chatId: string
   userId: string
   model: string
@@ -128,13 +127,15 @@ export async function POST(req: Request) {
       },
 
       onFinish: async ({ content }) => {
-        const parts: UIMessageWithMetadata["parts"] =
-          content as unknown as UIMessageWithMetadata["parts"] // TODO FIX
-        await storeAssistantMessage({
-          supabase,
-          chatId,
-          parts,
-        })
+        const parts: UIMessageFull["parts"] =
+          content as unknown as UIMessageFull["parts"] // TODO FIX
+        if (supabase) {
+          await storeAssistantMessage({
+            supabase,
+            chatId,
+            parts,
+          })
+        }
       },
     })
 

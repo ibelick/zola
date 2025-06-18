@@ -1,5 +1,5 @@
 import { saveFinalAssistantMessage } from "@/app/api/chat/db"
-import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
+import type { UIMessageFull } from "@/app/components/chat/chat"
 import type {
   ChatApiParams,
   LogUserMessageParams,
@@ -24,7 +24,7 @@ export async function validateAndTrackUsage({
   return supabase
 }
 
-function sanitizeUserMessagePart(part: UIMessageWithMetadata["parts"][number]) {
+function sanitizeUserMessagePart(part: UIMessageFull["parts"][number]) {
   if (part.type === "text") {
     return {
       ...part,

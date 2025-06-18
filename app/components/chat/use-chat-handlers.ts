@@ -2,14 +2,12 @@ import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { UserProfile } from "@/app/types/user"
 import { toast } from "@/components/ui/toast"
 import { useCallback } from "react"
-import type { UIMessageWithMetadata } from "./chat"
+import type { UIMessageFull } from "./chat"
 
 type UseChatHandlersProps = {
-  messages: UIMessageWithMetadata[]
+  messages: UIMessageFull[]
   setMessages: (
-    messages:
-      | UIMessageWithMetadata[]
-      | ((messages: UIMessageWithMetadata[]) => UIMessageWithMetadata[])
+    messages: UIMessageFull[] | ((messages: UIMessageFull[]) => UIMessageFull[])
   ) => void
   setInput: (input: string) => void
   setSelectedModel: (model: string) => void

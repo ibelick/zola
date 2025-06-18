@@ -1,4 +1,4 @@
-import { LanguageModelV1 } from "ai"
+import { LanguageModelV2 } from "@ai-sdk/provider"
 
 type ModelConfig = {
   id: string // "gpt-4.1-nano" // same from AI SDKs
@@ -30,7 +30,7 @@ type ModelConfig = {
   releasedAt?: string // "2024-12-01" (optional, for tracking changes)
 
   // apiSdk?: () => LanguageModelV1 // "openai("gpt-4.1-nano")"
-  apiSdk?: (apiKey?: string) => LanguageModelV1
+  apiSdk?: (apiKey?: string) => LanguageModelV2
 }
 
 export type { ModelConfig }

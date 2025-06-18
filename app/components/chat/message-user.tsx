@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 import { Check, Copy, Trash } from "@phosphor-icons/react"
 import Image from "next/image"
 import { useRef, useState } from "react"
-import type { UIMessageWithMetadata } from "./chat"
+import type { UIMessageFull } from "./chat"
 
 const getTextFromDataUrl = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1]
@@ -28,7 +28,7 @@ const getTextFromDataUrl = (dataUrl: string) => {
 
 export type MessageUserProps = {
   hasScrollAnchor?: boolean
-  parts: UIMessageWithMetadata["parts"]
+  parts: UIMessageFull["parts"]
   copied: boolean
   copyToClipboard: () => void
   onEdit: (id: string, newText: string) => void

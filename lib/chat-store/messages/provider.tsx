@@ -1,6 +1,6 @@
 "use client"
 
-import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
+import type { UIMessageFull } from "@/app/components/chat/chat"
 import {
   getChatIdFromPathname,
   useChatSession,
@@ -19,11 +19,11 @@ import {
 } from "./api"
 
 interface MessagesContextType {
-  messages: UIMessageWithMetadata[]
-  setMessages: React.Dispatch<React.SetStateAction<UIMessageWithMetadata[]>>
+  messages: UIMessageFull[]
+  setMessages: React.Dispatch<React.SetStateAction<UIMessageFull[]>>
   refresh: () => Promise<void>
-  saveAllMessages: (messages: UIMessageWithMetadata[]) => Promise<void>
-  cacheAndAddMessage: (message: UIMessageWithMetadata) => Promise<void>
+  saveAllMessages: (messages: UIMessageFull[]) => Promise<void>
+  cacheAndAddMessage: (message: UIMessageFull) => Promise<void>
   resetMessages: () => Promise<void>
   deleteMessages: () => Promise<void>
 }
@@ -38,7 +38,7 @@ export function useMessages() {
 }
 
 export function MessagesProvider({ children }: { children: React.ReactNode }) {
-  const [messages, setMessages] = useState<UIMessageWithMetadata[]>([])
+  const [messages, setMessages] = useState<UIMessageFull[]>([])
   const { chatId } = useChatSession()
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const cacheAndAddMessage = async (message: UIMessageWithMetadata) => {
+  const cacheAndAddMessage = async (message: UIMessageFull) => {
     const chatId = getChatIdFromPathname()
     if (!chatId) return
 
@@ -92,7 +92,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const saveAllMessages = async (newMessages: UIMessageWithMetadata[]) => {
+  const saveAllMessages = async (newMessages: UIMessageFull[]) => {
     // @todo: manage the case where the chatId is null (first time the user opens the chat)
     if (!chatId) return
 

@@ -10,7 +10,7 @@ import { summarizeSources } from "./tools/summarizeSources"
 export const tools = {
   search: tool({
     description: "Search the web.",
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string(),
     }),
     async execute({ query }) {
@@ -19,7 +19,7 @@ export const tools = {
   }),
   planSearchQueries: tool({
     description: "Plan search queries.",
-    parameters: z.object({
+    inputSchema: z.object({
       prompt: z.string(),
     }),
     async execute({ prompt }) {
@@ -28,7 +28,7 @@ export const tools = {
   }),
   generateTitle: tool({
     description: "Generate a title for a report.",
-    parameters: z.object({
+    inputSchema: z.object({
       prompt: z.string(),
     }),
     async execute({ prompt }) {
@@ -37,7 +37,7 @@ export const tools = {
   }),
   summarizeSources: tool({
     description: "Summarize sources.",
-    parameters: z.object({
+    inputSchema: z.object({
       searchResults: z
         .union([
           z.array(
@@ -76,7 +76,7 @@ export const tools = {
   }),
   generateReport: tool({
     description: "Generate a report.",
-    parameters: z.object({
+    inputSchema: z.object({
       findings: z.array(
         z.object({
           query: z.string(),

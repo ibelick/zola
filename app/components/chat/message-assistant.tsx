@@ -7,7 +7,7 @@ import {
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
-import type { UIMessageWithMetadata } from "./chat"
+import type { UIMessageFull } from "./chat"
 import { getSources } from "./get-sources"
 import { Reasoning } from "./reasoning"
 import { SearchImages } from "./search-images"
@@ -20,9 +20,28 @@ type MessageAssistantProps = {
   copied?: boolean
   copyToClipboard?: () => void
   onReload?: () => void
-  parts?: UIMessageWithMetadata["parts"]
+  parts?: UIMessageFull["parts"]
   status?: "streaming" | "ready" | "submitted" | "error"
 }
+
+export function isPartToolInvocation(part: UIMessageFull["parts"][number]) {
+  return (
+    part.type === "tool-generateReport" ||
+    part.type === "tool-planSearchQueries" ||
+    part.type === "tool-generateTitle" ||
+    part.type === "tool-summarizeSources" ||
+    part.type === "tool-search" ||
+    part.type == "tool-imageSearch"
+  )
+}
+
+export function filterPartsForToolInvocation(parts: UIMessageFull["parts"]) {
+  return parts.filter((part) => isPartToolInvocation(part))
+}
+
+export type ToolInvocationUIPart = ReturnType<
+  typeof filterPartsForToolInvocation
+>[number]
 
 export function MessageAssistant({
   isLast,
@@ -35,8 +54,8 @@ export function MessageAssistant({
 }: MessageAssistantProps) {
   const { preferences } = useUserPreferences()
   const sources = getSources(parts || [])
-  const toolInvocationParts = parts?.filter(
-    (part) => part.type === "tool-invocation"
+  const toolInvocationParts = parts?.filter((part) =>
+    isPartToolInvocation(part)
   )
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
   const textParts = parts?.filter((part) => part.type === "text")
@@ -48,17 +67,15 @@ export function MessageAssistant({
     parts
       ?.filter(
         (part) =>
-          part.type === "tool-invocation" &&
-          part.toolInvocation?.state === "result" &&
-          part.toolInvocation?.toolName === "imageSearch" &&
-          part.toolInvocation?.result?.content?.[0]?.type === "images"
+          part.type === "tool-imageSearch" &&
+          part.state === "output-available" &&
+          part.output?.content?.[0]?.type === "images"
       )
       .flatMap((part) =>
-        part.type === "tool-invocation" &&
-        part.toolInvocation?.state === "result" &&
-        part.toolInvocation?.toolName === "imageSearch" &&
-        part.toolInvocation?.result?.content?.[0]?.type === "images"
-          ? (part.toolInvocation?.result?.content?.[0]?.results ?? [])
+        part.type === "tool-imageSearch" &&
+        part.state === "output-available" &&
+        part.output?.content?.[0]?.type === "images"
+          ? (part.output?.content?.[0]?.results ?? [])
           : []
       ) ?? []
 

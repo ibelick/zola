@@ -4,7 +4,7 @@ import { runImageSearch } from "./run"
 
 export const imageSearchTool = tool({
   description: "Search for images using Exa.",
-  parameters: z.object({
+  inputSchema: z.object({
     query: z.string().describe("The topic to search for images"),
     numResults: z
       .number()

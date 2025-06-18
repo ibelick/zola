@@ -1,4 +1,4 @@
-import type { UIMessageWithMetadata } from "@/app/components/chat/chat"
+import type { UIMessageFull } from "@/app/components/chat/chat"
 import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import type { UIMessage } from "ai"
@@ -6,7 +6,7 @@ import { readFromIndexedDB, writeToIndexedDB } from "../persist"
 
 export async function getMessagesFromDb(
   chatId: string
-): Promise<UIMessageWithMetadata[]> {
+): Promise<UIMessageFull[]> {
   // fallback to local cache only
   if (!isSupabaseEnabled) {
     const cached = await getCachedMessages(chatId)
@@ -28,23 +28,20 @@ export async function getMessagesFromDb(
   }
 
   return data.map((message) => {
-    const uiMessage: UIMessageWithMetadata = {
+    const uiMessage: UIMessageFull = {
       id: String(message.id),
       role: message["role"],
-      metadata: {
-        createdAt: new Date(message.created_at || ""),
-      },
-      parts: (message?.parts as UIMessage["parts"]) || undefined,
+      // metadata: {
+      //   createdAt: new Date(message.created_at || ""),
+      // },
+      parts: (message?.parts as UIMessageFull["parts"]) || undefined,
     }
 
     return uiMessage
   })
 }
 
-async function insertMessageToDb(
-  chatId: string,
-  message: UIMessageWithMetadata
-) {
+async function insertMessageToDb(chatId: string, message: UIMessageFull) {
   const supabase = createClient()
   if (!supabase) return
 
@@ -55,10 +52,7 @@ async function insertMessageToDb(
   })
 }
 
-async function insertMessagesToDb(
-  chatId: string,
-  messages: UIMessageWithMetadata[]
-) {
+async function insertMessagesToDb(chatId: string, messages: UIMessageFull[]) {
   const supabase = createClient()
   if (!supabase) return
 
@@ -87,12 +81,12 @@ async function deleteMessagesFromDb(chatId: string) {
 
 type ChatMessageEntry = {
   id: string
-  messages: UIMessageWithMetadata[]
+  messages: UIMessageFull[]
 }
 
 export async function getCachedMessages(
   chatId: string
-): Promise<UIMessageWithMetadata[]> {
+): Promise<UIMessageFull[]> {
   const entry = await readFromIndexedDB<ChatMessageEntry>("messages", chatId)
 
   if (!entry || Array.isArray(entry)) return []
@@ -106,14 +100,14 @@ export async function getCachedMessages(
 
 export async function cacheMessages(
   chatId: string,
-  messages: UIMessageWithMetadata[]
+  messages: UIMessageFull[]
 ): Promise<void> {
   await writeToIndexedDB("messages", { id: chatId, messages })
 }
 
 export async function addMessage(
   chatId: string,
-  message: UIMessageWithMetadata
+  message: UIMessageFull
 ): Promise<void> {
   await insertMessageToDb(chatId, message)
   const current = await getCachedMessages(chatId)
@@ -124,7 +118,7 @@ export async function addMessage(
 
 export async function setMessages(
   chatId: string,
-  messages: UIMessageWithMetadata[]
+  messages: UIMessageFull[]
 ): Promise<void> {
   await insertMessagesToDb(chatId, messages)
   await writeToIndexedDB("messages", { id: chatId, messages })

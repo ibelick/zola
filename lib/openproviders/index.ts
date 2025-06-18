@@ -2,7 +2,7 @@ import { anthropic, createAnthropic } from "@ai-sdk/anthropic"
 import { createGoogleGenerativeAI, google } from "@ai-sdk/google"
 import { createMistral, mistral } from "@ai-sdk/mistral"
 import { createOpenAI, openai } from "@ai-sdk/openai"
-import type { LanguageModelV1 } from "@ai-sdk/provider"
+import type { LanguageModelV2 } from "@ai-sdk/provider"
 import { createXai, xai } from "@ai-sdk/xai"
 import { getProviderForModel } from "./provider-map"
 import type {
@@ -65,45 +65,51 @@ export function openproviders<T extends SupportedModel>(
   modelId: T,
   settings?: OpenProvidersOptions<T>,
   apiKey?: string
-): LanguageModelV1 {
+): LanguageModelV2 {
   const provider = getProviderForModel(modelId)
 
   if (provider === "openai") {
     if (apiKey) {
       const openaiProvider = createOpenAI({
         apiKey,
-        compatibility: "strict",
+        // compatibility: "strict",
       })
       return openaiProvider(
-        modelId as OpenAIModel,
-        settings as OpenAIChatSettings
+        modelId as OpenAIModel
+        // settings as OpenAIChatSettings
       )
     }
-    return openai(modelId as OpenAIModel, settings as OpenAIChatSettings)
+    return openai(
+      modelId as OpenAIModel
+      //  settings as OpenAIChatSettings
+    )
   }
 
   if (provider === "mistral") {
     if (apiKey) {
       const mistralProvider = createMistral({ apiKey })
       return mistralProvider(
-        modelId as MistralModel,
-        settings as MistralProviderSettings
+        modelId as MistralModel
+        // settings as MistralProviderSettings
       )
     }
-    return mistral(modelId as MistralModel, settings as MistralProviderSettings)
+    return mistral(
+      modelId as MistralModel
+      // settings as MistralProviderSettings
+    )
   }
 
   if (provider === "google") {
     if (apiKey) {
       const googleProvider = createGoogleGenerativeAI({ apiKey })
       return googleProvider(
-        modelId as GeminiModel,
-        settings as GoogleGenerativeAIProviderSettings
+        modelId as GeminiModel
+        // settings as GoogleGenerativeAIProviderSettings
       )
     }
     return google(
-      modelId as GeminiModel,
-      settings as GoogleGenerativeAIProviderSettings
+      modelId as GeminiModel
+      // settings as GoogleGenerativeAIProviderSettings
     )
   }
 
@@ -111,29 +117,31 @@ export function openproviders<T extends SupportedModel>(
     if (apiKey) {
       const anthropicProvider = createAnthropic({ apiKey })
       return anthropicProvider(
-        modelId as AnthropicModel,
-        settings as AnthropicProviderSettings
+        modelId as AnthropicModel
+        // settings as AnthropicProviderSettings
       )
     }
     return anthropic(
-      modelId as AnthropicModel,
-      settings as AnthropicProviderSettings
+      modelId as AnthropicModel
+      // settings as AnthropicProviderSetting
     )
   }
 
   if (provider === "xai") {
     if (apiKey) {
       const xaiProvider = createXai({ apiKey })
-      return xaiProvider(modelId as XaiModel, settings as XaiProviderSettings)
+      return xaiProvider(modelId as XaiModel)
+      // settings as XaiProviderSettings
     }
-    return xai(modelId as XaiModel, settings as XaiProviderSettings)
+    return xai(modelId as XaiModel)
+    // settings as XaiProviderSettings
   }
 
   if (provider === "ollama") {
     const ollamaProvider = createOllamaProvider()
     return ollamaProvider(
-      modelId as OllamaModel,
-      settings as OllamaProviderSettings
+      modelId as OllamaModel
+      // settings as OllamaProviderSettings
     )
   }
 

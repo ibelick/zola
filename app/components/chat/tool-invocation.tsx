@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import type { ToolInvocationUIPart } from "@ai-sdk/ui-utils"
+// import type { ToolInvocationUIPart } from "@ai-sdk/ui-utils"
 import {
   CaretDown,
   CheckCircle,
@@ -13,6 +13,7 @@ import {
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState } from "react"
+import { ToolInvocationUIPart } from "./message-assistant"
 
 interface ToolInvocationProps {
   toolInvocations: ToolInvocationUIPart[]
@@ -39,7 +40,7 @@ export function ToolInvocation({
   // Group tool invocations by toolCallId
   const groupedTools = toolInvocationsData.reduce(
     (acc, item) => {
-      const { toolCallId } = item.toolInvocation
+      const toolCallId = item.toolCallId
       if (!acc[toolCallId]) {
         acc[toolCallId] = []
       }
@@ -139,7 +140,7 @@ function SingleToolView({
   // Group by toolCallId and pick the most informative state
   const groupedTools = toolInvocations.reduce(
     (acc, item) => {
-      const { toolCallId } = item.toolInvocation
+      const toolCallId = item.toolCallId
       if (!acc[toolCallId]) {
         acc[toolCallId] = []
       }
@@ -152,14 +153,10 @@ function SingleToolView({
   // For each toolCallId, get the most informative state (result > call > requested)
   const toolsToDisplay = Object.values(groupedTools)
     .map((group) => {
-      const resultTool = group.find(
-        (item) => item.toolInvocation.state === "result"
-      )
-      const callTool = group.find(
-        (item) => item.toolInvocation.state === "call"
-      )
+      const resultTool = group.find((item) => item.state === "output-available")
+      const callTool = group.find((item) => item.state === "input-available")
       const partialCallTool = group.find(
-        (item) => item.toolInvocation.state === "partial-call"
+        (item) => item.state === "input-streaming"
       )
 
       // Return the most informative one
@@ -186,7 +183,7 @@ function SingleToolView({
       <div className="space-y-4">
         {toolsToDisplay.map((tool) => (
           <SingleToolCard
-            key={tool.toolInvocation.toolCallId}
+            key={tool.toolCallId}
             toolData={tool}
             defaultOpen={defaultOpen}
           />
@@ -210,11 +207,16 @@ function SingleToolCard({
   const [parsedResult, setParsedResult] = useState<unknown>(null)
   const [parseError, setParseError] = useState<string | null>(null)
 
-  const { toolInvocation } = toolData
-  const { state, toolName, toolCallId, args } = toolInvocation
-  const isLoading = state === "call"
-  const isCompleted = state === "result"
-  const result = isCompleted ? toolInvocation.result : undefined
+  // const { toolInvocation } = toolData
+  const toolCallId = toolData.toolCallId
+  const state = toolData.state
+  const toolName = toolData.type
+  const args = toolData.input
+  const result =
+    toolData.state === "output-available" ? toolData.output : undefined
+
+  const isLoading = state === "input-available"
+  const isCompleted = state === "output-available"
 
   // Parse the result JSON if available
   useEffect(() => {
@@ -312,30 +314,35 @@ function SingleToolCard({
       ) {
         return (
           <div className="space-y-3">
-            {parsedResult.map((item: { url: string; title: string; snippet?: string }, index: number) => (
-              <div
-                key={index}
-                className="border-border border-b pb-3 last:border-0 last:pb-0"
-              >
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary group flex items-center gap-1 font-medium hover:underline"
+            {parsedResult.map(
+              (
+                item: { url: string; title: string; snippet?: string },
+                index: number
+              ) => (
+                <div
+                  key={index}
+                  className="border-border border-b pb-3 last:border-0 last:pb-0"
                 >
-                  {item.title}
-                  <Link className="h-3 w-3 opacity-70 transition-opacity group-hover:opacity-100" />
-                </a>
-                <div className="text-muted-foreground mt-1 font-mono text-xs">
-                  {item.url}
-                </div>
-                {item.snippet && (
-                  <div className="mt-1 line-clamp-2 text-sm">
-                    {item.snippet}
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary group flex items-center gap-1 font-medium hover:underline"
+                  >
+                    {item.title}
+                    <Link className="h-3 w-3 opacity-70 transition-opacity group-hover:opacity-100" />
+                  </a>
+                  <div className="text-muted-foreground mt-1 font-mono text-xs">
+                    {item.url}
                   </div>
-                )}
-              </div>
-            ))}
+                  {item.snippet && (
+                    <div className="mt-1 line-clamp-2 text-sm">
+                      {item.snippet}
+                    </div>
+                  )}
+                </div>
+              )
+            )}
           </div>
         )
       }
@@ -354,13 +361,12 @@ function SingleToolCard({
     if (typeof parsedResult === "object" && parsedResult !== null) {
       const resultObj = parsedResult as Record<string, unknown>
       const title = typeof resultObj.title === "string" ? resultObj.title : null
-      const htmlUrl = typeof resultObj.html_url === "string" ? resultObj.html_url : null
-      
+      const htmlUrl =
+        typeof resultObj.html_url === "string" ? resultObj.html_url : null
+
       return (
         <div>
-          {title && (
-            <div className="mb-2 font-medium">{title}</div>
-          )}
+          {title && <div className="mb-2 font-medium">{title}</div>}
           {htmlUrl && (
             <div className="mb-2">
               <a
