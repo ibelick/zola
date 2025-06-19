@@ -7,18 +7,16 @@ import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import { useChatSession } from "@/lib/chat-store/session/provider"
+import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect } from "next/navigation"
-import { Suspense, useMemo } from "react"
-import { useChatActions } from "./use-chat-actions"
-import { useChatHandlers } from "./use-chat-handlers"
-import { useChatInitialization } from "./use-chat-initialization"
-import { useChatState } from "./use-chat-state"
-import { useChatUtils } from "./use-chat-utils"
+import { useMemo, useState } from "react"
+import { useChatCore } from "./use-chat-core"
+import { useChatOperations } from "./use-chat-operations"
 import { useFileUpload } from "./use-file-upload"
 
 const FeedbackWidget = dynamic(
@@ -51,38 +49,6 @@ export function Chat() {
   const { preferences } = useUserPreferences()
   const { draftValue, clearDraft } = useChatDraft(chatId)
 
-  // Initialize chat and get useChat hooks
-  const {
-    messages,
-    input,
-    handleSubmit,
-    status,
-    reload,
-    stop,
-    setMessages,
-    setInput,
-    append,
-    isAuthenticated,
-    systemPrompt,
-    hasSentFirstMessageRef,
-  } = useChatInitialization({
-    initialMessages,
-    draftValue,
-    cacheAndAddMessage,
-    chatId,
-    user,
-  })
-
-  // Manage component state
-  const {
-    isSubmitting,
-    setIsSubmitting,
-    hasDialogAuth,
-    setHasDialogAuth,
-    enableSearch,
-    setEnableSearch,
-  } = useChatState({ setInput })
-
   // File upload functionality
   const {
     files,
@@ -102,52 +68,59 @@ export function Chat() {
     chatId,
   })
 
-  // Chat utilities
-  const { checkLimitsAndNotify, ensureChatExists } = useChatUtils({
-    isAuthenticated,
-    chatId,
+  // State to pass between hooks
+  const [hasDialogAuth, setHasDialogAuth] = useState(false)
+  const isAuthenticated = useMemo(() => !!user?.id, [user?.id])
+  const systemPrompt = useMemo(
+    () => user?.system_prompt || SYSTEM_PROMPT_DEFAULT,
+    [user?.system_prompt]
+  )
+
+  // Chat operations (utils + handlers) - created first
+  const { checkLimitsAndNotify, ensureChatExists, handleDelete, handleEdit } =
+    useChatOperations({
+      isAuthenticated,
+      chatId,
+      messages: initialMessages,
+      input: draftValue,
+      selectedModel,
+      systemPrompt,
+      createNewChat,
+      setHasDialogAuth,
+      setMessages: () => {},
+      setInput: () => {},
+    })
+
+  // Core chat functionality (initialization + state + actions)
+  const {
     messages,
     input,
-    selectedModel,
-    systemPrompt,
-    createNewChat,
-    setHasDialogAuth,
-  })
-
-  // Message handlers
-  const { handleInputChange, handleDelete, handleEdit } = useChatHandlers({
-    messages,
-    setMessages,
-    setInput,
+    status,
+    stop,
+    hasSentFirstMessageRef,
+    isSubmitting,
+    enableSearch,
+    setEnableSearch,
+    submit,
+    handleSuggestion,
+    handleReload,
+    handleInputChange,
+  } = useChatCore({
+    initialMessages,
+    draftValue,
+    cacheAndAddMessage,
     chatId,
-  })
-
-  // Chat actions
-  const { submit, handleSuggestion, handleReload } = useChatActions({
     user,
     files,
     createOptimisticAttachments,
-    input,
-    setMessages,
-    setInput,
     setFiles,
     checkLimitsAndNotify,
     cleanupOptimisticAttachments,
     ensureChatExists,
     handleFileUploads,
     selectedModel,
-    isAuthenticated,
-    systemPrompt,
-    enableSearch,
-    handleSubmit,
-    append,
-    cacheAndAddMessage,
     clearDraft,
-    messages,
     bumpChat,
-    chatId,
-    reload,
-    setIsSubmitting,
   })
 
   // Memoize the conversation props to prevent unnecessary rerenders

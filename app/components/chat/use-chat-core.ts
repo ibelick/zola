@@ -1,17 +1,22 @@
+import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
 import { getOrCreateGuestUserId } from "@/lib/api"
 import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
+import { API_ROUTE_CHAT } from "@/lib/routes"
+import { useChat } from "@ai-sdk/react"
 import type { Message } from "@ai-sdk/react"
-import { useCallback } from "react"
+import { useSearchParams } from "next/navigation"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-type UseChatActionsProps = {
+type UseChatCoreProps = {
+  initialMessages: Message[]
+  draftValue: string
+  cacheAndAddMessage: (message: Message) => void
+  chatId: string | null
   user: any
   files: File[]
   createOptimisticAttachments: (files: File[]) => any[]
-  input: string
-  setMessages: (messages: Message[] | ((prev: Message[]) => Message[])) => void
-  setInput: (input: string) => void
   setFiles: (files: File[]) => void
   checkLimitsAndNotify: (uid: string) => Promise<boolean>
   cleanupOptimisticAttachments: (attachments?: any[]) => void
@@ -21,46 +26,99 @@ type UseChatActionsProps = {
     chatId: string
   ) => Promise<Attachment[] | null>
   selectedModel: string
-  isAuthenticated: boolean
-  systemPrompt: string
-  enableSearch: boolean
-  handleSubmit: (event?: React.FormEvent, options?: any) => void
-  append: (message: any, options?: any) => void
-  cacheAndAddMessage: (message: Message) => void
   clearDraft: () => void
-  messages: Message[]
   bumpChat: (chatId: string) => void
-  chatId: string | null
-  reload: (options?: any) => void
-  setIsSubmitting: (value: boolean) => void
 }
 
-export function useChatActions({
+export function useChatCore({
+  initialMessages,
+  draftValue,
+  cacheAndAddMessage,
+  chatId,
   user,
   files,
   createOptimisticAttachments,
-  input,
-  setMessages,
-  setInput,
   setFiles,
   checkLimitsAndNotify,
   cleanupOptimisticAttachments,
   ensureChatExists,
   handleFileUploads,
   selectedModel,
-  isAuthenticated,
-  systemPrompt,
-  enableSearch,
-  handleSubmit,
-  append,
-  cacheAndAddMessage,
   clearDraft,
-  messages,
   bumpChat,
-  chatId,
-  reload,
-  setIsSubmitting,
-}: UseChatActionsProps) {
+}: UseChatCoreProps) {
+  // State management
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [hasDialogAuth, setHasDialogAuth] = useState(false)
+  const [enableSearch, setEnableSearch] = useState(false)
+
+  // Refs and derived state
+  const hasSentFirstMessageRef = useRef(false)
+  const prevChatIdRef = useRef<string | null>(chatId)
+  const isAuthenticated = useMemo(() => !!user?.id, [user?.id])
+  const systemPrompt = useMemo(
+    () => user?.system_prompt || SYSTEM_PROMPT_DEFAULT,
+    [user?.system_prompt]
+  )
+
+  // Search params handling
+  const searchParams = useSearchParams()
+  const prompt = searchParams.get("prompt")
+
+  // Handle errors directly in onError callback
+  const handleError = useCallback((error: Error) => {
+    console.error("Chat error:", error)
+    console.error("Error message:", error.message)
+    let errorMsg = error.message || "Something went wrong."
+
+    if (errorMsg === "An error occurred" || errorMsg === "fetch failed") {
+      errorMsg = "Something went wrong. Please try again."
+    }
+
+    toast({
+      title: errorMsg,
+      status: "error",
+    })
+  }, [])
+
+  // Initialize useChat
+  const {
+    messages,
+    input,
+    handleSubmit,
+    status,
+    error,
+    reload,
+    stop,
+    setMessages,
+    setInput,
+    append,
+  } = useChat({
+    api: API_ROUTE_CHAT,
+    initialMessages,
+    initialInput: draftValue,
+    onFinish: cacheAndAddMessage,
+    onError: handleError,
+  })
+
+  // Handle search params on mount
+  useEffect(() => {
+    if (prompt && typeof window !== "undefined") {
+      requestAnimationFrame(() => setInput(prompt))
+    }
+  }, [prompt, setInput])
+
+  // Reset messages when navigating from a chat to home
+  if (
+    prevChatIdRef.current !== null &&
+    chatId === null &&
+    messages.length > 0
+  ) {
+    setMessages([])
+  }
+  prevChatIdRef.current = chatId
+
+  // Submit action
   const submit = useCallback(async () => {
     setIsSubmitting(true)
 
@@ -144,8 +202,6 @@ export function useChatActions({
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
 
-      // Bump existing chats to top (non-blocking, after submit)
-      // If messages.length === 0, this is a new chat that was just created
       if (messages.length > 0) {
         bumpChat(currentChatId)
       }
@@ -180,6 +236,7 @@ export function useChatActions({
     setIsSubmitting,
   ])
 
+  // Handle suggestion
   const handleSuggestion = useCallback(
     async (suggestion: string) => {
       setIsSubmitting(true)
@@ -251,6 +308,7 @@ export function useChatActions({
     ]
   )
 
+  // Handle reload
   const handleReload = useCallback(async () => {
     const uid = await getOrCreateGuestUserId(user)
     if (!uid) {
@@ -270,9 +328,44 @@ export function useChatActions({
     reload(options)
   }, [user, chatId, selectedModel, isAuthenticated, systemPrompt, reload])
 
+  // Handle input change - now with access to the real setInput function!
+  const { setDraftValue } = useChatDraft(chatId)
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setInput(value)
+      setDraftValue(value)
+    },
+    [setInput, setDraftValue]
+  )
+
   return {
+    // Chat state
+    messages,
+    input,
+    handleSubmit,
+    status,
+    error,
+    reload,
+    stop,
+    setMessages,
+    setInput,
+    append,
+    isAuthenticated,
+    systemPrompt,
+    hasSentFirstMessageRef,
+
+    // Component state
+    isSubmitting,
+    setIsSubmitting,
+    hasDialogAuth,
+    setHasDialogAuth,
+    enableSearch,
+    setEnableSearch,
+
+    // Actions
     submit,
     handleSuggestion,
     handleReload,
+    handleInputChange,
   }
 }
