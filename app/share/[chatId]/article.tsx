@@ -1,3 +1,4 @@
+import { UIMessageFull } from "@/app/components/chat/chat"
 import { getSources } from "@/app/components/chat/get-sources"
 import { SourcesList } from "@/app/components/chat/sources-list"
 import type { Tables } from "@/app/types/database.types"
@@ -62,7 +63,7 @@ export default function Article({
         </div>
         <div className="mt-20 w-full">
           {messages.map((message) => {
-            const parts = message?.parts as UIMessage["parts"]
+            const parts = message?.parts as UIMessageFull["parts"]
             const sources = getSources(parts)
 
             const content: string = parts

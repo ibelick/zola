@@ -3,13 +3,7 @@ import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { getAllModels } from "@/lib/models"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import type { ProviderWithoutOllama } from "@/lib/user-keys"
-import {
-  convertToModelMessages,
-  stepCountIs,
-  streamText,
-  ToolSet,
-  UIMessage,
-} from "ai"
+import { convertToModelMessages, stepCountIs, streamText, ToolSet } from "ai"
 import {
   logUserMessage,
   storeAssistantMessage,
@@ -117,10 +111,10 @@ export async function POST(req: Request) {
         }
       },
       sendSources: true,
-      getErrorMessage: (error: unknown) => {
-        console.error("Error forwarded to client:", error)
-        return extractErrorMessage(error)
-      },
+      // getErrorMessage: (error: unknown) => {
+      //   console.error("Error forwarded to client:", error)
+      //   return extractErrorMessage(error)
+      // },
     })
   } catch (err: unknown) {
     console.error("Error in /api/chat:", err)

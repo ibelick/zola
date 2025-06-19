@@ -1,32 +1,14 @@
+import { SourceUIPart } from "@ai-sdk/ui-utils"
 import type { UIMessageFull } from "./chat"
 
-export function getSources(parts: UIMessageFull["parts"]) {
+export function getSources(
+  parts: UIMessageFull["parts"]
+): SourceUIPart["source"][] {
   const sources = parts
-    ?.filter(
-      (part) =>
-        part.type === "source-url" || part.type === "tool-summarizeSources"
-    )
+    ?.filter((part) => part.type === "source-url")
     .map((part) => {
       if (part.type === "source-url") {
         return part.url
-      }
-
-      if (
-        part.type === "tool-summarizeSources" &&
-        part.state === "output-available"
-      ) {
-        const result = part.output
-
-        if (
-          part.type === "tool-summarizeSources" &&
-          result?.result?.[0]?.citations
-        ) {
-          return result.result.flatMap(
-            (item: { citations?: unknown[] }) => item.citations || []
-          )
-        }
-
-        return Array.isArray(result) ? result.flat() : result
       }
 
       return null
@@ -36,9 +18,13 @@ export function getSources(parts: UIMessageFull["parts"]) {
 
   const validSources =
     sources?.filter(
-      (source) =>
-        source && typeof source === "object" && source.url && source.url !== ""
+      (source) => source && typeof source === "string" && source !== ""
     ) || []
 
-  return validSources
+  return validSources.map((source) => ({
+    id: source!,
+    sourceType: "url",
+    url: source!,
+    title: source!,
+  }))
 }

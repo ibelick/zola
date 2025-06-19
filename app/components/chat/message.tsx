@@ -1,5 +1,6 @@
 import { UIMessage } from "@ai-sdk/react"
 import React, { useState } from "react"
+import { UIMessageFull } from "./chat"
 import { MessageAssistant } from "./message-assistant"
 import { MessageUser } from "./message-user"
 
@@ -11,7 +12,7 @@ type MessageProps = {
   onEdit: (id: string, newText: string) => void
   onReload: () => void
   hasScrollAnchor?: boolean
-  parts?: UIMessage["parts"]
+  parts?: UIMessageFull["parts"]
   status?: "streaming" | "ready" | "submitted" | "error"
 }
 
@@ -70,9 +71,7 @@ export function Message({
         hasScrollAnchor={hasScrollAnchor}
         parts={parts}
         status={status}
-      >
-        {children}
-      </MessageAssistant>
+      />
     )
   }
 

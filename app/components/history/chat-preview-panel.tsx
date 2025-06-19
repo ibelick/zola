@@ -3,21 +3,15 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react"
 import { useLayoutEffect, useRef, useState } from "react"
+import { UIMessageFull } from "../chat/chat"
 
 type ChatPreviewPanelProps = {
   chatId: string | null
   onHover?: (isHovering: boolean) => void
-  messages?: ChatMessage[]
+  messages?: UIMessageFull[]
   isLoading?: boolean
   error?: string | null
   onFetchPreview?: (chatId: string) => Promise<void>
-}
-
-type ChatMessage = {
-  id: string
-  content: string
-  role: "user" | "assistant"
-  created_at: string
 }
 
 type MessageBubbleProps = {
@@ -242,14 +236,21 @@ export function ChatPreviewPanel({
                   Last {messages.length} messages
                 </div>
               </div>
-              {messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  content={message.content}
-                  role={message.role}
-                  timestamp={message.created_at}
-                />
-              ))}
+              {messages.map((message) => {
+                if (message.role === "system") {
+                  return null
+                }
+
+                const messageAsTextContent = "#TODO"
+                return (
+                  <MessageBubble
+                    key={message.id}
+                    content={messageAsTextContent}
+                    role={message.role}
+                    timestamp={message.metadata?.createdAt || ""}
+                  />
+                )
+              })}
             </div>
             <div ref={bottomRef} />
           </ScrollArea>

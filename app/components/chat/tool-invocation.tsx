@@ -204,8 +204,6 @@ function SingleToolCard({
   className?: string
 }) {
   const [isExpanded, setIsExpanded] = useState(defaultOpen)
-  const [parsedResult, setParsedResult] = useState<unknown>(null)
-  const [parseError, setParseError] = useState<string | null>(null)
 
   // const { toolInvocation } = toolData
   const toolCallId = toolData.toolCallId
@@ -231,6 +229,8 @@ function SingleToolCard({
         result !== null &&
         "content" in result
       ) {
+        // For now because there is no tool in the UIMessageFull typelib/hooks/use-chat-preview.tsx
+        // @ts-expect-error Property 'find' does not exist on type '{}'.
         const textContent = result.content?.find(
           (item: { type: string }) => item.type === "text"
         )
@@ -438,7 +438,7 @@ function SingleToolCard({
           >
             <div className="space-y-3 px-3 pt-3 pb-3">
               {/* Arguments section */}
-              {args && Object.keys(args).length > 0 && (
+              {args && Object.keys(args).length > 0 ? (
                 <div>
                   <div className="text-muted-foreground mb-1 text-xs font-medium">
                     Arguments
@@ -447,7 +447,7 @@ function SingleToolCard({
                     {formattedArgs}
                   </div>
                 </div>
-              )}
+              ) : null}
 
               {/* Result section */}
               {isCompleted && (

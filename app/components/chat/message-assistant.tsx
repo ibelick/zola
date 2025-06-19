@@ -4,15 +4,17 @@ import {
   MessageActions,
   MessageContent,
 } from "@/components/prompt-kit/message"
-import { useUserPreferences } from "@/lib/user-preference-store/provider"
+// import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
+import { isToolUIPart } from "ai"
 import type { UIMessageFull } from "./chat"
 import { getSources } from "./get-sources"
 import { Reasoning } from "./reasoning"
-import { SearchImages } from "./search-images"
+// import { SearchImages } from "./search-images"
 import { SourcesList } from "./sources-list"
-import { ToolInvocation } from "./tool-invocation"
+
+// import { ToolInvocation } from "./tool-invocation"
 
 type MessageAssistantProps = {
   isLast?: boolean
@@ -25,18 +27,11 @@ type MessageAssistantProps = {
 }
 
 export function isPartToolInvocation(part: UIMessageFull["parts"][number]) {
-  return (
-    part.type === "tool-generateReport" ||
-    part.type === "tool-planSearchQueries" ||
-    part.type === "tool-generateTitle" ||
-    part.type === "tool-summarizeSources" ||
-    part.type === "tool-search" ||
-    part.type == "tool-imageSearch"
-  )
+  return isToolUIPart(part)
 }
 
 export function filterPartsForToolInvocation(parts: UIMessageFull["parts"]) {
-  return parts.filter((part) => isPartToolInvocation(part))
+  return parts.filter(isToolUIPart)
 }
 
 export type ToolInvocationUIPart = ReturnType<
@@ -52,32 +47,32 @@ export function MessageAssistant({
   parts,
   status,
 }: MessageAssistantProps) {
-  const { preferences } = useUserPreferences()
+  // const { preferences } = useUserPreferences()
   const sources = getSources(parts || [])
-  const toolInvocationParts = parts?.filter((part) =>
-    isPartToolInvocation(part)
-  )
+  // const toolInvocationParts = parts?.filter((part) =>
+  //   isPartToolInvocation(part)
+  // )
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
   const textParts = parts?.filter((part) => part.type === "text")
   const textPartsAsText = textParts?.map((part) => part.text).join("") || ""
 
   const contentNullOrEmpty = textPartsAsText === null || textPartsAsText === ""
   const isLastStreaming = status === "streaming" && isLast
-  const searchImageResults =
-    parts
-      ?.filter(
-        (part) =>
-          part.type === "tool-imageSearch" &&
-          part.state === "output-available" &&
-          part.output?.content?.[0]?.type === "images"
-      )
-      .flatMap((part) =>
-        part.type === "tool-imageSearch" &&
-        part.state === "output-available" &&
-        part.output?.content?.[0]?.type === "images"
-          ? (part.output?.content?.[0]?.results ?? [])
-          : []
-      ) ?? []
+  // const searchImageResults =
+  //   parts
+  //     ?.filter(
+  //       (part) =>
+  //         part.type === "tool-imageSearch" &&
+  //         part.state === "output-available" &&
+  //         part.output?.content?.[0]?.type === "images"
+  //     )
+  //     .flatMap((part) =>
+  //       part.type === "tool-imageSearch" &&
+  //       part.state === "output-available" &&
+  //       part.output?.content?.[0]?.type === "images"
+  //         ? (part.output?.content?.[0]?.results ?? [])
+  //         : []
+  //     ) ?? []
 
   return (
     <Message
@@ -87,14 +82,14 @@ export function MessageAssistant({
       )}
     >
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
-        {reasoningParts && reasoningParts.reasoning && (
+        {reasoningParts && reasoningParts.text && (
           <Reasoning
-            reasoning={reasoningParts.reasoning}
+            reasoning={reasoningParts.text}
             isStreaming={status === "streaming"}
           />
         )}
 
-        {toolInvocationParts &&
+        {/* {toolInvocationParts &&
           toolInvocationParts.length > 0 &&
           preferences.showToolInvocations && (
             <ToolInvocation toolInvocations={toolInvocationParts} />
@@ -102,7 +97,7 @@ export function MessageAssistant({
 
         {searchImageResults.length > 0 && (
           <SearchImages results={searchImageResults} />
-        )}
+        )} */}
 
         {contentNullOrEmpty ? null : (
           <MessageContent

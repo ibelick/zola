@@ -28,6 +28,7 @@ const deepseekModels: ModelConfig[] = [
     modelPage: "https://deepseek.com",
     releasedAt: "2024-04-01",
     icon: "deepseek",
+    // @ts-expect-error The `supportedUrls` property is missing in the return type of `createOpenRouter(...).chat(...)`.
     apiSdk: () =>
       createOpenRouter({
         apiKey: process.env.OPENROUTER_API_KEY,
@@ -57,6 +58,7 @@ const deepseekModels: ModelConfig[] = [
     modelPage: "https://github.com/deepseek-ai",
     releasedAt: "2024-12-26",
     icon: "deepseek",
+    // @ts-expect-error The `supportedUrls` property is missing in the return type of `createOpenRouter(...).chat(...)`.
     apiSdk: () =>
       createOpenRouter({
         apiKey: process.env.OPENROUTER_API_KEY,

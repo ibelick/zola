@@ -48,8 +48,6 @@ export function Conversation({
             const hasScrollAnchor =
               isLast && messages.length > initialMessageCount.current
 
-            const messageAsTextContent = "#TODO"
-
             return (
               <Message
                 key={message.id}
@@ -63,9 +61,7 @@ export function Conversation({
                 hasScrollAnchor={hasScrollAnchor}
                 parts={message.parts}
                 status={status}
-              >
-                {messageAsTextContent}
-              </Message>
+              />
             )
           })}
           {status === "submitted" &&

@@ -37,6 +37,8 @@ type ModelConfig = {
     apiKey?: string,
     opts?: { enableSearch?: boolean }
   ) => LanguageModelV2
+
+  accessible?: boolean // true if the model is accessible to the user
 }
 
 export type { ModelConfig }

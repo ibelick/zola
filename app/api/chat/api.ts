@@ -6,15 +6,9 @@ import type {
   StoreAssistantMessageParams,
   SupabaseClientType,
 } from "@/app/types/api.types"
-import type {
-  ChatApiParams,
-  LogUserMessageParams,
-  StoreAssistantMessageParams,
-  SupabaseClientType,
-} from "@/app/types/api.types"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
-import type { SupabaseClient } from "@/lib/supabase/server"
+// import type { SupabaseClient } from "@/lib/supabase/server"
 import { checkUsageByModel, incrementUsageByModel } from "@/lib/usage"
 
 export async function validateAndTrackUsage({

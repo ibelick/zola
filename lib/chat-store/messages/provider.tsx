@@ -1,13 +1,11 @@
 "use client"
 
 import type { UIMessageFull } from "@/app/components/chat/chat"
+import { toast } from "@/components/ui/toast"
 import {
   getChatIdFromPathname,
   useChatSession,
-} from "@/app/providers/chat-session-provider"
-import { toast } from "@/components/ui/toast"
-// import { useChatSession } from "@/lib/chat-store/session/provider"
-import type { UIMessage } from "ai"
+} from "@/lib/chat-store/session/provider"
 import { createContext, useContext, useEffect, useState } from "react"
 import { writeToIndexedDB } from "../persist"
 import {

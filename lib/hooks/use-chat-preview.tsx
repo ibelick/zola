@@ -59,14 +59,8 @@ export function useChatPreview(): UseChatPreviewReturn {
             currentRequestRef.current === chatId &&
             !controller.signal.aborted
           ) {
-            const cachedMessages = cached
-              .slice(-5) // Get last 5 messages
-              .map((msg) => ({
-                id: msg.id,
-                pars: msg.parts,
-                role: msg.role as "user" | "assistant",
-                created_at: msg.metadata?.createdAt || new Date().toISOString(),
-              }))
+            const cachedMessages = cached.slice(-5) // Get last 5 messages
+
             setMessages(cachedMessages)
           }
         } else {
