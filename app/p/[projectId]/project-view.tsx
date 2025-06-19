@@ -2,12 +2,11 @@
 
 import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
-import { useChatHandlers } from "@/app/components/chat/use-chat-handlers"
+import { useChatOperations } from "@/app/components/chat/use-chat-operations"
 import { useFileUpload } from "@/app/components/chat/use-file-upload"
 import { useModel } from "@/app/components/chat/use-model"
 import { ProjectChatItem } from "@/app/components/layout/sidebar/project-chat-item"
 import { toast } from "@/components/ui/toast"
-import { getOrCreateGuestUserId } from "@/lib/api"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
@@ -20,7 +19,7 @@ import { ChatCircleIcon } from "@phosphor-icons/react"
 import { useQuery } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "motion/react"
 import { usePathname } from "next/navigation"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 type Project = {
   id: string
@@ -170,12 +169,26 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     ]
   )
 
-  const { handleInputChange, handleDelete, handleEdit } = useChatHandlers({
+  const { handleDelete, handleEdit } = useChatOperations({
+    isAuthenticated: true, // Always authenticated in project context
+    chatId: null,
     messages,
+    input,
+    selectedModel,
+    systemPrompt: SYSTEM_PROMPT_DEFAULT,
+    createNewChat,
+    setHasDialogAuth: () => {}, // Not used in project context
     setMessages,
     setInput,
-    chatId: null,
   })
+
+  // Simple input change handler for project context (no draft saving needed)
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setInput(value)
+    },
+    [setInput]
+  )
 
   const submit = useCallback(async () => {
     setIsSubmitting(true)
