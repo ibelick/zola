@@ -23,6 +23,7 @@ import { OllamaSection } from "./connections/ollama-section"
 import { AccountManagement } from "./general/account-management"
 import { ModelPreferences } from "./general/model-preferences"
 import { UserProfile } from "./general/user-profile"
+import { FavoriteModels } from "./models/favorite-models"
 import { ModelVisibilitySettings } from "./models/model-visibility-settings"
 
 type SettingsContentProps = {
@@ -127,6 +128,7 @@ export function SettingsContent({
             </TabsContent>
 
             <TabsContent value="models" className="px-6">
+              <FavoriteModels />
               <ModelVisibilitySettings />
             </TabsContent>
 
@@ -214,6 +216,7 @@ export function SettingsContent({
               </TabsContent>
 
               <TabsContent value="models" className="mt-0 space-y-6">
+                <FavoriteModels />
                 <ModelVisibilitySettings />
               </TabsContent>
 
