@@ -13,7 +13,7 @@ import {
 import { AnimatePresence, motion, Reorder } from "framer-motion"
 import { useEffect, useMemo, useState } from "react"
 
-interface FavoriteModelItem extends ModelConfig {
+type FavoriteModelItem = ModelConfig & {
   isFavorite: boolean
 }
 
@@ -24,6 +24,7 @@ export function ModelsSettings() {
   const [searchQuery, setSearchQuery] = useState("")
 
   // Initialize with some default favorites for demo
+  // @todo: to remove
   useEffect(() => {
     if (models.length > 0 && favoriteModelIds.length === 0) {
       const defaultFavorites = models
@@ -92,6 +93,7 @@ export function ModelsSettings() {
 
   const getProviderIcon = (model: ModelConfig) => {
     const provider = PROVIDERS.find(
+      // @todo: use badeProvider when available
       (p) => p.id === model.icon || p.id === model.providerId
     )
     return provider?.icon
@@ -156,8 +158,13 @@ export function ModelsSettings() {
                       <button
                         onClick={() => removeFavorite(model.id)}
                         type="button"
-                        className="text-muted-foreground hover:text-destructive border-border rounded-md border p-1 opacity-0 transition-all group-hover:opacity-100"
-                        title="Remove from favorites"
+                        disabled={favoriteModels.length <= 1}
+                        className="text-muted-foreground hover:text-destructive border-border disabled:hover:text-muted-foreground rounded-md border p-1 opacity-0 transition-all group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        title={
+                          favoriteModels.length <= 1
+                            ? "At least one favorite model is required"
+                            : "Remove from favorites"
+                        }
                       >
                         <MinusIcon className="size-4" />
                       </button>
@@ -246,15 +253,14 @@ export function ModelsSettings() {
                               </span>
                             )}
                           </div>
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
+                          <button
                             onClick={() => toggleFavorite(model.id)}
-                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            type="button"
+                            className="text-muted-foreground hover:text-foreground border-border rounded-md border p-1 transition-colors"
                             title="Add to favorites"
                           >
                             <PlusIcon className="size-4" />
-                          </motion.button>
+                          </button>
                         </motion.div>
                       )
                     })}
