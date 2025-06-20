@@ -97,7 +97,7 @@ export function ChatInput({
   )
 
   const handlePaste = useCallback(
-    async (e: ClipboardEvent) => {
+    async (e: React.ClipboardEvent) => {
       const items = e.clipboardData?.items
       if (!items) return
 
@@ -162,6 +162,7 @@ export function ChatInput({
           <PromptInputTextarea
             placeholder="Ask Zola"
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             className="min-h-[44px] pt-3 pl-4 text-base leading-[1.3] sm:text-base md:text-base"
           />
           <PromptInputActions className="mt-5 w-full justify-between px-3 pb-3">
