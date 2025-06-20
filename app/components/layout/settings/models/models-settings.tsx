@@ -4,7 +4,12 @@ import { useModel } from "@/lib/model-store/provider"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
-import { DotsSixVerticalIcon, StarIcon } from "@phosphor-icons/react"
+import {
+  DotsSixVerticalIcon,
+  MinusIcon,
+  PlusIcon,
+  StarIcon,
+} from "@phosphor-icons/react"
 import { AnimatePresence, motion, Reorder } from "framer-motion"
 import { useEffect, useMemo, useState } from "react"
 
@@ -12,7 +17,7 @@ interface FavoriteModelItem extends ModelConfig {
   isFavorite: boolean
 }
 
-export function FavoriteModels() {
+export function ModelsSettings() {
   const { models } = useModel()
   const { isModelHidden } = useUserPreferences()
   const [favoriteModelIds, setFavoriteModelIds] = useState<string[]>([])
@@ -40,9 +45,9 @@ export function FavoriteModels() {
       .filter(Boolean) as FavoriteModelItem[]
   }, [favoriteModelIds, models, isModelHidden])
 
-  // Available models that aren't favorites yet
-  const availableModels = useMemo(() => {
-    return models
+  // Available models that aren't favorites yet, filtered and grouped by provider
+  const availableModelsByProvider = useMemo(() => {
+    const availableModels = models
       .filter(
         (model) =>
           !favoriteModelIds.includes(model.id) && !isModelHidden(model.id)
@@ -50,7 +55,21 @@ export function FavoriteModels() {
       .filter((model) =>
         model.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
-      .map((model) => ({ ...model, isFavorite: false }))
+
+    return availableModels.reduce(
+      (acc, model) => {
+        const iconKey = model.icon || "unknown"
+
+        if (!acc[iconKey]) {
+          acc[iconKey] = []
+        }
+
+        acc[iconKey].push(model)
+
+        return acc
+      },
+      {} as Record<string, typeof models>
+    )
   }, [models, favoriteModelIds, isModelHidden, searchQuery])
 
   const handleReorder = (newOrder: FavoriteModelItem[]) => {
@@ -81,9 +100,9 @@ export function FavoriteModels() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="mb-2 text-lg font-medium">Favorite models</h3>
+        <h3 className="mb-2 text-lg font-medium">Models</h3>
         <p className="text-muted-foreground mb-4 text-sm">
-          Reorder and manage the models shown in your selector
+          Reorder and manage the models shown in your selector.
         </p>
       </div>
 
@@ -102,16 +121,9 @@ export function FavoriteModels() {
             >
               {favoriteModels.map((model) => {
                 const ProviderIcon = getProviderIcon(model)
+
                 return (
-                  <Reorder.Item
-                    key={model.id}
-                    value={model}
-                    className="group"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.2 }}
-                  >
+                  <Reorder.Item key={model.id} value={model} className="group">
                     <motion.div className="bg-card border-border flex items-center gap-3 rounded-lg border p-3">
                       {/* Drag Handle */}
                       <div className="text-muted-foreground cursor-grab opacity-60 transition-opacity group-hover:opacity-100 active:cursor-grabbing">
@@ -143,10 +155,11 @@ export function FavoriteModels() {
                       {/* Remove Button */}
                       <button
                         onClick={() => removeFavorite(model.id)}
-                        className="text-muted-foreground hover:text-destructive opacity-0 transition-all group-hover:opacity-100"
+                        type="button"
+                        className="text-muted-foreground hover:text-destructive border-border rounded-md border p-1 opacity-0 transition-all group-hover:opacity-100"
                         title="Remove from favorites"
                       >
-                        <StarIcon className="size-4 fill-current" />
+                        <MinusIcon className="size-4" />
                       </button>
                     </motion.div>
                   </Reorder.Item>
@@ -172,6 +185,9 @@ export function FavoriteModels() {
       {/* Available Models */}
       <div>
         <h4 className="mb-3 text-sm font-medium">Available models</h4>
+        <p className="text-muted-foreground mb-4 text-sm">
+          Choose models to add to your favorites.
+        </p>
 
         {/* Search */}
         <div className="mb-4">
@@ -184,63 +200,78 @@ export function FavoriteModels() {
           />
         </div>
 
-        {/* Available Models List */}
-        <div className="max-h-64 space-y-2 overflow-y-auto">
-          <AnimatePresence>
-            {availableModels.map((model) => {
-              const ProviderIcon = getProviderIcon(model)
-              return (
-                <motion.div
-                  key={model.id}
-                  layout
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.2 }}
-                  className="bg-muted/30 hover:bg-muted/50 flex items-center justify-between rounded-lg p-3 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {ProviderIcon && (
-                      <ProviderIcon className="size-4 shrink-0" />
-                    )}
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">
-                          {model.name}
-                        </span>
-                        <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">
-                          {model.provider}
-                        </span>
-                      </div>
-                      {model.description && (
-                        <span className="text-muted-foreground text-xs">
-                          {model.description}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <motion.button
-                    onClick={() => toggleFavorite(model.id)}
-                    className="text-muted-foreground hover:text-foreground hover:bg-muted/80 flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors"
-                  >
-                    <StarIcon className="size-3" />
-                    Add
-                  </motion.button>
-                </motion.div>
-              )
-            })}
-          </AnimatePresence>
+        {/* Models grouped by provider */}
+        <div className="space-y-6 pb-6">
+          {Object.entries(availableModelsByProvider).map(
+            ([iconKey, modelsGroup]) => {
+              const firstModel = modelsGroup[0]
+              const provider = PROVIDERS.find((p) => p.id === firstModel.icon)
 
-          {availableModels.length === 0 && searchQuery && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-muted-foreground py-8 text-center text-sm"
-            >
-              No models found matching "{searchQuery}"
-            </motion.div>
+              return (
+                <div key={iconKey} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    {provider?.icon && <provider.icon className="size-5" />}
+                    <h4 className="font-medium">{provider?.name || iconKey}</h4>
+                    <span className="text-muted-foreground text-sm">
+                      ({modelsGroup.length} models)
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 pl-7">
+                    {modelsGroup.map((model) => {
+                      const modelProvider = PROVIDERS.find(
+                        (p) => p.id === model.provider
+                      )
+
+                      return (
+                        <motion.div
+                          key={model.id}
+                          layout
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="flex items-center justify-between py-1"
+                        >
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{model.name}</span>
+                              <span className="text-muted-foreground bg-muted rounded px-1.5 py-0.5 text-xs">
+                                via {modelProvider?.name || model.provider}
+                              </span>
+                            </div>
+                            {model.description && (
+                              <span className="text-muted-foreground text-xs">
+                                {model.description}
+                              </span>
+                            )}
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => toggleFavorite(model.id)}
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            title="Add to favorites"
+                          >
+                            <PlusIcon className="size-4" />
+                          </motion.button>
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            }
           )}
         </div>
+
+        {Object.keys(availableModelsByProvider).length === 0 && (
+          <div className="text-muted-foreground py-8 text-center text-sm">
+            {searchQuery
+              ? `No models found matching "${searchQuery}"`
+              : "No available models to add"}
+          </div>
+        )}
       </div>
     </div>
   )
