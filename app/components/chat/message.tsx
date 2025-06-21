@@ -15,6 +15,7 @@ type MessageProps = {
   hasScrollAnchor?: boolean
   parts?: MessageType["parts"]
   status?: "streaming" | "ready" | "submitted" | "error"
+  className?: string
 }
 
 export function Message({
@@ -29,6 +30,7 @@ export function Message({
   hasScrollAnchor,
   parts,
   status,
+  className,
 }: MessageProps) {
   const [copied, setCopied] = useState(false)
 
@@ -49,6 +51,7 @@ export function Message({
         id={id}
         hasScrollAnchor={hasScrollAnchor}
         attachments={attachments}
+        className={className}
       >
         {children}
       </MessageUser>
@@ -65,6 +68,7 @@ export function Message({
         hasScrollAnchor={hasScrollAnchor}
         parts={parts}
         status={status}
+        className={className}
       >
         {children}
       </MessageAssistant>

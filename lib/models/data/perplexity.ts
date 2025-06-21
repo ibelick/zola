@@ -8,6 +8,7 @@ const perplexityModels: ModelConfig[] = [
     provider: "Perplexity",
     providerId: "perplexity",
     modelFamily: "Sonar",
+    baseProviderId: "perplexity",
     description:
       "Sonar is a fast, affordable QA model with source control and citation support—ideal for lightweight, real-time integrations.",
     tags: ["fast", "simple", "affordable", "QA"],
@@ -35,6 +36,7 @@ const perplexityModels: ModelConfig[] = [
     provider: "Perplexity",
     providerId: "perplexity",
     modelFamily: "Sonar",
+    baseProviderId: "perplexity",
     description:
       "An enhanced version of Sonar optimized for deeper reasoning and more complex tasks, while retaining fast response times.",
     tags: ["reasoning", "fast", "QA", "affordable"],
@@ -63,6 +65,7 @@ const perplexityModels: ModelConfig[] = [
     provider: "Perplexity",
     providerId: "perplexity",
     modelFamily: "Sonar",
+    baseProviderId: "perplexity",
     description:
       "Perplexity's most advanced Sonar model with pro-level reasoning, accuracy, and context handling—ideal for complex tasks.",
     tags: ["reasoning", "pro", "advanced", "QA", "research"],
@@ -91,6 +94,7 @@ const perplexityModels: ModelConfig[] = [
     provider: "Perplexity",
     providerId: "perplexity",
     modelFamily: "Sonar",
+    baseProviderId: "perplexity",
     description:
       "A high-performance version of Sonar optimized for speed and accuracy across general tasks, with solid reasoning capabilities.",
     tags: ["fast", "accurate", "QA", "general-purpose"],
@@ -118,6 +122,7 @@ const perplexityModels: ModelConfig[] = [
     provider: "Perplexity",
     providerId: "perplexity",
     modelFamily: "Sonar",
+    baseProviderId: "perplexity",
     description:
       "Perplexity's most powerful model for deep research, long-context understanding, and advanced reasoning tasks.",
     tags: ["deep research", "advanced", "long-context", "reasoning", "QA"],

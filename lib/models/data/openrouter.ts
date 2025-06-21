@@ -8,6 +8,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "OpenRouter",
+    baseProviderId: "deepseek",
     description:
       "Flagship model by DeepSeek, optimized for performance and reliability.",
     tags: ["flagship", "reasoning", "performance", "reliability"],
@@ -39,6 +40,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Claude",
+    baseProviderId: "anthropic",
     description:
       "Claude's latest model with transparent reasoning mode, excellent for complex problem-solving and coding tasks.",
     tags: ["flagship", "reasoning", "transparent", "coding"],
@@ -75,6 +77,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Claude",
+    baseProviderId: "anthropic",
     description:
       "Claude's latest model with transparent reasoning mode, excellent for complex problem-solving and coding tasks.",
     tags: ["flagship", "reasoning", "transparent", "coding"],
@@ -111,6 +114,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Gemini",
+    baseProviderId: "google",
     description:
       "Google's advanced multimodal model with methodical reasoning and excellent codebase analysis capabilities.",
     tags: ["flagship", "multimodal", "methodical", "coding"],
@@ -147,6 +151,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "GPT",
+    baseProviderId: "openai",
     description:
       "OpenAI's latest developer-focused model with exceptional instruction following and coding capabilities.",
     tags: ["flagship", "coding", "instruction", "reasoning"],
@@ -183,6 +188,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "GPT",
+    baseProviderId: "openai",
     description:
       "Smaller, faster version of O4 with excellent performance-to-cost ratio.",
     tags: ["efficient", "fast", "coding", "cost-effective"],
@@ -219,6 +225,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Grok",
+    baseProviderId: "xai",
     description:
       "xAI's compact model with multi-threaded reasoning and real-time knowledge access.",
     tags: ["fast", "multi-threaded", "reasoning", "uncensored"],
@@ -255,6 +262,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Gemini",
+    baseProviderId: "google",
     description:
       "High-speed variant of Gemini 2.5 optimized for responsiveness while maintaining strong reasoning abilities.",
     tags: ["fast", "responsive", "efficient", "coding"],
@@ -291,6 +299,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Llama",
+    baseProviderId: "meta",
     description:
       "Meta's latest model with improved reasoning capabilities and enhanced performance.",
     tags: ["flagship", "reasoning", "performance", "reliability"],
@@ -327,6 +336,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "GPT",
+    baseProviderId: "openai",
     description:
       "Compact version of GPT-4.1 optimized for speed and cost-effectiveness while maintaining strong capabilities.",
     tags: ["efficient", "fast", "coding", "cost-effective"],
@@ -363,6 +373,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "GPT",
+    baseProviderId: "openai",
     description:
       "Ultra-efficient nano version of GPT-4.1 for rapid inference and minimal cost.",
     tags: ["ultra-fast", "nano", "efficient", "cost-effective"],
@@ -399,6 +410,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "GPT",
+    baseProviderId: "openai",
     description:
       "Compact reasoning model with strong problem-solving capabilities at a lower cost.",
     tags: ["reasoning", "efficient", "problem-solving", "cost-effective"],
@@ -433,6 +445,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Claude",
+    baseProviderId: "anthropic",
     description:
       "Anthropic's flagship model with exceptional reasoning, coding, and creative capabilities.",
     tags: ["flagship", "reasoning", "coding", "creative"],
@@ -467,6 +480,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Gemini",
+    baseProviderId: "google",
     description:
       "Google's next-generation multimodal model with enhanced speed and reasoning capabilities.",
     tags: ["fast", "multimodal", "reasoning", "coding"],
@@ -501,6 +515,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Gemini",
+    baseProviderId: "google",
     description:
       "Lightweight version of Gemini 2.0 Flash optimized for speed and cost-efficiency.",
     tags: ["fast", "lite", "efficient", "cost-effective"],
@@ -535,6 +550,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "GPT",
+    baseProviderId: "openai",
     description:
       "Preview version of OpenAI's next-generation model with advanced reasoning and multimodal capabilities.",
     tags: ["preview", "advanced", "reasoning", "multimodal"],
@@ -569,6 +585,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Sonar",
+    baseProviderId: "perplexity",
     description:
       "Sonar is a fast, affordable QA model with source control and citation support—ideal for lightweight, real-time integrations.",
     tags: ["fast", "simple", "affordable", "QA"],
@@ -603,6 +620,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Sonar",
+    baseProviderId: "perplexity",
     description:
       "An enhanced version of Sonar optimized for deeper reasoning and more complex tasks, while retaining fast response times.",
     tags: ["reasoning", "fast", "QA", "affordable"],
@@ -639,6 +657,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Sonar",
+    baseProviderId: "perplexity",
     description:
       "Perplexity's most advanced Sonar model with pro-level reasoning, accuracy, and context handling—ideal for complex tasks.",
     tags: ["reasoning", "pro", "advanced", "QA", "research"],
@@ -675,6 +694,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Sonar",
+    baseProviderId: "perplexity",
     description:
       "A high-performance version of Sonar optimized for speed and accuracy across general tasks, with solid reasoning capabilities.",
     tags: ["fast", "accurate", "QA", "general-purpose"],
@@ -711,6 +731,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Sonar",
+    baseProviderId: "perplexity",
     description:
       "Perplexity's most powerful model for deep research, long-context understanding, and advanced reasoning tasks.",
     tags: ["deep research", "advanced", "long-context", "reasoning", "QA"],

@@ -36,6 +36,7 @@ export type MessageUserProps = {
   onReload: () => void
   onDelete: (id: string) => void
   id: string
+  className?: string
 }
 
 export function MessageUser({
@@ -48,6 +49,7 @@ export function MessageUser({
   onReload,
   onDelete,
   id,
+  className,
 }: MessageUserProps) {
   const [editInput, setEditInput] = useState(children)
   const [isEditing, setIsEditing] = useState(false)
@@ -74,7 +76,8 @@ export function MessageUser({
     <MessageContainer
       className={cn(
         "group flex w-full max-w-3xl flex-col items-end gap-0.5 px-6 pb-2",
-        hasScrollAnchor && "min-h-scroll-anchor"
+        hasScrollAnchor && "min-h-scroll-anchor",
+        className
       )}
     >
       {attachments?.map((attachment, index) => (

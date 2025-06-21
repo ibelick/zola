@@ -8,6 +8,7 @@ const grokModels: ModelConfig[] = [
     provider: "xAI",
     providerId: "xai",
     modelFamily: "Grok",
+    baseProviderId: "xai",
     description:
       "Second-generation model developed by xAI, designed for reasoning and general tasks.",
     tags: ["reasoning", "conversational", "general-purpose"],
@@ -35,6 +36,7 @@ const grokModels: ModelConfig[] = [
     provider: "xAI",
     providerId: "xai",
     modelFamily: "Grok",
+    baseProviderId: "xai",
     description: "Vision-capable variant of Grok 2 for multimodal use.",
     tags: ["vision", "multimodal", "reasoning"],
     contextWindow: 128000,
@@ -61,6 +63,7 @@ const grokModels: ModelConfig[] = [
     provider: "xAI",
     providerId: "xai",
     modelFamily: "Grok",
+    baseProviderId: "xai",
     description: "Early beta of Grok 3 with improved performance and speed.",
     tags: ["beta", "next-gen", "reasoning", "experimental"],
     contextWindow: 200000,
@@ -86,6 +89,7 @@ const grokModels: ModelConfig[] = [
     provider: "xAI",
     providerId: "xai",
     modelFamily: "Grok",
+    baseProviderId: "xai",
     description:
       "Beta version of Grok 3 optimized for lower latency responses.",
     tags: ["beta", "fast", "optimized", "experimental"],
@@ -113,6 +117,7 @@ const grokModels: ModelConfig[] = [
     provider: "xAI",
     providerId: "xai",
     modelFamily: "Grok",
+    baseProviderId: "xai",
     description: "Small variant of Grok 3 for lighter usage scenarios.",
     tags: ["beta", "mini", "lightweight", "cheap"],
     contextWindow: 64000,
@@ -138,6 +143,7 @@ const grokModels: ModelConfig[] = [
     provider: "xAI",
     providerId: "xai",
     modelFamily: "Grok",
+    baseProviderId: "xai",
     description:
       "Faster version of Grok 3 Mini, ideal for responsive applications.",
     tags: ["beta", "mini", "fast", "responsive", "cheap"],

@@ -4,11 +4,16 @@ import { Switch } from "@/components/ui/switch"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 
 export function InteractionPreferences() {
-  const { preferences, setPromptSuggestions, setShowToolInvocations, setShowConversationPreviews } =
-    useUserPreferences()
+  const {
+    preferences,
+    setPromptSuggestions,
+    setShowToolInvocations,
+    setShowConversationPreviews,
+    setMultiModelEnabled,
+  } = useUserPreferences()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Prompt Suggestions */}
       <div>
         <div className="flex items-center justify-between">
@@ -56,6 +61,22 @@ export function InteractionPreferences() {
           />
         </div>
       </div>
+      {/* Multi-Model Chat */}
+      {/* @todo: when multi-model chat is ready */}
+      {/* <div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-medium">Multi-model chat</h3>
+            <p className="text-muted-foreground text-xs">
+              Send prompts to multiple models at once
+            </p>
+          </div>
+          <Switch
+            checked={preferences.multiModelEnabled}
+            onCheckedChange={setMultiModelEnabled}
+          />
+        </div>
+      </div> */}
     </div>
   )
 }
