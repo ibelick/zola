@@ -4,6 +4,7 @@ import { useModel } from "@/lib/model-store/provider"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
+import { debounce } from "@/lib/utils"
 import {
   DotsSixVerticalIcon,
   MinusIcon,
@@ -11,7 +12,7 @@ import {
   StarIcon,
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion, Reorder } from "framer-motion"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 type FavoriteModelItem = ModelConfig & {
   isFavorite: boolean
@@ -22,6 +23,60 @@ export function ModelsSettings() {
   const { isModelHidden } = useUserPreferences()
   const [favoriteModelIds, setFavoriteModelIds] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
+  const [isSaving, setIsSaving] = useState(false)
+
+  // API call to save favorite models order
+  const saveFavoriteModels = async (favoriteModels: string[]) => {
+    try {
+      setIsSaving(true)
+      console.log("🔄 Saving favorite models order:", favoriteModels)
+
+      // const response = await fetch("/api/user-preferences/favorite-models", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     favorite_models: favoriteModels,
+      //   }),
+      // })
+
+      // if (!response.ok) {
+      //   throw new Error(
+      //     `Failed to save favorite models: ${response.statusText}`
+      //   )
+      // }
+
+      // const result = await response.json()
+      // console.log("✅ Successfully saved favorite models:", result)
+    } catch (error) {
+      console.error("❌ Error saving favorite models:", error)
+      // @todo: Add proper error handling/toast notification
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const debouncedSaveFavoriteModels = useCallback(
+    debounce((favoriteModels: string[]) => {
+      if (favoriteModels.length > 0) {
+        console.log(
+          "📝 Favorite models changed, scheduling save:",
+          favoriteModels
+        )
+        saveFavoriteModels(favoriteModels)
+      }
+    }, 1000),
+    []
+  )
+
+  // Save favorite models when the order changes
+  useEffect(() => {
+    // Skip the initial load to avoid saving default values
+    if (favoriteModelIds.length > 0) {
+      debouncedSaveFavoriteModels(favoriteModelIds)
+    }
+  }, [favoriteModelIds, debouncedSaveFavoriteModels])
 
   // Initialize with some default favorites for demo
   // @todo: to remove
@@ -74,21 +129,36 @@ export function ModelsSettings() {
   }, [models, favoriteModelIds, isModelHidden, searchQuery])
 
   const handleReorder = (newOrder: FavoriteModelItem[]) => {
-    setFavoriteModelIds(newOrder.map((item) => item.id))
+    const newOrderIds = newOrder.map((item) => item.id)
+    setFavoriteModelIds(newOrderIds)
   }
 
   const toggleFavorite = (modelId: string) => {
     setFavoriteModelIds((prev) => {
+      const newIds = prev.includes(modelId)
+        ? prev.filter((id) => id !== modelId)
+        : [...prev, modelId]
+
       if (prev.includes(modelId)) {
-        return prev.filter((id) => id !== modelId)
+        console.log("➖ Removing from favorites:", modelId)
       } else {
-        return [...prev, modelId]
+        console.log("➕ Adding to favorites:", modelId)
       }
+
+      // Trigger debounced save for add/remove actions
+      debouncedSaveFavoriteModels(newIds)
+      return newIds
     })
   }
 
   const removeFavorite = (modelId: string) => {
-    setFavoriteModelIds((prev) => prev.filter((id) => id !== modelId))
+    console.log("🗑️ Removing favorite model:", modelId)
+    setFavoriteModelIds((prev) => {
+      const newIds = prev.filter((id) => id !== modelId)
+      // Trigger debounced save for remove action
+      debouncedSaveFavoriteModels(newIds)
+      return newIds
+    })
   }
 
   const getProviderIcon = (model: ModelConfig) => {
@@ -122,7 +192,14 @@ export function ModelsSettings() {
                 const ProviderIcon = getProviderIcon(model)
 
                 return (
-                  <Reorder.Item key={model.id} value={model} className="group">
+                  <Reorder.Item
+                    key={model.id}
+                    value={model}
+                    className="group"
+                    onDragEnd={() => {
+                      debouncedSaveFavoriteModels(favoriteModelIds)
+                    }}
+                  >
                     <motion.div className="bg-card border-border flex items-center gap-3 rounded-lg border p-3">
                       {/* Drag Handle */}
                       <div className="text-muted-foreground cursor-grab opacity-60 transition-opacity group-hover:opacity-100 active:cursor-grabbing">
