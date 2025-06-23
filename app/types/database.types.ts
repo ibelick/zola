@@ -188,7 +188,6 @@ export type Database = {
           favorite_models: string[] | null
           id: string
           message_count: number | null
-          preferred_model: string | null
           premium: boolean | null
           profile_image: string | null
           last_active_at: string | null
@@ -206,7 +205,6 @@ export type Database = {
           favorite_models?: string[] | null
           id: string
           message_count?: number | null
-          preferred_model?: string | null
           premium?: boolean | null
           profile_image?: string | null
           last_active_at?: string | null
@@ -224,7 +222,6 @@ export type Database = {
           favorite_models?: string[] | null
           id?: string
           message_count?: number | null
-          preferred_model?: string | null
           premium?: boolean | null
           profile_image?: string | null
           last_active_at?: string | null

@@ -166,7 +166,6 @@ CREATE TABLE users (
   display_name TEXT,
   favorite_models TEXT[], -- Array of favorite model IDs
   message_count INTEGER,
-  preferred_model TEXT,
   premium BOOLEAN,
   profile_image TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),

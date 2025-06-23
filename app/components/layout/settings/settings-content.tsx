@@ -21,7 +21,6 @@ import { ConnectionsPlaceholder } from "./connections/connections-placeholder"
 import { DeveloperTools } from "./connections/developer-tools"
 import { OllamaSection } from "./connections/ollama-section"
 import { AccountManagement } from "./general/account-management"
-import { ModelPreferences } from "./general/model-preferences"
 import { UserProfile } from "./general/user-profile"
 import { ModelsSettings } from "./models/models-settings"
 
@@ -110,7 +109,6 @@ export function SettingsContent({
               <UserProfile />
               {isSupabaseEnabled && (
                 <>
-                  <ModelPreferences />
                   <AccountManagement />
                 </>
               )}
@@ -198,7 +196,6 @@ export function SettingsContent({
                 <UserProfile />
                 {isSupabaseEnabled && (
                   <>
-                    <ModelPreferences />
                     <AccountManagement />
                   </>
                 )}

@@ -1,6 +1,7 @@
 "use client"
 
 import { PopoverContentAuth } from "@/app/components/chat-input/popover-content-auth"
+import { useFavoriteModels } from "@/app/components/layout/settings/models/use-favorite-models"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useKeyShortcut } from "@/app/hooks/use-key-shortcut"
 import { Button } from "@/components/ui/button"
@@ -52,7 +53,7 @@ export function ModelSelector({
   className,
   isUserAuthenticated = true,
 }: ModelSelectorProps) {
-  const { models, isLoading: isLoadingModels } = useModel()
+  const { models, isLoading: isLoadingModels, favoriteModels } = useModel()
   const { isModelHidden } = useUserPreferences()
 
   const currentModel = models.find((model) => model.id === selectedModelId)
@@ -127,10 +128,26 @@ export function ModelSelector({
 
   const filteredModels = models
     .filter((model) => !isModelHidden(model.id))
+    .filter((model) => {
+      // If user has favorite models, only show favorites
+      if (favoriteModels && favoriteModels.length > 0) {
+        return favoriteModels.includes(model.id)
+      }
+      // If no favorites, show all models
+      return true
+    })
     .filter((model) =>
       model.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
+      // If user has favorite models, maintain their order
+      if (favoriteModels && favoriteModels.length > 0) {
+        const aIndex = favoriteModels.indexOf(a.id)
+        const bIndex = favoriteModels.indexOf(b.id)
+        return aIndex - bIndex
+      }
+
+      // Fallback to original sorting (free models first)
       const aIsFree = FREE_MODELS_IDS.includes(a.id)
       const bIsFree = FREE_MODELS_IDS.includes(b.id)
       return aIsFree === bIsFree ? 0 : aIsFree ? -1 : 1

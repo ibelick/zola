@@ -2,7 +2,7 @@ import { UserProfile } from "@/app/types/user"
 import { toast } from "@/components/ui/toast"
 import { Chats } from "@/lib/chat-store/types"
 import { MODEL_DEFAULT } from "@/lib/config"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 
 interface UseModelProps {
   currentChat: Chats | null
@@ -26,17 +26,19 @@ export function useModel({
   updateChatModel,
   chatId,
 }: UseModelProps) {
-  // Calculate the effective model based on priority: chat model > user preferred > default
+  // Calculate the effective model based on priority: chat model > first favorite model > default
   const getEffectiveModel = useCallback(() => {
-    return currentChat?.model || user?.preferred_model || MODEL_DEFAULT
-  }, [currentChat?.model, user?.preferred_model])
+    const firstFavoriteModel = user?.favorite_models?.[0]
+    return currentChat?.model || firstFavoriteModel || MODEL_DEFAULT
+  }, [currentChat?.model, user?.favorite_models])
 
-  const [selectedModel, setSelectedModel] = useState<string>(getEffectiveModel)
+  // Use local state only for temporary overrides, derive base value from props
+  const [localSelectedModel, setLocalSelectedModel] = useState<string | null>(
+    null
+  )
 
-  // Update selectedModel when dependencies change
-  useEffect(() => {
-    setSelectedModel(getEffectiveModel())
-  }, [getEffectiveModel])
+  // The actual selected model: local override or computed effective model
+  const selectedModel = localSelectedModel || getEffectiveModel()
 
   // Function to handle model changes with proper validation and error handling
   const handleModelChange = useCallback(
@@ -45,20 +47,22 @@ export function useModel({
       // but we still allow the model selection for when they create a chat
       if (!user?.id && !chatId) {
         // For unauthenticated users without chat, just update local state
-        setSelectedModel(newModel)
+        setLocalSelectedModel(newModel)
         return
       }
 
       // For authenticated users with a chat, persist the change
       if (chatId && updateChatModel && user?.id) {
         // Optimistically update the state
-        setSelectedModel(newModel)
+        setLocalSelectedModel(newModel)
 
         try {
           await updateChatModel(chatId, newModel)
+          // Clear local override since it's now persisted in the chat
+          setLocalSelectedModel(null)
         } catch (err) {
           // Revert on error
-          setSelectedModel(getEffectiveModel())
+          setLocalSelectedModel(null)
           console.error("Failed to update chat model:", err)
           toast({
             title: "Failed to update chat model",
@@ -69,10 +73,10 @@ export function useModel({
       } else if (user?.id) {
         // Authenticated user but no chat yet - just update local state
         // The model will be used when creating a new chat
-        setSelectedModel(newModel)
+        setLocalSelectedModel(newModel)
       }
     },
-    [chatId, updateChatModel, user?.id, getEffectiveModel]
+    [chatId, updateChatModel, user?.id]
   )
 
   return {
