@@ -95,12 +95,6 @@ export function useFavoriteModels() {
         description: error.message || "Please try again.",
       })
     },
-    onSuccess: () => {
-      toast({
-        title: "Favorite models updated",
-        description: "Your favorite models order has been saved.",
-      })
-    },
     onSettled: () => {
       // Always refetch after error or success:
       // This will refetch from the server and update the cache
