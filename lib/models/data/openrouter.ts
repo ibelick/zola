@@ -40,7 +40,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Claude",
-    baseProviderId: "anthropic",
+    baseProviderId: "claude",
     description:
       "Claude's latest model with transparent reasoning mode, excellent for complex problem-solving and coding tasks.",
     tags: ["flagship", "reasoning", "transparent", "coding"],
@@ -77,7 +77,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Claude",
-    baseProviderId: "anthropic",
+    baseProviderId: "claude",
     description:
       "Claude's latest model with transparent reasoning mode, excellent for complex problem-solving and coding tasks.",
     tags: ["flagship", "reasoning", "transparent", "coding"],
@@ -445,7 +445,7 @@ export const openrouterModels: ModelConfig[] = [
     provider: "OpenRouter",
     providerId: "openrouter",
     modelFamily: "Claude",
-    baseProviderId: "anthropic",
+    baseProviderId: "claude",
     description:
       "Anthropic's flagship model with exceptional reasoning, coding, and creative capabilities.",
     tags: ["flagship", "reasoning", "coding", "creative"],

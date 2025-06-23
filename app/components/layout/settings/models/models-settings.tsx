@@ -92,10 +92,7 @@ export function ModelsSettings() {
   }
 
   const getProviderIcon = (model: ModelConfig) => {
-    const provider = PROVIDERS.find(
-      // @todo: use badeProvider when available
-      (p) => p.id === model.icon || p.id === model.providerId
-    )
+    const provider = PROVIDERS.find((p) => p.id === model.baseProviderId)
     return provider?.icon
   }
 
@@ -159,7 +156,7 @@ export function ModelsSettings() {
                         onClick={() => removeFavorite(model.id)}
                         type="button"
                         disabled={favoriteModels.length <= 1}
-                        className="text-muted-foreground hover:text-destructive border-border disabled:hover:text-muted-foreground rounded-md border p-1 opacity-0 transition-all group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="text-muted-foreground rounded-md border p-1 opacity-0 transition-all group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
                         title={
                           favoriteModels.length <= 1
                             ? "At least one favorite model is required"
