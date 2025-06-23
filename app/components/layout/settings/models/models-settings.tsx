@@ -4,7 +4,6 @@ import { useModel } from "@/lib/model-store/provider"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
-import { debounce } from "@/lib/utils"
 import {
   DotsSixVerticalIcon,
   MinusIcon,
@@ -12,7 +11,8 @@ import {
   StarIcon,
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion, Reorder } from "framer-motion"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
+import { useFavoriteModels } from "./use-favorite-models"
 
 type FavoriteModelItem = ModelConfig & {
   isFavorite: boolean
@@ -21,92 +21,66 @@ type FavoriteModelItem = ModelConfig & {
 export function ModelsSettings() {
   const { models } = useModel()
   const { isModelHidden } = useUserPreferences()
-  const [favoriteModelIds, setFavoriteModelIds] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [isSaving, setIsSaving] = useState(false)
 
-  // API call to save favorite models order
-  const saveFavoriteModels = async (favoriteModels: string[]) => {
-    try {
-      setIsSaving(true)
-      console.log("🔄 Saving favorite models order:", favoriteModels)
+  // Use TanStack Query for favorite models
+  const {
+    favoriteModels: serverFavoriteModels,
+    isLoading: isFetchingFavorites,
+    updateFavoriteModels,
+    isUpdating,
+  } = useFavoriteModels()
 
-      // const response = await fetch("/api/user-preferences/favorite-models", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     favorite_models: favoriteModels,
-      //   }),
-      // })
+  // Get current favorite models (use server data or defaults)
+  const currentFavoriteModels = useMemo(() => {
+    if (isFetchingFavorites) return []
 
-      // if (!response.ok) {
-      //   throw new Error(
-      //     `Failed to save favorite models: ${response.statusText}`
-      //   )
-      // }
-
-      // const result = await response.json()
-      // console.log("✅ Successfully saved favorite models:", result)
-    } catch (error) {
-      console.error("❌ Error saving favorite models:", error)
-      // @todo: Add proper error handling/toast notification
-    } finally {
-      setIsSaving(false)
+    if (serverFavoriteModels.length > 0) {
+      return serverFavoriteModels
     }
-  }
 
-  const debouncedSaveFavoriteModels = useCallback(
-    debounce((favoriteModels: string[]) => {
-      if (favoriteModels.length > 0) {
-        console.log(
-          "📝 Favorite models changed, scheduling save:",
-          favoriteModels
-        )
-        saveFavoriteModels(favoriteModels)
-      }
-    }, 1000),
-    []
-  )
-
-  // Save favorite models when the order changes
-  useEffect(() => {
-    // Skip the initial load to avoid saving default values
-    if (favoriteModelIds.length > 0) {
-      debouncedSaveFavoriteModels(favoriteModelIds)
-    }
-  }, [favoriteModelIds, debouncedSaveFavoriteModels])
-
-  // Initialize with some default favorites for demo
-  // @todo: to remove
-  useEffect(() => {
-    if (models.length > 0 && favoriteModelIds.length === 0) {
+    // Return defaults if no server data and models are available
+    if (models.length > 0) {
       const defaultFavorites = models
         .filter((model) => !isModelHidden(model.id))
         .slice(0, 5)
         .map((model) => model.id)
-      setFavoriteModelIds(defaultFavorites)
+
+      // Trigger initial save of defaults if we have them
+      if (defaultFavorites.length > 0) {
+        console.log("🔄 Auto-initializing default favorite models")
+        updateFavoriteModels(defaultFavorites)
+      }
+
+      return defaultFavorites
     }
-  }, [models, favoriteModelIds.length, isModelHidden])
+
+    return []
+  }, [
+    serverFavoriteModels,
+    isFetchingFavorites,
+    models,
+    isModelHidden,
+    updateFavoriteModels,
+  ])
 
   // Create favorite models list with additional metadata
   const favoriteModels: FavoriteModelItem[] = useMemo(() => {
-    return favoriteModelIds
-      .map((id) => {
+    return currentFavoriteModels
+      .map((id: string) => {
         const model = models.find((m) => m.id === id)
         if (!model || isModelHidden(model.id)) return null
         return { ...model, isFavorite: true }
       })
       .filter(Boolean) as FavoriteModelItem[]
-  }, [favoriteModelIds, models, isModelHidden])
+  }, [currentFavoriteModels, models, isModelHidden])
 
   // Available models that aren't favorites yet, filtered and grouped by provider
   const availableModelsByProvider = useMemo(() => {
     const availableModels = models
       .filter(
         (model) =>
-          !favoriteModelIds.includes(model.id) && !isModelHidden(model.id)
+          !currentFavoriteModels.includes(model.id) && !isModelHidden(model.id)
       )
       .filter((model) =>
         model.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -126,39 +100,38 @@ export function ModelsSettings() {
       },
       {} as Record<string, typeof models>
     )
-  }, [models, favoriteModelIds, isModelHidden, searchQuery])
+  }, [models, currentFavoriteModels, isModelHidden, searchQuery])
 
+  // Optimistic handlers - all immediately update the UI via TanStack Query
   const handleReorder = (newOrder: FavoriteModelItem[]) => {
     const newOrderIds = newOrder.map((item) => item.id)
-    setFavoriteModelIds(newOrderIds)
+    console.log("🔄 Reordering favorite models:", newOrderIds)
+    updateFavoriteModels(newOrderIds)
   }
 
   const toggleFavorite = (modelId: string) => {
-    setFavoriteModelIds((prev) => {
-      const newIds = prev.includes(modelId)
-        ? prev.filter((id) => id !== modelId)
-        : [...prev, modelId]
+    const isCurrentlyFavorite = currentFavoriteModels.includes(modelId)
+    const newIds = isCurrentlyFavorite
+      ? currentFavoriteModels.filter((id: string) => id !== modelId)
+      : [...currentFavoriteModels, modelId]
 
-      if (prev.includes(modelId)) {
-        console.log("➖ Removing from favorites:", modelId)
-      } else {
-        console.log("➕ Adding to favorites:", modelId)
-      }
+    console.log(
+      isCurrentlyFavorite
+        ? "➖ Removing from favorites:"
+        : "➕ Adding to favorites:",
+      modelId
+    )
 
-      // Trigger debounced save for add/remove actions
-      debouncedSaveFavoriteModels(newIds)
-      return newIds
-    })
+    // Optimistic update - immediately updates UI
+    updateFavoriteModels(newIds)
   }
 
   const removeFavorite = (modelId: string) => {
     console.log("🗑️ Removing favorite model:", modelId)
-    setFavoriteModelIds((prev) => {
-      const newIds = prev.filter((id) => id !== modelId)
-      // Trigger debounced save for remove action
-      debouncedSaveFavoriteModels(newIds)
-      return newIds
-    })
+    const newIds = currentFavoriteModels.filter((id: string) => id !== modelId)
+
+    // Optimistic update - immediately updates UI
+    updateFavoriteModels(newIds)
   }
 
   const getProviderIcon = (model: ModelConfig) => {
@@ -192,14 +165,7 @@ export function ModelsSettings() {
                 const ProviderIcon = getProviderIcon(model)
 
                 return (
-                  <Reorder.Item
-                    key={model.id}
-                    value={model}
-                    className="group"
-                    onDragEnd={() => {
-                      debouncedSaveFavoriteModels(favoriteModelIds)
-                    }}
-                  >
+                  <Reorder.Item key={model.id} value={model} className="group">
                     <motion.div className="bg-card border-border flex items-center gap-3 rounded-lg border p-3">
                       {/* Drag Handle */}
                       <div className="text-muted-foreground cursor-grab opacity-60 transition-opacity group-hover:opacity-100 active:cursor-grabbing">

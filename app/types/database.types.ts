@@ -185,6 +185,7 @@ export type Database = {
           daily_reset: string | null
           display_name: string | null
           email: string
+          favorite_models: string[] | null
           id: string
           message_count: number | null
           preferred_model: string | null
@@ -202,6 +203,7 @@ export type Database = {
           daily_reset?: string | null
           display_name?: string | null
           email: string
+          favorite_models?: string[] | null
           id: string
           message_count?: number | null
           preferred_model?: string | null
@@ -219,6 +221,7 @@ export type Database = {
           daily_reset?: string | null
           display_name?: string | null
           email?: string
+          favorite_models?: string[] | null
           id?: string
           message_count?: number | null
           preferred_model?: string | null
