@@ -24,9 +24,11 @@ type UserKeyStatus = {
 type ModelContextType = {
   models: ModelConfig[]
   userKeyStatus: UserKeyStatus
+  favoriteModels: string[]
   isLoading: boolean
   refreshModels: () => Promise<void>
   refreshUserKeyStatus: () => Promise<void>
+  refreshFavoriteModels: () => Promise<void>
   refreshAll: () => Promise<void>
 }
 
@@ -43,6 +45,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     xai: false,
     anthropic: false,
   })
+  const [favoriteModels, setFavoriteModels] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   const fetchModels = useCallback(async () => {
@@ -79,6 +82,21 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  const fetchFavoriteModels = useCallback(async () => {
+    try {
+      const response = await fetchClient(
+        "/api/user-preferences/favorite-models"
+      )
+      if (response.ok) {
+        const data = await response.json()
+        setFavoriteModels(data.favorite_models || [])
+      }
+    } catch (error) {
+      console.error("Failed to fetch favorite models:", error)
+      setFavoriteModels([])
+    }
+  }, [])
+
   const refreshModels = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -97,14 +115,27 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchUserKeyStatus])
 
-  const refreshAll = useCallback(async () => {
+  const refreshFavoriteModels = useCallback(async () => {
     setIsLoading(true)
     try {
-      await Promise.all([fetchModels(), fetchUserKeyStatus()])
+      await fetchFavoriteModels()
     } finally {
       setIsLoading(false)
     }
-  }, [fetchModels, fetchUserKeyStatus])
+  }, [fetchFavoriteModels])
+
+  const refreshAll = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      await Promise.all([
+        fetchModels(),
+        fetchUserKeyStatus(),
+        fetchFavoriteModels(),
+      ])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [fetchModels, fetchUserKeyStatus, fetchFavoriteModels])
 
   // Initial data fetch
   useEffect(() => {
@@ -116,9 +147,11 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
       value={{
         models,
         userKeyStatus,
+        favoriteModels,
         isLoading,
         refreshModels,
         refreshUserKeyStatus,
+        refreshFavoriteModels,
         refreshAll,
       }}
     >

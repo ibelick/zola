@@ -11,7 +11,7 @@ import {
   StarIcon,
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion, Reorder } from "framer-motion"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useFavoriteModels } from "./use-favorite-models"
 
 type FavoriteModelItem = ModelConfig & {
@@ -23,49 +23,21 @@ export function ModelsSettings() {
   const { isModelHidden } = useUserPreferences()
   const [searchQuery, setSearchQuery] = useState("")
 
-  // Use TanStack Query for favorite models
+  // Use TanStack Query for favorite models with optimistic updates
   const {
-    favoriteModels: serverFavoriteModels,
+    favoriteModels: currentFavoriteModels,
     isLoading: isFetchingFavorites,
     updateFavoriteModels,
+    updateFavoriteModelsDebounced,
     isUpdating,
   } = useFavoriteModels()
 
-  // Get current favorite models (use server data or defaults)
-  const currentFavoriteModels = useMemo(() => {
-    if (isFetchingFavorites) return []
-
-    if (serverFavoriteModels.length > 0) {
-      return serverFavoriteModels
-    }
-
-    // Return defaults if no server data and models are available
-    if (models.length > 0) {
-      const defaultFavorites = models
-        .filter((model) => !isModelHidden(model.id))
-        .slice(0, 5)
-        .map((model) => model.id)
-
-      // Trigger initial save of defaults if we have them
-      if (defaultFavorites.length > 0) {
-        console.log("🔄 Auto-initializing default favorite models")
-        updateFavoriteModels(defaultFavorites)
-      }
-
-      return defaultFavorites
-    }
-
-    return []
-  }, [
-    serverFavoriteModels,
-    isFetchingFavorites,
-    models,
-    isModelHidden,
-    updateFavoriteModels,
-  ])
-
   // Create favorite models list with additional metadata
   const favoriteModels: FavoriteModelItem[] = useMemo(() => {
+    if (!currentFavoriteModels || !Array.isArray(currentFavoriteModels)) {
+      return []
+    }
+
     return currentFavoriteModels
       .map((id: string) => {
         const model = models.find((m) => m.id === id)
@@ -77,6 +49,10 @@ export function ModelsSettings() {
 
   // Available models that aren't favorites yet, filtered and grouped by provider
   const availableModelsByProvider = useMemo(() => {
+    if (!currentFavoriteModels || !Array.isArray(currentFavoriteModels)) {
+      return {}
+    }
+
     const availableModels = models
       .filter(
         (model) =>
@@ -102,32 +78,33 @@ export function ModelsSettings() {
     )
   }, [models, currentFavoriteModels, isModelHidden, searchQuery])
 
-  // Optimistic handlers - all immediately update the UI via TanStack Query
+  // Handle reorder - immediate state update with debounced API call
   const handleReorder = (newOrder: FavoriteModelItem[]) => {
     const newOrderIds = newOrder.map((item) => item.id)
-    console.log("🔄 Reordering favorite models:", newOrderIds)
-    updateFavoriteModels(newOrderIds)
+
+    // Immediate optimistic update with debounced API call
+    updateFavoriteModelsDebounced(newOrderIds)
   }
 
   const toggleFavorite = (modelId: string) => {
+    if (!currentFavoriteModels || !Array.isArray(currentFavoriteModels)) {
+      return
+    }
+
     const isCurrentlyFavorite = currentFavoriteModels.includes(modelId)
     const newIds = isCurrentlyFavorite
       ? currentFavoriteModels.filter((id: string) => id !== modelId)
       : [...currentFavoriteModels, modelId]
-
-    console.log(
-      isCurrentlyFavorite
-        ? "➖ Removing from favorites:"
-        : "➕ Adding to favorites:",
-      modelId
-    )
 
     // Optimistic update - immediately updates UI
     updateFavoriteModels(newIds)
   }
 
   const removeFavorite = (modelId: string) => {
-    console.log("🗑️ Removing favorite model:", modelId)
+    if (!currentFavoriteModels || !Array.isArray(currentFavoriteModels)) {
+      return
+    }
+
     const newIds = currentFavoriteModels.filter((id: string) => id !== modelId)
 
     // Optimistic update - immediately updates UI
@@ -153,7 +130,7 @@ export function ModelsSettings() {
         <h4 className="mb-3 text-sm font-medium">
           Your favorites ({favoriteModels.length})
         </h4>
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {favoriteModels.length > 0 ? (
             <Reorder.Group
               axis="y"
@@ -166,7 +143,7 @@ export function ModelsSettings() {
 
                 return (
                   <Reorder.Item key={model.id} value={model} className="group">
-                    <motion.div className="bg-card border-border flex items-center gap-3 rounded-lg border p-3">
+                    <div className="bg-card border-border flex items-center gap-3 rounded-lg border p-3">
                       {/* Drag Handle */}
                       <div className="text-muted-foreground cursor-grab opacity-60 transition-opacity group-hover:opacity-100 active:cursor-grabbing">
                         <DotsSixVerticalIcon className="size-4" />
@@ -208,7 +185,7 @@ export function ModelsSettings() {
                       >
                         <MinusIcon className="size-4" />
                       </button>
-                    </motion.div>
+                    </div>
                   </Reorder.Item>
                 )
               })}

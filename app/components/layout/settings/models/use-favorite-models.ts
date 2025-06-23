@@ -1,6 +1,9 @@
 import { toast } from "@/components/ui/toast"
 import { fetchClient } from "@/lib/fetch"
+import { useModel } from "@/lib/model-store/provider"
+import { debounce } from "@/lib/utils"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useCallback, useRef } from "react"
 
 type FavoriteModelsResponse = {
   favorite_models: string[]
@@ -8,10 +11,16 @@ type FavoriteModelsResponse = {
 
 export function useFavoriteModels() {
   const queryClient = useQueryClient()
+  const { favoriteModels: initialFavoriteModels } = useModel()
+
+  // Ensure we always have an array
+  const safeInitialData = Array.isArray(initialFavoriteModels)
+    ? initialFavoriteModels
+    : []
 
   // Query to fetch favorite models
   const {
-    data: favoriteModels = [],
+    data: favoriteModels = safeInitialData,
     isLoading,
     error,
   } = useQuery<string[]>({
@@ -30,6 +39,7 @@ export function useFavoriteModels() {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
+    initialData: safeInitialData,
   })
 
   // Mutation to update favorite models
@@ -81,7 +91,11 @@ export function useFavoriteModels() {
     },
     onError: (error, _newFavoriteModels, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousFavoriteModels) {
+      if (
+        context &&
+        "previousFavoriteModels" in context &&
+        context.previousFavoriteModels
+      ) {
         queryClient.setQueryData(
           ["favorite-models"],
           context.previousFavoriteModels
@@ -102,11 +116,35 @@ export function useFavoriteModels() {
     },
   })
 
+  // Debounced version of the mutation for reordering
+  const debouncedUpdateFavoriteModels = useRef(
+    debounce((favoriteModels: string[]) => {
+      updateFavoriteModelsMutation.mutate(favoriteModels)
+    }, 500)
+  ).current
+
+  // Wrapper function that decides whether to debounce or not
+  const updateFavoriteModels = useCallback(
+    (favoriteModels: string[], shouldDebounce = false) => {
+      // Always update the cache immediately for optimistic updates
+      queryClient.setQueryData(["favorite-models"], favoriteModels)
+
+      if (shouldDebounce) {
+        debouncedUpdateFavoriteModels(favoriteModels)
+      } else {
+        updateFavoriteModelsMutation.mutate(favoriteModels)
+      }
+    },
+    [updateFavoriteModelsMutation, debouncedUpdateFavoriteModels, queryClient]
+  )
+
   return {
     favoriteModels,
     isLoading,
     error,
-    updateFavoriteModels: updateFavoriteModelsMutation.mutate,
+    updateFavoriteModels,
+    updateFavoriteModelsDebounced: (favoriteModels: string[]) =>
+      updateFavoriteModels(favoriteModels, true),
     isUpdating: updateFavoriteModelsMutation.isPending,
     updateError: updateFavoriteModelsMutation.error,
   }
