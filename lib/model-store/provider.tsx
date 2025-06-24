@@ -126,10 +126,8 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   }, [fetchFavoriteModels])
 
   const refreshFavoriteModelsSilent = useCallback(async () => {
-    console.log("🔄 ModelProvider: refreshFavoriteModelsSilent called")
     try {
       await fetchFavoriteModels()
-      console.log("✅ ModelProvider: favoriteModels refreshed silently")
     } catch (error) {
       console.error(
         "❌ ModelProvider: Failed to silently refresh favorite models:",

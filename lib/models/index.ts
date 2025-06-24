@@ -4,10 +4,10 @@ import { deepseekModels } from "./data/deepseek"
 import { geminiModels } from "./data/gemini"
 import { grokModels } from "./data/grok"
 import { mistralModels } from "./data/mistral"
-import {perplexityModels } from "./data/perplexity"
 import { getOllamaModels, ollamaModels } from "./data/ollama"
 import { openaiModels } from "./data/openai"
 import { openrouterModels } from "./data/openrouter"
+import { perplexityModels } from "./data/perplexity"
 import { ModelConfig } from "./types"
 
 // Static models (always available)

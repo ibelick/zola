@@ -48,8 +48,6 @@ export function useFavoriteModels() {
   // Mutation to update favorite models
   const updateFavoriteModelsMutation = useMutation({
     mutationFn: async (favoriteModels: string[]) => {
-      console.log("🔄 Saving favorite models order:", favoriteModels)
-
       const response = await fetchClient(
         "/api/user-preferences/favorite-models",
         {
@@ -74,7 +72,6 @@ export function useFavoriteModels() {
       }
 
       const result = await response.json()
-      console.log("✅ Successfully saved favorite models:", result)
       return result
     },
     onMutate: async (newFavoriteModels) => {
@@ -117,9 +114,6 @@ export function useFavoriteModels() {
       refreshUser()
     },
     onSuccess: () => {
-      console.log(
-        "✅ Mutation successful, refreshing ModelProvider and UserProvider"
-      )
       // Invalidate the cache to trigger a refetch
       queryClient.invalidateQueries({ queryKey: ["favorite-models"] })
 

@@ -164,7 +164,7 @@ CREATE TABLE users (
   daily_message_count INTEGER,
   daily_reset TIMESTAMPTZ,
   display_name TEXT,
-  favorite_models TEXT[], -- Array of favorite model IDs
+  favorite_models TEXT[],
   message_count INTEGER,
   premium BOOLEAN,
   profile_image TEXT,

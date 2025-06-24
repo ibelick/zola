@@ -70,7 +70,6 @@ export async function POST(request: Request) {
 
         // Skip if no models found for this provider
         if (providerModelIds.length === 0) {
-          console.log(`No models found for provider: ${provider}`)
           return NextResponse.json({
             success: true,
             isNewKey,
@@ -94,12 +93,6 @@ export async function POST(request: Request) {
 
           if (favoritesError) {
             console.error("Failed to update favorite models:", favoritesError)
-            // Don't fail the main request if favorite models update fails
-          } else {
-            console.log(
-              `✅ Added ${newModelsToAdd.length} ${provider} models to favorites:`,
-              newModelsToAdd
-            )
           }
         }
       } catch (modelsError) {
