@@ -131,6 +131,7 @@ export function ModelSelector({
     .filter((model) => {
       // If user has favorite models, only show favorites
       if (favoriteModels && favoriteModels.length > 0) {
+        console.log("🔍 ModelSelector favoriteModels:", favoriteModels)
         return favoriteModels.includes(model.id)
       }
       // If no favorites, show all models
@@ -153,9 +154,10 @@ export function ModelSelector({
       return aIsFree === bIsFree ? 0 : aIsFree ? -1 : 1
     })
 
-  if (isLoadingModels) {
-    return null
-  }
+  // Don't return null when loading - show the trigger button but disabled
+  // if (isLoadingModels) {
+  //   return null
+  // }
 
   const trigger = (
     <Button

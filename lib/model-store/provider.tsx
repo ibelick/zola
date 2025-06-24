@@ -29,6 +29,7 @@ type ModelContextType = {
   refreshModels: () => Promise<void>
   refreshUserKeyStatus: () => Promise<void>
   refreshFavoriteModels: () => Promise<void>
+  refreshFavoriteModelsSilent: () => Promise<void>
   refreshAll: () => Promise<void>
 }
 
@@ -124,6 +125,19 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchFavoriteModels])
 
+  const refreshFavoriteModelsSilent = useCallback(async () => {
+    console.log("🔄 ModelProvider: refreshFavoriteModelsSilent called")
+    try {
+      await fetchFavoriteModels()
+      console.log("✅ ModelProvider: favoriteModels refreshed silently")
+    } catch (error) {
+      console.error(
+        "❌ ModelProvider: Failed to silently refresh favorite models:",
+        error
+      )
+    }
+  }, [fetchFavoriteModels])
+
   const refreshAll = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -152,6 +166,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
         refreshModels,
         refreshUserKeyStatus,
         refreshFavoriteModels,
+        refreshFavoriteModelsSilent,
         refreshAll,
       }}
     >
