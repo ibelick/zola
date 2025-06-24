@@ -160,3 +160,18 @@ code {
 [data-sonner-toaster] > li {
   width: 100%;
 }
+
+.space-grid-background {
+  background-color: oklch(var(--background));
+  background-image: radial-gradient(
+      oklch(var(--foreground) / 0.1) 1px,
+      transparent 1px
+    ),
+    radial-gradient(oklch(var(--foreground) / 0.1) 1px, transparent 1px);
+  background-size:
+    40px 40px,
+    40px 40px;
+  background-position:
+    0 0,
+    20px 20px;
+}
