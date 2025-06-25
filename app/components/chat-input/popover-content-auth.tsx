@@ -76,7 +76,7 @@ export function PopoverContentAuth() {
           onClick={handleSignInWithGoogle}
           disabled={isLoading}
         >
-          <Image
+          <img
             src="https://www.google.com/favicon.ico"
             alt="Google logo"
             width={20}
