@@ -34,7 +34,7 @@ export function MultiChat() {
   const [messageGroups, setMessageGroups] = useState<GroupedMessage[]>([])
   const [files, setFiles] = useState<File[]>([])
   const { user } = useUser()
-  const { models, isLoading: isLoadingModels } = useModel()
+  const { models } = useModel()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // mock data for UI development
@@ -68,7 +68,7 @@ export function MultiChat() {
 
   const updateMessageGroups = useCallback(() => {
     // Group messages by user message content (simple grouping strategy)
-    const groups: { [key: string]: any } = {}
+    const groups: { [key: string]: GroupedMessage } = {}
 
     modelChats.forEach((chat) => {
       // No need to check selectedModelIds since modelChats only contains selected models
@@ -115,13 +115,13 @@ export function MultiChat() {
     })
 
     setMessageGroups(Object.values(groups))
-  }, [modelChats, selectedModelIds, prompt])
+  }, [modelChats, prompt])
 
   useEffect(() => {
     updateMessageGroups()
   }, [updateMessageGroups])
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!prompt.trim()) return
 
     if (selectedModelIds.length === 0) {
@@ -175,7 +175,7 @@ export function MultiChat() {
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [prompt, selectedModelIds, user, modelChats, systemPrompt])
 
   const handleFileUpload = useCallback((newFiles: File[]) => {
     setFiles((prev) => [...prev, ...newFiles])

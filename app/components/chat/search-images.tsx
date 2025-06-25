@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { useState } from "react"
 import { addUTM, getFavicon, getSiteName } from "./utils"
 
@@ -28,7 +29,7 @@ export function SearchImages({ results }: { results: ImageResult[] }) {
             rel="noopener noreferrer"
             className="group/image relative block overflow-hidden rounded-xl"
           >
-            <img
+            <Image
               src={img.imageUrl}
               alt={img.title}
               onError={() => handleError(i)}
@@ -38,7 +39,7 @@ export function SearchImages({ results }: { results: ImageResult[] }) {
             <div className="bg-primary absolute right-0 bottom-0 left-0 flex flex-col gap-0.5 px-2.5 py-1.5 opacity-0 transition-opacity duration-100 ease-out group-hover/image:opacity-100">
               <div className="flex items-center gap-1">
                 {favicon && (
-                  <img
+                  <Image
                     src={favicon}
                     alt="favicon"
                     className="h-4 w-4 rounded-full"

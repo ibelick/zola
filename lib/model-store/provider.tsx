@@ -152,6 +152,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   // Initial data fetch
   useEffect(() => {
     refreshAll()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Only run once on mount
 
   return (

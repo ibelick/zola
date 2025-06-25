@@ -4,22 +4,25 @@ import { getOrCreateGuestUserId } from "@/lib/api"
 import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
-import { useChat } from "@ai-sdk/react"
 import type { Message } from "@ai-sdk/react"
+import { useChat } from "@ai-sdk/react"
 import { useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { UserProfile } from "../../types/user"
 
 type UseChatCoreProps = {
   initialMessages: Message[]
   draftValue: string
   cacheAndAddMessage: (message: Message) => void
   chatId: string | null
-  user: any
+  user: UserProfile | null
   files: File[]
-  createOptimisticAttachments: (files: File[]) => any[]
+  createOptimisticAttachments: (
+    files: File[]
+  ) => Array<{ name: string; contentType: string; url: string }>
   setFiles: (files: File[]) => void
   checkLimitsAndNotify: (uid: string) => Promise<boolean>
-  cleanupOptimisticAttachments: (attachments?: any[]) => void
+  cleanupOptimisticAttachments: (attachments?: Array<{ url?: string }>) => void
   ensureChatExists: (uid: string) => Promise<string | null>
   handleFileUploads: (
     uid: string,
@@ -205,7 +208,7 @@ export function useChatCore({
       if (messages.length > 0) {
         bumpChat(currentChatId)
       }
-    } catch (submitError) {
+    } catch {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       toast({ title: "Failed to send message", status: "error" })
@@ -289,7 +292,7 @@ export function useChatCore({
           options
         )
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      } catch (suggestionError) {
+      } catch {
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
         toast({ title: "Failed to send suggestion", status: "error" })
       } finally {

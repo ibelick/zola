@@ -11,7 +11,7 @@ import {
   StarIcon,
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion, Reorder } from "framer-motion"
-import { useCallback, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useFavoriteModels } from "./use-favorite-models"
 
 type FavoriteModelItem = ModelConfig & {
@@ -26,10 +26,8 @@ export function ModelsSettings() {
   // Use TanStack Query for favorite models with optimistic updates
   const {
     favoriteModels: currentFavoriteModels,
-    isLoading: isFetchingFavorites,
     updateFavoriteModels,
     updateFavoriteModelsDebounced,
-    isUpdating,
   } = useFavoriteModels()
 
   // Create favorite models list with additional metadata

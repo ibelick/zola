@@ -1,4 +1,3 @@
-import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
 import { checkRateLimits } from "@/lib/api"
 import type { Chats } from "@/lib/chat-store/types"
@@ -37,10 +36,7 @@ export function useChatOperations({
   createNewChat,
   setHasDialogAuth,
   setMessages,
-  setInput,
 }: UseChatOperationsProps) {
-  const { setDraftValue } = useChatDraft(chatId)
-
   // Chat utilities
   const checkLimitsAndNotify = async (uid: string): Promise<boolean> => {
     try {

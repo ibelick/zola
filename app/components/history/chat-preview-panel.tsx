@@ -26,7 +26,7 @@ type MessageBubbleProps = {
   timestamp: string
 }
 
-function MessageBubble({ content, role, timestamp }: MessageBubbleProps) {
+function MessageBubble({ content, role }: MessageBubbleProps) {
   const isUser = role === "user"
 
   if (isUser) {

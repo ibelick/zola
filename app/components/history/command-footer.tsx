@@ -1,12 +1,3 @@
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { useUserPreferences } from "@/lib/user-preference-store/provider"
-import { ArrowsOutSimpleIcon } from "@phosphor-icons/react"
-import React, { useState } from "react"
-
 export function CommandFooter() {
   //   const [showPreview, setShowPreview] = useState(false)
   //   const { preferences, setShowConversationPreviews } = useUserPreferences()

@@ -150,6 +150,7 @@ export function handleStreamError(err: unknown): ApiError {
   console.error("🛑 streamText error:", err)
 
   // Extract error details from the AI SDK error
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const aiError = (err as { error?: any })?.error
 
   if (aiError) {
@@ -266,6 +267,7 @@ export function extractErrorMessage(error: unknown): string {
   }
 
   // Handle AI SDK error objects
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const aiError = (error as any)?.error
   if (aiError) {
     if (aiError.statusCode === 401) {

@@ -1,7 +1,6 @@
 "use client"
 
 import { PopoverContentAuth } from "@/app/components/chat-input/popover-content-auth"
-import { useFavoriteModels } from "@/app/components/layout/settings/models/use-favorite-models"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useKeyShortcut } from "@/app/hooks/use-key-shortcut"
 import { Button } from "@/components/ui/button"
@@ -75,9 +74,11 @@ export function ModelSelector({
   useKeyShortcut(
     (e) => (e.key === "p" || e.key === "P") && e.metaKey && e.shiftKey,
     () => {
-      isMobile
-        ? setIsDrawerOpen((prev) => !prev)
-        : setIsDropdownOpen((prev) => !prev)
+      if (isMobile) {
+        setIsDrawerOpen((prev) => !prev)
+      } else {
+        setIsDropdownOpen((prev) => !prev)
+      }
     }
   )
 

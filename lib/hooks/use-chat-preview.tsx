@@ -3,7 +3,6 @@ import {
   getCachedMessages,
   getMessagesFromDb,
 } from "@/lib/chat-store/messages/api"
-import type { Message as MessageAISDK } from "ai"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 interface ChatMessage {

@@ -90,12 +90,10 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     input,
     handleSubmit,
     status,
-    error,
     reload,
     stop,
     setMessages,
     setInput,
-    append,
   } = useChat({
     id: `project-${projectId}-${currentChatId}`,
     api: API_ROUTE_CHAT,
@@ -268,7 +266,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       if (messages.length > 0) {
         bumpChat(currentChatId)
       }
-    } catch (submitError) {
+    } catch {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       toast({ title: "Failed to send message", status: "error" })
@@ -291,6 +289,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     cacheAndAddMessage,
     messages.length,
     bumpChat,
+    enableSearch,
   ])
 
   const handleReload = useCallback(async () => {

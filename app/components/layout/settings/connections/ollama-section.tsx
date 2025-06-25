@@ -34,7 +34,7 @@ export function OllamaSection() {
           description: "Please check your Ollama endpoint and try again.",
         })
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Ollama connection failed",
         description: "Please check your Ollama endpoint and try again.",

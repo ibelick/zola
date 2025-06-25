@@ -9,7 +9,6 @@ export function InteractionPreferences() {
     setPromptSuggestions,
     setShowToolInvocations,
     setShowConversationPreviews,
-    setMultiModelEnabled,
   } = useUserPreferences()
 
   return (

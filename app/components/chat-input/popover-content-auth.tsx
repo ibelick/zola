@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button"
 import { PopoverContent } from "@/components/ui/popover"
+import { signInWithGoogle } from "@/lib/api"
+import { APP_NAME } from "@/lib/config"
+import { createClient } from "@/lib/supabase/client"
+import { isSupabaseEnabled } from "@/lib/supabase/config"
 import Image from "next/image"
-import React, { useState } from "react"
-import { signInWithGoogle } from "../../../lib/api"
-import { APP_NAME } from "../../../lib/config"
-import { createClient } from "../../../lib/supabase/client"
-import { isSupabaseEnabled } from "../../../lib/supabase/config"
+import { useState } from "react"
 
 export function PopoverContentAuth() {
   const [isLoading, setIsLoading] = useState(false)
@@ -76,7 +76,7 @@ export function PopoverContentAuth() {
           onClick={handleSignInWithGoogle}
           disabled={isLoading}
         >
-          <img
+          <Image
             src="https://www.google.com/favicon.ico"
             alt="Google logo"
             width={20}

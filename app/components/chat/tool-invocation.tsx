@@ -242,7 +242,7 @@ function SingleToolCard({
       }
 
       return { parsedResult: result, parseError: null }
-    } catch (e) {
+    } catch {
       return { parsedResult: null, parseError: "Failed to parse result" }
     }
   }, [isCompleted, result])

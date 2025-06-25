@@ -36,7 +36,6 @@ import {
   CheckIcon,
   MagnifyingGlassIcon,
   StarIcon,
-  XIcon,
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useRef, useState } from "react"
@@ -79,9 +78,11 @@ export function MultiModelSelector({
   useKeyShortcut(
     (e) => (e.key === "m" || e.key === "M") && e.metaKey && e.shiftKey,
     () => {
-      isMobile
-        ? setIsDrawerOpen((prev) => !prev)
-        : setIsDropdownOpen((prev) => !prev)
+      if (isMobile) {
+        setIsDrawerOpen((prev) => !prev)
+      } else {
+        setIsDropdownOpen((prev) => !prev)
+      }
     }
   )
 
@@ -105,10 +106,10 @@ export function MultiModelSelector({
     }
   }
 
-  const removeModel = (modelId: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    setSelectedModelIds(selectedModelIds.filter((id) => id !== modelId))
-  }
+  // const removeModel = (modelId: string, e: React.MouseEvent) => {
+  //   e.stopPropagation()
+  //   setSelectedModelIds(selectedModelIds.filter((id) => id !== modelId))
+  // }
 
   const renderModelItem = (model: ModelConfig) => {
     const isLocked = !model.accessible
@@ -462,7 +463,6 @@ export function MultiModelSelector({
                 filteredModels.map((model) => {
                   const isLocked = !model.accessible
                   const isSelected = selectedModelIds.includes(model.id)
-                  const isAtLimit = selectedModelIds.length >= maxModels
                   const provider = PROVIDERS.find(
                     (provider) => provider.id === model.icon
                   )
