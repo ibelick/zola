@@ -1,8 +1,8 @@
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
-import { UserProfile } from "@/app/types/user"
-import { toast } from "@/components/ui/toast"
+// import { UserProfile } from "@/app/types/user"
+// import { toast } from "@/components/ui/toast"
 import { useCallback } from "react"
-import type { UIMessageFull } from "./chat"
+import type { UIMessageFull } from "./use-chat-core"
 
 type UseChatHandlersProps = {
   messages: UIMessageFull[]

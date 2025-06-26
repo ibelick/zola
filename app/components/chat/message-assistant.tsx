@@ -8,11 +8,11 @@ import {
 import { cn } from "@/lib/utils"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
 import { isToolUIPart } from "ai"
-import type { UIMessageFull } from "./chat"
 import { getSources } from "./get-sources"
 import { Reasoning } from "./reasoning"
 // import { SearchImages } from "./search-images"
 import { SourcesList } from "./sources-list"
+import type { UIMessageFull } from "./use-chat-core"
 
 // import { ToolInvocation } from "./tool-invocation"
 

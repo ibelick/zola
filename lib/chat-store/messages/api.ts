@@ -1,7 +1,6 @@
-import type { UIMessageFull } from "@/app/components/chat/chat"
+import { UIMessageFull } from "@/app/components/chat/use-chat-core"
 import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
-import type { UIMessage } from "ai"
 import { readFromIndexedDB, writeToIndexedDB } from "../persist"
 
 export async function getMessagesFromDb(

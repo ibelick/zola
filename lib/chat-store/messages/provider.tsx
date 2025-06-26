@@ -1,6 +1,6 @@
 "use client"
 
-import type { UIMessageFull } from "@/app/components/chat/chat"
+import { UIMessageFull } from "@/app/components/chat/use-chat-core"
 import { toast } from "@/components/ui/toast"
 import {
   getChatIdFromPathname,

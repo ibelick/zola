@@ -1,11 +1,11 @@
 "use client"
 
 import { ChatInput } from "@/app/components/chat-input/chat-input"
+import { Conversation } from "@/app/components/chat/conversation"
 import {
   messageMetadataSchema,
   UIMessageFull,
-} from "@/app/components/chat/chat"
-import { Conversation } from "@/app/components/chat/conversation"
+} from "@/app/components/chat/use-chat-core"
 import { useChatOperations } from "@/app/components/chat/use-chat-operations"
 import { useFileUpload } from "@/app/components/chat/use-file-upload"
 import { useModel } from "@/app/components/chat/use-model"

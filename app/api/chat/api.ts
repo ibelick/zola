@@ -1,5 +1,5 @@
 import { saveFinalAssistantMessage } from "@/app/api/chat/db"
-import type { UIMessageFull } from "@/app/components/chat/chat"
+import { UIMessageFull } from "@/app/components/chat/use-chat-core"
 import type {
   ChatApiParams,
   LogUserMessageParams,

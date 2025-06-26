@@ -1,4 +1,4 @@
-import type { UIMessageFull } from "@/app/components/chat/chat"
+import { UIMessageFull } from "@/app/components/chat/use-chat-core"
 import type { ContentPart, Message } from "@/app/types/api.types"
 import type { Database, Json } from "@/app/types/database.types"
 import type { SupabaseClient } from "@supabase/supabase-js"

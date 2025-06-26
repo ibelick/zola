@@ -1,7 +1,7 @@
 // import { Message as MessageAISDK } from "ai"
 
-import { UIMessageFull } from "@/app/components/chat/chat"
 import { isPartToolInvocation } from "@/app/components/chat/message-assistant"
+import { UIMessageFull } from "@/app/components/chat/use-chat-core"
 
 /**
  * Clean messages when switching between agents with different tool capabilities.
@@ -327,6 +327,7 @@ export function createErrorResponse(error: {
   message?: string
   statusCode?: number
 }): Response {
+  console.log("[createErrorResponse]", error)
   // Handle daily limit first (existing logic)
   if (error.code === "DAILY_LIMIT_REACHED") {
     return new Response(

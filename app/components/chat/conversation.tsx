@@ -5,8 +5,8 @@ import {
 import { Loader } from "@/components/prompt-kit/loader"
 import { ScrollButton } from "@/components/prompt-kit/scroll-button"
 import { useRef } from "react"
-import { UIMessageFull } from "./chat"
 import { Message } from "./message"
+import type { UIMessageFull } from "./use-chat-core"
 
 type ConversationProps = {
   messages: UIMessageFull[]

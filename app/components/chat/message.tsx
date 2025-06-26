@@ -1,8 +1,8 @@
 import { UIMessage } from "@ai-sdk/react"
 import React, { useState } from "react"
-import { UIMessageFull } from "./chat"
 import { MessageAssistant } from "./message-assistant"
 import { MessageUser } from "./message-user"
+import { UIMessageFull } from "./use-chat-core"
 
 type MessageProps = {
   variant: UIMessage["role"]

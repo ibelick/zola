@@ -1,5 +1,5 @@
 import { SourceUIPart } from "@ai-sdk/ui-utils"
-import type { UIMessageFull } from "./chat"
+import type { UIMessageFull } from "./use-chat-core"
 
 export function getSources(
   parts: UIMessageFull["parts"]

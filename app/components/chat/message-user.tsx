@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 import { Check, Copy, Trash } from "@phosphor-icons/react"
 import Image from "next/image"
 import { useRef, useState } from "react"
-import type { UIMessageFull } from "./chat"
+import type { UIMessageFull } from "./use-chat-core"
 
 const getTextFromDataUrl = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1]

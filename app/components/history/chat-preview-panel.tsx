@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react"
 import { useLayoutEffect, useRef, useState } from "react"
-import { UIMessageFull } from "../chat/chat"
+import { UIMessageFull } from "../chat/use-chat-core"
 
 type ChatPreviewPanelProps = {
   chatId: string | null

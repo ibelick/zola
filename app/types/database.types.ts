@@ -1,5 +1,5 @@
 import { Attachment } from "@ai-sdk/ui-utils"
-import type { UIMessageFull } from "../components/chat/chat"
+import { UIMessageFull } from "../components/chat/use-chat-core"
 
 export type Json =
   | string

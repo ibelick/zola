@@ -1,4 +1,7 @@
-import type { MessageMetadata, UIMessageFull } from "@/app/components/chat/chat"
+import {
+  MessageMetadata,
+  UIMessageFull,
+} from "@/app/components/chat/use-chat-core"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { getAllModels } from "@/lib/models"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
@@ -9,7 +12,10 @@ import {
   storeAssistantMessage,
   validateAndTrackUsage,
 } from "./api"
-import { createErrorResponse, extractErrorMessage } from "./utils"
+
+// import { createErrorResponse } from "./utils"
+
+// import { createErrorResponse, extractErrorMessage } from "./utils"
 
 export const maxDuration = 60
 
@@ -34,6 +40,8 @@ export async function POST(req: Request) {
       systemPrompt,
       enableSearch,
     } = (await req.json()) as ChatRequest
+
+    console.log("messages start", messages)
 
     if (!messages || !chatId || !userId) {
       return new Response(
@@ -124,6 +132,8 @@ export async function POST(req: Request) {
       statusCode?: number
     }
 
-    return createErrorResponse(error)
+    throw err
+
+    // return createErrorResponse(error)
   }
 }
