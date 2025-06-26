@@ -172,7 +172,7 @@ export function useChatCore({
       //   optimisticAttachments.length > 0 ? optimisticAttachments : undefined,
     }
 
-    setMessages((prev) => [...prev, optimisticMessage])
+    // setMessages((prev) => [...prev, optimisticMessage])
     setInput("")
 
     const submittedFiles = [...files]
@@ -181,14 +181,14 @@ export function useChatCore({
     try {
       const allowed = await checkLimitsAndNotify(uid)
       if (!allowed) {
-        setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+        // setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
         // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
 
       const currentChatId = await ensureChatExists(uid, input)
       if (!currentChatId) {
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        // setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
         // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
@@ -198,22 +198,22 @@ export function useChatCore({
           title: `The message you submitted was too long, please submit something shorter. (Max ${MESSAGE_MAX_LENGTH} characters)`,
           status: "error",
         })
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        // setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
         // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
 
-      let attachments: Attachment[] | null = []
-      if (submittedFiles.length > 0) {
-        attachments = await handleFileUploads(uid, currentChatId)
-        if (attachments === null) {
-          setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-          // cleanupOptimisticAttachments(
-          //   optimisticMessage.experimental_attachments
-          // )
-          return
-        }
-      }
+      // let attachments: Attachment[] | null = []
+      // if (submittedFiles.length > 0) {
+      //   attachments = await handleFileUploads(uid, currentChatId)
+      //   if (attachments === null) {
+      //     setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+      //     // cleanupOptimisticAttachments(
+      //     //   optimisticMessage.experimental_attachments
+      //     // )
+      //     return
+      //   }
+      // }
 
       const options = {
         body: {
@@ -224,14 +224,14 @@ export function useChatCore({
           systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
           enableSearch,
         },
-        experimental_attachments: attachments || undefined,
+        // experimental_attachments: attachments || undefined,
       }
 
       sendMessage(
         { role: "user" as const, parts: [{ type: "text", text: input }] },
         options
       )
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+      // setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
@@ -289,26 +289,26 @@ export function useChatCore({
         ],
       }
 
-      setMessages((prev) => [...prev, optimisticMessage])
+      // setMessages((prev) => [...prev, optimisticMessage])
 
       try {
         const uid = await getOrCreateGuestUserId(user)
 
         if (!uid) {
-          setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+          // setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
           return
         }
 
         const allowed = await checkLimitsAndNotify(uid)
         if (!allowed) {
-          setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+          // setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
           return
         }
 
         const currentChatId = await ensureChatExists(uid, suggestion)
 
         if (!currentChatId) {
-          setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+          // setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
           return
         }
 
@@ -329,7 +329,7 @@ export function useChatCore({
           },
           options
         )
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        // setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       } catch {
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
         toast({ title: "Failed to send suggestion", status: "error" })
