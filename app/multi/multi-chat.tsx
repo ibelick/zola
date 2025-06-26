@@ -33,12 +33,10 @@ export function MultiChat() {
   const [selectedModelIds, setSelectedModelIds] = useState<string[]>([])
   const [messageGroups, setMessageGroups] = useState<GroupedMessage[]>([])
   const [files, setFiles] = useState<File[]>([])
+  const [allUsedModelIds, setAllUsedModelIds] = useState<string[]>([])
   const { user } = useUser()
   const { models } = useModel()
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  // mock data for UI development
-  // const [mockMessages, setMockMessages] = useState(mockMessageGroups)
 
   // Filter models to get real available models and transform them for useMultiChat
   const availableModels = useMemo(() => {
@@ -49,14 +47,19 @@ export function MultiChat() {
     }))
   }, [models])
 
-  // Use the custom hook to manage chat instances for selected models only
-  const selectedModels = useMemo(() => {
-    return availableModels.filter((model) =>
-      selectedModelIds.includes(model.id)
-    )
-  }, [availableModels, selectedModelIds])
+  // Track all models that have ever been selected (combine current + historical)
+  const allModelsToMaintain = useMemo(() => {
+    const combined = [...new Set([...selectedModelIds, ...allUsedModelIds])]
+    return availableModels.filter((model) => combined.includes(model.id))
+  }, [availableModels, selectedModelIds, allUsedModelIds])
 
-  const modelChats = useMultiChat(selectedModels)
+  // Update allUsedModelIds whenever selectedModelIds changes
+  useEffect(() => {
+    setAllUsedModelIds((prev) => [...new Set([...prev, ...selectedModelIds])])
+  }, [selectedModelIds])
+
+  // Use the custom hook to manage chat instances for all models (selected + previously used)
+  const modelChats = useMultiChat(allModelsToMaintain)
 
   // Memoize system prompt
   const systemPrompt = useMemo(
@@ -68,10 +71,10 @@ export function MultiChat() {
 
   const updateMessageGroups = useCallback(() => {
     // Group messages by user message content (simple grouping strategy)
+    // Show messages from ALL models that have been used
     const groups: { [key: string]: GroupedMessage } = {}
 
     modelChats.forEach((chat) => {
-      // No need to check selectedModelIds since modelChats only contains selected models
       for (let i = 0; i < chat.messages.length; i += 2) {
         const userMsg = chat.messages[i]
         const assistantMsg = chat.messages[i + 1]
@@ -96,8 +99,12 @@ export function MultiChat() {
               isLoading: false,
               provider: chat.model.provider,
             })
-          } else if (chat.isLoading && userMsg.content === prompt) {
-            // Currently loading for this prompt - create a placeholder message
+          } else if (
+            chat.isLoading &&
+            userMsg.content === prompt &&
+            selectedModelIds.includes(chat.model.id)
+          ) {
+            // Currently loading for this prompt - create a placeholder message (only for selected models)
             const placeholderMessage: MessageType = {
               id: `loading-${chat.model.id}`,
               role: "assistant",
@@ -115,7 +122,7 @@ export function MultiChat() {
     })
 
     setMessageGroups(Object.values(groups))
-  }, [modelChats, prompt])
+  }, [modelChats, prompt, selectedModelIds])
 
   useEffect(() => {
     updateMessageGroups()
@@ -139,9 +146,13 @@ export function MultiChat() {
       const uid = await getOrCreateGuestUserId(user)
       if (!uid) return
 
-      // Send message to all models (they're already filtered to selected models)
+      // Send message only to currently selected models
+      const selectedChats = modelChats.filter((chat) =>
+        selectedModelIds.includes(chat.model.id)
+      )
+
       await Promise.all(
-        modelChats.map(async (chat) => {
+        selectedChats.map(async (chat) => {
           const options = {
             body: {
               chatId: `multi-${chat.model.id}-${Date.now()}`,
@@ -186,17 +197,20 @@ export function MultiChat() {
   }, [])
 
   const handleStop = useCallback(() => {
-    // Stop all currently loading chats
+    // Stop only currently selected models that are loading
     modelChats.forEach((chat) => {
-      if (chat.isLoading) {
+      if (chat.isLoading && selectedModelIds.includes(chat.model.id)) {
         chat.stop()
       }
     })
-  }, [modelChats])
+  }, [modelChats, selectedModelIds])
 
   const anyLoading = useMemo(
-    () => modelChats.some((chat) => chat.isLoading),
-    [modelChats]
+    () =>
+      modelChats.some(
+        (chat) => chat.isLoading && selectedModelIds.includes(chat.model.id)
+      ),
+    [modelChats, selectedModelIds]
   )
 
   // Memoize the conversation props
@@ -265,7 +279,7 @@ export function MultiChat() {
             }}
           >
             <h1 className="mb-6 text-3xl font-medium tracking-tight">
-              Compare responses from multiple models
+              What's on your mind?
             </h1>
           </motion.div>
         ) : (
