@@ -171,7 +171,6 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     isAuthenticated: true, // Always authenticated in project context
     chatId: null,
     messages,
-    input,
     selectedModel,
     systemPrompt: SYSTEM_PROMPT_DEFAULT,
     createNewChat,
