@@ -146,6 +146,8 @@ export type Database = {
           role: "system" | "user" | "assistant" | "data"
           parts: Json | null
           user_id?: string | null
+          message_group_id: string | null
+          model: string | null
         }
         Insert: {
           experimental_attachments?: Attachment[]
@@ -156,6 +158,8 @@ export type Database = {
           role: "system" | "user" | "assistant" | "data"
           parts?: Json
           user_id?: string | null
+          message_group_id?: string | null
+          model?: string | null
         }
         Update: {
           experimental_attachments?: Attachment[]
@@ -166,6 +170,8 @@ export type Database = {
           role?: "system" | "user" | "assistant" | "data"
           parts?: Json
           user_id?: string | null
+          message_group_id?: string | null
+          model?: string | null
         }
         Relationships: [
           {
