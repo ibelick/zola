@@ -7,19 +7,19 @@ import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { useModel } from "@/lib/model-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
-import { Message as MessageType } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { UIMessageFull } from "../components/chat/use-chat-core"
 // import { mockMessageGroups } from "./mock-data"
 import { MultiChatInput } from "./multi-chat-input"
 import { useMultiChat } from "./use-multi-chat"
 
 // Import the exact types from MultiModelConversation to ensure compatibility
 type GroupedMessage = {
-  userMessage: MessageType
+  userMessage: UIMessageFull
   responses: {
     model: string
-    message: MessageType
+    message: UIMessageFull
     isLoading?: boolean
     provider: string
   }[]
@@ -98,10 +98,15 @@ export function MultiChat() {
             })
           } else if (chat.isLoading && userMsg.content === prompt) {
             // Currently loading for this prompt - create a placeholder message
-            const placeholderMessage: MessageType = {
+            const placeholderMessage: UIMessageFull = {
               id: `loading-${chat.model.id}`,
               role: "assistant",
-              content: "",
+              parts: [
+                {
+                  type: "text",
+                  text: "",
+                },
+              ],
             }
             groups[groupKey].responses.push({
               model: chat.model.id,

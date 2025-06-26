@@ -59,11 +59,9 @@ export function Message({
         onDelete={onDelete}
         id={id}
         hasScrollAnchor={hasScrollAnchor}
-        attachments={attachments}
+        // attachments={attachments}
         className={className}
-      >
-        {children}
-      </MessageUser>
+      />
     )
   }
 

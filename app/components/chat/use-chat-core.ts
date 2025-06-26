@@ -7,11 +7,10 @@ import { API_ROUTE_CHAT } from "@/lib/routes"
 import type { UIMessage } from "@ai-sdk/react"
 import { Chat as ReactChat, useChat } from "@ai-sdk/react"
 import { DefaultChatTransport, UIDataPartSchemas } from "ai"
-import type { Message } from "@ai-sdk/react"
-import { useChat } from "@ai-sdk/react"
 import { useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { z } from "zod"
+import { UserProfile } from "../../types/user"
 
 export const messageMetadataSchema = z.object({
   createdAt: z.string(),
@@ -24,7 +23,6 @@ type UIMessageMetadata = MessageMetadata
 type UIMessageDataParts = UIDataPartSchemas
 
 export type UIMessageFull = UIMessage<UIMessageMetadata, UIMessageDataParts>
-import { UserProfile } from "../../types/user"
 
 type UseChatCoreProps = {
   initialMessages: UIMessageFull[]
