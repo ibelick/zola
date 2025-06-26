@@ -56,7 +56,7 @@ export function UserMenu() {
         <FeedbackTrigger />
         <AppInfoTrigger />
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <a
             href="https://x.com/zoladotchat"
             target="_blank"
@@ -64,10 +64,10 @@ export function UserMenu() {
             className="flex items-center gap-2"
           >
             <XIcon className="size-4 p-0.5" />
-            <span>x.com</span>
+            <span>@zoladotchat</span>
           </a>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <a
             href="https://github.com/ibelick/zola"
             target="_blank"
