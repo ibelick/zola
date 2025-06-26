@@ -87,6 +87,7 @@ async function detectOllamaModels(): Promise<ModelConfig[]> {
         name: formatModelName(modelName),
         provider: provider,
         providerId: "ollama",
+        baseProviderId: "ollama",
         modelFamily: family,
         description: `${formatModelName(modelName)} running locally via Ollama (${sizeInGB}GB)`,
         tags: tags,
@@ -270,6 +271,7 @@ const staticOllamaModels: ModelConfig[] = [
     provider: "Meta",
     providerId: "ollama",
     modelFamily: "Llama 3.2",
+    baseProviderId: "meta",
     description: "Latest Llama 3.2 model running locally via Ollama",
     tags: ["local", "open-source", "fast", "8b"],
     contextWindow: 128000,
@@ -295,6 +297,7 @@ const staticOllamaModels: ModelConfig[] = [
     provider: "Alibaba",
     providerId: "ollama",
     modelFamily: "Qwen 2.5",
+    baseProviderId: "alibaba",
     description:
       "Specialized coding model based on Qwen 2.5, optimized for programming tasks",
     tags: ["local", "open-source", "coding", "7b"],

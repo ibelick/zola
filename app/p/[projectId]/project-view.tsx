@@ -179,7 +179,6 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     isAuthenticated: true, // Always authenticated in project context
     chatId: null,
     messages,
-    input,
     selectedModel,
     systemPrompt: SYSTEM_PROMPT_DEFAULT,
     createNewChat,
@@ -276,7 +275,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       if (messages.length > 0) {
         bumpChat(currentChatId)
       }
-    } catch (submitError) {
+    } catch {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       toast({ title: "Failed to send message", status: "error" })
@@ -300,6 +299,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     messages.length,
     bumpChat,
     sendMessage,
+    enableSearch,
   ])
 
   const handleReload = useCallback(async () => {

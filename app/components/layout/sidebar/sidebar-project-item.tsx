@@ -71,16 +71,21 @@ export function SidebarProjectItem({ project }: SidebarProjectItemProps) {
       const previousProject = queryClient.getQueryData(["project", projectId])
 
       // Optimistically update projects list
-      queryClient.setQueryData(["projects"], (old: any) => {
+      queryClient.setQueryData(["projects"], (old: Project[] | undefined) => {
         if (!old) return old
-        return old.map((p: any) => (p.id === projectId ? { ...p, name } : p))
+        return old.map((p: Project) =>
+          p.id === projectId ? { ...p, name } : p
+        )
       })
 
       // Optimistically update individual project
-      queryClient.setQueryData(["project", projectId], (old: any) => {
-        if (!old) return old
-        return { ...old, name }
-      })
+      queryClient.setQueryData(
+        ["project", projectId],
+        (old: Project | undefined) => {
+          if (!old) return old
+          return { ...old, name }
+        }
+      )
 
       // Return a context object with the snapshotted values
       return { previousProjects, previousProject, projectId }

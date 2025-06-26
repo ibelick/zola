@@ -21,9 +21,8 @@ import { ConnectionsPlaceholder } from "./connections/connections-placeholder"
 import { DeveloperTools } from "./connections/developer-tools"
 import { OllamaSection } from "./connections/ollama-section"
 import { AccountManagement } from "./general/account-management"
-import { ModelPreferences } from "./general/model-preferences"
 import { UserProfile } from "./general/user-profile"
-import { ModelVisibilitySettings } from "./models/model-visibility-settings"
+import { ModelsSettings } from "./models/models-settings"
 
 type SettingsContentProps = {
   onClose: () => void
@@ -110,7 +109,6 @@ export function SettingsContent({
               <UserProfile />
               {isSupabaseEnabled && (
                 <>
-                  <ModelPreferences />
                   <AccountManagement />
                 </>
               )}
@@ -127,7 +125,8 @@ export function SettingsContent({
             </TabsContent>
 
             <TabsContent value="models" className="px-6">
-              <ModelVisibilitySettings />
+              <ModelsSettings />
+              {/* <ModelVisibilitySettings /> */}
             </TabsContent>
 
             <TabsContent value="connections" className="space-y-6 px-6">
@@ -197,7 +196,6 @@ export function SettingsContent({
                 <UserProfile />
                 {isSupabaseEnabled && (
                   <>
-                    <ModelPreferences />
                     <AccountManagement />
                   </>
                 )}
@@ -214,7 +212,8 @@ export function SettingsContent({
               </TabsContent>
 
               <TabsContent value="models" className="mt-0 space-y-6">
-                <ModelVisibilitySettings />
+                <ModelsSettings />
+                {/* <ModelVisibilitySettings /> */}
               </TabsContent>
 
               <TabsContent value="connections" className="mt-0 space-y-6">

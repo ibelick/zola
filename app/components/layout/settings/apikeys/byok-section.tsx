@@ -25,7 +25,7 @@ import { fetchClient } from "@/lib/fetch"
 import { useModel } from "@/lib/model-store/provider"
 import { cn } from "@/lib/utils"
 import { PlusIcon } from "@phosphor-icons/react"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2, Trash2 } from "lucide-react"
 import { useState } from "react"
 
@@ -98,6 +98,7 @@ const PROVIDERS: Provider[] = [
 ]
 
 export function ByokSection() {
+  const queryClient = useQueryClient()
   const { userKeyStatus, refreshUserKeyStatus, refreshModels } = useModel()
   const [selectedProvider, setSelectedProvider] = useState<string>("openrouter")
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
@@ -133,15 +134,26 @@ export function ByokSection() {
         }),
       })
       if (!res.ok) throw new Error("Failed to save key")
-      return res
+      return res.json()
     },
-    onSuccess: async (_, { provider }) => {
+    onSuccess: async (response, { provider }) => {
       const providerConfig = PROVIDERS.find((p) => p.id === provider)
+
       toast({
         title: "API key saved",
-        description: `Your ${providerConfig?.name} API key has been saved.`,
+        description: response.isNewKey
+          ? `Your ${providerConfig?.name} API key has been saved and models have been added to your favorites.`
+          : `Your ${providerConfig?.name} API key has been updated.`,
       })
+
+      // Refresh models and user key status
       await Promise.all([refreshUserKeyStatus(), refreshModels()])
+
+      // If new models were added to favorites, refresh the favorite models cache
+      if (response.isNewKey) {
+        queryClient.invalidateQueries({ queryKey: ["favorite-models"] })
+      }
+
       setApiKeys((prev) => ({
         ...prev,
         [provider]: providerConfig?.defaultKey || "",

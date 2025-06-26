@@ -7,6 +7,8 @@ import { API_ROUTE_CHAT } from "@/lib/routes"
 import type { UIMessage } from "@ai-sdk/react"
 import { Chat as ReactChat, useChat } from "@ai-sdk/react"
 import { DefaultChatTransport, UIDataPartSchemas } from "ai"
+import type { Message } from "@ai-sdk/react"
+import { useChat } from "@ai-sdk/react"
 import { useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { z } from "zod"
@@ -22,19 +24,22 @@ type UIMessageMetadata = MessageMetadata
 type UIMessageDataParts = UIDataPartSchemas
 
 export type UIMessageFull = UIMessage<UIMessageMetadata, UIMessageDataParts>
+import { UserProfile } from "../../types/user"
 
 type UseChatCoreProps = {
   initialMessages: UIMessageFull[]
   draftValue: string
   cacheAndAddMessage: (message: UIMessageFull) => void
   chatId: string | null
-  user: any
+  user: UserProfile | null
   files: File[]
-  createOptimisticAttachments: (files: File[]) => any[]
+  createOptimisticAttachments: (
+    files: File[]
+  ) => Array<{ name: string; contentType: string; url: string }>
   setFiles: (files: File[]) => void
   checkLimitsAndNotify: (uid: string) => Promise<boolean>
-  cleanupOptimisticAttachments: (attachments?: any[]) => void
-  ensureChatExists: (uid: string) => Promise<string | null>
+  cleanupOptimisticAttachments: (attachments?: Array<{ url?: string }>) => void
+  ensureChatExists: (uid: string, input: string) => Promise<string | null>
   handleFileUploads: (
     uid: string,
     chatId: string
@@ -183,7 +188,7 @@ export function useChatCore({
         return
       }
 
-      const currentChatId = await ensureChatExists(uid)
+      const currentChatId = await ensureChatExists(uid, input)
       if (!currentChatId) {
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
         // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
@@ -236,7 +241,7 @@ export function useChatCore({
       if (messages.length > 0) {
         bumpChat(currentChatId)
       }
-    } catch (submitError) {
+    } catch {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       toast({ title: "Failed to send message", status: "error" })
@@ -302,7 +307,7 @@ export function useChatCore({
           return
         }
 
-        const currentChatId = await ensureChatExists(uid)
+        const currentChatId = await ensureChatExists(uid, suggestion)
 
         if (!currentChatId) {
           setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
@@ -327,7 +332,7 @@ export function useChatCore({
           options
         )
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      } catch (suggestionError) {
+      } catch {
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
         toast({ title: "Failed to send suggestion", status: "error" })
       } finally {

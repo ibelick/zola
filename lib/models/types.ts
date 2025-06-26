@@ -6,6 +6,7 @@ type ModelConfig = {
   provider: string // "OpenAI", "Mistral", etc.
   providerId: string // "openai", "mistral", etc.
   modelFamily?: string // "GPT-4", "Claude 3", etc.
+  baseProviderId: string // "gemini" // same from AI SDKs
 
   description?: string // Short 1–2 line summary
   tags?: string[] // ["fast", "cheap", "vision", "OSS"]

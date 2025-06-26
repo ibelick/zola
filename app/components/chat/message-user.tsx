@@ -35,6 +35,7 @@ export type MessageUserProps = {
   onReload: () => void
   onDelete: (id: string) => void
   id: string
+  className?: string
 }
 
 export function MessageUser({
@@ -46,6 +47,7 @@ export function MessageUser({
   onReload,
   onDelete,
   id,
+  className,
 }: MessageUserProps) {
   const textParts = parts?.filter((part) => part.type === "text")
   const textPartsAsText = textParts?.map((part) => part.text).join("")
@@ -77,7 +79,8 @@ export function MessageUser({
     <MessageContainer
       className={cn(
         "group flex w-full max-w-3xl flex-col items-end gap-0.5 px-6 pb-2",
-        hasScrollAnchor && "min-h-scroll-anchor"
+        hasScrollAnchor && "min-h-scroll-anchor",
+        className
       )}
     >
       {fileParts?.map((file, index) => (

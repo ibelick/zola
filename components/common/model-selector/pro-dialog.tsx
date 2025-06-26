@@ -82,7 +82,7 @@ export function ProModelDialog({
             to add your key securely.
           </p>
           <p className="text-muted-foreground mt-5">
-            We don't support this model yet?
+            We don&apos;t support this model yet?
           </p>
           {mutation.isSuccess ? (
             <div className="mt-5 flex justify-center gap-3">

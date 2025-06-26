@@ -54,7 +54,7 @@ export async function GET(request: Request) {
       created_at: new Date().toISOString(),
       message_count: 0,
       premium: false,
-      preferred_model: MODEL_DEFAULT,
+      favorite_models: [MODEL_DEFAULT],
     })
 
     if (insertError && insertError.code !== "23505") {

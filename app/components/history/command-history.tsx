@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Command,
-  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -511,7 +510,6 @@ export function CommandHistory({
       editTitle,
       selectedChatId,
       preferences.showConversationPreviews,
-      isPreviewPanelHovered,
       handleSaveEdit,
       handleCancelEdit,
       handleConfirmDelete,

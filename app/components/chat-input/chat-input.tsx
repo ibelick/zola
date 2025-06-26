@@ -9,8 +9,8 @@ import {
 } from "@/components/prompt-kit/prompt-input"
 import { Button } from "@/components/ui/button"
 import { getModelInfo } from "@/lib/models"
-import { ArrowUp, Stop, Warning } from "@phosphor-icons/react"
-import React, { useCallback, useEffect, useMemo } from "react"
+import { ArrowUpIcon, StopIcon } from "@phosphor-icons/react"
+import { useCallback, useMemo } from "react"
 import { PromptSystem } from "../suggestions/prompt-system"
 import { ButtonFileUpload } from "./button-file-upload"
 import { ButtonSearch } from "./button-search"
@@ -55,7 +55,6 @@ export function ChatInput({
   enableSearch,
 }: ChatInputProps) {
   const selectModelConfig = getModelInfo(selectedModel)
-  const hasToolSupport = Boolean(selectModelConfig?.tools)
   const hasSearchSupport = Boolean(selectModelConfig?.webSearch)
   const isOnlyWhitespace = (text: string) => !/[^\s]/.test(text)
 
@@ -97,7 +96,7 @@ export function ChatInput({
   )
 
   const handlePaste = useCallback(
-    async (e: ClipboardEvent) => {
+    async (e: React.ClipboardEvent) => {
       const items = e.clipboardData?.items
       if (!items) return
 
@@ -162,6 +161,7 @@ export function ChatInput({
           <PromptInputTextarea
             placeholder="Ask Zola"
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             className="min-h-[44px] pt-3 pl-4 text-base leading-[1.3] sm:text-base md:text-base"
           />
           <PromptInputActions className="mt-5 w-full justify-between px-3 pb-3">
@@ -197,9 +197,9 @@ export function ChatInput({
                 aria-label={status === "streaming" ? "Stop" : "Send message"}
               >
                 {status === "streaming" ? (
-                  <Stop className="size-4" />
+                  <StopIcon className="size-4" />
                 ) : (
-                  <ArrowUp className="size-4" />
+                  <ArrowUpIcon className="size-4" />
                 )}
               </Button>
             </PromptInputAction>

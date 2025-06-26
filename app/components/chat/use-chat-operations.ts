@@ -1,4 +1,3 @@
-import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
 import { checkRateLimits } from "@/lib/api"
 import type { Chats } from "@/lib/chat-store/types"
@@ -10,7 +9,6 @@ type UseChatOperationsProps = {
   isAuthenticated: boolean
   chatId: string | null
   messages: Message[]
-  input: string
   selectedModel: string
   systemPrompt: string
   createNewChat: (
@@ -31,16 +29,12 @@ export function useChatOperations({
   isAuthenticated,
   chatId,
   messages,
-  input,
   selectedModel,
   systemPrompt,
   createNewChat,
   setHasDialogAuth,
   setMessages,
-  setInput,
 }: UseChatOperationsProps) {
-  const { setDraftValue } = useChatDraft(chatId)
-
   // Chat utilities
   const checkLimitsAndNotify = async (uid: string): Promise<boolean> => {
     try {
@@ -76,7 +70,7 @@ export function useChatOperations({
     }
   }
 
-  const ensureChatExists = async (userId: string) => {
+  const ensureChatExists = async (userId: string, input: string) => {
     if (!isAuthenticated) {
       const storedGuestChatId = localStorage.getItem("guestChatId")
       if (storedGuestChatId) return storedGuestChatId

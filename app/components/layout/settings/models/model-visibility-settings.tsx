@@ -93,7 +93,7 @@ export function ModelVisibilitySettings() {
 
   return (
     <div>
-      <h3 className="mb-2 text-lg font-medium">Model</h3>
+      <h3 className="mb-2 text-lg font-medium">Available models</h3>
       <p className="text-muted-foreground mb-4 text-sm">
         Choose which models appear in your model selector.
       </p>

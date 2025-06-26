@@ -82,7 +82,6 @@ export function Chat() {
       isAuthenticated,
       chatId,
       messages: initialMessages,
-      input: draftValue,
       selectedModel,
       systemPrompt,
       createNewChat,

@@ -3,13 +3,10 @@
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import useClickOutside from "@/app/hooks/use-click-outside"
 import { useChats } from "@/lib/chat-store/chats/provider"
-import { useMessages } from "@/lib/chat-store/messages/provider"
-import { useChatSession } from "@/lib/chat-store/session/provider"
 import { Chat } from "@/lib/chat-store/types"
 import { cn } from "@/lib/utils"
 import { ChatCircleIcon, Check, X } from "@phosphor-icons/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { SidebarItemMenu } from "./sidebar-item-menu"
 
@@ -27,10 +24,6 @@ export function ProjectChatItem({ chat, formatDate }: ProjectChatItemProps) {
   const { updateTitle } = useChats()
   const isMobile = useBreakpoint(768)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const { deleteMessages } = useMessages()
-  const { deleteChat } = useChats()
-  const { chatId } = useChatSession()
-  const router = useRouter()
 
   if (!isEditing && lastChatTitleRef.current !== chat.title) {
     lastChatTitleRef.current = chat.title
@@ -121,11 +114,6 @@ export function ProjectChatItem({ chat, formatDate }: ProjectChatItemProps) {
   const handleLinkClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
   }, [])
-
-  const handleConfirmDelete = useCallback(async () => {
-    await deleteMessages()
-    await deleteChat(chat.id, chatId!, () => router.push("/"))
-  }, [deleteMessages, deleteChat, chat.id, chatId, router])
 
   // Memoize computed values
   const displayTitle = useMemo(

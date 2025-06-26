@@ -24,6 +24,7 @@ type MessageAssistantProps = {
   onReload?: () => void
   parts?: UIMessageFull["parts"]
   status?: "streaming" | "ready" | "submitted" | "error"
+  className?: string
 }
 
 export function isPartToolInvocation(part: UIMessageFull["parts"][number]) {
@@ -46,6 +47,7 @@ export function MessageAssistant({
   onReload,
   parts,
   status,
+  className,
 }: MessageAssistantProps) {
   // const { preferences } = useUserPreferences()
   const sources = getSources(parts || [])
@@ -78,7 +80,8 @@ export function MessageAssistant({
     <Message
       className={cn(
         "group flex w-full max-w-3xl flex-1 items-start gap-4 px-6 pb-2",
-        hasScrollAnchor && "min-h-scroll-anchor"
+        hasScrollAnchor && "min-h-scroll-anchor",
+        className
       )}
     >
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>

@@ -4,6 +4,7 @@ import { PopoverContentAuth } from "@/app/components/chat-input/popover-content-
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useKeyShortcut } from "@/app/hooks/use-key-shortcut"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Drawer,
   DrawerContent,
@@ -32,32 +33,35 @@ import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import {
   CaretDownIcon,
+  CheckIcon,
   MagnifyingGlassIcon,
   StarIcon,
 } from "@phosphor-icons/react"
+import { AnimatePresence, motion } from "motion/react"
 import { useRef, useState } from "react"
-import { ProModelDialog } from "./pro-dialog"
-import { SubMenu } from "./sub-menu"
+import { ProModelDialog } from "../model-selector/pro-dialog"
+import { SubMenu } from "../model-selector/sub-menu"
 
-type ModelSelectorProps = {
-  selectedModelId: string
-  setSelectedModelId: (modelId: string) => void
+type MultiModelSelectorProps = {
+  selectedModelIds: string[]
+  setSelectedModelIds: (modelIds: string[]) => void
   className?: string
   isUserAuthenticated?: boolean
+  maxModels?: number
 }
 
-export function ModelSelector({
-  selectedModelId,
-  setSelectedModelId,
+export function MultiModelSelector({
+  selectedModelIds,
+  setSelectedModelIds,
   className,
   isUserAuthenticated = true,
-}: ModelSelectorProps) {
-  const { models, isLoading: isLoadingModels, favoriteModels } = useModel()
+  maxModels = 5,
+}: MultiModelSelectorProps) {
+  const { models, isLoading: isLoadingModels } = useModel()
   const { isModelHidden } = useUserPreferences()
 
-  const currentModel = models.find((model) => model.id === selectedModelId)
-  const currentProvider = PROVIDERS.find(
-    (provider) => provider.id === currentModel?.icon
+  const selectedModels = models.filter((model) =>
+    selectedModelIds.includes(model.id)
   )
   const isMobile = useBreakpoint(768)
 
@@ -72,7 +76,7 @@ export function ModelSelector({
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   useKeyShortcut(
-    (e) => (e.key === "p" || e.key === "P") && e.metaKey && e.shiftKey,
+    (e) => (e.key === "m" || e.key === "M") && e.metaKey && e.shiftKey,
     () => {
       if (isMobile) {
         setIsDrawerOpen((prev) => !prev)
@@ -82,44 +86,71 @@ export function ModelSelector({
     }
   )
 
+  const handleModelToggle = (modelId: string, isLocked: boolean) => {
+    if (isLocked) {
+      setSelectedProModel(modelId)
+      setIsProDialogOpen(true)
+      return
+    }
+
+    const isSelected = selectedModelIds.includes(modelId)
+
+    if (isSelected) {
+      // Remove model from selection
+      setSelectedModelIds(selectedModelIds.filter((id) => id !== modelId))
+    } else {
+      // Add model to selection if under limit
+      if (selectedModelIds.length < maxModels) {
+        setSelectedModelIds([...selectedModelIds, modelId])
+      }
+    }
+  }
+
+  // const removeModel = (modelId: string, e: React.MouseEvent) => {
+  //   e.stopPropagation()
+  //   setSelectedModelIds(selectedModelIds.filter((id) => id !== modelId))
+  // }
+
   const renderModelItem = (model: ModelConfig) => {
     const isLocked = !model.accessible
+    const isSelected = selectedModelIds.includes(model.id)
+    const isAtLimit = selectedModelIds.length >= maxModels
     const provider = PROVIDERS.find((provider) => provider.id === model.icon)
 
     return (
       <div
         key={model.id}
         className={cn(
-          "flex w-full items-center justify-between px-3 py-2",
-          selectedModelId === model.id && "bg-accent"
+          "hover:bg-accent/50 flex w-full cursor-pointer items-center justify-between px-3 py-2",
+          isSelected && "bg-accent"
         )}
-        onClick={() => {
-          if (isLocked) {
-            setSelectedProModel(model.id)
-            setIsProDialogOpen(true)
-            return
-          }
-
-          setSelectedModelId(model.id)
-          if (isMobile) {
-            setIsDrawerOpen(false)
-          } else {
-            setIsDropdownOpen(false)
-          }
-        }}
+        onClick={() => handleModelToggle(model.id, isLocked)}
       >
         <div className="flex items-center gap-3">
+          <Checkbox
+            checked={isSelected}
+            disabled={isLocked || (!isSelected && isAtLimit)}
+            onClick={(e) => e.stopPropagation()}
+            onChange={() => handleModelToggle(model.id, isLocked)}
+          />
           {provider?.icon && <provider.icon className="size-5" />}
           <div className="flex flex-col gap-0">
             <span className="text-sm">{model.name}</span>
           </div>
         </div>
-        {isLocked && (
-          <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
-            <StarIcon className="size-2" />
-            <span>Locked</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {isLocked && (
+            <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
+              <StarIcon className="size-2" />
+              <span>Locked</span>
+            </div>
+          )}
+          {!isSelected && isAtLimit && !isLocked && (
+            <div className="border-input bg-muted text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
+              <span>Limit</span>
+            </div>
+          )}
+        </div>
       </div>
     )
   }
@@ -129,42 +160,152 @@ export function ModelSelector({
 
   const filteredModels = models
     .filter((model) => !isModelHidden(model.id))
-    .filter((model) => {
-      // If user has favorite models, only show favorites
-      if (favoriteModels && favoriteModels.length > 0) {
-        return favoriteModels.includes(model.id)
-      }
-      // If no favorites, show all models
-      return true
-    })
     .filter((model) =>
       model.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      // If user has favorite models, maintain their order
-      if (favoriteModels && favoriteModels.length > 0) {
-        const aIndex = favoriteModels.indexOf(a.id)
-        const bIndex = favoriteModels.indexOf(b.id)
-        return aIndex - bIndex
-      }
-
-      // Fallback to original sorting (free models first)
       const aIsFree = FREE_MODELS_IDS.includes(a.id)
       const bIsFree = FREE_MODELS_IDS.includes(b.id)
       return aIsFree === bIsFree ? 0 : aIsFree ? -1 : 1
     })
 
+  if (isLoadingModels) {
+    return null
+  }
+
   const trigger = (
     <Button
       variant="outline"
-      className={cn("dark:bg-secondary justify-between", className)}
+      className={cn(
+        "dark:bg-secondary min-w-[200px] justify-between rounded-full",
+        className
+      )}
       disabled={isLoadingModels}
     >
-      <div className="flex items-center gap-2">
-        {currentProvider?.icon && <currentProvider.icon className="size-5" />}
-        <span>{currentModel?.name || "Select model"}</span>
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <AnimatePresence mode="popLayout">
+          {selectedModels.length === 0 ? (
+            <motion.span
+              key="placeholder"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="text-muted-foreground"
+            >
+              Select models
+            </motion.span>
+          ) : selectedModels.length === 1 ? (
+            <motion.div
+              key="single-model"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="flex items-center gap-2"
+            >
+              {(() => {
+                const provider = PROVIDERS.find(
+                  (p) => p.id === selectedModels[0].icon
+                )
+                return provider?.icon ? (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: 180 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 20,
+                    }}
+                  >
+                    <provider.icon className="size-5 flex-shrink-0" />
+                  </motion.div>
+                ) : null
+              })()}
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="truncate"
+              >
+                {selectedModels[0].name}
+              </motion.span>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="multiple-models"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.1 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="flex min-w-0 flex-1 items-center gap-1"
+            >
+              <div className="flex flex-shrink-0 -space-x-1">
+                <AnimatePresence mode="popLayout">
+                  {selectedModels.slice(0, 3).map((model, index) => {
+                    const provider = PROVIDERS.find((p) => p.id === model.icon)
+                    return provider?.icon ? (
+                      <motion.div
+                        key={`${model.id}`}
+                        layout="position"
+                        layoutId={`${model.id}`}
+                        initial={{
+                          scale: 0,
+                          rotate: -180,
+                          x: -20,
+                          opacity: 0,
+                        }}
+                        animate={{
+                          scale: 1,
+                          rotate: 0,
+                          x: 0,
+                          opacity: 1,
+                        }}
+                        exit={{
+                          scale: 0,
+                          rotate: 180,
+                          x: 20,
+                          opacity: 0,
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25,
+                          delay: index * 0.05,
+                        }}
+                        className="bg-background border-border flex size-5 items-center justify-center rounded-full border"
+                        style={{ zIndex: 3 - index }}
+                      >
+                        <provider.icon className="size-3" />
+                      </motion.div>
+                    ) : null
+                  })}
+                </AnimatePresence>
+              </div>
+              <span className="text-sm font-medium">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={selectedModels.length}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{
+                      duration: 0.15,
+                      ease: "easeOut",
+                    }}
+                    className="inline-block"
+                  >
+                    {selectedModels.length}
+                  </motion.span>
+                </AnimatePresence>{" "}
+                model{selectedModels.length > 1 ? "s" : ""} selected
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      <CaretDownIcon className="size-4 opacity-50" />
+      <CaretDownIcon className="ml-2 size-4 flex-shrink-0 opacity-50" />
     </Button>
   )
 
@@ -190,15 +331,12 @@ export function ModelSelector({
                 )}
                 type="button"
               >
-                {currentProvider?.icon && (
-                  <currentProvider.icon className="size-5" />
-                )}
-                {currentModel?.name}
+                <span>Select models</span>
                 <CaretDownIcon className="size-4" />
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
-          <TooltipContent>Select a model</TooltipContent>
+          <TooltipContent>Select models</TooltipContent>
         </Tooltip>
         <PopoverContentAuth />
       </Popover>
@@ -207,7 +345,7 @@ export function ModelSelector({
 
   if (isMobile) {
     return (
-      <>
+      <div>
         <ProModelDialog
           isOpen={isProDialogOpen}
           setIsOpen={setIsProDialogOpen}
@@ -217,7 +355,9 @@ export function ModelSelector({
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
-              <DrawerTitle>Select Model</DrawerTitle>
+              <DrawerTitle>
+                Select Models ({selectedModelIds.length}/{maxModels})
+              </DrawerTitle>
             </DrawerHeader>
             <div className="px-4 pb-2">
               <div className="relative">
@@ -259,7 +399,7 @@ export function ModelSelector({
             </div>
           </DrawerContent>
         </Drawer>
-      </>
+      </div>
     )
   }
 
@@ -279,14 +419,17 @@ export function ModelSelector({
               setHoveredModel(null)
               setSearchQuery("")
             } else {
-              if (selectedModelId) setHoveredModel(selectedModelId)
+              if (selectedModelIds.length > 0)
+                setHoveredModel(selectedModelIds[0])
             }
           }}
         >
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
           </TooltipTrigger>
-          <TooltipContent>Switch model ⌘⇧P</TooltipContent>
+          <TooltipContent>
+            Select models ⌘⇧M ({selectedModelIds.length}/{maxModels})
+          </TooltipContent>
           <DropdownMenuContent
             className="flex h-[320px] w-[300px] flex-col space-y-0.5 overflow-visible p-0"
             align="start"
@@ -319,6 +462,7 @@ export function ModelSelector({
               ) : filteredModels.length > 0 ? (
                 filteredModels.map((model) => {
                   const isLocked = !model.accessible
+                  const isSelected = selectedModelIds.includes(model.id)
                   const provider = PROVIDERS.find(
                     (provider) => provider.id === model.icon
                   )
@@ -328,17 +472,11 @@ export function ModelSelector({
                       key={model.id}
                       className={cn(
                         "flex w-full items-center justify-between px-3 py-2",
-                        selectedModelId === model.id && "bg-accent"
+                        isSelected && "bg-accent"
                       )}
-                      onSelect={() => {
-                        if (isLocked) {
-                          setSelectedProModel(model.id)
-                          setIsProDialogOpen(true)
-                          return
-                        }
-
-                        setSelectedModelId(model.id)
-                        setIsDropdownOpen(false)
+                      onSelect={(e) => {
+                        e.preventDefault()
+                        handleModelToggle(model.id, isLocked)
                       }}
                       onFocus={() => {
                         if (isDropdownOpen) {
@@ -357,11 +495,14 @@ export function ModelSelector({
                           <span className="text-sm">{model.name}</span>
                         </div>
                       </div>
-                      {isLocked && (
-                        <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
-                          <span>Locked</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {isSelected && <CheckIcon className="size-4" />}
+                        {isLocked && (
+                          <div className="border-input bg-accent text-muted-foreground flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
+                            <span>Locked</span>
+                          </div>
+                        )}
+                      </div>
                     </DropdownMenuItem>
                   )
                 })
