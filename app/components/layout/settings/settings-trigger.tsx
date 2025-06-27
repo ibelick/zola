@@ -15,9 +15,18 @@ import type React from "react"
 import { useState } from "react"
 import { SettingsContent } from "./settings-content"
 
-export function SettingsTrigger() {
+type SettingsTriggerProps = {
+  onOpenChange: (open: boolean) => void
+}
+
+export function SettingsTrigger({ onOpenChange }: SettingsTriggerProps) {
   const [open, setOpen] = useState(false)
   const isMobile = useBreakpoint(768)
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen)
+    onOpenChange(isOpen)
+  }
 
   const trigger = (
     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -28,23 +37,23 @@ export function SettingsTrigger() {
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={setOpen}>
+      <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
         <DrawerContent>
-          <SettingsContent isDrawer onClose={() => setOpen(false)} />
+          <SettingsContent isDrawer />
         </DrawerContent>
       </Drawer>
     )
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="flex h-[80%] min-h-[480px] w-full flex-col gap-0 p-0 sm:max-w-[768px]">
         <DialogHeader className="border-border border-b px-6 py-5">
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
-        <SettingsContent onClose={() => setOpen(false)} />
+        <SettingsContent />
       </DialogContent>
     </Dialog>
   )
