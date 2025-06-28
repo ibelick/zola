@@ -4,6 +4,7 @@ import { MultiModelConversation } from "@/app/components/chat/multi-conversation
 import { toast } from "@/components/ui/toast"
 import { getOrCreateGuestUserId } from "@/lib/api"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
+import { fetchClient } from "@/lib/fetch"
 import { useModel } from "@/lib/model-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
@@ -34,6 +35,7 @@ export function MultiChat() {
   const [messageGroups, setMessageGroups] = useState<GroupedMessage[]>([])
   const [files, setFiles] = useState<File[]>([])
   const [allUsedModelIds, setAllUsedModelIds] = useState<string[]>([])
+  const [multiChatId, setMultiChatId] = useState<string | null>(null)
   const { user } = useUser()
   const { models } = useModel()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -149,16 +151,40 @@ export function MultiChat() {
       // Generate a new message group ID for this user message
       const message_group_id = crypto.randomUUID()
 
+      // Create a single chat for this multi-model session if it doesn't exist
+      let chatId = multiChatId
+      if (!chatId) {
+        const createChatResponse = await fetchClient("/api/create-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: uid,
+            title: "Multi-model conversation",
+            model: selectedModelIds[0], // Use first selected model as default
+            isAuthenticated: !!user?.id,
+          }),
+        })
+
+        if (!createChatResponse.ok) {
+          throw new Error("Failed to create multi-model chat")
+        }
+
+        const { chat: createdChat } = await createChatResponse.json()
+        chatId = createdChat.id
+        setMultiChatId(chatId)
+      }
+
       // Send message only to currently selected models
       const selectedChats = modelChats.filter((chat) =>
         selectedModelIds.includes(chat.model.id)
       )
 
+      // Send messages to all selected models using the same chat ID
       await Promise.all(
         selectedChats.map(async (chat) => {
           const options = {
             body: {
-              chatId: `multi-${chat.model.id}-${Date.now()}`,
+              chatId, // Use the same chat ID for all models
               userId: uid,
               model: chat.model.id,
               isAuthenticated: !!user?.id,
@@ -190,7 +216,7 @@ export function MultiChat() {
     } finally {
       setIsSubmitting(false)
     }
-  }, [prompt, selectedModelIds, user, modelChats, systemPrompt])
+  }, [prompt, selectedModelIds, user, modelChats, systemPrompt, multiChatId])
 
   const handleFileUpload = useCallback((newFiles: File[]) => {
     setFiles((prev) => [...prev, ...newFiles])
