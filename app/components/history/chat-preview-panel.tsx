@@ -241,7 +241,10 @@ export function ChatPreviewPanel({
                   return null
                 }
 
-                const messageAsTextContent = "#TODO"
+                const messageAsTextContent = message.parts
+                  .map((part) => (part.type === "text" ? part.text : null))
+                  .filter(Boolean)
+                  .join("")
                 return (
                   <MessageBubble
                     key={message.id}
