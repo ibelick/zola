@@ -7,7 +7,9 @@ const DEFAULT_STEP = 0
 export async function saveFinalAssistantMessage(
   supabase: SupabaseClient<Database>,
   chatId: string,
-  messages: Message[]
+  messages: Message[],
+  message_group_id?: string,
+  model?: string
 ) {
   const parts: ContentPart[] = []
   const toolMap = new Map<string, ContentPart>()
@@ -77,6 +79,8 @@ export async function saveFinalAssistantMessage(
     role: "assistant",
     content: finalPlainText || "",
     parts: parts as unknown as Json,
+    message_group_id,
+    model,
   })
 
   if (error) {

@@ -22,6 +22,7 @@ type ChatRequest = {
   isAuthenticated: boolean
   systemPrompt: string
   enableSearch: boolean
+  message_group_id?: string
 }
 
 export async function POST(req: Request) {
@@ -34,6 +35,7 @@ export async function POST(req: Request) {
       isAuthenticated,
       systemPrompt,
       enableSearch,
+      message_group_id,
     } = (await req.json()) as ChatRequest
 
     if (!messages || !chatId || !userId) {
@@ -65,6 +67,7 @@ export async function POST(req: Request) {
         attachments: userMessage.experimental_attachments as Attachment[],
         model,
         isAuthenticated,
+        message_group_id,
       })
     }
 
@@ -104,6 +107,8 @@ export async function POST(req: Request) {
             chatId,
             messages:
               response.messages as unknown as import("@/app/types/api.types").Message[],
+            message_group_id,
+            model,
           })
         }
       },

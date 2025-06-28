@@ -146,6 +146,9 @@ export function MultiChat() {
       const uid = await getOrCreateGuestUserId(user)
       if (!uid) return
 
+      // Generate a new message group ID for this user message
+      const message_group_id = crypto.randomUUID()
+
       // Send message only to currently selected models
       const selectedChats = modelChats.filter((chat) =>
         selectedModelIds.includes(chat.model.id)
@@ -161,6 +164,7 @@ export function MultiChat() {
               isAuthenticated: !!user?.id,
               systemPrompt: systemPrompt,
               enableSearch: false,
+              message_group_id, // Pass the group ID to group messages
             },
           }
 
