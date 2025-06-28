@@ -8,6 +8,7 @@ import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import type { ProviderWithoutOllama } from "@/lib/user-keys"
 import { convertToModelMessages, stepCountIs, streamText, ToolSet } from "ai"
 import {
+  incrementMessageCount,
   logUserMessage,
   storeAssistantMessage,
   validateAndTrackUsage,
@@ -55,6 +56,11 @@ export async function POST(req: Request) {
       model,
       isAuthenticated,
     })
+
+    // Increment message count for successful validation
+    if (supabase) {
+      await incrementMessageCount({ supabase, userId })
+    }
 
     const userMessage = messages[messages.length - 1]
 

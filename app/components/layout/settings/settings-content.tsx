@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { DrawerClose } from "@/components/ui/drawer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { cn, isDev } from "@/lib/utils"
@@ -25,14 +26,12 @@ import { UserProfile } from "./general/user-profile"
 import { ModelsSettings } from "./models/models-settings"
 
 type SettingsContentProps = {
-  onClose: () => void
   isDrawer?: boolean
 }
 
 type TabType = "general" | "appearance" | "models" | "connections"
 
 export function SettingsContent({
-  onClose,
   isDrawer = false,
 }: SettingsContentProps) {
   const [activeTab, setActiveTab] = useState<TabType>("general")
@@ -47,9 +46,11 @@ export function SettingsContent({
       {isDrawer && (
         <div className="border-border mb-2 flex items-center justify-between border-b px-4 pb-2">
           <h2 className="text-lg font-medium">Settings</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <XIcon className="size-4" />
-          </Button>
+          <DrawerClose asChild>
+            <Button variant="ghost" size="icon">
+              <XIcon className="size-4" />
+            </Button>
+          </DrawerClose>
         </div>
       )}
 
