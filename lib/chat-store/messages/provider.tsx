@@ -36,6 +36,9 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<MessageAISDK[]>([])
   const { chatId } = useChatSession()
 
+  console.log("chatId", chatId)
+  console.log("messages", messages)
+
   useEffect(() => {
     if (chatId === null) {
       setMessages([])

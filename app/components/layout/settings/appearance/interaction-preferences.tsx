@@ -9,6 +9,7 @@ export function InteractionPreferences() {
     setPromptSuggestions,
     setShowToolInvocations,
     setShowConversationPreviews,
+    setMultiModelEnabled,
   } = useUserPreferences()
 
   return (
@@ -28,7 +29,6 @@ export function InteractionPreferences() {
           />
         </div>
       </div>
-
       {/* Tool Invocations */}
       <div>
         <div className="flex items-center justify-between">
@@ -44,7 +44,6 @@ export function InteractionPreferences() {
           />
         </div>
       </div>
-
       {/* Conversation Previews */}
       <div>
         <div className="flex items-center justify-between">
@@ -61,8 +60,7 @@ export function InteractionPreferences() {
         </div>
       </div>
       {/* Multi-Model Chat */}
-      {/* @todo: when multi-model chat is ready */}
-      {/* <div>
+      <div>
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium">Multi-model chat</h3>
@@ -75,7 +73,7 @@ export function InteractionPreferences() {
             onCheckedChange={setMultiModelEnabled}
           />
         </div>
-      </div> */}
+      </div>
     </div>
   )
 }
