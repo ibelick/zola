@@ -3,6 +3,8 @@
 import { MultiModelConversation } from "@/app/components/chat/multi-conversation"
 import { toast } from "@/components/ui/toast"
 import { getOrCreateGuestUserId } from "@/lib/api"
+import { useMessages } from "@/lib/chat-store/messages/provider"
+import { useChatSession } from "@/lib/chat-store/session/provider"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { fetchClient } from "@/lib/fetch"
 import { useModel } from "@/lib/model-store/provider"
@@ -40,6 +42,12 @@ export function MultiChat() {
   const { models } = useModel()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Get chat session and messages similar to Chat component
+  const { chatId } = useChatSession()
+  const { messages: persistedMessages, cacheAndAddMessage } = useMessages()
+
+  console.log("persistedMessages", persistedMessages)
+
   // Filter models to get real available models and transform them for useMultiChat
   const availableModels = useMemo(() => {
     return models.map((model) => ({
@@ -72,9 +80,101 @@ export function MultiChat() {
   const isAuthenticated = useMemo(() => !!user?.id, [user?.id])
 
   const updateMessageGroups = useCallback(() => {
-    // Group messages by user message content (simple grouping strategy)
-    // Show messages from ALL models that have been used
-    const groups: { [key: string]: GroupedMessage } = {}
+    // Group persisted messages by message_group_id first
+    const persistedGroups: { [key: string]: GroupedMessage } = {}
+
+    // Process persisted messages from database/cache
+    if (persistedMessages.length > 0) {
+      console.log("Processing persisted messages:", persistedMessages)
+
+      // For multi-model messages, we need to group them properly
+      // Since message_group_id might not be available in persisted messages yet,
+      // we'll group by analyzing the sequence of user/assistant messages
+
+      const groups: {
+        [key: string]: {
+          userMessage: MessageType
+          assistantMessages: MessageType[]
+        }
+      } = {}
+
+      for (let i = 0; i < persistedMessages.length; i++) {
+        const message = persistedMessages[i]
+
+        if (message.role === "user") {
+          // Use message content as grouping key for now
+          const groupKey = message.content
+          if (!groups[groupKey]) {
+            groups[groupKey] = {
+              userMessage: message,
+              assistantMessages: [],
+            }
+          }
+        } else if (message.role === "assistant") {
+          // Find the most recent user message to associate this assistant message with
+          let associatedUserMessage = null
+          for (let j = i - 1; j >= 0; j--) {
+            if (persistedMessages[j].role === "user") {
+              associatedUserMessage = persistedMessages[j]
+              break
+            }
+          }
+
+          if (associatedUserMessage) {
+            const groupKey = associatedUserMessage.content
+            if (!groups[groupKey]) {
+              groups[groupKey] = {
+                userMessage: associatedUserMessage,
+                assistantMessages: [],
+              }
+            }
+            groups[groupKey].assistantMessages.push(message)
+            console.log(
+              `Associated assistant message "${message.content.slice(0, 50)}..." with user message "${groupKey}"`
+            )
+          }
+        }
+      }
+
+      console.log("Grouped persisted messages:", groups)
+
+      // Convert to GroupedMessage format
+      Object.entries(groups).forEach(([groupKey, group]) => {
+        if (group.userMessage) {
+          persistedGroups[groupKey] = {
+            userMessage: group.userMessage,
+            responses: group.assistantMessages.map((msg, index) => {
+              // Try to infer model from the message or use index-based fallback
+              const model =
+                (msg as any).model ||
+                selectedModelIds[index] ||
+                `model-${index}`
+              const provider =
+                models.find((m) => m.id === model)?.provider || "unknown"
+
+              console.log(
+                `Creating response for model: ${model}, provider: ${provider}`
+              )
+
+              return {
+                model,
+                message: msg,
+                isLoading: false,
+                provider,
+              }
+            }),
+            onDelete: () => {},
+            onEdit: () => {},
+            onReload: () => {},
+          }
+        }
+      })
+
+      console.log("Final persistedGroups:", persistedGroups)
+    }
+
+    // Then add any currently loading messages from useMultiChat (real-time)
+    const liveGroups = { ...persistedGroups }
 
     modelChats.forEach((chat) => {
       for (let i = 0; i < chat.messages.length; i += 2) {
@@ -84,8 +184,8 @@ export function MultiChat() {
         if (userMsg?.role === "user") {
           const groupKey = userMsg.content
 
-          if (!groups[groupKey]) {
-            groups[groupKey] = {
+          if (!liveGroups[groupKey]) {
+            liveGroups[groupKey] = {
               userMessage: userMsg,
               responses: [],
               onDelete: () => {},
@@ -95,12 +195,19 @@ export function MultiChat() {
           }
 
           if (assistantMsg?.role === "assistant") {
-            groups[groupKey].responses.push({
-              model: chat.model.id,
-              message: assistantMsg,
-              isLoading: false,
-              provider: chat.model.provider,
-            })
+            // Check if this response already exists in persisted messages
+            const existingResponse = liveGroups[groupKey].responses.find(
+              (r) => r.model === chat.model.id
+            )
+
+            if (!existingResponse) {
+              liveGroups[groupKey].responses.push({
+                model: chat.model.id,
+                message: assistantMsg,
+                isLoading: false,
+                provider: chat.model.provider,
+              })
+            }
           } else if (
             chat.isLoading &&
             userMsg.content === prompt &&
@@ -112,7 +219,7 @@ export function MultiChat() {
               role: "assistant",
               content: "",
             }
-            groups[groupKey].responses.push({
+            liveGroups[groupKey].responses.push({
               model: chat.model.id,
               message: placeholderMessage,
               isLoading: true,
@@ -123,8 +230,9 @@ export function MultiChat() {
       }
     })
 
-    setMessageGroups(Object.values(groups))
-  }, [modelChats, prompt, selectedModelIds])
+    console.log("Final liveGroups before setting:", liveGroups)
+    setMessageGroups(Object.values(liveGroups))
+  }, [modelChats, prompt, selectedModelIds, persistedMessages, models])
 
   useEffect(() => {
     updateMessageGroups()
@@ -152,8 +260,8 @@ export function MultiChat() {
       const message_group_id = crypto.randomUUID()
 
       // Create a single chat for this multi-model session if it doesn't exist
-      let chatId = multiChatId
-      if (!chatId) {
+      let chatIdToUse = multiChatId || chatId
+      if (!chatIdToUse) {
         const createChatResponse = await fetchClient("/api/create-chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -170,8 +278,8 @@ export function MultiChat() {
         }
 
         const { chat: createdChat } = await createChatResponse.json()
-        chatId = createdChat.id
-        setMultiChatId(chatId)
+        chatIdToUse = createdChat.id
+        setMultiChatId(chatIdToUse)
       }
 
       // Send message only to currently selected models
@@ -184,7 +292,7 @@ export function MultiChat() {
         selectedChats.map(async (chat) => {
           const options = {
             body: {
-              chatId, // Use the same chat ID for all models
+              chatId: chatIdToUse, // Use the same chat ID for all models
               userId: uid,
               model: chat.model.id,
               isAuthenticated: !!user?.id,
@@ -216,7 +324,15 @@ export function MultiChat() {
     } finally {
       setIsSubmitting(false)
     }
-  }, [prompt, selectedModelIds, user, modelChats, systemPrompt, multiChatId])
+  }, [
+    prompt,
+    selectedModelIds,
+    user,
+    modelChats,
+    systemPrompt,
+    multiChatId,
+    chatId,
+  ])
 
   const handleFileUpload = useCallback((newFiles: File[]) => {
     setFiles((prev) => [...prev, ...newFiles])
@@ -282,6 +398,8 @@ export function MultiChat() {
       anyLoading,
     ]
   )
+
+  console.log("messageGroups", messageGroups)
 
   const showOnboarding = messageGroups.length === 0
 
