@@ -1,4 +1,5 @@
 import { Attachment } from "@ai-sdk/ui-utils"
+import { UIMessageFull } from "../components/chat/use-chat-core"
 
 export type Json =
   | string
@@ -140,31 +141,28 @@ export type Database = {
         Row: {
           experimental_attachments: Attachment[]
           chat_id: string
-          content: string | null
           created_at: string | null
           id: number
-          role: "system" | "user" | "assistant" | "data"
-          parts: Json | null
+          role: "system" | "user" | "assistant"
+          parts: UIMessageFull["parts"] | null
           user_id?: string | null
         }
         Insert: {
           experimental_attachments?: Attachment[]
           chat_id: string
-          content: string | null
           created_at?: string | null
           id?: number
-          role: "system" | "user" | "assistant" | "data"
-          parts?: Json
+          role: "system" | "user" | "assistant"
+          parts?: UIMessageFull["parts"]
           user_id?: string | null
         }
         Update: {
           experimental_attachments?: Attachment[]
           chat_id?: string
-          content?: string | null
           created_at?: string | null
           id?: number
-          role?: "system" | "user" | "assistant" | "data"
-          parts?: Json
+          role?: "system" | "user" | "assistant"
+          parts?: UIMessageFull["parts"]
           user_id?: string | null
         }
         Relationships: [

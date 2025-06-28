@@ -8,14 +8,14 @@ import { Loader } from "@/components/prompt-kit/loader"
 import { ScrollButton } from "@/components/prompt-kit/scroll-button"
 import { getModelInfo } from "@/lib/models"
 import { PROVIDERS } from "@/lib/providers"
-import { Message as MessageType } from "@ai-sdk/react"
 import { Message } from "./message"
+import { UIMessageFull } from "./use-chat-core"
 
 type GroupedMessage = {
-  userMessage: MessageType
+  userMessage: UIMessageFull
   responses: {
     model: string
-    message: MessageType
+    message: UIMessageFull
     isLoading?: boolean
     provider: string
   }[]
@@ -57,19 +57,13 @@ export function MultiModelConversation({
                   <Message
                     id={group.userMessage.id}
                     variant="user"
-                    parts={
-                      group.userMessage.parts || [
-                        { type: "text", text: group.userMessage.content },
-                      ]
-                    }
-                    attachments={group.userMessage.experimental_attachments}
+                    parts={group.userMessage.parts}
+                    // attachments={group.userMessage.experimental_attachments}
                     onDelete={() => {}}
                     onEdit={() => {}}
                     onReload={() => {}}
                     status="ready"
-                  >
-                    {group.userMessage.content}
-                  </Message>
+                  />
                 </div>
 
                 <div className="mx-auto flex w-full max-w-[1800px] items-start space-x-4 overflow-x-auto px-6">
@@ -100,12 +94,8 @@ export function MultiModelConversation({
                           <Message
                             id={res.message.id}
                             variant="assistant"
-                            parts={
-                              res.message.parts || [
-                                { type: "text", text: res.message.content },
-                              ]
-                            }
-                            attachments={res.message.experimental_attachments}
+                            parts={res.message.parts}
+                            // attachments={res.message.experimental_attachments}
                             onDelete={() =>
                               group.onDelete(res.model, res.message.id)
                             }
@@ -117,9 +107,7 @@ export function MultiModelConversation({
                             isLast={false}
                             hasScrollAnchor={false}
                             className="bg-transparent p-0 px-0"
-                          >
-                            {res.message.content}
-                          </Message>
+                          />
                         ) : res.isLoading ? (
                           <div className="space-y-2">
                             <div className="text-muted-foreground text-xs font-medium tracking-wide uppercase">

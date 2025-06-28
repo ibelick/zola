@@ -1,4 +1,5 @@
 import { saveFinalAssistantMessage } from "@/app/api/chat/db"
+import { UIMessageFull } from "@/app/components/chat/use-chat-core"
 import type {
   ChatApiParams,
   LogUserMessageParams,
@@ -9,6 +10,7 @@ import { FREE_MODELS_IDS, NON_AUTH_ALLOWED_MODELS } from "@/lib/config"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
+// import type { SupabaseClient } from "@/lib/supabase/server"
 import { checkUsageByModel, incrementUsage } from "@/lib/usage"
 import { getUserKey, type ProviderWithoutOllama } from "@/lib/user-keys"
 
@@ -53,6 +55,16 @@ export async function validateAndTrackUsage({
   return supabase
 }
 
+function sanitizeUserMessagePart(part: UIMessageFull["parts"][number]) {
+  if (part.type === "text") {
+    return {
+      ...part,
+      text: sanitizeUserInput(part.text),
+    }
+  }
+  return part
+}
+
 export async function incrementMessageCount({
   supabase,
   userId,
@@ -74,17 +86,17 @@ export async function logUserMessage({
   supabase,
   userId,
   chatId,
-  content,
-  attachments,
+  model,
+  isAuthenticated,
+  parts,
 }: LogUserMessageParams): Promise<void> {
   if (!supabase) return
 
   const { error } = await supabase.from("messages").insert({
     chat_id: chatId,
     role: "user",
-    content: sanitizeUserInput(content),
-    experimental_attachments: attachments,
     user_id: userId,
+    parts: parts.map(sanitizeUserMessagePart),
   })
 
   if (error) {
@@ -95,11 +107,11 @@ export async function logUserMessage({
 export async function storeAssistantMessage({
   supabase,
   chatId,
-  messages,
+  parts,
 }: StoreAssistantMessageParams): Promise<void> {
   if (!supabase) return
   try {
-    await saveFinalAssistantMessage(supabase, chatId, messages)
+    await saveFinalAssistantMessage(supabase, chatId, parts)
   } catch (err) {
     console.error("Failed to save assistant messages:", err)
   }

@@ -1,29 +1,14 @@
-import type { Message as MessageAISDK } from "@ai-sdk/react"
+import { SourceUIPart } from "@ai-sdk/ui-utils"
+import type { UIMessageFull } from "./use-chat-core"
 
-export function getSources(parts: MessageAISDK["parts"]) {
+export function getSources(
+  parts: UIMessageFull["parts"]
+): SourceUIPart["source"][] {
   const sources = parts
-    ?.filter(
-      (part) => part.type === "source" || part.type === "tool-invocation"
-    )
+    ?.filter((part) => part.type === "source-url")
     .map((part) => {
-      if (part.type === "source") {
-        return part.source
-      }
-
-      if (
-        part.type === "tool-invocation" &&
-        part.toolInvocation.state === "result"
-      ) {
-        const result = part.toolInvocation.result
-
-        if (
-          part.toolInvocation.toolName === "summarizeSources" &&
-          result?.result?.[0]?.citations
-        ) {
-          return result.result.flatMap((item: { citations?: unknown[] }) => item.citations || [])
-        }
-
-        return Array.isArray(result) ? result.flat() : result
+      if (part.type === "source-url") {
+        return part.url
       }
 
       return null
@@ -33,9 +18,13 @@ export function getSources(parts: MessageAISDK["parts"]) {
 
   const validSources =
     sources?.filter(
-      (source) =>
-        source && typeof source === "object" && source.url && source.url !== ""
+      (source) => source && typeof source === "string" && source !== ""
     ) || []
 
-  return validSources
+  return validSources.map((source) => ({
+    id: source!,
+    sourceType: "url",
+    url: source!,
+    title: source!,
+  }))
 }
