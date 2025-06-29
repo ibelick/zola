@@ -12,7 +12,7 @@ import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import { Message as MessageType } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 // import { mockMessageGroups } from "./mock-data"
 import { MultiChatInput } from "./multi-chat-input"
 import { useMultiChat } from "./use-multi-chat"
@@ -34,12 +34,8 @@ type GroupedMessage = {
 export function MultiChat() {
   const [prompt, setPrompt] = useState("")
   const [selectedModelIds, setSelectedModelIds] = useState<string[]>([])
-  const [messageGroups, setMessageGroups] = useState<GroupedMessage[]>([])
   const [files, setFiles] = useState<File[]>([])
-  const [allUsedModelIds, setAllUsedModelIds] = useState<string[]>([])
   const [multiChatId, setMultiChatId] = useState<string | null>(null)
-  const [hasInitializedSelectedModels, setHasInitializedSelectedModels] =
-    useState(false)
   const { user } = useUser()
   const { models } = useModel()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -47,8 +43,6 @@ export function MultiChat() {
   // Get chat session and messages similar to Chat component
   const { chatId } = useChatSession()
   const { messages: persistedMessages, cacheAndAddMessage } = useMessages()
-
-  console.log("persistedMessages", persistedMessages)
 
   // Filter models to get real available models and transform them for useMultiChat
   const availableModels = useMemo(() => {
@@ -59,34 +53,48 @@ export function MultiChat() {
     }))
   }, [models])
 
-  // Track all models that have ever been selected (combine current + historical)
-  const allModelsToMaintain = useMemo(() => {
-    const combined = [...new Set([...selectedModelIds, ...allUsedModelIds])]
-    return availableModels.filter((model) => combined.includes(model.id))
-  }, [availableModels, selectedModelIds, allUsedModelIds])
+  // Derive models from persisted messages for initialization and maintenance
+  const modelsFromPersisted = useMemo(() => {
+    return persistedMessages
+      .filter((msg) => (msg as any).model)
+      .map((msg) => (msg as any).model)
+  }, [persistedMessages])
 
-  // Initialize selectedModelIds from the last message group on first load
-  useEffect(() => {
-    if (!hasInitializedSelectedModels && messageGroups.length > 0) {
-      const lastMessageGroup = messageGroups[messageGroups.length - 1]
-      if (lastMessageGroup && lastMessageGroup.responses.length > 0) {
-        const modelsInLastGroup = lastMessageGroup.responses.map(
-          (response) => response.model
-        )
-        console.log(
-          "Initializing selectedModelIds from last message group:",
-          modelsInLastGroup
-        )
-        setSelectedModelIds(modelsInLastGroup)
-        setHasInitializedSelectedModels(true)
+  // Derive models from last user message group for initialization
+  const modelsFromLastGroup = useMemo(() => {
+    // Find the last user message and its associated assistant messages
+    const userMessages = persistedMessages.filter((msg) => msg.role === "user")
+    if (userMessages.length === 0) return []
+
+    const lastUserMessage = userMessages[userMessages.length - 1]
+    const lastUserIndex = persistedMessages.indexOf(lastUserMessage)
+
+    // Find all assistant messages after this user message (until next user message or end)
+    const modelsInLastGroup: string[] = []
+    for (let i = lastUserIndex + 1; i < persistedMessages.length; i++) {
+      const msg = persistedMessages[i]
+      if (msg.role === "user") break // Stop at next user message
+      if (msg.role === "assistant" && (msg as any).model) {
+        modelsInLastGroup.push((msg as any).model)
       }
     }
-  }, [messageGroups, hasInitializedSelectedModels])
+    return modelsInLastGroup
+  }, [persistedMessages])
 
-  // Update allUsedModelIds whenever selectedModelIds changes
-  useEffect(() => {
-    setAllUsedModelIds((prev) => [...new Set([...prev, ...selectedModelIds])])
-  }, [selectedModelIds])
+  // Track all models that need chat instances (current selection + historical)
+  const allModelsToMaintain = useMemo(() => {
+    const combined = [...new Set([...selectedModelIds, ...modelsFromPersisted])]
+    return availableModels.filter((model) => combined.includes(model.id))
+  }, [availableModels, selectedModelIds, modelsFromPersisted])
+
+  // Initialize selectedModelIds from conversation history if empty
+  if (selectedModelIds.length === 0 && modelsFromLastGroup.length > 0) {
+    console.log(
+      "Initializing selectedModelIds from last message group:",
+      modelsFromLastGroup
+    )
+    setSelectedModelIds(modelsFromLastGroup)
+  }
 
   // Use the custom hook to manage chat instances for all models (selected + previously used)
   const modelChats = useMultiChat(allModelsToMaintain)
@@ -99,7 +107,8 @@ export function MultiChat() {
 
   const isAuthenticated = useMemo(() => !!user?.id, [user?.id])
 
-  const updateMessageGroups = useCallback(() => {
+  // Compute message groups from persisted messages and live chat data
+  const messageGroups = useMemo(() => {
     // Group persisted messages by message_group_id first
     const persistedGroups: { [key: string]: GroupedMessage } = {}
 
@@ -251,12 +260,8 @@ export function MultiChat() {
     })
 
     console.log("Final liveGroups before setting:", liveGroups)
-    setMessageGroups(Object.values(liveGroups))
+    return Object.values(liveGroups)
   }, [modelChats, prompt, selectedModelIds, persistedMessages, models])
-
-  useEffect(() => {
-    updateMessageGroups()
-  }, [updateMessageGroups])
 
   const handleSubmit = useCallback(async () => {
     if (!prompt.trim()) return
