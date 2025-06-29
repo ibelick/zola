@@ -17,7 +17,9 @@ export async function getMessagesFromDb(
 
   const { data, error } = await supabase
     .from("messages")
-    .select("id, content, role, experimental_attachments, created_at, parts")
+    .select(
+      "id, content, role, experimental_attachments, created_at, parts, message_group_id, model"
+    )
     .eq("chat_id", chatId)
     .order("created_at", { ascending: true })
 
@@ -32,6 +34,8 @@ export async function getMessagesFromDb(
     content: message.content ?? "",
     createdAt: new Date(message.created_at || ""),
     parts: (message?.parts as MessageAISDK["parts"]) || undefined,
+    message_group_id: message.message_group_id,
+    model: message.model,
   }))
 }
 
@@ -45,6 +49,8 @@ async function insertMessageToDb(chatId: string, message: MessageAISDK) {
     content: message.content,
     experimental_attachments: message.experimental_attachments,
     created_at: message.createdAt?.toISOString() || new Date().toISOString(),
+    message_group_id: (message as any).message_group_id || null,
+    model: (message as any).model || null,
   })
 }
 
@@ -58,6 +64,8 @@ async function insertMessagesToDb(chatId: string, messages: MessageAISDK[]) {
     content: message.content,
     experimental_attachments: message.experimental_attachments,
     created_at: message.createdAt?.toISOString() || new Date().toISOString(),
+    message_group_id: (message as any).message_group_id || null,
+    model: (message as any).model || null,
   }))
 
   await supabase.from("messages").insert(payload)
