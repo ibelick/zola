@@ -38,6 +38,8 @@ export function MultiChat() {
   const [files, setFiles] = useState<File[]>([])
   const [allUsedModelIds, setAllUsedModelIds] = useState<string[]>([])
   const [multiChatId, setMultiChatId] = useState<string | null>(null)
+  const [hasInitializedSelectedModels, setHasInitializedSelectedModels] =
+    useState(false)
   const { user } = useUser()
   const { models } = useModel()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -62,6 +64,24 @@ export function MultiChat() {
     const combined = [...new Set([...selectedModelIds, ...allUsedModelIds])]
     return availableModels.filter((model) => combined.includes(model.id))
   }, [availableModels, selectedModelIds, allUsedModelIds])
+
+  // Initialize selectedModelIds from the last message group on first load
+  useEffect(() => {
+    if (!hasInitializedSelectedModels && messageGroups.length > 0) {
+      const lastMessageGroup = messageGroups[messageGroups.length - 1]
+      if (lastMessageGroup && lastMessageGroup.responses.length > 0) {
+        const modelsInLastGroup = lastMessageGroup.responses.map(
+          (response) => response.model
+        )
+        console.log(
+          "Initializing selectedModelIds from last message group:",
+          modelsInLastGroup
+        )
+        setSelectedModelIds(modelsInLastGroup)
+        setHasInitializedSelectedModels(true)
+      }
+    }
+  }, [messageGroups, hasInitializedSelectedModels])
 
   // Update allUsedModelIds whenever selectedModelIds changes
   useEffect(() => {
