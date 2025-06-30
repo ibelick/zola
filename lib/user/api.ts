@@ -1,12 +1,17 @@
 import type { Tables } from "@/app/types/database.types"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { createClient } from "@/lib/supabase/server"
+import {
+  convertFromApiFormat,
+  defaultPreferences,
+  type UserPreferences,
+} from "@/lib/user-preference-store/utils"
 
 export type UserProfile = {
   profile_image: string
   display_name: string
-} & Tables<"users"> &
-  Tables<"user_preferences">
+  preferences?: UserPreferences
+} & Tables<"users">
 
 export async function getSupabaseUser() {
   const supabase = await createClient()
@@ -28,6 +33,7 @@ export async function getUserProfile(): Promise<UserProfile | null> {
       display_name: "Guest",
       profile_image: "",
       anonymous: true,
+      preferences: defaultPreferences,
     } as UserProfile
   }
 
@@ -43,9 +49,15 @@ export async function getUserProfile(): Promise<UserProfile | null> {
   // Don't load anonymous users in the user store
   if (userProfileData?.anonymous) return null
 
+  // Format user preferences if they exist
+  const formattedPreferences = userProfileData?.user_preferences
+    ? convertFromApiFormat(userProfileData.user_preferences)
+    : undefined
+
   return {
     ...userProfileData,
     profile_image: user.user_metadata?.avatar_url ?? "",
     display_name: user.user_metadata?.name ?? "",
+    preferences: formattedPreferences,
   } as UserProfile
 }

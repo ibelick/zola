@@ -57,7 +57,10 @@ export default async function RootLayout({
             <ModelProvider>
               <ChatsProvider userId={userProfile?.id}>
                 <ChatSessionProvider>
-                  <UserPreferencesProvider userId={userProfile?.id}>
+                  <UserPreferencesProvider
+                    userId={userProfile?.id}
+                    initialPreferences={userProfile?.preferences}
+                  >
                     <TooltipProvider
                       delayDuration={200}
                       skipDelayDuration={500}

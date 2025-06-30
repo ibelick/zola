@@ -2,25 +2,19 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createContext, ReactNode, useContext } from "react"
+import {
+  convertFromApiFormat,
+  convertToApiFormat,
+  defaultPreferences,
+  type LayoutType,
+  type UserPreferences,
+} from "./utils"
 
-export type LayoutType = "sidebar" | "fullscreen"
-
-type UserPreferences = {
-  layout: LayoutType
-  promptSuggestions: boolean
-  showToolInvocations: boolean
-  showConversationPreviews: boolean
-  multiModelEnabled: boolean
-  hiddenModels: string[]
-}
-
-const defaultPreferences: UserPreferences = {
-  layout: "fullscreen",
-  promptSuggestions: true,
-  showToolInvocations: true,
-  showConversationPreviews: true,
-  multiModelEnabled: false,
-  hiddenModels: [],
+export {
+  type LayoutType,
+  type UserPreferences,
+  convertFromApiFormat,
+  convertToApiFormat,
 }
 
 const PREFERENCES_STORAGE_KEY = "user-preferences"
@@ -41,34 +35,6 @@ interface UserPreferencesContextType {
 const UserPreferencesContext = createContext<
   UserPreferencesContextType | undefined
 >(undefined)
-
-// Helper functions to convert between API format (snake_case) and frontend format (camelCase)
-function convertFromApiFormat(apiData: any): UserPreferences {
-  return {
-    layout: apiData.layout || "fullscreen",
-    promptSuggestions: apiData.prompt_suggestions ?? true,
-    showToolInvocations: apiData.show_tool_invocations ?? true,
-    showConversationPreviews: apiData.show_conversation_previews ?? true,
-    multiModelEnabled: apiData.multi_model_enabled ?? false,
-    hiddenModels: apiData.hidden_models || [],
-  }
-}
-
-function convertToApiFormat(preferences: Partial<UserPreferences>) {
-  const apiData: any = {}
-  if (preferences.layout !== undefined) apiData.layout = preferences.layout
-  if (preferences.promptSuggestions !== undefined)
-    apiData.prompt_suggestions = preferences.promptSuggestions
-  if (preferences.showToolInvocations !== undefined)
-    apiData.show_tool_invocations = preferences.showToolInvocations
-  if (preferences.showConversationPreviews !== undefined)
-    apiData.show_conversation_previews = preferences.showConversationPreviews
-  if (preferences.multiModelEnabled !== undefined)
-    apiData.multi_model_enabled = preferences.multiModelEnabled
-  if (preferences.hiddenModels !== undefined)
-    apiData.hidden_models = preferences.hiddenModels
-  return apiData
-}
 
 async function fetchUserPreferences(): Promise<UserPreferences> {
   const response = await fetch("/api/user-preferences")
@@ -127,15 +93,30 @@ function saveToLocalStorage(preferences: UserPreferences) {
 export function UserPreferencesProvider({
   children,
   userId,
+  initialPreferences,
 }: {
   children: ReactNode
   userId?: string
+  initialPreferences?: UserPreferences
 }) {
   const isAuthenticated = !!userId
   const queryClient = useQueryClient()
 
+  // Merge initial preferences with defaults
+  const getInitialData = (): UserPreferences => {
+    if (initialPreferences && isAuthenticated) {
+      return initialPreferences
+    }
+
+    if (!isAuthenticated) {
+      return getLocalStoragePreferences()
+    }
+
+    return defaultPreferences
+  }
+
   // Query for user preferences
-  const { data: preferences = defaultPreferences, isLoading } =
+  const { data: preferences = getInitialData(), isLoading } =
     useQuery<UserPreferences>({
       queryKey: ["user-preferences", userId],
       queryFn: async () => {
@@ -159,6 +140,9 @@ export function UserPreferencesProvider({
         // Only retry for authenticated users and network errors
         return isAuthenticated && failureCount < 2
       },
+      // Use initial data if available to avoid unnecessary API calls
+      initialData:
+        initialPreferences && isAuthenticated ? getInitialData() : undefined,
     })
 
   // Mutation for updating preferences
