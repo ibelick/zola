@@ -301,6 +301,50 @@ export type Database = {
           },
         ]
       }
+      user_preferences: {
+        Row: {
+          user_id: string
+          layout: string | null
+          prompt_suggestions: boolean | null
+          show_tool_invocations: boolean | null
+          show_conversation_previews: boolean | null
+          multi_model_enabled: boolean | null
+          hidden_models: string[] | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          user_id: string
+          layout?: string | null
+          prompt_suggestions?: boolean | null
+          show_tool_invocations?: boolean | null
+          show_conversation_previews?: boolean | null
+          multi_model_enabled?: boolean | null
+          hidden_models?: string[] | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          user_id?: string
+          layout?: string | null
+          prompt_suggestions?: boolean | null
+          show_tool_invocations?: boolean | null
+          show_conversation_previews?: boolean | null
+          multi_model_enabled?: boolean | null
+          hidden_models?: string[] | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

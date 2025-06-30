@@ -250,6 +250,33 @@ CREATE TABLE user_keys (
   PRIMARY KEY (user_id, provider)
 );
 
+-- User preferences table
+CREATE TABLE user_preferences (
+  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  layout TEXT DEFAULT 'fullscreen',
+  prompt_suggestions BOOLEAN DEFAULT true,
+  show_tool_invocations BOOLEAN DEFAULT true,
+  show_conversation_previews BOOLEAN DEFAULT true,
+  multi_model_enabled BOOLEAN DEFAULT false,
+  hidden_models TEXT[] DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Optional: keep updated_at in sync for user_preferences
+CREATE OR REPLACE FUNCTION update_user_preferences_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_user_preferences_timestamp
+BEFORE UPDATE ON user_preferences
+FOR EACH ROW
+EXECUTE PROCEDURE update_user_preferences_updated_at();
+
 -- RLS (Row Level Security) Reminder
 -- Ensure RLS is enabled on these tables in your Supabase dashboard
 -- and appropriate policies are created.

@@ -11,7 +11,7 @@ type UserPreferences = {
   showToolInvocations: boolean
   showConversationPreviews: boolean
   multiModelEnabled: boolean
-  hiddenModels: string[] // Array of model IDs that should be hidden
+  hiddenModels: string[]
 }
 
 const defaultPreferences: UserPreferences = {
