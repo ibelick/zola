@@ -31,6 +31,15 @@ type MultiModelConversationProps = {
   messageGroups: GroupedMessage[]
 }
 
+// Drop zone indicator component
+function DropZone() {
+  return (
+    <div className="pointer-events-none h-full w-full border-2 border-dashed">
+      {/* Invisible content for testing */}
+    </div>
+  )
+}
+
 function ResponseCard({
   response,
   group,
@@ -49,21 +58,18 @@ function ResponseCard({
       value={response}
       dragListener={false}
       dragControls={dragControls}
-      className="bg-background relative max-w-[420px] min-w-[360px] flex-shrink-0"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="relative"
+      whileDrag={{ zIndex: 50 }}
     >
-      <div className="rounded border bg-transparent p-3">
+      <div className="bg-background pointer-events-auto relative z-10 rounded border p-3">
         {/* Drag handle - appears on hover */}
-        {isHovered && (
-          <button
-            className="bg-background absolute top-2 right-2 z-10 cursor-grab border p-1 active:cursor-grabbing"
-            type="button"
-            onPointerDown={(e) => dragControls.start(e)}
-          >
-            <DotsSixVerticalIcon className="text-muted-foreground size-4" />
-          </button>
-        )}
+        <button
+          className="bg-background absolute top-2 right-2 z-30 cursor-grab border p-1 active:cursor-grabbing"
+          type="button"
+          onPointerDown={(e) => dragControls.start(e)}
+        >
+          <DotsSixVerticalIcon className="text-muted-foreground size-4" />
+        </button>
 
         <div className="text-muted-foreground mb-2 flex items-center gap-1">
           <span>
@@ -175,29 +181,44 @@ export function MultiModelConversation({
                     </Message>
                   </div>
 
-                  <Reorder.Group
-                    axis="x"
-                    values={groupResponses[groupIndex] || group.responses}
-                    onReorder={(newOrder) =>
-                      handleReorder(groupIndex, newOrder)
-                    }
-                    className="mx-auto flex w-full max-w-[1800px] items-start space-x-4 overflow-x-auto px-6"
-                    layoutScroll
-                    style={{ overflowX: "auto" }}
-                  >
-                    {(groupResponses[groupIndex] || group.responses).map(
-                      (response) => (
-                        <ResponseCard
-                          key={response.model}
-                          response={response}
-                          group={group}
-                        />
-                      )
-                    )}
-                  </Reorder.Group>
+                  <div className="mx-auto w-full max-w-[1800px]">
+                    <div className="overflow-x-auto pl-6">
+                      <div
+                        className="grid items-start gap-4"
+                        style={{
+                          gridTemplateColumns: `repeat(${(groupResponses[groupIndex] || group.responses).length}, minmax(360px, 420px))`,
+                          gridAutoFlow: "column",
+                        }}
+                      >
+                        <Reorder.Group
+                          axis="x"
+                          values={groupResponses[groupIndex] || group.responses}
+                          onReorder={(newOrder) =>
+                            handleReorder(groupIndex, newOrder)
+                          }
+                          className="contents"
+                          layoutScroll
+                        >
+                          {(groupResponses[groupIndex] || group.responses).map(
+                            (response) => (
+                              <div key={response.model} className="relative">
+                                <ResponseCard
+                                  response={response}
+                                  group={group}
+                                />
+                                <div className="pointer-events-none absolute inset-0 z-0 p-0.5">
+                                  <DropZone />
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </Reorder.Group>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
-          <div className="absolute bottom-0 flex w-full max-w-3xl flex-1 items-end justify-end gap-4 px-6 pb-2">
+          <div className="absolute right-0 bottom-32 flex w-full max-w-3xl flex-1 items-end justify-end gap-4 pb-2 pl-6">
             <ScrollButton className="absolute top-[-50px] right-[30px]" />
           </div>
         </ChatContainerContent>
