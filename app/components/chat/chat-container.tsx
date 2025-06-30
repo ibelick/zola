@@ -23,17 +23,16 @@ function getInitialMultiModelEnabled(): boolean {
 }
 
 export function ChatContainer() {
-  // @todo: remove when feature ready
-  //   const [initialMultiModelEnabled] = useState(getInitialMultiModelEnabled)
-  //   const { preferences } = useUserPreferences()
+  const [initialMultiModelEnabled] = useState(getInitialMultiModelEnabled)
+  const { preferences } = useUserPreferences()
 
-  //   // Use preference store value, fallback to initial read for FOUC prevention
-  //   const multiModelEnabled =
-  //     preferences.multiModelEnabled ?? initialMultiModelEnabled
+  // Use preference store value, fallback to initial read for FOUC prevention
+  const multiModelEnabled =
+    preferences.multiModelEnabled ?? initialMultiModelEnabled
 
-  //   if (multiModelEnabled) {
-  //     return <MultiChat />
-  //   }
+  if (multiModelEnabled) {
+    return <MultiChat />
+  }
 
   return <Chat />
 }

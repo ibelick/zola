@@ -13,11 +13,9 @@ import { cn } from "@/lib/utils"
 import { Message as MessageType } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
-// import { mockMessageGroups } from "./mock-data"
 import { MultiChatInput } from "./multi-chat-input"
 import { useMultiChat } from "./use-multi-chat"
 
-// Import the exact types from MultiModelConversation to ensure compatibility
 type GroupedMessage = {
   userMessage: MessageType
   responses: {
@@ -164,8 +162,6 @@ export function MultiChat() {
           }
         }
       }
-
-      console.log("Grouped persisted messages:", groups)
 
       // Convert to GroupedMessage format
       Object.entries(groups).forEach(([groupKey, group]) => {
@@ -423,8 +419,6 @@ export function MultiChat() {
       anyLoading,
     ]
   )
-
-  console.log("messageGroups", messageGroups)
 
   const showOnboarding = messageGroups.length === 0
 
