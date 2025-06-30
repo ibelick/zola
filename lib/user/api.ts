@@ -1,6 +1,12 @@
-import type { UserProfile } from "@/app/types/user"
+import type { Tables } from "@/app/types/database.types"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { createClient } from "@/lib/supabase/server"
+
+export type UserProfile = {
+  profile_image: string
+  display_name: string
+} & Tables<"users"> &
+  Tables<"user_preferences">
 
 export async function getSupabaseUser() {
   const supabase = await createClient()
@@ -30,7 +36,7 @@ export async function getUserProfile(): Promise<UserProfile | null> {
 
   const { data: userProfileData } = await supabase
     .from("users")
-    .select("*")
+    .select("*, user_preferences(*)")
     .eq("id", user.id)
     .single()
 
