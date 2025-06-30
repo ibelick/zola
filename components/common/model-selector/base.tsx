@@ -24,8 +24,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { FREE_MODELS_IDS } from "@/lib/config"
 import { useModel } from "@/lib/model-store/provider"
+import { filterAndSortModels } from "@/lib/model-store/utils"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
@@ -127,32 +127,12 @@ export function ModelSelector({
   // Get the hovered model data
   const hoveredModelData = models.find((model) => model.id === hoveredModel)
 
-  const filteredModels = models
-    .filter((model) => !isModelHidden(model.id))
-    .filter((model) => {
-      // If user has favorite models, only show favorites
-      if (favoriteModels && favoriteModels.length > 0) {
-        return favoriteModels.includes(model.id)
-      }
-      // If no favorites, show all models
-      return true
-    })
-    .filter((model) =>
-      model.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
-      // If user has favorite models, maintain their order
-      if (favoriteModels && favoriteModels.length > 0) {
-        const aIndex = favoriteModels.indexOf(a.id)
-        const bIndex = favoriteModels.indexOf(b.id)
-        return aIndex - bIndex
-      }
-
-      // Fallback to original sorting (free models first)
-      const aIsFree = FREE_MODELS_IDS.includes(a.id)
-      const bIsFree = FREE_MODELS_IDS.includes(b.id)
-      return aIsFree === bIsFree ? 0 : aIsFree ? -1 : 1
-    })
+  const filteredModels = filterAndSortModels(
+    models,
+    favoriteModels || [],
+    searchQuery,
+    isModelHidden
+  )
 
   const trigger = (
     <Button
@@ -162,7 +142,7 @@ export function ModelSelector({
     >
       <div className="flex items-center gap-2">
         {currentProvider?.icon && <currentProvider.icon className="size-5" />}
-        <span>{currentModel?.name}</span>
+        <span>{currentModel?.name || "Select model"}</span>
       </div>
       <CaretDownIcon className="size-4 opacity-50" />
     </Button>
@@ -172,10 +152,6 @@ export function ModelSelector({
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation()
     setSearchQuery(e.target.value)
-  }
-
-  if (isLoadingModels) {
-    return null
   }
 
   // If user is not authenticated, show the auth popover

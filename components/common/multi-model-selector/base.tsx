@@ -25,8 +25,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { FREE_MODELS_IDS } from "@/lib/config"
 import { useModel } from "@/lib/model-store/provider"
+import { filterAndSortModels } from "@/lib/model-store/utils"
 import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
@@ -57,7 +57,7 @@ export function MultiModelSelector({
   isUserAuthenticated = true,
   maxModels = 5,
 }: MultiModelSelectorProps) {
-  const { models, isLoading: isLoadingModels } = useModel()
+  const { models, isLoading: isLoadingModels, favoriteModels } = useModel()
   const { isModelHidden } = useUserPreferences()
 
   const selectedModels = models.filter((model) =>
@@ -72,7 +72,6 @@ export function MultiModelSelector({
   const [selectedProModel, setSelectedProModel] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
 
-  // Ref for input to maintain focus
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   useKeyShortcut(
@@ -96,20 +95,13 @@ export function MultiModelSelector({
     const isSelected = selectedModelIds.includes(modelId)
 
     if (isSelected) {
-      // Remove model from selection
       setSelectedModelIds(selectedModelIds.filter((id) => id !== modelId))
     } else {
-      // Add model to selection if under limit
       if (selectedModelIds.length < maxModels) {
         setSelectedModelIds([...selectedModelIds, modelId])
       }
     }
   }
-
-  // const removeModel = (modelId: string, e: React.MouseEvent) => {
-  //   e.stopPropagation()
-  //   setSelectedModelIds(selectedModelIds.filter((id) => id !== modelId))
-  // }
 
   const renderModelItem = (model: ModelConfig) => {
     const isLocked = !model.accessible
@@ -158,16 +150,12 @@ export function MultiModelSelector({
   // Get the hovered model data
   const hoveredModelData = models.find((model) => model.id === hoveredModel)
 
-  const filteredModels = models
-    .filter((model) => !isModelHidden(model.id))
-    .filter((model) =>
-      model.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
-      const aIsFree = FREE_MODELS_IDS.includes(a.id)
-      const bIsFree = FREE_MODELS_IDS.includes(b.id)
-      return aIsFree === bIsFree ? 0 : aIsFree ? -1 : 1
-    })
+  const filteredModels = filterAndSortModels(
+    models,
+    favoriteModels || [],
+    searchQuery,
+    isModelHidden
+  )
 
   if (isLoadingModels) {
     return null
