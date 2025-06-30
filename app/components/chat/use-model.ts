@@ -1,7 +1,7 @@
-import { UserProfile } from "@/app/types/user"
 import { toast } from "@/components/ui/toast"
 import { Chats } from "@/lib/chat-store/types"
 import { MODEL_DEFAULT } from "@/lib/config"
+import type { UserProfile } from "@/lib/user/types"
 import { useCallback, useState } from "react"
 
 interface UseModelProps {
