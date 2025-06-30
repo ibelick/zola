@@ -162,7 +162,7 @@ export function ModelSelector({
     >
       <div className="flex items-center gap-2">
         {currentProvider?.icon && <currentProvider.icon className="size-5" />}
-        <span>{currentModel?.name || "Select model"}</span>
+        <span>{currentModel?.name}</span>
       </div>
       <CaretDownIcon className="size-4 opacity-50" />
     </Button>
@@ -172,6 +172,10 @@ export function ModelSelector({
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation()
     setSearchQuery(e.target.value)
+  }
+
+  if (isLoadingModels) {
+    return null
   }
 
   // If user is not authenticated, show the auth popover
