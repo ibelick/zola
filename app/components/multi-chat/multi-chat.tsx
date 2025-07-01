@@ -255,6 +255,7 @@ export function MultiChat() {
         }
         chatIdToUse = createdChat.id
         setMultiChatId(chatIdToUse)
+        window.history.pushState(null, "", `/c/${chatIdToUse}`)
       }
 
       const selectedChats = modelChats.filter((chat) =>
