@@ -8,6 +8,7 @@ import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { ZolaIcon } from "@/components/icons/zola"
 import { Button } from "@/components/ui/button"
 import { APP_NAME } from "@/lib/config"
+import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { Info } from "@phosphor-icons/react"
 import Link from "next/link"
@@ -17,6 +18,8 @@ import { HeaderSidebarTrigger } from "./header-sidebar-trigger"
 export function Header({ hasSidebar }: { hasSidebar: boolean }) {
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
+  const { preferences } = useUserPreferences()
+  const isMultiModelEnabled = preferences.multiModelEnabled
 
   const isLoggedIn = !!user
 
@@ -60,7 +63,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
             </div>
           ) : (
             <div className="pointer-events-auto flex flex-1 items-center justify-end gap-2">
-              <DialogPublish />
+              {!isMultiModelEnabled && <DialogPublish />}
               <ButtonNewChat />
               {!hasSidebar && <HistoryTrigger hasSidebar={hasSidebar} />}
               <UserMenu />

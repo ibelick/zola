@@ -8,9 +8,8 @@ import { Loader } from "@/components/prompt-kit/loader"
 import { ScrollButton } from "@/components/prompt-kit/scroll-button"
 import { getModelInfo } from "@/lib/models"
 import { PROVIDERS } from "@/lib/providers"
+import { cn } from "@/lib/utils"
 import { Message as MessageType } from "@ai-sdk/react"
-// import { DotsSixVerticalIcon } from "@phosphor-icons/react"
-// import { motion, Reorder, useDragControls } from "motion/react"
 import { useEffect, useState } from "react"
 import { Message } from "./message"
 
@@ -31,19 +30,18 @@ type MultiModelConversationProps = {
   messageGroups: GroupedMessage[]
 }
 
-function ResponseCard({
-  response,
-  group,
-}: {
+type ResponseCardProps = {
   response: GroupedMessage["responses"][0]
   group: GroupedMessage
-}) {
+}
+
+function ResponseCard({ response, group }: ResponseCardProps) {
   const model = getModelInfo(response.model)
   const providerIcon = PROVIDERS.find((p) => p.id === model?.baseProviderId)
 
   return (
     <div className="relative">
-      <div className="bg-background pointer-events-auto relative z-10 rounded border p-3">
+      <div className="bg-background pointer-events-auto relative rounded border p-3">
         {/* <button
           className="bg-background absolute top-2 right-2 z-30 cursor-grab p-1 active:cursor-grabbing"
           type="button"
@@ -131,50 +129,61 @@ export function MultiModelConversation({
         >
           {messageGroups.length === 0
             ? null
-            : messageGroups.map((group, groupIndex) => (
-                <div key={groupIndex} className="mb-10 w-full space-y-3">
-                  <div className="mx-auto w-full max-w-3xl">
-                    <Message
-                      id={group.userMessage.id}
-                      variant="user"
-                      parts={
-                        group.userMessage.parts || [
-                          { type: "text", text: group.userMessage.content },
-                        ]
-                      }
-                      attachments={group.userMessage.experimental_attachments}
-                      onDelete={() => {}}
-                      onEdit={() => {}}
-                      onReload={() => {}}
-                      status="ready"
-                    >
-                      {group.userMessage.content}
-                    </Message>
-                  </div>
-
-                  <div className="mx-auto w-full max-w-[1800px]">
-                    <div className="overflow-x-auto pl-6">
-                      <div
-                        className="grid gap-4"
-                        style={{
-                          gridTemplateColumns: `repeat(${(groupResponses[groupIndex] || group.responses).length}, minmax(360px, 420px))`,
-                          gridAutoFlow: "column",
-                        }}
+            : messageGroups.map((group, groupIndex) => {
+                return (
+                  <div key={groupIndex} className="mb-10 w-full space-y-3">
+                    <div className="mx-auto w-full max-w-3xl">
+                      <Message
+                        id={group.userMessage.id}
+                        variant="user"
+                        parts={
+                          group.userMessage.parts || [
+                            { type: "text", text: group.userMessage.content },
+                          ]
+                        }
+                        attachments={group.userMessage.experimental_attachments}
+                        onDelete={() => {}}
+                        onEdit={() => {}}
+                        onReload={() => {}}
+                        status="ready"
                       >
-                        {(groupResponses[groupIndex] || group.responses).map(
-                          (response) => (
-                            <ResponseCard
-                              key={response.model}
-                              response={response}
-                              group={group}
-                            />
-                          )
-                        )}
+                        {group.userMessage.content}
+                      </Message>
+                    </div>
+
+                    <div
+                      className={cn(
+                        "mx-auto w-full",
+                        groupResponses[groupIndex]?.length > 2
+                          ? "max-w-[1800px]"
+                          : "max-w-3xl"
+                      )}
+                    >
+                      <div className={cn("overflow-x-auto pl-6")}>
+                        <div className="flex gap-4">
+                          {(groupResponses[groupIndex] || group.responses).map(
+                            (response) => {
+                              return (
+                                <div
+                                  key={response.model}
+                                  className="max-w-[420px] min-w-[320px] flex-shrink-0"
+                                >
+                                  <ResponseCard
+                                    response={response}
+                                    group={group}
+                                  />
+                                </div>
+                              )
+                            }
+                          )}
+                          {/* Spacer to create scroll padding - only when more than 2 items */}
+                          <div className="w-px flex-shrink-0" />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
           <div className="absolute right-0 bottom-32 flex w-full max-w-3xl flex-1 items-end justify-end gap-4 pb-2 pl-6">
             <ScrollButton className="absolute top-[-50px] right-[30px]" />
           </div>
