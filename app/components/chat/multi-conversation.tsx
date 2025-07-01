@@ -9,8 +9,8 @@ import { ScrollButton } from "@/components/prompt-kit/scroll-button"
 import { getModelInfo } from "@/lib/models"
 import { PROVIDERS } from "@/lib/providers"
 import { Message as MessageType } from "@ai-sdk/react"
-import { DotsSixVerticalIcon } from "@phosphor-icons/react"
-import { Reorder, useDragControls } from "motion/react"
+// import { DotsSixVerticalIcon } from "@phosphor-icons/react"
+// import { motion, Reorder, useDragControls } from "motion/react"
 import { useEffect, useState } from "react"
 import { Message } from "./message"
 
@@ -31,15 +31,6 @@ type MultiModelConversationProps = {
   messageGroups: GroupedMessage[]
 }
 
-// Drop zone indicator component
-function DropZone() {
-  return (
-    <div className="pointer-events-none h-full w-full border-2 border-dashed">
-      {/* Invisible content for testing */}
-    </div>
-  )
-}
-
 function ResponseCard({
   response,
   group,
@@ -47,29 +38,19 @@ function ResponseCard({
   response: GroupedMessage["responses"][0]
   group: GroupedMessage
 }) {
-  const [isHovered, setIsHovered] = useState(false)
-  const dragControls = useDragControls()
-
   const model = getModelInfo(response.model)
   const providerIcon = PROVIDERS.find((p) => p.id === model?.baseProviderId)
 
   return (
-    <Reorder.Item
-      value={response}
-      dragListener={false}
-      dragControls={dragControls}
-      className="relative"
-      whileDrag={{ zIndex: 50 }}
-    >
+    <div className="relative">
       <div className="bg-background pointer-events-auto relative z-10 rounded border p-3">
-        {/* Drag handle - appears on hover */}
-        <button
-          className="bg-background absolute top-2 right-2 z-30 cursor-grab border p-1 active:cursor-grabbing"
+        {/* <button
+          className="bg-background absolute top-2 right-2 z-30 cursor-grab p-1 active:cursor-grabbing"
           type="button"
           onPointerDown={(e) => dragControls.start(e)}
         >
           <DotsSixVerticalIcon className="text-muted-foreground size-4" />
-        </button>
+        </button> */}
 
         <div className="text-muted-foreground mb-2 flex items-center gap-1">
           <span>
@@ -111,7 +92,7 @@ function ResponseCard({
           </div>
         )}
       </div>
-    </Reorder.Item>
+    </div>
   )
 }
 
@@ -137,16 +118,6 @@ export function MultiModelConversation({
     })
     setGroupResponses(updated)
   }, [messageGroups])
-
-  const handleReorder = (
-    groupIndex: number,
-    newOrder: GroupedMessage["responses"]
-  ) => {
-    setGroupResponses((prev) => ({
-      ...prev,
-      [groupIndex]: newOrder,
-    }))
-  }
 
   return (
     <div className="relative flex h-full w-full flex-col items-center overflow-y-auto">
@@ -184,35 +155,21 @@ export function MultiModelConversation({
                   <div className="mx-auto w-full max-w-[1800px]">
                     <div className="overflow-x-auto pl-6">
                       <div
-                        className="grid items-start gap-4"
+                        className="grid gap-4"
                         style={{
                           gridTemplateColumns: `repeat(${(groupResponses[groupIndex] || group.responses).length}, minmax(360px, 420px))`,
                           gridAutoFlow: "column",
                         }}
                       >
-                        <Reorder.Group
-                          axis="x"
-                          values={groupResponses[groupIndex] || group.responses}
-                          onReorder={(newOrder) =>
-                            handleReorder(groupIndex, newOrder)
-                          }
-                          className="contents"
-                          layoutScroll
-                        >
-                          {(groupResponses[groupIndex] || group.responses).map(
-                            (response) => (
-                              <div key={response.model} className="relative">
-                                <ResponseCard
-                                  response={response}
-                                  group={group}
-                                />
-                                <div className="pointer-events-none absolute inset-0 z-0 p-0.5">
-                                  <DropZone />
-                                </div>
-                              </div>
-                            )
-                          )}
-                        </Reorder.Group>
+                        {(groupResponses[groupIndex] || group.responses).map(
+                          (response) => (
+                            <ResponseCard
+                              key={response.model}
+                              response={response}
+                              group={group}
+                            />
+                          )
+                        )}
                       </div>
                     </div>
                   </div>
