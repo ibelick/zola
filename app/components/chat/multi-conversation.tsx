@@ -154,7 +154,7 @@ export function MultiModelConversation({
                     <div
                       className={cn(
                         "mx-auto w-full",
-                        groupResponses[groupIndex]?.length > 2
+                        groupResponses[groupIndex]?.length > 1
                           ? "max-w-[1800px]"
                           : "max-w-3xl"
                       )}
