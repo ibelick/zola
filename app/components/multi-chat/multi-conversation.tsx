@@ -11,7 +11,7 @@ import { PROVIDERS } from "@/lib/providers"
 import { cn } from "@/lib/utils"
 import { Message as MessageType } from "@ai-sdk/react"
 import { useEffect, useState } from "react"
-import { Message } from "./message"
+import { Message } from "../chat/message"
 
 type GroupedMessage = {
   userMessage: MessageType
