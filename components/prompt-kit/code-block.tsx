@@ -51,7 +51,7 @@ function CodeBlockCode({
       setHighlightedHtml(html)
     }
     highlight()
-  }, [code, language, theme, appTheme])
+  }, [code, language, appTheme])
 
   const classNames = cn(
     "w-full overflow-x-auto text-[13px] [&>pre]:px-4 [&>pre]:py-4 [&>pre]:!bg-background",
