@@ -15,6 +15,7 @@ import {
 
 interface MessagesContextType {
   messages: MessageAISDK[]
+  isLoading: boolean
   setMessages: React.Dispatch<React.SetStateAction<MessageAISDK[]>>
   refresh: () => Promise<void>
   saveAllMessages: (messages: MessageAISDK[]) => Promise<void>
@@ -34,11 +35,13 @@ export function useMessages() {
 
 export function MessagesProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<MessageAISDK[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const { chatId } = useChatSession()
 
   useEffect(() => {
     if (chatId === null) {
       setMessages([])
+      setIsLoading(false)
     }
   }, [chatId])
 
@@ -46,6 +49,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     if (!chatId) return
 
     const load = async () => {
+      setIsLoading(true)
       const cached = await getCachedMessages(chatId)
       setMessages(cached)
 
@@ -55,6 +59,8 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
         cacheMessages(chatId, fresh)
       } catch (error) {
         console.error("Failed to fetch messages:", error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -113,6 +119,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     <MessagesContext.Provider
       value={{
         messages,
+        isLoading,
         setMessages,
         refresh,
         saveAllMessages,

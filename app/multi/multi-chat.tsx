@@ -39,7 +39,8 @@ export function MultiChat() {
   const { user } = useUser()
   const { models } = useModel()
   const { chatId } = useChatSession()
-  const { messages: persistedMessages } = useMessages()
+  const { messages: persistedMessages, isLoading: messagesLoading } =
+    useMessages()
   const { createNewChat } = useChats()
 
   const availableModels = useMemo(() => {
@@ -357,7 +358,7 @@ export function MultiChat() {
     ]
   )
 
-  const showOnboarding = messageGroups.length === 0
+  const showOnboarding = messageGroups.length === 0 && !messagesLoading
 
   return (
     <div
