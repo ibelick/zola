@@ -17,7 +17,7 @@ import type {
   XaiModel,
 } from "./types"
 
-type OpenAIChatSettings = Parameters<typeof neosantara>[1]
+type OpenAIChatSettings = Parameters<typeof openai>[1]
 type MistralProviderSettings = Parameters<typeof mistral>[1]
 type GoogleGenerativeAIProviderSettings = Parameters<typeof google>[1]
 type PerplexityProviderSettings = Parameters<typeof perplexity>[0]
@@ -85,7 +85,7 @@ export function openproviders<T extends SupportedModel>(
         settings as OpenAIChatSettings
       )
     }
-    return neosantara(modelId as OpenAIModel, settings as OpenAIChatSettings)
+    return openai(modelId as OpenAIModel, settings as OpenAIChatSettings)
   }
 
   if (provider === "mistral") {
