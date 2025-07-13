@@ -17,7 +17,7 @@ import type {
   XaiModel,
 } from "./types"
 
-type OpenAIChatSettings = Parameters<typeof openai>[1]
+type OpenAIChatSettings = Parameters<typeof neosantara>[1]
 type MistralProviderSettings = Parameters<typeof mistral>[1]
 type GoogleGenerativeAIProviderSettings = Parameters<typeof google>[1]
 type PerplexityProviderSettings = Parameters<typeof perplexity>[0]
