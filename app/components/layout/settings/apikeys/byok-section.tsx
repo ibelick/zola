@@ -48,12 +48,12 @@ const PROVIDERS: Provider[] = [
     defaultKey: "sk-or-v1-............",
   },
   {
-    id: "neosantara",
-    name: "Neosantara",
+    id: "openai",
+    name: "OpenAI",
     icon: OpenAIIcon,
-    placeholder: "nai...",
+    placeholder: "sk-...",
     getKeyUrl: "https://platform.openai.com/api-keys",
-    defaultKey: "nai............",
+    defaultKey: "sk-............",
   },
   {
     id: "mistral",

@@ -1,6 +1,5 @@
 export const env = {
-  NEOSANTARA_API_KEY: process.env.NEOSANTARA_API_KEY!,
-//  OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
   MISTRAL_API_KEY: process.env.MISTRAL_API_KEY!,
   GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
   PERPLEXITY_API_KEY: process.env.PERPLEXITY_API_KEY!,
@@ -13,8 +12,7 @@ export function createEnvWithUserKeys(
   userKeys: Record<string, string> = {}
 ): typeof env {
   return {
-    NEOSANTARA_API_KEY: userKeys.neosantara || env.NEOSANTARA_API_KEY,
-//    OPENAI_API_KEY: userKeys.openai || env.OPENAI_API_KEY,
+    OPENAI_API_KEY: userKeys.openai || env.OPENAI_API_KEY,
     MISTRAL_API_KEY: userKeys.mistral || env.MISTRAL_API_KEY,
     PERPLEXITY_API_KEY: userKeys.perplexity || env.PERPLEXITY_API_KEY,
     GOOGLE_GENERATIVE_AI_API_KEY:

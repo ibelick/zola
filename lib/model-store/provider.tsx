@@ -12,7 +12,7 @@ import {
 
 type UserKeyStatus = {
   openrouter: boolean
-  neosantara: boolean
+  openai: boolean
   mistral: boolean
   google: boolean
   perplexity: boolean
@@ -39,7 +39,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   const [models, setModels] = useState<ModelConfig[]>([])
   const [userKeyStatus, setUserKeyStatus] = useState<UserKeyStatus>({
     openrouter: false,
-    neosantara: false,
+    openai: false,
     mistral: false,
     google: false,
     perplexity: false,
@@ -73,7 +73,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
       // Set default values on error
       setUserKeyStatus({
         openrouter: false,
-        neosantara: false,
+        openai: false,
         mistral: false,
         google: false,
         perplexity: false,

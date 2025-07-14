@@ -73,10 +73,9 @@ export function openproviders<T extends SupportedModel>(
 ): LanguageModelV1 {
   const provider = getProviderForModel(modelId)
 
-  if (provider === "neosantara") {
+  if (provider === "openai") {
     if (apiKey) {
       const openaiProvider = createOpenAI({
-        baseURL: "https://api.neosantara.xyz/v1",
         apiKey,
         compatibility: "strict",
       })

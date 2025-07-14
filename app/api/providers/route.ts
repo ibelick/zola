@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     )
 
     const envKeyMap: Record<ProviderWithoutOllama, string | undefined> = {
-      neosantara: process.env.NEOSANTARA_API_KEY,
+      openai: process.env.OPENAI_API_KEY,
       mistral: process.env.MISTRAL_API_KEY,
       perplexity: process.env.PERPLEXITY_API_KEY,
       google: process.env.GOOGLE_GENERATIVE_AI_API_KEY,

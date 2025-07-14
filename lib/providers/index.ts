@@ -26,8 +26,8 @@ export const PROVIDERS: Provider[] = [
     icon: OpenRouter,
   },
   {
-    id: "neosantara",
-    name: "Neosantara",
+    id: "openai",
+    name: "OpenAI",
     icon: OpenAI,
   },
   {
