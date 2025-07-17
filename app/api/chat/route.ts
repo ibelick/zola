@@ -188,6 +188,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Get the chat by id
     const chat = await supabase
       .from("chats")
       .select("*")
@@ -202,6 +203,7 @@ export async function GET(req: Request) {
       return new Response("Forbidden", { status: 403 })
     }
 
+    // Get the stream ids by chat id
     const streamIds = await supabase
       .from("stream_ids")
       .select("*")
