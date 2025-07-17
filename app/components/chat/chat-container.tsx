@@ -2,9 +2,16 @@
 
 import { MultiChat } from "@/app/components/multi-chat/multi-chat"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
+import type { Message as MessageAISDK } from "ai"
 import { Chat } from "./chat"
 
-export function ChatContainer() {
+export function ChatContainer({
+  initialMessages,
+  autoResume,
+}: {
+  initialMessages?: MessageAISDK[]
+  autoResume?: boolean
+}) {
   const { preferences } = useUserPreferences()
   const multiModelEnabled = preferences.multiModelEnabled
 
@@ -12,5 +19,5 @@ export function ChatContainer() {
     return <MultiChat />
   }
 
-  return <Chat />
+  return <Chat autoResume={autoResume} initialMessages={initialMessages} />
 }

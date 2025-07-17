@@ -136,6 +136,35 @@ export type Database = {
           },
         ]
       }
+      stream_ids: {
+        Row: {
+          id: string
+          stream_id: string
+          chat_id: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          stream_id: string
+          chat_id: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          stream_id?: string
+          chat_id?: string
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_ids_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           experimental_attachments: Attachment[]

@@ -1,18 +1,33 @@
+import { getMessagesFromDb } from "@/lib/chat-store/messages/api"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { getAllModels } from "@/lib/models"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
+import { createClient } from "@/lib/supabase/server"
 import type { ProviderWithoutOllama } from "@/lib/user-keys"
+import { generateUUID } from "@/lib/utils"
 import { Attachment } from "@ai-sdk/ui-utils"
-import { Message as MessageAISDK, streamText, ToolSet } from "ai"
+import {
+  createDataStream,
+  Message as MessageAISDK,
+  streamText,
+  ToolSet,
+} from "ai"
+import { after, NextResponse } from "next/server"
+import { createResumableStreamContext } from "resumable-stream"
 import {
   incrementMessageCount,
   logUserMessage,
   storeAssistantMessage,
   validateAndTrackUsage,
 } from "./api"
+import { createStreamId } from "./db"
 import { createErrorResponse, extractErrorMessage } from "./utils"
 
 export const maxDuration = 60
+
+const streamContext = createResumableStreamContext({
+  waitUntil: after,
+})
 
 type ChatRequest = {
   messages: MessageAISDK[]
@@ -89,39 +104,51 @@ export async function POST(req: Request) {
         undefined
     }
 
-    const result = streamText({
-      model: modelConfig.apiSdk(apiKey, { enableSearch }),
-      system: effectiveSystemPrompt,
-      messages: messages,
-      tools: {} as ToolSet,
-      maxSteps: 10,
+    const streamId = generateUUID()
+    await createStreamId(supabase!, { streamId, chatId })
+
+    const stream = createDataStream({
+      execute: (dataStream) => {
+        const result = streamText({
+          model: modelConfig.apiSdk!(apiKey, { enableSearch }),
+          system: effectiveSystemPrompt,
+          messages: messages,
+          tools: {} as ToolSet,
+          maxSteps: 10,
+          onError: (err: unknown) => {
+            console.error("Streaming error occurred:", err)
+            // Don't set streamError anymore - let the AI SDK handle it through the stream
+          },
+
+          onFinish: async ({ response }) => {
+            if (supabase) {
+              await storeAssistantMessage({
+                supabase,
+                chatId,
+                messages:
+                  response.messages as unknown as import("@/app/types/api.types").Message[],
+                message_group_id,
+                model,
+              })
+            }
+          },
+        })
+        result.consumeStream()
+
+        result.mergeIntoDataStream(dataStream, {
+          sendReasoning: true,
+          sendSources: true,
+        })
+      },
       onError: (err: unknown) => {
-        console.error("Streaming error occurred:", err)
-        // Don't set streamError anymore - let the AI SDK handle it through the stream
-      },
-
-      onFinish: async ({ response }) => {
-        if (supabase) {
-          await storeAssistantMessage({
-            supabase,
-            chatId,
-            messages:
-              response.messages as unknown as import("@/app/types/api.types").Message[],
-            message_group_id,
-            model,
-          })
-        }
+        console.error("Error forwarded to client:", err)
+        return extractErrorMessage(err)
       },
     })
 
-    return result.toDataStreamResponse({
-      sendReasoning: true,
-      sendSources: true,
-      getErrorMessage: (error: unknown) => {
-        console.error("Error forwarded to client:", error)
-        return extractErrorMessage(error)
-      },
-    })
+    return new Response(
+      await streamContext.resumableStream(streamId, () => stream)
+    )
   } catch (err: unknown) {
     console.error("Error in /api/chat:", err)
     const error = err as {
@@ -131,5 +158,105 @@ export async function POST(req: Request) {
     }
 
     return createErrorResponse(error)
+  }
+}
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const chatId = searchParams.get("chatId")
+
+    if (!chatId) {
+      return new Response("id is required", { status: 400 })
+    }
+    const supabase = await createClient()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Database connection failed" },
+        { status: 500 }
+      )
+    }
+
+    // Get the current user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const chat = await supabase
+      .from("chats")
+      .select("*")
+      .eq("id", chatId)
+      .single()
+
+    if (!chat.data) {
+      return new Response("Not found", { status: 404 })
+    }
+
+    if (chat.data.user_id !== user.id) {
+      return new Response("Forbidden", { status: 403 })
+    }
+
+    const streamIds = await supabase
+      .from("stream_ids")
+      .select("*")
+      .eq("chat_id", chatId)
+
+    if (!streamIds.data) {
+      return new Response("No streams found", { status: 404 })
+    }
+
+    const recentStreamId = streamIds.data.at(-1)?.stream_id
+
+    if (!recentStreamId) {
+      return new Response("No recent stream found", { status: 404 })
+    }
+
+    const emptyDataStream = createDataStream({
+      execute: () => {},
+    })
+
+    const stream = await streamContext.resumableStream(
+      recentStreamId,
+      () => emptyDataStream
+    )
+
+    if (stream) {
+      return new Response(stream, { status: 200 })
+    }
+
+    /*
+     * For when the generation is "active" during SSR but the
+     * resumable stream has concluded after reaching this point.
+     */
+
+    const messages = await getMessagesFromDb(chatId)
+    const mostRecentMessage = messages.at(-1)
+
+    if (!mostRecentMessage || mostRecentMessage.role !== "assistant") {
+      return new Response(emptyDataStream, { status: 200 })
+    }
+
+    const streamWithMessage = createDataStream({
+      execute: (buffer) => {
+        buffer.writeData({
+          type: "append-message",
+          message: JSON.stringify(mostRecentMessage),
+        })
+      },
+    })
+
+    return new Response(streamWithMessage, { status: 200 })
+  } catch (error) {
+    console.error("Error in chat GET API:", error)
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
   }
 }
