@@ -211,7 +211,7 @@ CREATE TABLE messages (
   parts JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT messages_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
-  CONSTRAINT messages_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  CONSTRAINT messages_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   message_group_id TEXT,
   model TEXT
 );
