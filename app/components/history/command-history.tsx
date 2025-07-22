@@ -411,8 +411,15 @@ export function CommandHistory({
     async (id: string) => {
       setDeletingId(null)
       await onConfirmDelete(id)
+
+      // Clear preview and selection if the deleted chat was being previewed
+      if (hoveredChatId === id || selectedChatId === id) {
+        setHoveredChatId(null)
+        setSelectedChatId(null)
+        clearPreview()
+      }
     },
-    [onConfirmDelete]
+    [onConfirmDelete, hoveredChatId, selectedChatId, clearPreview]
   )
 
   const handleCancelDelete = useCallback(() => {
