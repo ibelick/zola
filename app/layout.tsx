@@ -37,16 +37,13 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const isDev = process.env.NODE_ENV === "development"
+  const isOfficialDeployment = process.env.ZOLA_OFFICIAL === "true"
   const userProfile = await getUserProfile()
 
   return (
     <html lang="en" suppressHydrationWarning>
-      {!isDev ? (
-        <Script
-          async
-          src="https://analytics.umami.is/script.js"
-          data-website-id="42e5b68c-5478-41a6-bc68-088d029cee52"
-        />
+      {!isDev && isOfficialDeployment ? (
+        <Script defer src="https://assets.onedollarstats.com/stonks.js" />
       ) : null}
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
