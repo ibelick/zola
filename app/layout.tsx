@@ -42,8 +42,12 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      {!isDev && isOfficialDeployment ? (
-        <Script defer src="https://assets.onedollarstats.com/stonks.js" />
+      {isOfficialDeployment ? (
+        <Script
+          defer
+          src="https://assets.onedollarstats.com/stonks.js"
+          {...(isDev ? { "data-debug": "zola.chat" } : {})}
+        />
       ) : null}
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
