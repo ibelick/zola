@@ -90,3 +90,24 @@ export async function saveFinalAssistantMessage(
     console.log("Assistant message saved successfully (merged).")
   }
 }
+
+export async function createStreamId(
+  supabase: SupabaseClient<Database>,
+  {
+    streamId,
+    chatId,
+  }: {
+    streamId: string
+    chatId: string
+  }
+) {
+  const { error } = await supabase.from("stream_ids").insert({
+    stream_id: streamId,
+    chat_id: chatId,
+  })
+
+  if (error) {
+    console.error("Error creating stream ID:", error)
+    throw new Error(`Failed to create stream ID: ${error.message}`)
+  }
+}

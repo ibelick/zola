@@ -1,3 +1,4 @@
+import { useAutoResume } from "@/app/hooks/use-auto-resume"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
 import { getOrCreateGuestUserId } from "@/lib/api"
@@ -31,6 +32,7 @@ type UseChatCoreProps = {
   selectedModel: string
   clearDraft: () => void
   bumpChat: (chatId: string) => void
+  autoResume?: boolean
 }
 
 export function useChatCore({
@@ -49,6 +51,7 @@ export function useChatCore({
   selectedModel,
   clearDraft,
   bumpChat,
+  autoResume,
 }: UseChatCoreProps) {
   // State management
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -96,12 +99,23 @@ export function useChatCore({
     setMessages,
     setInput,
     append,
+    experimental_resume,
+    data,
   } = useChat({
+    id: chatId!,
     api: API_ROUTE_CHAT,
     initialMessages,
     initialInput: draftValue,
     onFinish: cacheAndAddMessage,
     onError: handleError,
+  })
+
+  useAutoResume({
+    autoResume,
+    initialMessages,
+    experimental_resume,
+    data,
+    setMessages,
   })
 
   // Handle search params on mount
