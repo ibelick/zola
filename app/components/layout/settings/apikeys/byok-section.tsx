@@ -24,7 +24,7 @@ import { toast } from "@/components/ui/toast"
 import { fetchClient } from "@/lib/fetch"
 import { useModel } from "@/lib/model-store/provider"
 import { cn } from "@/lib/utils"
-import { PlusIcon } from "@phosphor-icons/react"
+import { KeyIcon, PlusIcon } from "@phosphor-icons/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2, Trash2 } from "lucide-react"
 import { useState } from "react"
@@ -232,19 +232,24 @@ export function ByokSection() {
         Your keys are stored securely with end-to-end encryption.
       </p>
 
-      <div className="mt-4 grid grid-cols-4 gap-3">
+      <div className="mt-4 grid grid-cols-2 gap-3 min-[400px]:grid-cols-3 min-[500px]:grid-cols-4">
         {PROVIDERS.map((provider) => (
           <button
             key={provider.id}
             type="button"
             onClick={() => setSelectedProvider(provider.id)}
             className={cn(
-              "flex aspect-square min-w-28 flex-col items-center justify-center gap-2 rounded-lg border p-4",
+              "relative flex aspect-square min-w-28 flex-col items-center justify-center gap-2 rounded-lg border p-4",
               selectedProvider === provider.id
                 ? "border-primary ring-primary/30 ring-2"
                 : "border-border"
             )}
           >
+            {userKeyStatus[provider.id] && (
+              <span className="absolute top-1 right-1 rounded-sm bg-green-200 p-1">
+                <KeyIcon className="size-3.5 text-green-800" />
+              </span>
+            )}
             <provider.icon className="size-4" />
             <span>{provider.name}</span>
           </button>
