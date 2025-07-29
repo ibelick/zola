@@ -246,8 +246,8 @@ export function ByokSection() {
             )}
           >
             {userKeyStatus[provider.id] && (
-              <span className="absolute top-1 right-1 rounded-sm bg-green-200 p-1">
-                <KeyIcon className="size-3.5 text-green-800" />
+              <span className="bg-secondary absolute top-1 right-1 rounded-sm border-[1px] p-1">
+                <KeyIcon className="text-secondary-foreground size-3.5" />
               </span>
             )}
             <provider.icon className="size-4" />
