@@ -11,6 +11,7 @@ import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
+import type { Message as MessageAISDK } from "ai"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect } from "next/navigation"
@@ -29,7 +30,13 @@ const DialogAuth = dynamic(
   { ssr: false }
 )
 
-export function Chat() {
+export function Chat({
+  initialMessages: InitialMessagesFromDB,
+  autoResume,
+}: {
+  autoResume?: boolean
+  initialMessages?: MessageAISDK[]
+}) {
   const { chatId } = useChatSession()
   const {
     createNewChat,
@@ -105,7 +112,7 @@ export function Chat() {
     handleReload,
     handleInputChange,
   } = useChatCore({
-    initialMessages,
+    initialMessages: InitialMessagesFromDB || [],
     draftValue,
     cacheAndAddMessage,
     chatId,
@@ -120,6 +127,7 @@ export function Chat() {
     selectedModel,
     clearDraft,
     bumpChat,
+    autoResume,
   })
 
   // Memoize the conversation props to prevent unnecessary rerenders
