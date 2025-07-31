@@ -10,17 +10,17 @@ import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { useModel } from "@/lib/model-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
-import { Message as MessageType } from "@ai-sdk/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
+import { UIMessageFull } from "../chat/use-chat-core"
 import { MultiChatInput } from "./multi-chat-input"
 import { useMultiChat } from "./use-multi-chat"
 
 type GroupedMessage = {
-  userMessage: MessageType
+  userMessage: UIMessageFull
   responses: {
     model: string
-    message: MessageType
+    message: UIMessageFull
     isLoading?: boolean
     provider: string
   }[]
@@ -98,8 +98,8 @@ export function MultiChat() {
 
     const groups: {
       [key: string]: {
-        userMessage: MessageType
-        assistantMessages: MessageType[]
+        userMessage: UIMessageFull
+        assistantMessages: UIMessageFull[]
       }
     } = {}
 
@@ -107,7 +107,7 @@ export function MultiChat() {
       const message = persistedMessages[i]
 
       if (message.role === "user") {
-        const groupKey = message.content
+        const groupKey = message.id
         if (!groups[groupKey]) {
           groups[groupKey] = {
             userMessage: message,
@@ -124,7 +124,7 @@ export function MultiChat() {
         }
 
         if (associatedUserMessage) {
-          const groupKey = associatedUserMessage.content
+          const groupKey = associatedUserMessage.id
           if (!groups[groupKey]) {
             groups[groupKey] = {
               userMessage: associatedUserMessage,
@@ -203,10 +203,10 @@ export function MultiChat() {
             userMsg.content === prompt &&
             selectedModelIds.includes(chat.model.id)
           ) {
-            const placeholderMessage: MessageType = {
+            const placeholderMessage: UIMessageFull = {
               id: `loading-${chat.model.id}`,
               role: "assistant",
-              content: "",
+              parts: [{ type: "text", text: "" }],
             }
             liveGroups[groupKey].responses.push({
               model: chat.model.id,

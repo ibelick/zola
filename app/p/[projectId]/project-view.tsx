@@ -2,6 +2,10 @@
 
 import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
+import {
+  messageMetadataSchema,
+  UIMessageFull,
+} from "@/app/components/chat/use-chat-core"
 import { useChatOperations } from "@/app/components/chat/use-chat-operations"
 import { useFileUpload } from "@/app/components/chat/use-file-upload"
 import { useModel } from "@/app/components/chat/use-model"
@@ -14,9 +18,10 @@ import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
-import { useChat } from "@ai-sdk/react"
+import { Chat as ReactChat, useChat } from "@ai-sdk/react"
 import { ChatCircleIcon } from "@phosphor-icons/react"
 import { useQuery } from "@tanstack/react-query"
+import { DefaultChatTransport } from "ai"
 import { AnimatePresence, motion } from "motion/react"
 import { usePathname } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
@@ -65,6 +70,8 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   // Get chats from the chat store and filter for this project
   const { chats: allChats } = useChats()
 
+  const [input, setInput] = useState("")
+
   // Filter chats for this project
   const chats = allChats.filter((chat) => chat.project_id === projectId)
 
@@ -85,22 +92,23 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     })
   }, [])
 
-  const {
-    messages,
-    input,
-    handleSubmit,
-    status,
-    reload,
-    stop,
-    setMessages,
-    setInput,
-  } = useChat({
-    id: `project-${projectId}-${currentChatId}`,
-    api: API_ROUTE_CHAT,
-    initialMessages: [],
-    onFinish: cacheAndAddMessage,
-    onError: handleError,
-  })
+  const { messages, sendMessage, status, stop, setMessages, regenerate } =
+    useChat<UIMessageFull>({
+      chat: new ReactChat({
+        messageMetadataSchema: messageMetadataSchema,
+        id: `project-${projectId}-${currentChatId}`,
+        transport: new DefaultChatTransport({
+          api: API_ROUTE_CHAT,
+        }),
+      }),
+      // api: API_ROUTE_CHAT,
+      // initialMessages: [],
+      onFinish: async (data) => {
+        console.log("onFinish", { data })
+        await cacheAndAddMessage(data.message)
+      },
+      onError: handleError,
+    })
 
   const { selectedModel, handleModelChange } = useModel({
     currentChat: null,
@@ -196,16 +204,18 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     }
 
     const optimisticId = `optimistic-${Date.now().toString()}`
-    const optimisticAttachments =
-      files.length > 0 ? createOptimisticAttachments(files) : []
+    // const optimisticAttachments =
+    //   files.length > 0 ? createOptimisticAttachments(files) : []
 
-    const optimisticMessage = {
+    const optimisticMessage: UIMessageFull = {
       id: optimisticId,
-      content: input,
+      parts: [{ type: "text", text: input }],
       role: "user" as const,
-      createdAt: new Date(),
-      experimental_attachments:
-        optimisticAttachments.length > 0 ? optimisticAttachments : undefined,
+      metadata: {
+        createdAt: new Date().toISOString(),
+      },
+      // experimental_attachments:
+      //   optimisticAttachments.length > 0 ? optimisticAttachments : undefined,
     }
 
     setMessages((prev) => [...prev, optimisticMessage])
@@ -218,7 +228,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       const currentChatId = await ensureChatExists(user.id)
       if (!currentChatId) {
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
 
@@ -228,7 +238,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           status: "error",
         })
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
 
@@ -237,9 +247,9 @@ export function ProjectView({ projectId }: ProjectViewProps) {
         attachments = await handleFileUploads(user.id, currentChatId)
         if (attachments === null) {
           setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-          cleanupOptimisticAttachments(
-            optimisticMessage.experimental_attachments
-          )
+          // cleanupOptimisticAttachments(
+          //   optimisticMessage.experimental_attachments
+          // )
           return
         }
       }
@@ -256,9 +266,9 @@ export function ProjectView({ projectId }: ProjectViewProps) {
         experimental_attachments: attachments || undefined,
       }
 
-      handleSubmit(undefined, options)
+      sendMessage({ text: input }, options)
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
 
       // Bump existing chats to top (non-blocking, after submit)
@@ -267,7 +277,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       }
     } catch {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      // cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       toast({ title: "Failed to send message", status: "error" })
     } finally {
       setIsSubmitting(false)
@@ -284,10 +294,11 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     ensureChatExists,
     handleFileUploads,
     selectedModel,
-    handleSubmit,
+    // handleSubmit,
     cacheAndAddMessage,
     messages.length,
     bumpChat,
+    sendMessage,
     enableSearch,
   ])
 
@@ -306,8 +317,8 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       },
     }
 
-    reload(options)
-  }, [user, selectedModel, reload])
+    regenerate(options)
+  }, [user, selectedModel, regenerate])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
