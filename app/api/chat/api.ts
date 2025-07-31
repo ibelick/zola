@@ -89,8 +89,6 @@ export async function logUserMessage({
   model,
   isAuthenticated,
   parts,
-  model,
-  isAuthenticated,
   message_group_id,
 }: LogUserMessageParams): Promise<void> {
   if (!supabase) return
@@ -121,8 +119,8 @@ export async function storeAssistantMessage({
       supabase,
       chatId,
       parts,
-      message_group_id,
-      model
+      model,
+      message_group_id
     )
   } catch (err) {
     console.error("Failed to save assistant messages:", err)

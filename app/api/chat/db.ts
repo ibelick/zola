@@ -8,7 +8,9 @@ const DEFAULT_STEP = 0
 export async function saveFinalAssistantMessage(
   supabase: SupabaseClient<Database>,
   chatId: string,
-  rawParts: UIMessageFull["parts"]
+  rawParts: UIMessageFull["parts"],
+  message_group_id?: string,
+  model?: string
 ) {
   const parts = rawParts
 

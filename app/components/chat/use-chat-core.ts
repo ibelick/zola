@@ -14,6 +14,8 @@ import { z } from "zod"
 
 export const messageMetadataSchema = z.object({
   createdAt: z.string(),
+  message_group_id: z.string().optional(),
+  model: z.string().optional(),
 })
 
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>

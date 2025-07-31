@@ -34,8 +34,11 @@ export async function getMessagesFromDb(
       //   createdAt: new Date(message.created_at || ""),
       // },
       parts: (message?.parts as UIMessageFull["parts"]) || undefined,
-      message_group_id: message.message_group_id,
-      model: message.model,
+      metadata: {
+        createdAt: new Date(message.created_at || "").toISOString(),
+        message_group_id: message.message_group_id || undefined,
+        model: message.model || undefined,
+      },
     }
 
     return uiMessage
