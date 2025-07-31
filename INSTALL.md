@@ -209,7 +209,9 @@ CREATE TABLE messages (
   parts JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT messages_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
-  CONSTRAINT messages_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  CONSTRAINT messages_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  message_group_id TEXT,
+  model TEXT
 );
 
 -- Chat attachments table
@@ -245,6 +247,33 @@ CREATE TABLE user_keys (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   PRIMARY KEY (user_id, provider)
 );
+
+-- User preferences table
+CREATE TABLE user_preferences (
+  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  layout TEXT DEFAULT 'fullscreen',
+  prompt_suggestions BOOLEAN DEFAULT true,
+  show_tool_invocations BOOLEAN DEFAULT true,
+  show_conversation_previews BOOLEAN DEFAULT true,
+  multi_model_enabled BOOLEAN DEFAULT false,
+  hidden_models TEXT[] DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Optional: keep updated_at in sync for user_preferences
+CREATE OR REPLACE FUNCTION update_user_preferences_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_user_preferences_timestamp
+BEFORE UPDATE ON user_preferences
+FOR EACH ROW
+EXECUTE PROCEDURE update_user_preferences_updated_at();
 
 -- RLS (Row Level Security) Reminder
 -- Ensure RLS is enabled on these tables in your Supabase dashboard

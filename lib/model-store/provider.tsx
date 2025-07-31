@@ -47,7 +47,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     anthropic: false,
   })
   const [favoriteModels, setFavoriteModels] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const fetchModels = useCallback(async () => {
     try {

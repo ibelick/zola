@@ -5,18 +5,19 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 })
 
 const nextConfig: NextConfig = withBundleAnalyzer({
-  output: 'standalone',
+  output: "standalone",
   experimental: {
     optimizePackageImports: ["@phosphor-icons/react"],
     nodeMiddleware: true,
   },
+  serverExternalPackages: ["shiki", "vscode-oniguruma"],
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '*.supabase.co',
-        port: '',
-        pathname: '/storage/v1/object/public/**',
+        protocol: "https",
+        hostname: "*.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**",
       },
     ],
   },

@@ -1,5 +1,6 @@
 import type { Database, Json } from "@/app/types/database.types"
 import type { Attachment } from "@ai-sdk/ui-utils"
+import type { Attachment } from "@ai-sdk/ui-utils"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { UIMessageFull } from "../components/chat/use-chat-core"
 
@@ -43,6 +44,7 @@ export interface LogUserMessageParams {
   model: string
   isAuthenticated: boolean
   parts: UIMessageFull["parts"]
+  message_group_id?: string
 }
 
 export interface StoreAssistantMessageParams {
@@ -50,6 +52,8 @@ export interface StoreAssistantMessageParams {
   chatId: string
   // messages: Message[]
   parts: UIMessageFull["parts"]
+  message_group_id?: string
+  model?: string
 }
 
 export interface ApiErrorResponse {

@@ -37,15 +37,16 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const isDev = process.env.NODE_ENV === "development"
+  const isOfficialDeployment = process.env.ZOLA_OFFICIAL === "true"
   const userProfile = await getUserProfile()
 
   return (
     <html lang="en" suppressHydrationWarning>
-      {!isDev ? (
+      {isOfficialDeployment ? (
         <Script
-          async
-          src="https://analytics.umami.is/script.js"
-          data-website-id="42e5b68c-5478-41a6-bc68-088d029cee52"
+          defer
+          src="https://assets.onedollarstats.com/stonks.js"
+          {...(isDev ? { "data-debug": "zola.chat" } : {})}
         />
       ) : null}
       <body
@@ -57,7 +58,10 @@ export default async function RootLayout({
             <ModelProvider>
               <ChatsProvider userId={userProfile?.id}>
                 <ChatSessionProvider>
-                  <UserPreferencesProvider userId={userProfile?.id}>
+                  <UserPreferencesProvider
+                    userId={userProfile?.id}
+                    initialPreferences={userProfile?.preferences}
+                  >
                     <TooltipProvider
                       delayDuration={200}
                       skipDelayDuration={500}

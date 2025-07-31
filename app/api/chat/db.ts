@@ -16,6 +16,8 @@ export async function saveFinalAssistantMessage(
     chat_id: chatId,
     role: "assistant",
     parts: parts,
+    message_group_id,
+    model,
   })
 
   if (error) {

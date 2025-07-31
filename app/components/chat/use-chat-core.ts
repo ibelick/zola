@@ -4,13 +4,13 @@ import { getOrCreateGuestUserId } from "@/lib/api"
 import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
+import type { UserProfile } from "@/lib/user/types"
 import type { UIMessage } from "@ai-sdk/react"
 import { Chat as ReactChat, useChat } from "@ai-sdk/react"
 import { DefaultChatTransport, UIDataPartSchemas } from "ai"
 import { useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { z } from "zod"
-import { UserProfile } from "../../types/user"
 
 export const messageMetadataSchema = z.object({
   createdAt: z.string(),

@@ -52,7 +52,7 @@ export function ChatsProvider({
   userId?: string
   children: React.ReactNode
 }) {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [chats, setChats] = useState<Chats[]>([])
 
   useEffect(() => {

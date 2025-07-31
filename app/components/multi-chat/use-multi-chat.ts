@@ -4,13 +4,13 @@ import { toast } from "@/components/ui/toast"
 import { useChat } from "@ai-sdk/react"
 import { useMemo } from "react"
 
-interface ModelConfig {
+type ModelConfig = {
   id: string
   name: string
   provider: string
 }
 
-interface ModelChat {
+type ModelChat = {
   model: ModelConfig
   messages: any[]
   isLoading: boolean

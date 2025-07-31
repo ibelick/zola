@@ -1,4 +1,4 @@
-import { Chat } from "@/app/components/chat/chat"
+import { ChatContainer } from "@/app/components/chat/chat-container"
 import { LayoutApp } from "@/app/components/layout/layout-app"
 import { MessagesProvider } from "@/lib/chat-store/messages/provider"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
@@ -19,7 +19,7 @@ export default async function Page() {
   return (
     <MessagesProvider>
       <LayoutApp>
-        <Chat />
+        <ChatContainer />
       </LayoutApp>
     </MessagesProvider>
   )

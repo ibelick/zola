@@ -1,6 +1,10 @@
-import type { UserProfile } from "@/app/types/user"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { createClient } from "@/lib/supabase/server"
+import {
+  convertFromApiFormat,
+  defaultPreferences,
+} from "@/lib/user-preference-store/utils"
+import type { UserProfile } from "./types"
 
 export async function getSupabaseUser() {
   const supabase = await createClient()
@@ -22,6 +26,7 @@ export async function getUserProfile(): Promise<UserProfile | null> {
       display_name: "Guest",
       profile_image: "",
       anonymous: true,
+      preferences: defaultPreferences,
     } as UserProfile
   }
 
@@ -30,16 +35,22 @@ export async function getUserProfile(): Promise<UserProfile | null> {
 
   const { data: userProfileData } = await supabase
     .from("users")
-    .select("*")
+    .select("*, user_preferences(*)")
     .eq("id", user.id)
     .single()
 
   // Don't load anonymous users in the user store
   if (userProfileData?.anonymous) return null
 
+  // Format user preferences if they exist
+  const formattedPreferences = userProfileData?.user_preferences
+    ? convertFromApiFormat(userProfileData.user_preferences)
+    : undefined
+
   return {
     ...userProfileData,
     profile_image: user.user_metadata?.avatar_url ?? "",
     display_name: user.user_metadata?.name ?? "",
+    preferences: formattedPreferences,
   } as UserProfile
 }

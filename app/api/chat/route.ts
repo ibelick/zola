@@ -28,6 +28,7 @@ type ChatRequest = {
   isAuthenticated: boolean
   systemPrompt: string
   enableSearch: boolean
+  message_group_id?: string
 }
 
 export async function POST(req: Request) {
@@ -40,6 +41,7 @@ export async function POST(req: Request) {
       isAuthenticated,
       systemPrompt,
       enableSearch,
+      message_group_id,
     } = (await req.json()) as ChatRequest
 
     console.log("messages start", messages)
@@ -72,6 +74,7 @@ export async function POST(req: Request) {
         model,
         isAuthenticated,
         parts: userMessage.parts,
+        message_group_id,
       })
     }
 
@@ -112,6 +115,8 @@ export async function POST(req: Request) {
             supabase,
             chatId,
             parts,
+            message_group_id,
+            model,
           })
         }
       },

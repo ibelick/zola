@@ -17,7 +17,7 @@ export async function getMessagesFromDb(
 
   const { data, error } = await supabase
     .from("messages")
-    .select("id, role, created_at, parts")
+    .select("id, role, created_at, parts, message_group_id, model")
     .eq("chat_id", chatId)
     .order("created_at", { ascending: true })
 
@@ -34,6 +34,8 @@ export async function getMessagesFromDb(
       //   createdAt: new Date(message.created_at || ""),
       // },
       parts: (message?.parts as UIMessageFull["parts"]) || undefined,
+      message_group_id: message.message_group_id,
+      model: message.model,
     }
 
     return uiMessage
@@ -48,6 +50,8 @@ async function insertMessageToDb(chatId: string, message: UIMessageFull) {
     chat_id: chatId,
     role: message.role,
     created_at: message.metadata?.createdAt || new Date().toISOString(),
+    message_group_id: (message as any).message_group_id || null,
+    model: (message as any).model || null,
   })
 }
 
@@ -59,6 +63,8 @@ async function insertMessagesToDb(chatId: string, messages: UIMessageFull[]) {
     chat_id: chatId,
     role: message.role,
     created_at: message.metadata?.createdAt || new Date().toISOString(),
+    message_group_id: (message as any).message_group_id || null,
+    model: (message as any).model || null,
   }))
 
   await supabase.from("messages").insert(payload)

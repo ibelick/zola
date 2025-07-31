@@ -146,6 +146,8 @@ export type Database = {
           role: "system" | "user" | "assistant"
           parts: UIMessageFull["parts"] | null
           user_id?: string | null
+          message_group_id: string | null
+          model: string | null
         }
         Insert: {
           experimental_attachments?: Attachment[]
@@ -155,6 +157,8 @@ export type Database = {
           role: "system" | "user" | "assistant"
           parts?: UIMessageFull["parts"]
           user_id?: string | null
+          message_group_id?: string | null
+          model?: string | null
         }
         Update: {
           experimental_attachments?: Attachment[]
@@ -164,6 +168,8 @@ export type Database = {
           role?: "system" | "user" | "assistant"
           parts?: UIMessageFull["parts"]
           user_id?: string | null
+          message_group_id?: string | null
+          model?: string | null
         }
         Relationships: [
           {
@@ -288,6 +294,50 @@ export type Database = {
             foreignKeyName: "user_keys_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          user_id: string
+          layout: string | null
+          prompt_suggestions: boolean | null
+          show_tool_invocations: boolean | null
+          show_conversation_previews: boolean | null
+          multi_model_enabled: boolean | null
+          hidden_models: string[] | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          user_id: string
+          layout?: string | null
+          prompt_suggestions?: boolean | null
+          show_tool_invocations?: boolean | null
+          show_conversation_previews?: boolean | null
+          multi_model_enabled?: boolean | null
+          hidden_models?: string[] | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          user_id?: string
+          layout?: string | null
+          prompt_suggestions?: boolean | null
+          show_tool_invocations?: boolean | null
+          show_conversation_previews?: boolean | null
+          multi_model_enabled?: boolean | null
+          hidden_models?: string[] | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },

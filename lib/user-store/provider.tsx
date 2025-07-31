@@ -1,13 +1,13 @@
 // app/providers/user-provider.tsx
 "use client"
 
-import { UserProfile } from "@/app/types/user"
 import {
   fetchUserProfile,
   signOutUser,
   subscribeToUserUpdates,
   updateUserProfile,
 } from "@/lib/user-store/api"
+import type { UserProfile } from "@/lib/user/types"
 import { createContext, useContext, useEffect, useState } from "react"
 
 type UserContextType = {

@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { ArrowUp, Stop } from "@phosphor-icons/react"
 import React, { useCallback } from "react"
-import { ButtonFileUpload } from "../components/chat-input/button-file-upload"
 
 type MultiChatInputProps = {
   value: string
@@ -33,10 +32,8 @@ export function MultiChatInput({
   onValueChange,
   onSend,
   isSubmitting,
-  onFileUpload,
   selectedModelIds,
   onSelectedModelIdsChange,
-  isUserAuthenticated,
   stop,
   status,
   anyLoading,
@@ -96,11 +93,6 @@ export function MultiChatInput({
           />
           <PromptInputActions className="mt-5 w-full justify-between px-3 pb-3">
             <div className="flex gap-2">
-              <ButtonFileUpload
-                onFileUpload={onFileUpload}
-                isUserAuthenticated={isUserAuthenticated}
-                model={selectedModelIds[0] || "gpt-4.1-nano"} // Use first selected model for file upload validation
-              />
               <MultiModelSelector
                 selectedModelIds={selectedModelIds}
                 setSelectedModelIds={onSelectedModelIdsChange}
