@@ -112,13 +112,18 @@ export function useChatCore({
     stop,
     id,
   } = useChat<UIMessageFull>({
-    chat: new ReactChat({
-      messageMetadataSchema: messageMetadataSchema,
-      id: chatId || "default",
-      transport: new DefaultChatTransport({
-        api: API_ROUTE_CHAT,
-      }),
-      messages: initialMessages,
+    id: chatId || "default",
+    messages: initialMessages,
+    transport: new DefaultChatTransport({
+      api: API_ROUTE_CHAT,
+      body: {
+        chatId: chatId,
+        userId: user?.id,
+        isAuthenticated: isAuthenticated,
+        model: selectedModel,
+        systemPrompt: systemPrompt,
+        enableSearch: enableSearch,
+      },
     }),
     onFinish: async (data) => {
       console.log("onFinish", { data })
