@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { redirect } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useChatCore } from "./use-chat-core"
 import { useChatOperations } from "./use-chat-operations"
 import { useFileUpload } from "./use-file-upload"
@@ -76,6 +76,18 @@ export function Chat() {
     [user?.system_prompt]
   )
 
+  // New state for quoted text
+  const [quotedText, setQuotedText] = useState<{
+    text: string
+    messageId: string
+  }>()
+  const handleQuotedSelected = useCallback(
+    (text: string, messageId: string) => {
+      setQuotedText({ text, messageId })
+    },
+    []
+  )
+
   // Chat operations (utils + handlers) - created first
   const { checkLimitsAndNotify, ensureChatExists, handleDelete, handleEdit } =
     useChatOperations({
@@ -130,8 +142,16 @@ export function Chat() {
       onDelete: handleDelete,
       onEdit: handleEdit,
       onReload: handleReload,
+      onQuote: handleQuotedSelected,
     }),
-    [messages, status, handleDelete, handleEdit, handleReload]
+    [
+      messages,
+      status,
+      handleDelete,
+      handleEdit,
+      handleReload,
+      handleQuotedSelected,
+    ]
   )
 
   // Memoize the chat input props
@@ -154,6 +174,7 @@ export function Chat() {
       status,
       setEnableSearch,
       enableSearch,
+      quotedText,
     }),
     [
       input,
@@ -174,6 +195,7 @@ export function Chat() {
       status,
       setEnableSearch,
       enableSearch,
+      quotedText,
     ]
   )
 

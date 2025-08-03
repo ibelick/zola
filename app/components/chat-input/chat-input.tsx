@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { getModelInfo } from "@/lib/models"
 import { ArrowUpIcon, StopIcon } from "@phosphor-icons/react"
-import { useCallback, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import { PromptSystem } from "../suggestions/prompt-system"
 import { ButtonFileUpload } from "./button-file-upload"
 import { ButtonSearch } from "./button-search"
@@ -34,6 +34,7 @@ type ChatInputProps = {
   status?: "submitted" | "streaming" | "ready" | "error"
   setEnableSearch: (enabled: boolean) => void
   enableSearch: boolean
+  quotedText?: { text: string; messageId: string } | null
 }
 
 export function ChatInput({
@@ -53,10 +54,12 @@ export function ChatInput({
   status,
   setEnableSearch,
   enableSearch,
+  quotedText,
 }: ChatInputProps) {
   const selectModelConfig = getModelInfo(selectedModel)
   const hasSearchSupport = Boolean(selectModelConfig?.webSearch)
   const isOnlyWhitespace = (text: string) => !/[^\s]/.test(text)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleSend = useCallback(() => {
     if (isSubmitting) {
@@ -135,6 +138,21 @@ export function ChatInput({
     [isUserAuthenticated, onFileUpload]
   )
 
+  useEffect(() => {
+    if (quotedText) {
+      const quoted = quotedText.text
+        .split("\n")
+        .map((line) => `> ${line}`)
+        .join("\n")
+      onValueChange(value ? `${value}\n\n${quoted}\n\n` : `${quoted}\n\n`)
+
+      requestAnimationFrame(() => {
+        textareaRef.current?.focus()
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quotedText, onValueChange])
+
   useMemo(() => {
     if (!hasSearchSupport && enableSearch) {
       setEnableSearch?.(false)
@@ -159,6 +177,7 @@ export function ChatInput({
         >
           <FileList files={files} onFileRemove={onFileRemove} />
           <PromptInputTextarea
+            ref={textareaRef}
             placeholder="Ask Zola"
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}

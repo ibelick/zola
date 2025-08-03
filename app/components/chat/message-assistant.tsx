@@ -8,11 +8,14 @@ import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
+import { useCallback, useRef } from "react"
 import { getSources } from "./get-sources"
+import { QuoteButton } from "./quote-button"
 import { Reasoning } from "./reasoning"
 import { SearchImages } from "./search-images"
 import { SourcesList } from "./sources-list"
 import { ToolInvocation } from "./tool-invocation"
+import { useAssistantMessageSelection } from "./useAssistantMessageSelection"
 
 type MessageAssistantProps = {
   children: string
@@ -24,6 +27,8 @@ type MessageAssistantProps = {
   parts?: MessageAISDK["parts"]
   status?: "streaming" | "ready" | "submitted" | "error"
   className?: string
+  messageId: string
+  onQuote: (text: string, messageId: string) => void
 }
 
 export function MessageAssistant({
@@ -36,6 +41,8 @@ export function MessageAssistant({
   parts,
   status,
   className,
+  messageId,
+  onQuote,
 }: MessageAssistantProps) {
   const { preferences } = useUserPreferences()
   const sources = getSources(parts)
@@ -63,6 +70,16 @@ export function MessageAssistant({
           : []
       ) ?? []
 
+  const messageRef = useRef<HTMLDivElement>(null)
+  const { selectionInfo, clearSelection } =
+    useAssistantMessageSelection(messageRef)
+  const handleQuoteBtnClick = useCallback(() => {
+    if (selectionInfo) {
+      onQuote(selectionInfo.text, selectionInfo.messageId)
+      clearSelection()
+    }
+  }, [selectionInfo, onQuote, clearSelection])
+
   return (
     <Message
       className={cn(
@@ -71,7 +88,14 @@ export function MessageAssistant({
         className
       )}
     >
-      <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
+      <div
+        ref={messageRef}
+        className={cn(
+          "relative flex min-w-full flex-col gap-2",
+          isLast && "pb-8"
+        )}
+        data-message-id={messageId}
+      >
         {reasoningParts && reasoningParts.reasoning && (
           <Reasoning
             reasoning={reasoningParts.reasoning}
@@ -143,6 +167,15 @@ export function MessageAssistant({
               </MessageAction>
             ) : null}
           </MessageActions>
+        )}
+
+        {selectionInfo && selectionInfo.messageId && (
+          <QuoteButton
+            mousePosition={selectionInfo.position}
+            onQuote={handleQuoteBtnClick}
+            messageContainerRef={messageRef}
+            onDismiss={clearSelection}
+          />
         )}
       </div>
     </Message>
