@@ -1,10 +1,10 @@
 import { getSources } from "@/app/components/chat/get-sources"
 import { SourcesList } from "@/app/components/chat/sources-list"
+import { UIMessageFull } from "@/app/components/chat/use-chat-core"
 import type { Tables } from "@/app/types/database.types"
 import { Message, MessageContent } from "@/components/prompt-kit/message"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr"
 import Link from "next/link"
 import { Header } from "./header"
@@ -62,8 +62,13 @@ export default function Article({
         </div>
         <div className="mt-20 w-full">
           {messages.map((message) => {
-            const parts = message?.parts as MessageAISDK["parts"]
+            const parts = message?.parts as UIMessageFull["parts"]
             const sources = getSources(parts)
+
+            const content: string = parts
+              ?.filter((part) => part.type === "text")
+              .map((part) => part.text)
+              .join("")
 
             return (
               <div key={message.id}>
@@ -84,7 +89,7 @@ export default function Article({
                       "prose-h1:scroll-m-20 prose-h1:text-2xl prose-h1:font-semibold prose-h2:mt-8 prose-h2:scroll-m-20 prose-h2:text-xl prose-h2:mb-3 prose-h2:font-medium prose-h3:scroll-m-20 prose-h3:text-base prose-h3:font-medium prose-h4:scroll-m-20 prose-h5:scroll-m-20 prose-h6:scroll-m-20 prose-strong:font-medium prose-table:block prose-table:overflow-y-auto"
                     )}
                   >
-                    {message.content!}
+                    {content}
                   </MessageContent>
                 </Message>
                 {sources && sources.length > 0 && (

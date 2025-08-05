@@ -4,30 +4,42 @@ import {
   MessageActions,
   MessageContent,
 } from "@/components/prompt-kit/message"
-import { useUserPreferences } from "@/lib/user-preference-store/provider"
+// import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
-import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
+import { isToolUIPart } from "ai"
 import { getSources } from "./get-sources"
 import { Reasoning } from "./reasoning"
-import { SearchImages } from "./search-images"
+// import { SearchImages } from "./search-images"
 import { SourcesList } from "./sources-list"
-import { ToolInvocation } from "./tool-invocation"
+import type { UIMessageFull } from "./use-chat-core"
+
+// import { ToolInvocation } from "./tool-invocation"
 
 type MessageAssistantProps = {
-  children: string
   isLast?: boolean
   hasScrollAnchor?: boolean
   copied?: boolean
   copyToClipboard?: () => void
   onReload?: () => void
-  parts?: MessageAISDK["parts"]
+  parts?: UIMessageFull["parts"]
   status?: "streaming" | "ready" | "submitted" | "error"
   className?: string
 }
 
+export function isPartToolInvocation(part: UIMessageFull["parts"][number]) {
+  return isToolUIPart(part)
+}
+
+export function filterPartsForToolInvocation(parts: UIMessageFull["parts"]) {
+  return parts.filter(isToolUIPart)
+}
+
+export type ToolInvocationUIPart = ReturnType<
+  typeof filterPartsForToolInvocation
+>[number]
+
 export function MessageAssistant({
-  children,
   isLast,
   hasScrollAnchor,
   copied,
@@ -37,31 +49,32 @@ export function MessageAssistant({
   status,
   className,
 }: MessageAssistantProps) {
-  const { preferences } = useUserPreferences()
-  const sources = getSources(parts)
-  const toolInvocationParts = parts?.filter(
-    (part) => part.type === "tool-invocation"
-  )
+  // const { preferences } = useUserPreferences()
+  const sources = getSources(parts || [])
+  // const toolInvocationParts = parts?.filter((part) =>
+  //   isPartToolInvocation(part)
+  // )
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
-  const contentNullOrEmpty = children === null || children === ""
+  const textParts = parts?.filter((part) => part.type === "text")
+  const textPartsAsText = textParts?.map((part) => part.text).join("") || ""
+
+  const contentNullOrEmpty = textPartsAsText === null || textPartsAsText === ""
   const isLastStreaming = status === "streaming" && isLast
-  const searchImageResults =
-    parts
-      ?.filter(
-        (part) =>
-          part.type === "tool-invocation" &&
-          part.toolInvocation?.state === "result" &&
-          part.toolInvocation?.toolName === "imageSearch" &&
-          part.toolInvocation?.result?.content?.[0]?.type === "images"
-      )
-      .flatMap((part) =>
-        part.type === "tool-invocation" &&
-        part.toolInvocation?.state === "result" &&
-        part.toolInvocation?.toolName === "imageSearch" &&
-        part.toolInvocation?.result?.content?.[0]?.type === "images"
-          ? (part.toolInvocation?.result?.content?.[0]?.results ?? [])
-          : []
-      ) ?? []
+  // const searchImageResults =
+  //   parts
+  //     ?.filter(
+  //       (part) =>
+  //         part.type === "tool-imageSearch" &&
+  //         part.state === "output-available" &&
+  //         part.output?.content?.[0]?.type === "images"
+  //     )
+  //     .flatMap((part) =>
+  //       part.type === "tool-imageSearch" &&
+  //       part.state === "output-available" &&
+  //       part.output?.content?.[0]?.type === "images"
+  //         ? (part.output?.content?.[0]?.results ?? [])
+  //         : []
+  //     ) ?? []
 
   return (
     <Message
@@ -72,14 +85,14 @@ export function MessageAssistant({
       )}
     >
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
-        {reasoningParts && reasoningParts.reasoning && (
+        {reasoningParts && reasoningParts.text && (
           <Reasoning
-            reasoning={reasoningParts.reasoning}
+            reasoning={reasoningParts.text}
             isStreaming={status === "streaming"}
           />
         )}
 
-        {toolInvocationParts &&
+        {/* {toolInvocationParts &&
           toolInvocationParts.length > 0 &&
           preferences.showToolInvocations && (
             <ToolInvocation toolInvocations={toolInvocationParts} />
@@ -87,7 +100,7 @@ export function MessageAssistant({
 
         {searchImageResults.length > 0 && (
           <SearchImages results={searchImageResults} />
-        )}
+        )} */}
 
         {contentNullOrEmpty ? null : (
           <MessageContent
@@ -97,7 +110,7 @@ export function MessageAssistant({
             )}
             markdown={true}
           >
-            {children}
+            {textPartsAsText}
           </MessageContent>
         )}
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import type { ToolInvocationUIPart } from "@ai-sdk/ui-utils"
+// import type { ToolInvocationUIPart } from "@ai-sdk/ui-utils"
 import {
   CaretDown,
   CheckCircle,
@@ -13,6 +13,7 @@ import {
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useMemo, useState } from "react"
+import { ToolInvocationUIPart } from "./message-assistant"
 
 interface ToolInvocationProps {
   toolInvocations: ToolInvocationUIPart[]
@@ -39,7 +40,7 @@ export function ToolInvocation({
   // Group tool invocations by toolCallId
   const groupedTools = toolInvocationsData.reduce(
     (acc, item) => {
-      const { toolCallId } = item.toolInvocation
+      const toolCallId = item.toolCallId
       if (!acc[toolCallId]) {
         acc[toolCallId] = []
       }
@@ -139,7 +140,7 @@ function SingleToolView({
   // Group by toolCallId and pick the most informative state
   const groupedTools = toolInvocations.reduce(
     (acc, item) => {
-      const { toolCallId } = item.toolInvocation
+      const toolCallId = item.toolCallId
       if (!acc[toolCallId]) {
         acc[toolCallId] = []
       }
@@ -152,14 +153,10 @@ function SingleToolView({
   // For each toolCallId, get the most informative state (result > call > requested)
   const toolsToDisplay = Object.values(groupedTools)
     .map((group) => {
-      const resultTool = group.find(
-        (item) => item.toolInvocation.state === "result"
-      )
-      const callTool = group.find(
-        (item) => item.toolInvocation.state === "call"
-      )
+      const resultTool = group.find((item) => item.state === "output-available")
+      const callTool = group.find((item) => item.state === "input-available")
       const partialCallTool = group.find(
-        (item) => item.toolInvocation.state === "partial-call"
+        (item) => item.state === "input-streaming"
       )
 
       // Return the most informative one
@@ -186,7 +183,7 @@ function SingleToolView({
       <div className="space-y-4">
         {toolsToDisplay.map((tool) => (
           <SingleToolCard
-            key={tool.toolInvocation.toolCallId}
+            key={tool.toolCallId}
             toolData={tool}
             defaultOpen={defaultOpen}
           />
@@ -207,11 +204,17 @@ function SingleToolCard({
   className?: string
 }) {
   const [isExpanded, setIsExpanded] = useState(defaultOpen)
-  const { toolInvocation } = toolData
-  const { state, toolName, toolCallId, args } = toolInvocation
-  const isLoading = state === "call"
-  const isCompleted = state === "result"
-  const result = isCompleted ? toolInvocation.result : undefined
+
+  // const { toolInvocation } = toolData
+  const toolCallId = toolData.toolCallId
+  const state = toolData.state
+  const toolName = toolData.type
+  const args = toolData.input
+  const result =
+    toolData.state === "output-available" ? toolData.output : undefined
+
+  const isLoading = state === "input-available"
+  const isCompleted = state === "output-available"
 
   // Parse the result JSON if available
   const { parsedResult, parseError } = useMemo(() => {
@@ -226,6 +229,8 @@ function SingleToolCard({
         result !== null &&
         "content" in result
       ) {
+        // For now because there is no tool in the UIMessageFull typelib/hooks/use-chat-preview.tsx
+        // @ts-expect-error Property 'find' does not exist on type '{}'.
         const textContent = result.content?.find(
           (item: { type: string }) => item.type === "text"
         )
@@ -433,7 +438,7 @@ function SingleToolCard({
           >
             <div className="space-y-3 px-3 pt-3 pb-3">
               {/* Arguments section */}
-              {args && Object.keys(args).length > 0 && (
+              {args && Object.keys(args).length > 0 ? (
                 <div>
                   <div className="text-muted-foreground mb-1 text-xs font-medium">
                     Arguments
@@ -442,7 +447,7 @@ function SingleToolCard({
                     {formattedArgs}
                   </div>
                 </div>
-              )}
+              ) : null}
 
               {/* Result section */}
               {isCompleted && (

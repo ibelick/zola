@@ -16,10 +16,10 @@ import {
 } from "@/components/prompt-kit/message"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Message as MessageType } from "@ai-sdk/react"
 import { Check, Copy, Trash } from "@phosphor-icons/react"
 import Image from "next/image"
 import { useRef, useState } from "react"
+import type { UIMessageFull } from "./use-chat-core"
 
 const getTextFromDataUrl = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1]
@@ -28,8 +28,7 @@ const getTextFromDataUrl = (dataUrl: string) => {
 
 export type MessageUserProps = {
   hasScrollAnchor?: boolean
-  attachments?: MessageType["experimental_attachments"]
-  children: string
+  parts: UIMessageFull["parts"]
   copied: boolean
   copyToClipboard: () => void
   onEdit: (id: string, newText: string) => void
@@ -41,8 +40,7 @@ export type MessageUserProps = {
 
 export function MessageUser({
   hasScrollAnchor,
-  attachments,
-  children,
+  parts,
   copied,
   copyToClipboard,
   onEdit,
@@ -51,13 +49,18 @@ export function MessageUser({
   id,
   className,
 }: MessageUserProps) {
-  const [editInput, setEditInput] = useState(children)
+  const textParts = parts?.filter((part) => part.type === "text")
+  const textPartsAsText = textParts?.map((part) => part.text).join("")
+
+  const fileParts = parts?.filter((part) => part.type === "file")
+
+  const [editInput, setEditInput] = useState(textPartsAsText)
   const [isEditing, setIsEditing] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
 
   const handleEditCancel = () => {
     setIsEditing(false)
-    setEditInput(children)
+    setEditInput(textPartsAsText)
   }
 
   const handleSave = () => {
@@ -80,12 +83,9 @@ export function MessageUser({
         className
       )}
     >
-      {attachments?.map((attachment, index) => (
-        <div
-          className="flex flex-row gap-2"
-          key={`${attachment.name}-${index}`}
-        >
-          {attachment.contentType?.startsWith("image") ? (
+      {fileParts?.map((file, index) => (
+        <div className="flex flex-row gap-2" key={`${file.filename}-${index}`}>
+          {file.mediaType?.startsWith("image") ? (
             <MorphingDialog
               transition={{
                 type: "spring",
@@ -97,9 +97,9 @@ export function MessageUser({
               <MorphingDialogTrigger className="z-10">
                 <Image
                   className="mb-1 w-40 rounded-md"
-                  key={attachment.name}
-                  src={attachment.url}
-                  alt={attachment.name || "Attachment"}
+                  key={file.filename}
+                  src={file.url}
+                  alt={file.filename || "Attachment"}
                   width={160}
                   height={120}
                 />
@@ -107,17 +107,17 @@ export function MessageUser({
               <MorphingDialogContainer>
                 <MorphingDialogContent className="relative rounded-lg">
                   <MorphingDialogImage
-                    src={attachment.url}
-                    alt={attachment.name || ""}
+                    src={file.url}
+                    alt={file.filename || ""}
                     className="max-h-[90vh] max-w-[90vw] object-contain"
                   />
                 </MorphingDialogContent>
                 <MorphingDialogClose className="text-primary" />
               </MorphingDialogContainer>
             </MorphingDialog>
-          ) : attachment.contentType?.startsWith("text") ? (
+          ) : file.mediaType?.startsWith("text") ? (
             <div className="text-primary mb-3 h-24 w-40 overflow-hidden rounded-md border p-2 text-xs">
-              {getTextFromDataUrl(attachment.url)}
+              {getTextFromDataUrl(file.url)}
             </div>
           ) : null}
         </div>
@@ -173,7 +173,7 @@ export function MessageUser({
             ol: ({ children }) => <>{children}</>,
           }}
         >
-          {children}
+          {textPartsAsText}
         </MessageContent>
       )}
       <MessageActions className="flex gap-0 opacity-0 transition-opacity duration-0 group-hover:opacity-100">

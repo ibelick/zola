@@ -1,21 +1,27 @@
+import {
+  MessageMetadata,
+  UIMessageFull,
+} from "@/app/components/chat/use-chat-core"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { getAllModels } from "@/lib/models"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import type { ProviderWithoutOllama } from "@/lib/user-keys"
-import { Attachment } from "@ai-sdk/ui-utils"
-import { Message as MessageAISDK, streamText, ToolSet } from "ai"
+import { convertToModelMessages, stepCountIs, streamText, ToolSet } from "ai"
 import {
   incrementMessageCount,
   logUserMessage,
   storeAssistantMessage,
   validateAndTrackUsage,
 } from "./api"
-import { createErrorResponse, extractErrorMessage } from "./utils"
+
+// import { createErrorResponse } from "./utils"
+
+// import { createErrorResponse, extractErrorMessage } from "./utils"
 
 export const maxDuration = 60
 
 type ChatRequest = {
-  messages: MessageAISDK[]
+  messages: UIMessageFull[]
   chatId: string
   userId: string
   model: string
@@ -37,6 +43,8 @@ export async function POST(req: Request) {
       enableSearch,
       message_group_id,
     } = (await req.json()) as ChatRequest
+
+    console.log("messages start", messages)
 
     if (!messages || !chatId || !userId) {
       return new Response(
@@ -63,10 +71,9 @@ export async function POST(req: Request) {
         supabase,
         userId,
         chatId,
-        content: userMessage.content,
-        attachments: userMessage.experimental_attachments as Attachment[],
         model,
         isAuthenticated,
+        parts: userMessage.parts,
         message_group_id,
       })
     }
@@ -92,21 +99,22 @@ export async function POST(req: Request) {
     const result = streamText({
       model: modelConfig.apiSdk(apiKey, { enableSearch }),
       system: effectiveSystemPrompt,
-      messages: messages,
+      messages: convertToModelMessages(messages),
       tools: {} as ToolSet,
-      maxSteps: 10,
-      onError: (err: unknown) => {
+      stopWhen: (ops) => stepCountIs(10)(ops),
+      onError: (err: any) => {
         console.error("Streaming error occurred:", err)
         // Don't set streamError anymore - let the AI SDK handle it through the stream
       },
 
-      onFinish: async ({ response }) => {
+      onFinish: async ({ content }) => {
+        const parts: UIMessageFull["parts"] =
+          content as unknown as UIMessageFull["parts"] // TODO FIX
         if (supabase) {
           await storeAssistantMessage({
             supabase,
             chatId,
-            messages:
-              response.messages as unknown as import("@/app/types/api.types").Message[],
+            parts,
             message_group_id,
             model,
           })
@@ -114,13 +122,18 @@ export async function POST(req: Request) {
       },
     })
 
-    return result.toDataStreamResponse({
+    return result.toUIMessageStreamResponse({
       sendReasoning: true,
-      sendSources: true,
-      getErrorMessage: (error: unknown) => {
-        console.error("Error forwarded to client:", error)
-        return extractErrorMessage(error)
+      messageMetadata: (): MessageMetadata | undefined => {
+        return {
+          createdAt: new Date().toISOString(),
+        }
       },
+      sendSources: true,
+      // getErrorMessage: (error: unknown) => {
+      //   console.error("Error forwarded to client:", error)
+      //   return extractErrorMessage(error)
+      // },
     })
   } catch (err: unknown) {
     console.error("Error in /api/chat:", err)
@@ -130,6 +143,8 @@ export async function POST(req: Request) {
       statusCode?: number
     }
 
-    return createErrorResponse(error)
+    throw err
+
+    // return createErrorResponse(error)
   }
 }
