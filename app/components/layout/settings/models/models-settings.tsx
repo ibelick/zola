@@ -141,7 +141,7 @@ export function ModelsSettings() {
 
                 return (
                   <Reorder.Item key={model.id} value={model} className="group">
-                    <div className="bg-card border-border flex items-center gap-3 rounded-lg border p-3">
+                    <div className="border-border flex items-center gap-3 rounded-lg border bg-transparent p-3">
                       {/* Drag Handle */}
                       <div className="text-muted-foreground cursor-grab opacity-60 transition-opacity group-hover:opacity-100 active:cursor-grabbing">
                         <DotsSixVerticalIcon className="size-4" />
