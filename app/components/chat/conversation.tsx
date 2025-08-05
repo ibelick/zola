@@ -14,7 +14,7 @@ type ConversationProps = {
   onDelete: (id: string) => void
   onEdit: (id: string, newText: string) => void
   onReload: () => void
-  onQuote: (text: string, messageId: string) => void
+  onQuote?: (text: string, messageId: string) => void
 }
 
 export function Conversation({

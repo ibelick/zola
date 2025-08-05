@@ -7,7 +7,8 @@ type SelectionInfo = {
 }
 
 export const useAssistantMessageSelection = (
-  ref: RefObject<HTMLElement | null>
+  ref: RefObject<HTMLElement | null>,
+  enabled: boolean
 ) => {
   const [selectionInfo, setSelectionInfo] = useState<SelectionInfo | null>(null)
 
@@ -75,6 +76,8 @@ export const useAssistantMessageSelection = (
   )
 
   useEffect(() => {
+    if (!enabled) return
+
     const currentRef = ref.current
     if (currentRef) {
       currentRef.addEventListener("selectstart", onSelectStart)
@@ -84,7 +87,7 @@ export const useAssistantMessageSelection = (
         document.removeEventListener("mouseup", onMouseUp)
       }
     }
-  }, [ref, onSelectStart, onMouseUp])
+  }, [ref, onSelectStart, onMouseUp, enabled])
 
   const clearSelection = useCallback(() => {
     setSelectionInfo(null)

@@ -28,7 +28,7 @@ type MessageAssistantProps = {
   status?: "streaming" | "ready" | "submitted" | "error"
   className?: string
   messageId: string
-  onQuote: (text: string, messageId: string) => void
+  onQuote?: (text: string, messageId: string) => void
 }
 
 export function MessageAssistant({
@@ -70,11 +70,14 @@ export function MessageAssistant({
           : []
       ) ?? []
 
+  const isQuoteEnabled = !preferences.multiModelEnabled
   const messageRef = useRef<HTMLDivElement>(null)
-  const { selectionInfo, clearSelection } =
-    useAssistantMessageSelection(messageRef)
+  const { selectionInfo, clearSelection } = useAssistantMessageSelection(
+    messageRef,
+    isQuoteEnabled
+  )
   const handleQuoteBtnClick = useCallback(() => {
-    if (selectionInfo) {
+    if (selectionInfo && onQuote) {
       onQuote(selectionInfo.text, selectionInfo.messageId)
       clearSelection()
     }
@@ -94,7 +97,7 @@ export function MessageAssistant({
           "relative flex min-w-full flex-col gap-2",
           isLast && "pb-8"
         )}
-        data-message-id={messageId}
+        {...(isQuoteEnabled && { "data-message-id": messageId })}
       >
         {reasoningParts && reasoningParts.reasoning && (
           <Reasoning
@@ -169,7 +172,7 @@ export function MessageAssistant({
           </MessageActions>
         )}
 
-        {selectionInfo && selectionInfo.messageId && (
+        {isQuoteEnabled && selectionInfo && selectionInfo.messageId && (
           <QuoteButton
             mousePosition={selectionInfo.position}
             onQuote={handleQuoteBtnClick}

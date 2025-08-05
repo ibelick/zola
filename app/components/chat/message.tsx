@@ -16,7 +16,7 @@ type MessageProps = {
   parts?: MessageType["parts"]
   status?: "streaming" | "ready" | "submitted" | "error"
   className?: string
-  onQuote: (text: string, messageId: string) => void
+  onQuote?: (text: string, messageId: string) => void
 }
 
 export function Message({
