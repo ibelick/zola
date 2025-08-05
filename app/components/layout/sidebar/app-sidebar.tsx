@@ -39,7 +39,11 @@ export function AppSidebar() {
   const router = useRouter()
 
   return (
-    <Sidebar collapsible="offcanvas" variant="sidebar" className="border-none">
+    <Sidebar
+      collapsible="offcanvas"
+      variant="sidebar"
+      className="border-border/40 border-r bg-transparent"
+    >
       <SidebarHeader className="h-14 pl-3">
         <div className="flex justify-between">
           {isMobile ? (
@@ -55,8 +59,8 @@ export function AppSidebar() {
           )}
         </div>
       </SidebarHeader>
-      <SidebarContent className="mask-t-from-98% mask-t-to-100% mask-b-from-98% mask-b-to-100% px-3">
-        <ScrollArea className="flex h-full [&>div>div]:!block">
+      <SidebarContent className="border-border/40 border-t">
+        <ScrollArea className="flex h-full px-3 [&>div>div]:!block">
           <div className="mt-3 mb-5 flex w-full flex-col items-start gap-0">
             <button
               className="hover:bg-accent/80 hover:text-foreground text-primary group/new-chat relative inline-flex w-full items-center rounded-md bg-transparent px-2 py-2 text-sm transition-colors"
@@ -114,7 +118,7 @@ export function AppSidebar() {
           )}
         </ScrollArea>
       </SidebarContent>
-      <SidebarFooter className="mb-2 p-3">
+      <SidebarFooter className="border-border/40 mb-2 border-t p-3">
         <a
           href="https://github.com/ibelick/zola"
           className="hover:bg-muted flex items-center gap-2 rounded-md p-2"
