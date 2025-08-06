@@ -22,6 +22,9 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE=your_supabase_service_role_key
 
+# Redis
+REDIS_URL=redis://localhost:6379
+
 # OpenAI
 OPENAI_API_KEY=your_openai_api_key
 
@@ -151,6 +154,14 @@ Here are the detailed steps to set up Google OAuth:
 
 This allows users limited access to try the product before properly creating an account.
 
+### Redis
+
+Start a redis via docker:
+
+```bash
+docker run -p 6379:6379 -d redis:8.0-rc1
+```
+
 ### Database Schema
 
 Create the following tables in your Supabase SQL editor:
@@ -198,6 +209,15 @@ CREATE TABLE chats (
   public BOOLEAN DEFAULT FALSE NOT NULL,
   CONSTRAINT chats_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT chats_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+-- Stream IDs table
+CREATE TABLE stream_ids (
+  id SERIAL PRIMARY KEY,
+  stream_id UUID NOT NULL,
+  chat_id UUID NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT stream_ids_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
 );
 
 -- Messages table
