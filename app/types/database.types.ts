@@ -98,6 +98,8 @@ export type Database = {
           title: string | null
           user_id: string
           public: boolean
+          pinned: boolean
+          pinned_at: string | null
         }
         Insert: {
           created_at?: string | null
@@ -108,6 +110,8 @@ export type Database = {
           title?: string | null
           user_id: string
           public?: boolean
+          pinned?: boolean
+          pinned_at?: string | null
         }
         Update: {
           created_at?: string | null
@@ -118,6 +122,8 @@ export type Database = {
           title?: string | null
           user_id?: string
           public?: boolean
+          pinned?: boolean
+          pinned_at?: string | null
         }
         Relationships: [
           {

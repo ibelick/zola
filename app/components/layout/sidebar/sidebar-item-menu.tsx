@@ -10,6 +10,7 @@ import { useMessages } from "@/lib/chat-store/messages/provider"
 import { useChatSession } from "@/lib/chat-store/session/provider"
 import { Chat } from "@/lib/chat-store/types"
 import { DotsThree, PencilSimple, Trash } from "@phosphor-icons/react"
+import { Pin, PinOff } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { DialogDeleteChat } from "./dialog-delete-chat"
@@ -28,7 +29,7 @@ export function SidebarItemMenu({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const router = useRouter()
   const { deleteMessages } = useMessages()
-  const { deleteChat } = useChats()
+  const { deleteChat, togglePinned } = useChats()
   const { chatId } = useChatSession()
   const isMobile = useBreakpoint(768)
 
@@ -53,6 +54,21 @@ export function SidebarItemMenu({
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              togglePinned(chat.id, !chat.pinned)
+            }}
+          >
+            {chat.pinned ? (
+              <PinOff size={16} className="mr-2" />
+            ) : (
+              <Pin size={16} className="mr-2" />
+            )}
+            {chat.pinned ? "Unpin" : "Pin"}
+          </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={(e) => {

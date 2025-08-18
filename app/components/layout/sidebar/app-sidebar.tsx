@@ -18,6 +18,7 @@ import {
   NotePencilIcon,
   X,
 } from "@phosphor-icons/react"
+import { Pin } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { HistoryTrigger } from "../../history/history-trigger"
@@ -27,7 +28,7 @@ import { SidebarProject } from "./sidebar-project"
 export function AppSidebar() {
   const isMobile = useBreakpoint(768)
   const { setOpenMobile } = useSidebar()
-  const { chats, isLoading } = useChats()
+  const { chats, pinnedChats, isLoading } = useChats()
   const params = useParams<{ chatId: string }>()
   const currentChatId = params.chatId
 
@@ -95,6 +96,17 @@ export function AppSidebar() {
             <div className="h-full" />
           ) : hasChats ? (
             <div className="space-y-5">
+              {pinnedChats.length > 0 && (
+                <div className="space-y-5">
+                  <SidebarList
+                    key="pinned"
+                    title="Pinned"
+                    icon={<Pin className="size-3" />}
+                    items={pinnedChats}
+                    currentChatId={currentChatId}
+                  />
+                </div>
+              )}
               {groupedChats?.map((group) => (
                 <SidebarList
                   key={group.name}

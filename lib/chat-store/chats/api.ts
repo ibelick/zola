@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { MODEL_DEFAULT } from "../../config"
 import { fetchClient } from "../../fetch"
-import { API_ROUTE_UPDATE_CHAT_MODEL } from "../../routes"
+import {
+  API_ROUTE_TOGGLE_CHAT_PIN,
+  API_ROUTE_UPDATE_CHAT_MODEL,
+} from "../../routes"
 
 export async function getChatsForUserInDb(userId: string): Promise<Chats[]> {
   const supabase = createClient()
@@ -14,6 +17,8 @@ export async function getChatsForUserInDb(userId: string): Promise<Chats[]> {
     .from("chats")
     .select("*")
     .eq("user_id", userId)
+    .order("pinned", { ascending: false })
+    .order("pinned_at", { ascending: false, nullsFirst: false })
     .order("updated_at", { ascending: false })
 
   if (!data || error) {
@@ -180,6 +185,33 @@ export async function updateChatModel(chatId: string, model: string) {
   }
 }
 
+export async function toggleChatPin(chatId: string, pinned: boolean) {
+  try {
+    const res = await fetchClient(API_ROUTE_TOGGLE_CHAT_PIN, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chatId, pinned }),
+    })
+    const responseData = await res.json()
+    if (!res.ok) {
+      throw new Error(
+        responseData.error ||
+          `Failed to update pinned: ${res.status} ${res.statusText}`
+      )
+    }
+    const all = await getCachedChats()
+    const now = new Date().toISOString()
+    const updated = (all as Chats[]).map((c) =>
+      c.id === chatId ? { ...c, pinned, pinned_at: pinned ? now : null } : c
+    )
+    await writeToIndexedDB("chats", updated)
+    return responseData
+  } catch (error) {
+    console.error("Error updating chat pinned:", error)
+    throw error
+  }
+}
+
 export async function createNewChat(
   userId: string,
   title?: string,
@@ -226,6 +258,8 @@ export async function createNewChat(
       public: responseData.chat.public,
       updated_at: responseData.chat.updated_at,
       project_id: responseData.chat.project_id || null,
+      pinned: responseData.chat.pinned ?? false,
+      pinned_at: responseData.chat.pinned_at ?? null,
     }
 
     await writeToIndexedDB("chats", chat)

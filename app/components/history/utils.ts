@@ -30,6 +30,7 @@ export function groupChatsByDate(
 
   chats.forEach((chat) => {
     if (chat.project_id) return
+    if (chat.pinned) return
 
     if (!chat.updated_at) {
       todayChats.push(chat)

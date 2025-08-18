@@ -1,7 +1,7 @@
 "use client"
 
 import { toast } from "@/components/ui/toast"
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { MODEL_DEFAULT, SYSTEM_PROMPT_DEFAULT } from "../../config"
 import type { Chats } from "../types"
 import {
@@ -36,6 +36,8 @@ interface ChatsContextType {
   getChatById: (id: string) => Chats | undefined
   updateChatModel: (id: string, model: string) => Promise<void>
   bumpChat: (id: string) => Promise<void>
+  togglePinned: (id: string, pinned: boolean) => Promise<void>
+  pinnedChats: Chats[]
 }
 const ChatsContext = createContext<ChatsContextType | null>(null)
 
@@ -137,6 +139,8 @@ export function ChatsProvider({
       public: true,
       updated_at: new Date().toISOString(),
       project_id: null,
+      pinned: false,
+      pinned_at: null,
     }
     setChats((prev) => [optimisticChat, ...prev])
 
@@ -192,6 +196,47 @@ export function ChatsProvider({
     setChats(sorted)
   }
 
+  const togglePinned = async (id: string, pinned: boolean) => {
+    const prevChats = [...chats]
+    const now = new Date().toISOString()
+
+    const updatedChats = prevChats.map((chat) =>
+      chat.id === id
+        ? { ...chat, pinned, pinned_at: pinned ? now : null }
+        : chat
+    )
+    // Sort to maintain proper order of chats
+    const sortedChats = updatedChats.sort((a, b) => {
+      const aTime = new Date(a.updated_at || a.created_at || 0).getTime()
+      const bTime = new Date(b.updated_at || b.created_at || 0).getTime()
+      return bTime - aTime
+    })
+    setChats(sortedChats)
+    try {
+      const { toggleChatPin } = await import("./api")
+      await toggleChatPin(id, pinned)
+    } catch {
+      setChats(prevChats)
+      toast({
+        title: "Failed to update pin",
+        status: "error",
+      })
+    }
+  }
+
+  const pinnedChats = useMemo(
+    () =>
+      chats
+        .filter((c) => c.pinned && !c.project_id)
+        .slice()
+        .sort((a, b) => {
+          const at = a.pinned_at ? +new Date(a.pinned_at) : 0
+          const bt = b.pinned_at ? +new Date(b.pinned_at) : 0
+          return bt - at
+        }),
+    [chats]
+  )
+
   return (
     <ChatsContext.Provider
       value={{
@@ -206,6 +251,8 @@ export function ChatsProvider({
         updateChatModel,
         bumpChat,
         isLoading,
+        togglePinned,
+        pinnedChats,
       }}
     >
       {children}
