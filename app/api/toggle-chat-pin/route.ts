@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
@@ -6,14 +7,14 @@ export async function POST(request: Request) {
     const { chatId, pinned } = await request.json()
 
     if (!chatId || typeof pinned !== "boolean") {
-      return new Response(
-        JSON.stringify({ error: "Missing chatId or pinned" }),
+      return NextResponse.json(
+        { error: "Missing chatId or pinned" },
         { status: 400 }
       )
     }
 
     if (!supabase) {
-      return new Response(JSON.stringify({ success: true }), { status: 200 })
+      return NextResponse.json({ success: true }, { status: 200 })
     }
 
     const toggle = pinned
@@ -26,21 +27,17 @@ export async function POST(request: Request) {
       .eq("id", chatId)
 
     if (error) {
-      return new Response(
-        JSON.stringify({
-          error: "Failed to update pinned",
-          details: error.message,
-        }),
+      return NextResponse.json(
+        { error: "Failed to update pinned" },
         { status: 500 }
       )
     }
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 })
+    return NextResponse.json({ success: true }, { status: 200 })
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: (error as Error).message || "Internal server error",
-      }),
+    console.error("toggle-chat-pin unhandled error:", error)
+    return NextResponse.json(
+      { error: "Internal server error" },
       { status: 500 }
     )
   }
