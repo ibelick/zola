@@ -7,6 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useChats } from "@/lib/chat-store/chats/provider"
 import { Chats } from "@/lib/chat-store/types"
 import {
   Check,
@@ -15,9 +16,10 @@ import {
   TrashSimple,
   X,
 } from "@phosphor-icons/react"
+import { Pin, PinOff } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useMemo, useState } from "react"
 import { formatDate, groupChatsByDate } from "./utils"
 
 type DrawerHistoryProps = {
@@ -37,21 +39,25 @@ export function DrawerHistory({
   isOpen,
   setIsOpen,
 }: DrawerHistoryProps) {
+  const { pinnedChats, togglePinned } = useChats()
   const [searchQuery, setSearchQuery] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState("")
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const params = useParams<{ chatId: string }>()
 
-  const handleOpenChange = useCallback((open: boolean) => {
-    setIsOpen(open)
-    if (!open) {
-      setSearchQuery("")
-      setEditingId(null)
-      setEditTitle("")
-      setDeletingId(null)
-    }
-  }, [setIsOpen])
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open)
+      if (!open) {
+        setSearchQuery("")
+        setEditingId(null)
+        setEditTitle("")
+        setDeletingId(null)
+      }
+    },
+    [setIsOpen]
+  )
 
   const handleEdit = useCallback((chat: Chats) => {
     setEditingId(chat.id)
@@ -216,11 +222,28 @@ export function DrawerHistory({
                   {chat.title || "Untitled Chat"}
                 </span>
                 <span className="mr-2 text-xs font-normal text-gray-500">
-                  {formatDate(chat?.created_at)}
+                  {formatDate(chat?.updated_at || chat?.created_at)}
                 </span>
               </Link>
               <div className="flex items-center">
                 <div className="flex gap-1">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-muted-foreground hover:text-foreground size-8"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      togglePinned(chat.id, !chat.pinned)
+                    }}
+                    type="button"
+                    aria-label={chat.pinned ? "Unpin" : "Pin"}
+                  >
+                    {chat.pinned ? (
+                      <PinOff className="size-4 stroke-[1.5px]" />
+                    ) : (
+                      <Pin className="size-4 stroke-[1.5px]" />
+                    )}
+                  </Button>
                   <Button
                     size="icon"
                     variant="ghost"
@@ -264,6 +287,7 @@ export function DrawerHistory({
       handleCancelDelete,
       handleEdit,
       handleDelete,
+      togglePinned,
     ]
   )
 
@@ -301,17 +325,29 @@ export function DrawerHistory({
                   {filteredChat.map((chat) => renderChatItem(chat))}
                 </div>
               ) : (
-                // When not searching, display grouped by date
-                groupedChats?.map((group) => (
-                  <div key={group.name} className="space-y-0.5">
-                    <h3 className="text-muted-foreground pl-2 text-sm font-medium">
-                      {group.name}
-                    </h3>
-                    <div className="space-y-2">
-                      {group.chats.map((chat) => renderChatItem(chat))}
+                <>
+                  {pinnedChats.length > 0 && (
+                    <div className="space-y-0.5">
+                      <h3 className="text-muted-foreground flex items-center gap-1 pl-2 text-sm font-medium">
+                        <Pin className="size-3" />
+                        Pinned
+                      </h3>
+                      <div className="space-y-2">
+                        {pinnedChats.map((chat) => renderChatItem(chat))}
+                      </div>
                     </div>
-                  </div>
-                ))
+                  )}
+                  {groupedChats?.map((group) => (
+                    <div key={group.name} className="space-y-0.5">
+                      <h3 className="text-muted-foreground pl-2 text-sm font-medium">
+                        {group.name}
+                      </h3>
+                      <div className="space-y-2">
+                        {group.chats.map((chat) => renderChatItem(chat))}
+                      </div>
+                    </div>
+                  ))}
+                </>
               )}
             </div>
           </ScrollArea>
