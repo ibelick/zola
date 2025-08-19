@@ -24,12 +24,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useChats } from "@/lib/chat-store/chats/provider"
 import { useChatSession } from "@/lib/chat-store/session/provider"
 import type { Chats } from "@/lib/chat-store/types"
 import { useChatPreview } from "@/lib/hooks/use-chat-preview"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import { Check, PencilSimple, TrashSimple, X } from "@phosphor-icons/react"
+import { Pin, PinOff } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { ChatPreviewPanel } from "./chat-preview-panel"
@@ -208,6 +210,7 @@ function CommandItemRow({
 }: CommandItemRowProps) {
   const { chatId } = useChatSession()
   const isCurrentChat = chat.id === chatId
+  const { togglePinned } = useChats()
 
   return (
     <>
@@ -220,10 +223,33 @@ function CommandItemRow({
 
       <div className="relative flex min-w-[140px] flex-shrink-0 items-center justify-end">
         <div className="text-muted-foreground mr-2 text-xs transition-opacity duration-200 group-hover:opacity-0">
-          {formatDate(chat.created_at)}
+          {formatDate(chat.updated_at || chat.created_at)}
         </div>
 
         <div className="absolute right-0 flex translate-x-1 gap-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="group/edit text-muted-foreground hover:bg-primary/10 size-8 transition-colors duration-150"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  togglePinned(chat.id, !chat.pinned)
+                }}
+                disabled={!!editingId || !!deletingId}
+                aria-label={chat.pinned ? "Unpin" : "Pin"}
+              >
+                {chat.pinned ? (
+                  <PinOff className="group-hover/edit:text-primary size-3 stroke-[1.5px] transition-colors duration-150" />
+                ) : (
+                  <Pin className="group-hover/edit:text-primary size-3 stroke-[1.5px] transition-colors duration-150" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{chat.pinned ? "Unpin" : "Pin"}</TooltipContent>
+          </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -440,6 +466,8 @@ export function CommandHistory({
     [chatHistory, searchQuery]
   )
 
+  const { pinnedChats } = useChats()
+
   const activePreviewChatId =
     hoveredChatId || (isPreviewPanelHovered ? hoveredChatId : null)
 
@@ -570,6 +598,18 @@ export function CommandHistory({
                 <CommandEmpty>No chat history found.</CommandEmpty>
               )}
 
+              {!searchQuery && pinnedChats.length > 0 && (
+                <CommandGroup
+                  heading={
+                    <div className="flex items-center gap-1 font-semibold break-all">
+                      <Pin className="size-3" />
+                      Pinned
+                    </div>
+                  }
+                >
+                  {pinnedChats.map((chat) => renderChatItem(chat))}
+                </CommandGroup>
+              )}
               {searchQuery ? (
                 <CommandGroup className="p-1.5">
                   {filteredChat.map((chat) => renderChatItem(chat))}
