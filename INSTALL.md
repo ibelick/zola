@@ -196,6 +196,8 @@ CREATE TABLE chats (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   public BOOLEAN DEFAULT FALSE NOT NULL,
+  pinned BOOLEAN DEFAULT FALSE NOT NULL,
+  pinned_at TIMESTAMPTZ NULL,
   CONSTRAINT chats_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT chats_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
