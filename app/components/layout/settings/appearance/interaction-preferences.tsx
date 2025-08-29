@@ -9,7 +9,6 @@ export function InteractionPreferences() {
     setPromptSuggestions,
     setShowToolInvocations,
     setShowConversationPreviews,
-    setMultiModelEnabled,
   } = useUserPreferences()
 
   return (
@@ -56,21 +55,6 @@ export function InteractionPreferences() {
           <Switch
             checked={preferences.showConversationPreviews}
             onCheckedChange={setShowConversationPreviews}
-          />
-        </div>
-      </div>
-      {/* Multi-Model Chat */}
-      <div>
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-medium">Multi-model chat</h3>
-            <p className="text-muted-foreground text-xs">
-              Send prompts to multiple models at once
-            </p>
-          </div>
-          <Switch
-            checked={preferences.multiModelEnabled}
-            onCheckedChange={setMultiModelEnabled}
           />
         </div>
       </div>

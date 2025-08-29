@@ -1,57 +1,41 @@
-# Zola
+# Parley
 
-[zola.chat](https://zola.chat)
+**Parley** is the AI conversation platform for Kennesaw State University faculty and staff.
 
-**Zola** is the open-source chat interface for all your models.
-
-![zola cover](./public/cover_zola.jpg)
+![parley cover](./public/cover_parley.jpg)
 
 ## Features
 
-- Multi-model support: OpenAI, Mistral, Claude, Gemini, Ollama (local models)
-- Bring your own API key (BYOK) support via OpenRouter
+- OpenAI integration with secure API key management
+- Domain-restricted access for @kennesaw.edu users
 - File uploads
 - Clean, responsive UI with light/dark themes
 - Built with Tailwind CSS, shadcn/ui, and prompt-kit
-- Open-source and self-hostable
-- Customizable: user system prompt, multiple layout options
-- Local AI with Ollama: Run models locally with automatic model detection
-- Full MCP support (wip)
+- Research-focused conversation templates
+- Academic collaboration tools
+- Usage tracking and analytics
+- Single-threaded conversations for focused dialogue
 
 ## Quick Start
 
-### Option 1: With OpenAI (Cloud)
+### Local Development
 
 ```bash
-git clone https://github.com/ibelick/zola.git
-cd zola
+git clone https://github.com/kennesaw-edu/parley.git
+cd parley
 npm install
 echo "OPENAI_API_KEY=your-key" > .env.local
+echo "NEXT_PUBLIC_SUPABASE_URL=your-supabase-url" >> .env.local
+echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-key" >> .env.local
 npm run dev
 ```
 
-### Option 2: With Ollama (Local)
+### Deployment
 
 ```bash
-# Install and start Ollama
-curl -fsSL https://ollama.ai/install.sh | sh
-ollama pull llama3.2  # or any model you prefer
-
-# Clone and run Zola
-git clone https://github.com/ibelick/zola.git
-cd zola
-npm install
-npm run dev
-```
-
-Zola will automatically detect your local Ollama models!
-
-### Option 3: Docker with Ollama
-
-```bash
-git clone https://github.com/ibelick/zola.git
-cd zola
-docker-compose -f docker-compose.ollama.yml up
+# Configure environment variables for production
+# Deploy to Vercel or your preferred platform
+vercel --prod
 ```
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)

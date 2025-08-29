@@ -46,6 +46,14 @@ export async function GET(request: Request) {
     )
   }
 
+  // Validate KSU email domain
+  if (!user.email.endsWith('@kennesaw.edu')) {
+    await supabase.auth.signOut()
+    return NextResponse.redirect(
+      `${origin}/auth/error?message=${encodeURIComponent("Access restricted to @kennesaw.edu email addresses")}`
+    )
+  }
+
   try {
     // Try to insert user only if not exists
     const { error: insertError } = await supabaseAdmin.from("users").insert({

@@ -26,9 +26,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Zola",
+  title: "Parley",
   description:
-    "Zola is the open-source interface for AI chat. Multi-model, BYOK-ready, and fully self-hostable. Use Claude, OpenAI, Gemini, local models, and more, all in one place.",
+    "Parley is the AI conversation platform for Kennesaw State University faculty and staff. Engage in research discussions, academic collaboration, and knowledge exploration with OpenAI's advanced models.",
 }
 
 export default async function RootLayout({
@@ -37,7 +37,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const isDev = process.env.NODE_ENV === "development"
-  const isOfficialDeployment = process.env.ZOLA_OFFICIAL === "true"
+  const isOfficialDeployment = process.env.PARLEY_OFFICIAL === "true"
   const userProfile = await getUserProfile()
 
   return (
@@ -46,7 +46,7 @@ export default async function RootLayout({
         <Script
           defer
           src="https://assets.onedollarstats.com/stonks.js"
-          {...(isDev ? { "data-debug": "zola.chat" } : {})}
+          {...(isDev ? { "data-debug": "theparley.org" } : {})}
         />
       ) : null}
       <body

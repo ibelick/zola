@@ -8,114 +8,122 @@ import {
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr"
 
-export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5
-export const AUTH_DAILY_MESSAGE_LIMIT = 1000
-export const REMAINING_QUERY_ALERT_THRESHOLD = 2
-export const DAILY_FILE_UPLOAD_LIMIT = 5
-export const DAILY_LIMIT_PRO_MODELS = 500
+export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5 // For any non-KSU users (should be minimal)
+export const AUTH_DAILY_MESSAGE_LIMIT = 10000 // Effectively unlimited for KSU faculty/staff
+export const REMAINING_QUERY_ALERT_THRESHOLD = 100 // Higher threshold before showing alerts
+export const DAILY_FILE_UPLOAD_LIMIT = 100 // Generous limit for faculty and staff
+export const DAILY_LIMIT_PRO_MODELS = 10000 // Effectively unlimited for KSU faculty/staff
 
 export const NON_AUTH_ALLOWED_MODELS = ["gpt-4.1-nano"]
 
 export const FREE_MODELS_IDS = [
-  "openrouter:deepseek/deepseek-r1:free",
-  "openrouter:meta-llama/llama-3.3-8b-instruct:free",
-  "pixtral-large-latest",
-  "mistral-large-latest",
+  "gpt-3.5-turbo",
+  "gpt-4-turbo",
+  "gpt-4.1",
+  "gpt-4.1-mini",
   "gpt-4.1-nano",
+  "gpt-4.5-preview",
+  "gpt-4o",
+  "gpt-4o-mini",
+  "o1",
+  "o3-mini",
+  "o1-mini",
+  "o3",
+  "o4-mini",
 ]
 
-export const MODEL_DEFAULT = "gpt-4.1-nano"
+export const MODEL_DEFAULT = "gpt-4o-mini"
 
-export const APP_NAME = "Zola"
-export const APP_DOMAIN = "https://zola.chat"
+export const APP_NAME = "Parley"
+export const APP_DOMAIN = "https://theparley.org"
 
 export const SUGGESTIONS = [
   {
-    label: "Summary",
-    highlight: "Summarize",
-    prompt: `Summarize`,
+    label: "Research Planning",
+    highlight: "Help me plan",
+    prompt: `Help me plan`,
     items: [
-      "Summarize the French Revolution",
-      "Summarize the plot of Inception",
-      "Summarize World War II in 5 sentences",
-      "Summarize the benefits of meditation",
+      "Help me plan a literature review for my research proposal",
+      "Help me plan a grant application strategy",
+      "Help me plan my sabbatical research project",
+      "Help me plan a multi-phase research study",
     ],
     icon: Notepad,
   },
   {
-    label: "Code",
-    highlight: "Help me",
-    prompt: `Help me`,
+    label: "Data Analysis",
+    highlight: "Analyze",
+    prompt: `Analyze`,
     items: [
-      "Help me write a function to reverse a string in JavaScript",
-      "Help me create a responsive navbar in HTML/CSS",
-      "Help me write a SQL query to find duplicate emails",
-      "Help me convert this Python function to JavaScript",
+      "Analyze survey data patterns for statistical significance",
+      "Analyze qualitative interview themes",
+      "Analyze research methodology strengths and weaknesses",
+      "Analyze citation trends in my field",
     ],
     icon: Code,
   },
   {
-    label: "Design",
-    highlight: "Design",
-    prompt: `Design`,
+    label: "Academic Writing",
+    highlight: "Help me write",
+    prompt: `Help me write`,
     items: [
-      "Design a color palette for a tech blog",
-      "Design a UX checklist for mobile apps",
-      "Design 5 great font pairings for a landing page",
-      "Design better CTAs with useful tips",
+      "Help me write an abstract for my research paper",
+      "Help me write a compelling research hypothesis",
+      "Help me write a methodology section",
+      "Help me write a grant proposal summary",
     ],
     icon: PaintBrush,
   },
   {
-    label: "Research",
+    label: "Literature Review",
     highlight: "Research",
     prompt: `Research`,
     items: [
-      "Research the pros and cons of remote work",
-      "Research the differences between Apple Vision Pro and Meta Quest",
-      "Research best practices for password security",
-      "Research the latest trends in renewable energy",
+      "Research recent developments in sustainable energy policy",
+      "Research methodological approaches in educational psychology",
+      "Research funding opportunities for interdisciplinary studies",
+      "Research collaboration opportunities with industry partners",
     ],
     icon: BookOpenText,
   },
   {
-    label: "Get inspired",
-    highlight: "Inspire me",
-    prompt: `Inspire me`,
+    label: "Teaching Support",
+    highlight: "Design",
+    prompt: `Design`,
     items: [
-      "Inspire me with a beautiful quote about creativity",
-      "Inspire me with a writing prompt about solitude",
-      "Inspire me with a poetic way to start a newsletter",
-      "Inspire me by describing a peaceful morning in nature",
+      "Design engaging activities for graduate seminars",
+      "Design assessment rubrics for research projects",
+      "Design a course curriculum for advanced students",
+      "Design interactive learning experiences",
     ],
     icon: Sparkle,
   },
   {
-    label: "Think deeply",
-    highlight: "Reflect on",
-    prompt: `Reflect on`,
+    label: "Critical Thinking",
+    highlight: "Evaluate",
+    prompt: `Evaluate`,
     items: [
-      "Reflect on why we fear uncertainty",
-      "Reflect on what makes a conversation meaningful",
-      "Reflect on the concept of time in a simple way",
-      "Reflect on what it means to live intentionally",
+      "Evaluate the ethical implications of this research approach",
+      "Evaluate competing theories in my field",
+      "Evaluate the validity of research instruments",
+      "Evaluate potential research collaboration benefits",
     ],
     icon: Brain,
   },
   {
-    label: "Learn gently",
+    label: "Knowledge Synthesis",
     highlight: "Explain",
     prompt: `Explain`,
     items: [
-      "Explain quantum physics like I'm 10",
-      "Explain stoicism in simple terms",
-      "Explain how a neural network works",
-      "Explain the difference between AI and AGI",
+      "Explain complex theories to undergraduate students",
+      "Explain research findings to non-academic stakeholders",
+      "Explain the broader implications of my research",
+      "Explain interdisciplinary connections in my work",
     ],
     icon: Lightbulb,
   },
 ]
 
-export const SYSTEM_PROMPT_DEFAULT = `You are Zola, a thoughtful and clear assistant. Your tone is calm, minimal, and human. You write with intention—never too much, never too little. You avoid clichés, speak simply, and offer helpful, grounded answers. When needed, you ask good questions. You don't try to impress—you aim to clarify. You may use metaphors if they bring clarity, but you stay sharp and sincere. You're here to help the user think clearly and move forward, not to overwhelm or overperform.`
+export const SYSTEM_PROMPT_DEFAULT = `You are Parley, an AI assistant designed specifically for Kennesaw State University faculty and staff. You provide thoughtful, academically-oriented support for research, teaching, and administrative tasks. Your tone is professional yet approachable, scholarly but accessible. You understand the academic environment and can help with literature reviews, research planning, grant writing, course design, data analysis, and academic collaboration. You ask insightful questions to clarify research objectives and offer evidence-based suggestions. You respect the rigor of academic work while making complex topics understandable.`
 
 export const MESSAGE_MAX_LENGTH = 10000

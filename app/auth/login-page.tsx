@@ -1,9 +1,8 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { signInWithGoogle } from "@/lib/api"
+import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
-import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { HeaderGoBack } from "../components/header-go-back"
@@ -11,29 +10,43 @@ import { HeaderGoBack } from "../components/header-go-back"
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [email, setEmail] = useState("")
+  const [isEmailSent, setIsEmailSent] = useState(false)
 
-  async function handleSignInWithGoogle() {
+  async function handleSignInWithMagicLink() {
     const supabase = createClient()
 
     if (!supabase) {
       throw new Error("Supabase is not configured")
     }
 
+    // Validate KSU email domain
+    if (!email.endsWith('@kennesaw.edu')) {
+      setError('Please use your @kennesaw.edu email address')
+      return
+    }
+
     try {
       setIsLoading(true)
       setError(null)
 
-      const data = await signInWithGoogle(supabase)
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
 
-      // Redirect to the provider URL
-      if (data?.url) {
-        window.location.href = data.url
+      if (error) {
+        throw error
       }
+
+      setIsEmailSent(true)
     } catch (err: unknown) {
-      console.error("Error signing in with Google:", err)
+      console.error('Error sending magic link:', err)
       setError(
         (err as Error).message ||
-          "An unexpected error occurred. Please try again."
+          'An unexpected error occurred. Please try again.'
       )
     } finally {
       setIsLoading(false)
@@ -48,10 +61,10 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <h1 className="text-foreground text-3xl font-medium tracking-tight sm:text-4xl">
-              Welcome to Zola
+              Welcome to Parley
             </h1>
             <p className="text-muted-foreground mt-3">
-              Sign in below to increase your message limits.
+              KSU's AI conversation platform for faculty and staff research collaboration.
             </p>
           </div>
           {error && (
@@ -59,39 +72,69 @@ export default function LoginPage() {
               {error}
             </div>
           )}
-          <div className="mt-8">
-            <Button
-              variant="secondary"
-              className="w-full text-base sm:text-base"
-              size="lg"
-              onClick={handleSignInWithGoogle}
-              disabled={isLoading}
-            >
-              <img
-                src="https://www.google.com/favicon.ico"
-                alt="Google logo"
-                width={20}
-                height={20}
-                className="mr-2 size-4"
-              />
-              <span>
-                {isLoading ? "Connecting..." : "Continue with Google"}
-              </span>
-            </Button>
-          </div>
+          {!isEmailSent ? (
+            <div className="mt-8 space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium mb-2">
+                  KSU Email Address
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.name@kennesaw.edu"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full"
+                  disabled={isLoading}
+                />
+              </div>
+              <Button
+                className="w-full text-base sm:text-base"
+                size="lg"
+                onClick={handleSignInWithMagicLink}
+                disabled={isLoading || !email}
+              >
+                {isLoading ? "Sending..." : "Send Magic Link"}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                Only @kennesaw.edu email addresses are supported
+              </p>
+            </div>
+          ) : (
+            <div className="mt-8 text-center space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 className="text-green-800 font-medium mb-2">Check your email</h3>
+                <p className="text-green-700 text-sm">
+                  We've sent a magic link to <strong>{email}</strong>. 
+                  Click the link in your email to sign in.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEmailSent(false)
+                  setEmail("")
+                  setError(null)
+                }}
+              >
+                Use different email
+              </Button>
+            </div>
+          )}
         </div>
       </main>
 
       <footer className="text-muted-foreground py-6 text-center text-sm">
         {/* @todo */}
         <p>
-          By continuing, you agree to our{" "}
+          Kennesaw State University - Office of Research{" "}
+          <br />
           <Link href="/" className="text-foreground hover:underline">
-            Terms of Service
+            Terms of Use
           </Link>{" "}
-          and{" "}
+          |{" "}
           <Link href="/" className="text-foreground hover:underline">
-            Privacy Policy
+            Privacy Notice
           </Link>
         </p>
       </footer>
