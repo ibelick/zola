@@ -16,6 +16,7 @@ import { InteractionPreferences } from "./appearance/interaction-preferences"
 import { LayoutSettings } from "./appearance/layout-settings"
 import { ThemeSelection } from "./appearance/theme-selection"
 import { AccountManagement } from "./general/account-management"
+import { Attribution } from "./general/attribution"
 import { UserProfile } from "./general/user-profile"
 import { ModelsSettings } from "./models/models-settings"
 
@@ -93,6 +94,7 @@ export function SettingsContent({
                   <AccountManagement />
                 </>
               )}
+              <Attribution />
             </TabsContent>
 
             <TabsContent value="appearance" className="space-y-6 px-6">
@@ -154,6 +156,7 @@ export function SettingsContent({
                     <AccountManagement />
                   </>
                 )}
+                <Attribution />
               </TabsContent>
 
               <TabsContent value="appearance" className="mt-0 space-y-6">

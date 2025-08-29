@@ -2,25 +2,29 @@ export function AppInfoContent() {
   return (
     <div className="space-y-4">
       <p className="text-foreground leading-relaxed">
-        <span className="font-medium">Zola</span> is the open-source interface
-        for AI chat.
+        <span className="font-medium">Parley</span> is the AI conversation platform
+        for Kennesaw State University faculty and staff.
         <br />
-        Multi-model, BYOK-ready, and fully self-hostable.
+        Built specifically for academic research and collaboration.
         <br />
-        Use Claude, OpenAI, Gemini, local models, and more, all in one place.
+        Powered by OpenAI's advanced models with secure, university-managed access.
         <br />
       </p>
       <p className="text-foreground leading-relaxed">
-        The code is available on{" "}
+        Designed for academic excellence with research-focused features,
+        unlimited usage for KSU community, and enterprise-grade security.
+      </p>
+      <p className="text-foreground text-xs opacity-70">
+        Based on the open-source{" "}
         <a
           href="https://github.com/ibelick/zola"
           target="_blank"
           rel="noopener noreferrer"
           className="underline"
         >
-          GitHub
-        </a>
-        .
+          Zola project
+        </a>{" "}
+        by @ibelick
       </p>
     </div>
   )

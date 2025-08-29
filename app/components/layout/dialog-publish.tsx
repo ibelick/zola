@@ -58,7 +58,7 @@ export function DialogPublish() {
   const shareOnX = () => {
     setOpenDialog(false)
 
-    const X_TEXT = `Check out this public page I created with Zola! ${publicLink}`
+    const X_TEXT = `Check out this public page I created with Parley! ${publicLink}`
     window.open(`https://x.com/intent/tweet?text=${X_TEXT}`, "_blank")
   }
 
