@@ -2,6 +2,8 @@
 
 **Parley** is the AI conversation platform for Kennesaw State University faculty and staff.
 
+Built with the open-source [Zola](https://github.com/ibelick/zola) project by [@ibelick](https://github.com/ibelick).
+
 ![parley cover](./public/cover_parley.jpg)
 
 ## Features
@@ -21,7 +23,7 @@
 ### Local Development
 
 ```bash
-git clone https://github.com/kennesaw-edu/parley.git
+git clone https://github.com/ngoldbla/parley.git
 cd parley
 npm install
 echo "OPENAI_API_KEY=your-key" > .env.local
@@ -38,12 +40,13 @@ npm run dev
 vercel --prod
 ```
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ngoldbla/parley)
 
 To unlock features like auth, file uploads, see [INSTALL.md](./INSTALL.md).
 
 ## Built with
 
+- [Zola](https://github.com/ibelick/zola) — open-source AI chat interface foundation
 - [prompt-kit](https://prompt-kit.com/) — AI components
 - [shadcn/ui](https://ui.shadcn.com) — core components
 - [motion-primitives](https://motion-primitives.com) — animated components
@@ -56,10 +59,18 @@ To unlock features like auth, file uploads, see [INSTALL.md](./INSTALL.md).
   <img alt="Vercel OSS Program" src="https://vercel.com/oss/program-badge.svg" />
 </a>
 
+## Acknowledgments
+
+This project is built upon the excellent open-source [Zola](https://github.com/ibelick/zola) project by [@ibelick](https://github.com/ibelick). Zola provides a robust foundation for AI chat interfaces with multi-model support and self-hosting capabilities.
+
+**Original Project**: [github.com/ibelick/zola](https://github.com/ibelick/zola)
+
+Parley customizes and extends Zola specifically for academic use at Kennesaw State University, with features tailored for faculty and staff research collaboration.
+
 ## License
 
 Apache License 2.0
 
 ## Notes
 
-This is a beta release. The codebase is evolving and may change.
+This is a customized version for Kennesaw State University. For the original open-source project, visit [Zola](https://github.com/ibelick/zola).
