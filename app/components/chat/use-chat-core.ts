@@ -1,3 +1,4 @@
+import { syncRecentMessages } from "@/app/components/chat/syncRecentMessages"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
 import { getOrCreateGuestUserId } from "@/lib/api"
@@ -100,7 +101,15 @@ export function useChatCore({
     api: API_ROUTE_CHAT,
     initialMessages,
     initialInput: draftValue,
-    onFinish: cacheAndAddMessage,
+    onFinish: async (m) => {
+      cacheAndAddMessage(m)
+      try {
+        if (!chatId) return
+        await syncRecentMessages(chatId, setMessages, 2)
+      } catch (error) {
+        console.error("Message ID reconciliation failed: ", error)
+      }
+    },
     onError: handleError,
   })
 
