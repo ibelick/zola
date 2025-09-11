@@ -10,7 +10,7 @@ type MessageProps = {
   attachments?: MessageType["experimental_attachments"]
   isLast?: boolean
   onDelete: (id: string) => void
-  onEdit: (id: string, newText: string) => void
+  onEdit: (id: string, newText: string) => Promise<void> | void
   onReload: () => void
   hasScrollAnchor?: boolean
   parts?: MessageType["parts"]
@@ -25,7 +25,6 @@ export function Message({
   id,
   attachments,
   isLast,
-  onDelete,
   onEdit,
   onReload,
   hasScrollAnchor,
@@ -49,7 +48,6 @@ export function Message({
         copyToClipboard={copyToClipboard}
         onReload={onReload}
         onEdit={onEdit}
-        onDelete={onDelete}
         id={id}
         hasScrollAnchor={hasScrollAnchor}
         attachments={attachments}

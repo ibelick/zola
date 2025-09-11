@@ -89,7 +89,7 @@ export function Chat() {
   )
 
   // Chat operations (utils + handlers) - created first
-  const { checkLimitsAndNotify, ensureChatExists, handleDelete, handleEdit } =
+  const { checkLimitsAndNotify, ensureChatExists, handleDelete } =
     useChatOperations({
       isAuthenticated,
       chatId,
@@ -116,6 +116,7 @@ export function Chat() {
     handleSuggestion,
     handleReload,
     handleInputChange,
+    submitEdit,
   } = useChatCore({
     initialMessages,
     draftValue,
@@ -140,7 +141,7 @@ export function Chat() {
       messages,
       status,
       onDelete: handleDelete,
-      onEdit: handleEdit,
+      onEdit: submitEdit,
       onReload: handleReload,
       onQuote: handleQuotedSelected,
     }),
@@ -148,7 +149,7 @@ export function Chat() {
       messages,
       status,
       handleDelete,
-      handleEdit,
+      submitEdit,
       handleReload,
       handleQuotedSelected,
     ]

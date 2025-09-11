@@ -248,6 +248,128 @@ export function useChatCore({
     setIsSubmitting,
   ])
 
+  const submitEdit = useCallback(
+    async (messageId: string, newContent: string) => {
+      if (!newContent.trim()) return
+
+      if (!chatId) {
+        toast({ title: "Missing chat.", status: "error" })
+        return
+      }
+
+      // Find edited message
+      const editIndex = messages.findIndex(
+        (m) => String(m.id) === String(messageId)
+      )
+      if (editIndex === -1) {
+        toast({ title: "Message not found", status: "error" })
+        return
+      }
+
+      const target = messages[editIndex]
+      const cutoffIso = target?.createdAt?.toISOString()
+      if (!cutoffIso) {
+        console.error("Unable to locate message timestamp.")
+        return
+      }
+
+      if (newContent.length > MESSAGE_MAX_LENGTH) {
+        toast({
+          title: `The message you submitted was too long, please submit something shorter. (Max ${MESSAGE_MAX_LENGTH} characters)`,
+          status: "error",
+        })
+        return
+      }
+
+      // Store original messages for potential rollback
+      const originalMessages = [...messages]
+
+      const optimisticId = `optimistic-edit-${Date.now().toString()}`
+      const optimisticEditedMessage = {
+        id: optimisticId,
+        content: newContent,
+        role: "user" as const,
+        createdAt: new Date(),
+      }
+
+      try {
+        const trimmedMessages = messages.slice(0, editIndex)
+        setMessages([...trimmedMessages, optimisticEditedMessage])
+
+        try {
+          const { writeToIndexedDB } = await import("@/lib/chat-store/persist")
+          await writeToIndexedDB("messages", {
+            id: chatId,
+            messages: trimmedMessages,
+          })
+        } catch {}
+
+        // Get user validation
+        const uid = await getOrCreateGuestUserId(user)
+        if (!uid) {
+          setMessages(originalMessages)
+          toast({ title: "Please sign in and try again.", status: "error" })
+          return
+        }
+
+        const allowed = await checkLimitsAndNotify(uid)
+        if (!allowed) {
+          setMessages(originalMessages)
+          return
+        }
+
+        const currentChatId = await ensureChatExists(uid, newContent)
+        if (!currentChatId) {
+          setMessages(originalMessages)
+          return
+        }
+
+        const options = {
+          body: {
+            chatId: currentChatId,
+            userId: uid,
+            model: selectedModel,
+            isAuthenticated,
+            systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
+            enableSearch,
+            editCutoffTimestamp: cutoffIso, // Backend will delete messages from this timestamp
+          },
+        }
+
+        // Remove optimistic message before real message is added
+        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+
+        append(
+          {
+            role: "user",
+            content: newContent,
+          },
+          options
+        )
+
+        bumpChat(chatId)
+      } catch (error) {
+        console.error("Edit failed:", error)
+        setMessages(originalMessages)
+        toast({ title: "Failed to apply edit", status: "error" })
+      }
+    },
+    [
+      chatId,
+      messages,
+      user,
+      checkLimitsAndNotify,
+      ensureChatExists,
+      selectedModel,
+      isAuthenticated,
+      systemPrompt,
+      enableSearch,
+      append,
+      setMessages,
+      bumpChat,
+    ]
+  )
+
   // Handle suggestion
   const handleSuggestion = useCallback(
     async (suggestion: string) => {
@@ -379,5 +501,6 @@ export function useChatCore({
     handleSuggestion,
     handleReload,
     handleInputChange,
+    submitEdit,
   }
 }
