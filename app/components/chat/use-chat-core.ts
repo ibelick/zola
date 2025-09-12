@@ -299,6 +299,7 @@ export function useChatCore({
         content: newContent,
         role: "user" as const,
         createdAt: new Date(),
+        experimental_attachments: target.experimental_attachments || undefined,
       }
 
       try {
@@ -343,6 +344,8 @@ export function useChatCore({
             enableSearch,
             editCutoffTimestamp: cutoffIso, // Backend will delete messages from this timestamp
           },
+          experimental_attachments:
+            target.experimental_attachments || undefined,
         }
 
         // Remove optimistic message before real message is added
