@@ -26,7 +26,7 @@ import {
   PencilSimpleSlashIcon,
 } from "@phosphor-icons/react"
 import Image from "next/image"
-import React, { useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 
 const getTextFromDataUrl = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1]
@@ -57,9 +57,8 @@ export function MessageUser({
 }: MessageUserProps) {
   const [editInput, setEditInput] = useState(children)
   const [isEditing, setIsEditing] = useState(false)
-  const [isUpdating, setIsUpdating] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
-  // const { editMessageContent, isEditing: isGlobalEditing } = useMessages()
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleEditCancel = () => {
     setIsEditing(false)
@@ -67,9 +66,8 @@ export function MessageUser({
   }
 
   const handleSave = async () => {
-    if (!editInput.trim() || isUpdating) return
+    if (!editInput.trim()) return
 
-    setIsUpdating(true)
     try {
       if (isSupabaseEnabled && id && !/^\d+$/.test(id)) {
         toast({
@@ -84,7 +82,6 @@ export function MessageUser({
       setEditInput(children) // Reset on failure
     } finally {
       setIsEditing(false)
-      setIsUpdating(false)
     }
   }
 
@@ -92,6 +89,14 @@ export function MessageUser({
     setIsEditing(true)
     setEditInput(children)
   }
+
+  useEffect(() => {
+    if (!isEditing) return
+    const editTextarea = textareaRef.current
+    if (!editTextarea) return
+    editTextarea.style.height = "auto"
+    editTextarea.style.height = `${Math.min(editTextarea.scrollHeight, editTextarea.scrollHeight)}px`
+  }, [editInput, isEditing])
 
   return (
     <MessageContainer
@@ -145,12 +150,13 @@ export function MessageUser({
       ))}
       {isEditing ? (
         <div
-          className="bg-accent relative flex min-w-[180px] flex-col gap-2 rounded-3xl px-5 py-2.5"
+          className="bg-accent relative flex w-full max-w-xl min-w-[180px] flex-col gap-2 rounded-3xl px-5 py-2.5"
           style={{
             width: contentRef.current?.offsetWidth,
           }}
         >
           <textarea
+            ref={textareaRef}
             className="w-full resize-none bg-transparent outline-none"
             value={editInput}
             onChange={(e) => setEditInput(e.target.value)}
@@ -163,24 +169,18 @@ export function MessageUser({
                 handleEditCancel()
               }
             }}
-            disabled={isUpdating}
             autoFocus
+            style={{
+              maxHeight: "50vh",
+              overflowY: "auto",
+            }}
           />
           <div className="flex justify-end gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleEditCancel}
-              disabled={isUpdating}
-            >
+            <Button size="sm" variant="ghost" onClick={handleEditCancel}>
               Cancel
             </Button>
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={isUpdating || !editInput.trim()}
-            >
-              {isUpdating ? "Saving..." : "Save"}
+            <Button size="sm" onClick={handleSave} disabled={!editInput.trim()}>
+              Save
             </Button>
           </div>
         </div>

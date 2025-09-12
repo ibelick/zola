@@ -250,6 +250,15 @@ export function useChatCore({
 
   const submitEdit = useCallback(
     async (messageId: string, newContent: string) => {
+      // Block edits while sending/streaming
+      if (isSubmitting || status === "submitted" || status === "streaming") {
+        toast({
+          title: "Please wait until the current message finishes sending.",
+          status: "error",
+        })
+        return
+      }
+
       if (!newContent.trim()) return
 
       if (!chatId) {
@@ -367,6 +376,8 @@ export function useChatCore({
       append,
       setMessages,
       bumpChat,
+      isSubmitting,
+      status,
     ]
   )
 
