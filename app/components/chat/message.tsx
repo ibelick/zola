@@ -17,6 +17,7 @@ type MessageProps = {
   status?: "streaming" | "ready" | "submitted" | "error"
   className?: string
   onQuote?: (text: string, messageId: string) => void
+  messageGroupId?: string | null
 }
 
 export function Message({
@@ -32,6 +33,7 @@ export function Message({
   status,
   className,
   onQuote,
+  messageGroupId,
 }: MessageProps) {
   const [copied, setCopied] = useState(false)
 
@@ -52,6 +54,7 @@ export function Message({
         hasScrollAnchor={hasScrollAnchor}
         attachments={attachments}
         className={className}
+        messageGroupId={messageGroupId}
       >
         {children}
       </MessageUser>

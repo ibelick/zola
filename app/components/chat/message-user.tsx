@@ -43,6 +43,7 @@ export type MessageUserProps = {
   className?: string
   onReload?: () => void
   onEdit?: (id: string, newText: string) => void
+  messageGroupId?: string | null
 }
 
 export function MessageUser({
@@ -54,6 +55,7 @@ export function MessageUser({
   id,
   className,
   onEdit,
+  messageGroupId,
 }: MessageUserProps) {
   const [editInput, setEditInput] = useState(children)
   const [isEditing, setIsEditing] = useState(false)
@@ -222,24 +224,27 @@ export function MessageUser({
             )}
           </button>
         </MessageAction>
-        <MessageAction
-          tooltip={isEditing ? "Cancel edit" : "Edit message"}
-          side="bottom"
-          delayDuration={0}
-        >
-          <button
-            className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
-            aria-label={isEditing ? "Cancel edit" : "Edit message"}
-            onClick={isEditing ? handleEditCancel : handleEditStart}
-            type="button"
+        {messageGroupId === null && (
+          // Enabled if NOT multi-model chat
+          <MessageAction
+            tooltip={isEditing ? "Cancel edit" : "Edit message"}
+            side="bottom"
+            delayDuration={0}
           >
-            {isEditing ? (
-              <PencilSimpleSlashIcon className="size-4" />
-            ) : (
-              <PencilSimpleIcon className="size-4" />
-            )}
-          </button>
-        </MessageAction>
+            <button
+              className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
+              aria-label={isEditing ? "Cancel edit" : "Edit message"}
+              onClick={isEditing ? handleEditCancel : handleEditStart}
+              type="button"
+            >
+              {isEditing ? (
+                <PencilSimpleSlashIcon className="size-4" />
+              ) : (
+                <PencilSimpleIcon className="size-4" />
+              )}
+            </button>
+          </MessageAction>
+        )}
       </MessageActions>
     </MessageContainer>
   )

@@ -3,7 +3,7 @@ import { isSupabaseEnabled } from "@/lib/supabase/config"
 import type { Message as MessageAISDK } from "ai"
 import { readFromIndexedDB, writeToIndexedDB } from "../persist"
 
-interface ExtendedMessageAISDK extends MessageAISDK {
+export interface ExtendedMessageAISDK extends MessageAISDK {
   message_group_id?: string
   model?: string
 }

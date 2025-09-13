@@ -4,6 +4,7 @@ import {
 } from "@/components/prompt-kit/chat-container"
 import { Loader } from "@/components/prompt-kit/loader"
 import { ScrollButton } from "@/components/prompt-kit/scroll-button"
+import { ExtendedMessageAISDK } from "@/lib/chat-store/messages/api"
 import { Message as MessageType } from "@ai-sdk/react"
 import { useRef } from "react"
 import { Message } from "./message"
@@ -64,6 +65,9 @@ export function Conversation({
                 parts={message.parts}
                 status={status}
                 onQuote={onQuote}
+                messageGroupId={
+                  (message as ExtendedMessageAISDK).message_group_id ?? null
+                }
               >
                 {message.content}
               </Message>
