@@ -84,18 +84,20 @@ export function ChatsProvider({
   }
 
   const updateTitle = async (id: string, title: string) => {
-    const prev = [...chats]
-    const updatedChatWithNewTitle = prev.map((c) =>
-      c.id === id ? { ...c, title, updated_at: new Date().toISOString() } : c
-    )
-    const sorted = updatedChatWithNewTitle.sort(
-      (a, b) => +new Date(b.updated_at || "") - +new Date(a.updated_at || "")
-    )
-    setChats(sorted)
+    let previousState: Chats[] | null = null
+    setChats((prev) => {
+      previousState = prev
+      const updatedChatWithNewTitle = prev.map((c) =>
+        c.id === id ? { ...c, title, updated_at: new Date().toISOString() } : c
+      )
+      return updatedChatWithNewTitle.sort(
+        (a, b) => +new Date(b.updated_at || "") - +new Date(a.updated_at || "")
+      )
+    })
     try {
       await updateChatTitle(id, title)
     } catch {
-      setChats(prev)
+      if (previousState) setChats(previousState)
       toast({ title: "Failed to update title", status: "error" })
     }
   }
@@ -186,14 +188,14 @@ export function ChatsProvider({
   }
 
   const bumpChat = async (id: string) => {
-    const prev = [...chats]
-    const updatedChatWithNewUpdatedAt = prev.map((c) =>
-      c.id === id ? { ...c, updated_at: new Date().toISOString() } : c
-    )
-    const sorted = updatedChatWithNewUpdatedAt.sort(
-      (a, b) => +new Date(b.updated_at || "") - +new Date(a.updated_at || "")
-    )
-    setChats(sorted)
+    setChats((prev) => {
+      const updatedChatWithNewUpdatedAt = prev.map((c) =>
+        c.id === id ? { ...c, updated_at: new Date().toISOString() } : c
+      )
+      return updatedChatWithNewUpdatedAt.sort(
+        (a, b) => +new Date(b.updated_at || "") - +new Date(a.updated_at || "")
+      )
+    })
   }
 
   const togglePinned = async (id: string, pinned: boolean) => {

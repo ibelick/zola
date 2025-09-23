@@ -2,6 +2,7 @@ import { syncRecentMessages } from "@/app/components/chat/syncRecentMessages"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
 import { getOrCreateGuestUserId } from "@/lib/api"
+import { useChats } from "@/lib/chat-store/chats/provider"
 import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
@@ -68,6 +69,9 @@ export function useChatCore({
   // Search params handling
   const searchParams = useSearchParams()
   const prompt = searchParams.get("prompt")
+
+  // Chats operations
+  const { updateTitle } = useChats()
 
   // Handle errors directly in onError callback
   const handleError = useCallback((error: Error) => {
@@ -362,6 +366,13 @@ export function useChatCore({
         // Remove optimistic message before real message is added
         setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
 
+        // If this is an edit of the very first user message, update chat title
+        if (editIndex === 0 && target.role === "user") {
+          try {
+            await updateTitle(currentChatId, newContent)
+          } catch {}
+        }
+
         append(
           {
             role: "user",
@@ -390,6 +401,7 @@ export function useChatCore({
       append,
       setMessages,
       bumpChat,
+      updateTitle,
       isSubmitting,
       status,
     ]
