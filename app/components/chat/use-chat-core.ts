@@ -104,8 +104,15 @@ export function useChatCore({
     onFinish: async (m) => {
       cacheAndAddMessage(m)
       try {
-        if (!chatId) return
-        await syncRecentMessages(chatId, setMessages, 2)
+        const effectiveChatId =
+          chatId ||
+          prevChatIdRef.current ||
+          (typeof window !== "undefined"
+            ? localStorage.getItem("guestChatId")
+            : null)
+
+        if (!effectiveChatId) return
+        await syncRecentMessages(effectiveChatId, setMessages, 2)
       } catch (error) {
         console.error("Message ID reconciliation failed: ", error)
       }
@@ -173,6 +180,8 @@ export function useChatCore({
         cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
+
+      prevChatIdRef.current = currentChatId
 
       if (input.length > MESSAGE_MAX_LENGTH) {
         toast({
@@ -334,6 +343,8 @@ export function useChatCore({
           return
         }
 
+        prevChatIdRef.current = currentChatId
+
         const options = {
           body: {
             chatId: currentChatId,
@@ -359,7 +370,7 @@ export function useChatCore({
           options
         )
 
-        bumpChat(chatId)
+        bumpChat(currentChatId)
       } catch (error) {
         console.error("Edit failed:", error)
         setMessages(originalMessages)
@@ -418,6 +429,8 @@ export function useChatCore({
           setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
           return
         }
+
+        prevChatIdRef.current = currentChatId
 
         const options = {
           body: {
