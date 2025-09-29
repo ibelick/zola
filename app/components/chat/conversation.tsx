@@ -16,6 +16,7 @@ type ConversationProps = {
   onEdit: (id: string, newText: string) => void
   onReload: () => void
   onQuote?: (text: string, messageId: string) => void
+  isUserAuthenticated?: boolean
 }
 
 export function Conversation({
@@ -25,6 +26,7 @@ export function Conversation({
   onEdit,
   onReload,
   onQuote,
+  isUserAuthenticated,
 }: ConversationProps) {
   const initialMessageCount = useRef(messages.length)
 
@@ -68,6 +70,7 @@ export function Conversation({
                 messageGroupId={
                   (message as ExtendedMessageAISDK).message_group_id ?? null
                 }
+                isUserAuthenticated={isUserAuthenticated}
               >
                 {message.content}
               </Message>

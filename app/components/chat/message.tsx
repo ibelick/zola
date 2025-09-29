@@ -18,6 +18,7 @@ type MessageProps = {
   className?: string
   onQuote?: (text: string, messageId: string) => void
   messageGroupId?: string | null
+  isUserAuthenticated?: boolean
 }
 
 export function Message({
@@ -34,6 +35,7 @@ export function Message({
   className,
   onQuote,
   messageGroupId,
+  isUserAuthenticated,
 }: MessageProps) {
   const [copied, setCopied] = useState(false)
 
@@ -55,6 +57,7 @@ export function Message({
         attachments={attachments}
         className={className}
         messageGroupId={messageGroupId}
+        isUserAuthenticated={isUserAuthenticated}
       >
         {children}
       </MessageUser>
