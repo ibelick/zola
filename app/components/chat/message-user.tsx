@@ -71,9 +71,11 @@ export function MessageUser({
 
   const handleSave = async () => {
     if (!editInput.trim()) return
+    const UUIDLength = 36
 
     try {
-      if (isSupabaseEnabled && id && !/^\d+$/.test(id)) {
+      if (isSupabaseEnabled && id && id.length !== UUIDLength) {
+        // Message IDs failed to sync
         toast({
           title: "Oops, something went wrong",
           description: "Please refresh your browser and try again.",
