@@ -363,9 +363,6 @@ export function useChatCore({
             target.experimental_attachments || undefined,
         }
 
-        // Remove optimistic message before real message is added
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-
         // If this is an edit of the very first user message, update chat title
         if (editIndex === 0 && target.role === "user") {
           try {
@@ -380,6 +377,9 @@ export function useChatCore({
           },
           options
         )
+
+        // Remove optimistic message
+        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
 
         bumpChat(currentChatId)
       } catch (error) {
