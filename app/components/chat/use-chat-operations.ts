@@ -71,50 +71,48 @@ export function useChatOperations({
   }
 
   const ensureChatExists = async (userId: string, input: string) => {
+    if (chatId) return chatId
+
     if (!isAuthenticated) {
       const storedGuestChatId = localStorage.getItem("guestChatId")
       if (storedGuestChatId) return storedGuestChatId
     }
 
-    if (messages.length === 0) {
-      try {
-        const newChat = await createNewChat(
-          userId,
-          input,
-          selectedModel,
-          isAuthenticated,
-          systemPrompt
-        )
+    try {
+      const newChat = await createNewChat(
+        userId,
+        input,
+        selectedModel,
+        isAuthenticated,
+        systemPrompt
+      )
 
-        if (!newChat) return null
-        if (isAuthenticated) {
-          window.history.pushState(null, "", `/c/${newChat.id}`)
-        } else {
-          localStorage.setItem("guestChatId", newChat.id)
-        }
-
-        return newChat.id
-      } catch (err: unknown) {
-        let errorMessage = "Something went wrong."
-        try {
-          const errorObj = err as { message?: string }
-          if (errorObj.message) {
-            const parsed = JSON.parse(errorObj.message)
-            errorMessage = parsed.error || errorMessage
-          }
-        } catch {
-          const errorObj = err as { message?: string }
-          errorMessage = errorObj.message || errorMessage
-        }
-        toast({
-          title: errorMessage,
-          status: "error",
-        })
-        return null
+      if (!newChat) return null
+      if (isAuthenticated) {
+        window.history.pushState(null, "", `/c/${newChat.id}`)
+      } else {
+        localStorage.setItem("guestChatId", newChat.id)
       }
-    }
 
-    return chatId
+      return newChat.id
+    } catch (err: unknown) {
+      let errorMessage = "Something went wrong."
+      try {
+        const errorObj = err as { message?: string }
+        if (errorObj.message) {
+          const parsed = JSON.parse(errorObj.message)
+          errorMessage = parsed.error || errorMessage
+        }
+      } catch {
+        const errorObj = err as { message?: string }
+        errorMessage = errorObj.message || errorMessage
+      }
+      toast({
+        title: errorMessage,
+        status: "error",
+      })
+      return null
+    }
   }
 
   // Message handlers

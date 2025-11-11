@@ -23,6 +23,7 @@ type ChatRequest = {
   systemPrompt: string
   enableSearch: boolean
   message_group_id?: string
+  editCutoffTimestamp?: string
 }
 
 export async function POST(req: Request) {
@@ -36,6 +37,7 @@ export async function POST(req: Request) {
       systemPrompt,
       enableSearch,
       message_group_id,
+      editCutoffTimestamp,
     } = (await req.json()) as ChatRequest
 
     if (!messages || !chatId || !userId) {
@@ -57,6 +59,19 @@ export async function POST(req: Request) {
     }
 
     const userMessage = messages[messages.length - 1]
+
+    // If editing, delete messages from cutoff BEFORE saving the new user message
+    if (supabase && editCutoffTimestamp) {
+      try {
+        await supabase
+          .from("messages")
+          .delete()
+          .eq("chat_id", chatId)
+          .gte("created_at", editCutoffTimestamp)
+      } catch (err) {
+        console.error("Failed to delete messages from cutoff:", err)
+      }
+    }
 
     if (supabase && userMessage?.role === "user") {
       await logUserMessage({

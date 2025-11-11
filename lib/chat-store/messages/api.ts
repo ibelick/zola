@@ -3,6 +3,11 @@ import { isSupabaseEnabled } from "@/lib/supabase/config"
 import type { Message as MessageAISDK } from "ai"
 import { readFromIndexedDB, writeToIndexedDB } from "../persist"
 
+export interface ExtendedMessageAISDK extends MessageAISDK {
+  message_group_id?: string
+  model?: string
+}
+
 export async function getMessagesFromDb(
   chatId: string
 ): Promise<MessageAISDK[]> {
@@ -39,7 +44,48 @@ export async function getMessagesFromDb(
   }))
 }
 
-async function insertMessageToDb(chatId: string, message: MessageAISDK) {
+export async function getLastMessagesFromDb(
+  chatId: string,
+  limit: number = 2
+): Promise<MessageAISDK[]> {
+  if (!isSupabaseEnabled) {
+    const cached = await getCachedMessages(chatId)
+    return cached.slice(-limit)
+  }
+
+  const supabase = createClient()
+  if (!supabase) return []
+
+  const { data, error } = await supabase
+    .from("messages")
+    .select(
+      "id, content, role, experimental_attachments, created_at, parts, message_group_id, model"
+    )
+    .eq("chat_id", chatId)
+    .order("created_at", { ascending: false })
+    .limit(limit)
+
+  if (!data || error) {
+    console.error("Failed to fetch last messages: ", error)
+    return []
+  }
+
+  const ascendingData = [...data].reverse()
+  return ascendingData.map((message) => ({
+    ...message,
+    id: String(message.id),
+    content: message.content ?? "",
+    createdAt: new Date(message.created_at || ""),
+    parts: (message?.parts as MessageAISDK["parts"]) || undefined,
+    message_group_id: message.message_group_id,
+    model: message.model,
+  }))
+}
+
+async function insertMessageToDb(
+  chatId: string,
+  message: ExtendedMessageAISDK
+) {
   const supabase = createClient()
   if (!supabase) return
 
@@ -49,12 +95,15 @@ async function insertMessageToDb(chatId: string, message: MessageAISDK) {
     content: message.content,
     experimental_attachments: message.experimental_attachments,
     created_at: message.createdAt?.toISOString() || new Date().toISOString(),
-    message_group_id: (message as any).message_group_id || null,
-    model: (message as any).model || null,
+    message_group_id: message.message_group_id || null,
+    model: message.model || null,
   })
 }
 
-async function insertMessagesToDb(chatId: string, messages: MessageAISDK[]) {
+async function insertMessagesToDb(
+  chatId: string,
+  messages: ExtendedMessageAISDK[]
+) {
   const supabase = createClient()
   if (!supabase) return
 
@@ -64,8 +113,8 @@ async function insertMessagesToDb(chatId: string, messages: MessageAISDK[]) {
     content: message.content,
     experimental_attachments: message.experimental_attachments,
     created_at: message.createdAt?.toISOString() || new Date().toISOString(),
-    message_group_id: (message as any).message_group_id || null,
-    model: (message as any).model || null,
+    message_group_id: message.message_group_id || null,
+    model: message.model || null,
   }))
 
   await supabase.from("messages").insert(payload)

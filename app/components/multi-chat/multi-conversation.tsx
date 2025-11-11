@@ -6,6 +6,7 @@ import {
 } from "@/components/prompt-kit/chat-container"
 import { Loader } from "@/components/prompt-kit/loader"
 import { ScrollButton } from "@/components/prompt-kit/scroll-button"
+import { ExtendedMessageAISDK } from "@/lib/chat-store/messages/api"
 import { getModelInfo } from "@/lib/models"
 import { PROVIDERS } from "@/lib/providers"
 import { cn } from "@/lib/utils"
@@ -146,6 +147,10 @@ export function MultiModelConversation({
                         onEdit={() => {}}
                         onReload={() => {}}
                         status="ready"
+                        messageGroupId={
+                          (group.userMessage as ExtendedMessageAISDK)
+                            .message_group_id ?? null
+                        }
                       >
                         {group.userMessage.content}
                       </Message>
