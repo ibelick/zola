@@ -1,14 +1,16 @@
+import bundleAnalyzer from "@next/bundle-analyzer"
 import type { NextConfig } from "next"
 
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
+// Configure bundle analyzer and wrap the Next config factory
+const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 })
 
 const nextConfig: NextConfig = withBundleAnalyzer({
   output: "standalone",
+  turbopack: {},
   experimental: {
     optimizePackageImports: ["@phosphor-icons/react"],
-    nodeMiddleware: true,
   },
   serverExternalPackages: ["shiki", "vscode-oniguruma"],
   images: {
@@ -20,10 +22,6 @@ const nextConfig: NextConfig = withBundleAnalyzer({
         pathname: "/storage/v1/object/public/**",
       },
     ],
-  },
-  eslint: {
-    // @todo: remove before going live
-    ignoreDuringBuilds: true,
   },
 })
 
