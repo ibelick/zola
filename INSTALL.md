@@ -279,14 +279,210 @@ BEFORE UPDATE ON user_preferences
 FOR EACH ROW
 EXECUTE PROCEDURE update_user_preferences_updated_at();
 
--- RLS (Row Level Security) Reminder
--- Ensure RLS is enabled on these tables in your Supabase dashboard
--- and appropriate policies are created.
--- Example policies (adapt as needed):
--- ALTER TABLE users ENABLE ROW LEVEL SECURITY;
--- CREATE POLICY "Users can view their own data." ON users FOR SELECT USING (auth.uid() = id);
--- CREATE POLICY "Users can update their own data." ON users FOR UPDATE USING (auth.uid() = id);
--- ... add policies for other tables (chats, messages, etc.) ...
+
+-- =============================================
+-- ROW LEVEL SECURITY (RLS) Configuration
+-- =============================================
+
+-- Enable RLS on all tables
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chats ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chat_attachments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_keys ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
+
+-- =============================================
+-- USERS table policies
+-- =============================================
+CREATE POLICY "Users can view their own data"
+  ON users FOR SELECT
+  USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert their own data"
+  ON users FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update their own data"
+  ON users FOR UPDATE
+  USING (auth.uid() = id);
+
+CREATE POLICY "Users can delete their own data"
+  ON users FOR DELETE
+  USING (auth.uid() = id);
+
+-- =============================================
+-- PROJECTS table policies
+-- =============================================
+CREATE POLICY "Users can view their own projects"
+  ON projects FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own projects"
+  ON projects FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own projects"
+  ON projects FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own projects"
+  ON projects FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- =============================================
+-- CHATS table policies
+-- =============================================
+CREATE POLICY "Users can view their own chats"
+  ON chats FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view public chats"
+  ON chats FOR SELECT
+  USING (public = true);
+
+CREATE POLICY "Users can create their own chats"
+  ON chats FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own chats"
+  ON chats FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own chats"
+  ON chats FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- =============================================
+-- MESSAGES table policies
+-- =============================================
+CREATE POLICY "Users can view messages from their chats"
+  ON messages FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM chats
+      WHERE chats.id = messages.chat_id
+      AND (chats.user_id = auth.uid() OR chats.public = true)
+    )
+  );
+
+CREATE POLICY "Users can insert messages to their chats"
+  ON messages FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM chats
+      WHERE chats.id = messages.chat_id
+      AND chats.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can update messages in their chats"
+  ON messages FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM chats
+      WHERE chats.id = messages.chat_id
+      AND chats.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can delete messages from their chats"
+  ON messages FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM chats
+      WHERE chats.id = messages.chat_id
+      AND chats.user_id = auth.uid()
+    )
+  );
+
+-- =============================================
+-- CHAT_ATTACHMENTS table policies
+-- =============================================
+CREATE POLICY "Users can view their own attachments"
+  ON chat_attachments FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view attachments from public chats"
+  ON chat_attachments FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM chats
+      WHERE chats.id = chat_attachments.chat_id
+      AND chats.public = true
+    )
+  );
+
+CREATE POLICY "Users can create their own attachments"
+  ON chat_attachments FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own attachments"
+  ON chat_attachments FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own attachments"
+  ON chat_attachments FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- =============================================
+-- FEEDBACK table policies
+-- =============================================
+CREATE POLICY "Users can view their own feedback"
+  ON feedback FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own feedback"
+  ON feedback FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own feedback"
+  ON feedback FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own feedback"
+  ON feedback FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- =============================================
+-- USER_KEYS table policies (BYOK)
+-- =============================================
+CREATE POLICY "Users can view their own API keys"
+  ON user_keys FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own API keys"
+  ON user_keys FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own API keys"
+  ON user_keys FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own API keys"
+  ON user_keys FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- =============================================
+-- USER_PREFERENCES table policies
+-- =============================================
+CREATE POLICY "Users can view their own preferences"
+  ON user_preferences FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own preferences"
+  ON user_preferences FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own preferences"
+  ON user_preferences FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own preferences"
+  ON user_preferences FOR DELETE
+  USING (auth.uid() = user_id);
 ```
 
 ### Storage Setup
