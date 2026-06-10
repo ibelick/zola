@@ -21,7 +21,7 @@ export const openrouterModels: ModelConfig[] = [
   reasoning: false,
   webSearch: false,
   openSource: true,
-  speed: "Thinking",
+  speed: "Slow",
   intelligence: "Medium",
   website: "https://openrouter.ai",
   apiDocs: "https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b:free",
