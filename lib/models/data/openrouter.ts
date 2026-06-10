@@ -4,12 +4,12 @@ import { ModelConfig } from "../types"
 export const openrouterModels: ModelConfig[] = [
   {
   id: "openrouter:nvidia/nemotron-3-ultra-550b-a55b:free",
-  name: "Llama 3.1 8B",
+  name: "Nemotron 5 Ultra",
   provider: "OpenRouter",
   providerId: "openrouter",
   modelFamily: "OpenRouter",
-  baseProviderId: "meta-llama",
-  description: "Meta's Llama 3.1 8B instruction-tuned model.",
+  baseProviderId: "nvidia",
+  description: "Nvidia's Nemotron 5 Ultra. Best for long-running and complex tasks. ",
   tags: ["open-source", "thinking"],
   contextWindow: 1000000,
   inputCost: 0,
@@ -25,7 +25,7 @@ export const openrouterModels: ModelConfig[] = [
   intelligence: "Medium",
   website: "https://openrouter.ai",
   apiDocs: "https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b:free",
-  modelPage: "https://ai.meta.com",
+  modelPage: "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
   releasedAt: "2026-06-04",
   icon: "meta",
   apiSdk: (apiKey?: string) =>
