@@ -3,6 +3,37 @@ import { ModelConfig } from "../types"
 
 export const openrouterModels: ModelConfig[] = [
   {
+  id: "openrouter:nvidia/nemotron-3-ultra-550b-a55b:free",
+  name: "Llama 3.1 8B",
+  provider: "OpenRouter",
+  providerId: "openrouter",
+  modelFamily: "OpenRouter",
+  baseProviderId: "meta-llama",
+  description: "Meta's Llama 3.1 8B instruction-tuned model.",
+  tags: ["open-source", "thinking"],
+  contextWindow: 1000000,
+  inputCost: 0,
+  outputCost: 0,
+  priceUnit: "per 1M tokens",
+  vision: false,
+  tools: true,
+  audio: false,
+  reasoning: false,
+  webSearch: false,
+  openSource: true,
+  speed: "Thinking",
+  intelligence: "Medium",
+  website: "https://openrouter.ai",
+  apiDocs: "https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b:free",
+  modelPage: "https://ai.meta.com",
+  releasedAt: "2026-06-04",
+  icon: "meta",
+  apiSdk: (apiKey?: string) =>
+    createOpenRouter({
+      apiKey: apiKey || process.env.OPENROUTER_API_KEY,
+    }).chat("nvidia/nemotron-3-ultra-550b-a55b:free"),
+},
+  {
     id: "openrouter:deepseek/deepseek-r1:free",
     name: "DeepSeek R1",
     provider: "OpenRouter",
