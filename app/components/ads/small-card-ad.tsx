@@ -1,6 +1,9 @@
 "use client"
 
-import { observeAdImpression } from "@/lib/ads/impression"
+import {
+  observeAdImpression,
+  reportTrackingUrl,
+} from "@/lib/ads/impression"
 import { getSmallCardLinkPresentation } from "@/lib/ads/presentation"
 import type { SmallCardAd as SmallCardAdType } from "@/lib/ads/types"
 import { useEffect, useRef, useState } from "react"
@@ -16,7 +19,7 @@ export function SmallCardAd({ ad, reportedImpressions }: SmallCardAdProps) {
   const link = getSmallCardLinkPresentation({
     title: ad.creative.title,
     badgeText: ad.creative.badge_text,
-    clickTrackingUrl: ad.click_tracking_url,
+    landingUrl: ad.landing_url,
   })
 
   useEffect(() => {
@@ -35,6 +38,7 @@ export function SmallCardAd({ ad, reportedImpressions }: SmallCardAdProps) {
       target={link.target}
       rel={link.rel}
       aria-label={link.ariaLabel}
+      onClick={() => reportTrackingUrl(ad.click_tracking_url)}
       className="border-border/70 bg-muted/35 hover:bg-muted/65 group/ad my-2 flex w-full items-center gap-3 rounded-xl border p-3 no-underline shadow-sm transition-colors"
     >
       <span className="bg-muted text-muted-foreground flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg text-lg font-semibold">
