@@ -5,6 +5,7 @@ import {
   MessageContent,
 } from "@/components/prompt-kit/message"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
+import type { NativeTextInstruction, SmallCardAd } from "@/lib/ads/types"
 import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
@@ -16,6 +17,7 @@ import { SearchImages } from "./search-images"
 import { SourcesList } from "./sources-list"
 import { ToolInvocation } from "./tool-invocation"
 import { useAssistantMessageSelection } from "./useAssistantMessageSelection"
+import { useNativeTextAnchors } from "@/app/components/ads/use-native-text-anchors"
 
 type MessageAssistantProps = {
   children: string
@@ -29,6 +31,9 @@ type MessageAssistantProps = {
   className?: string
   messageId: string
   onQuote?: (text: string, messageId: string) => void
+  nativeTextAds?: NativeTextInstruction[]
+  smallCardAd?: SmallCardAd
+  reportedImpressions?: Set<string>
 }
 
 export function MessageAssistant({
@@ -43,6 +48,8 @@ export function MessageAssistant({
   className,
   messageId,
   onQuote,
+  nativeTextAds = [],
+  reportedImpressions = new Set<string>(),
 }: MessageAssistantProps) {
   const { preferences } = useUserPreferences()
   const sources = getSources(parts)
@@ -72,6 +79,12 @@ export function MessageAssistant({
 
   const isQuoteEnabled = !preferences.multiModelEnabled
   const messageRef = useRef<HTMLDivElement>(null)
+  useNativeTextAnchors(
+    messageRef,
+    children,
+    nativeTextAds,
+    reportedImpressions
+  )
   const { selectionInfo, clearSelection } = useAssistantMessageSelection(
     messageRef,
     isQuoteEnabled

@@ -1,6 +1,7 @@
 "use client"
 
 import { ChatInput } from "@/app/components/chat-input/chat-input"
+import { useChatAdvertising } from "@/app/components/ads/use-chat-advertising"
 import { Conversation } from "@/app/components/chat/conversation"
 import { useModel } from "@/app/components/chat/use-model"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
@@ -135,6 +136,17 @@ export function Chat() {
     bumpChat,
   })
 
+  const {
+    nativeTextByMessageId,
+    smallCardByMessageId,
+    reportedImpressions,
+    cancelActiveAdSession,
+  } = useChatAdvertising({ messages, status, chatId })
+  const handleStop = useCallback(() => {
+    cancelActiveAdSession()
+    stop()
+  }, [cancelActiveAdSession, stop])
+
   // Memoize the conversation props to prevent unnecessary rerenders
   const conversationProps = useMemo(
     () => ({
@@ -145,6 +157,9 @@ export function Chat() {
       onReload: handleReload,
       onQuote: handleQuotedSelected,
       isUserAuthenticated: isAuthenticated,
+      nativeTextByMessageId,
+      smallCardByMessageId,
+      reportedImpressions,
     }),
     [
       messages,
@@ -154,6 +169,9 @@ export function Chat() {
       handleReload,
       handleQuotedSelected,
       isAuthenticated,
+      nativeTextByMessageId,
+      smallCardByMessageId,
+      reportedImpressions,
     ]
   )
 
@@ -173,7 +191,7 @@ export function Chat() {
       onSelectModel: handleModelChange,
       selectedModel,
       isUserAuthenticated: isAuthenticated,
-      stop,
+      stop: handleStop,
       status,
       setEnableSearch,
       enableSearch,
@@ -194,7 +212,7 @@ export function Chat() {
       handleModelChange,
       selectedModel,
       isAuthenticated,
-      stop,
+      handleStop,
       status,
       setEnableSearch,
       enableSearch,

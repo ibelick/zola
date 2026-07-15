@@ -1,4 +1,5 @@
 import { Message as MessageType } from "@ai-sdk/react"
+import type { NativeTextInstruction, SmallCardAd } from "@/lib/ads/types"
 import React, { useState } from "react"
 import { MessageAssistant } from "./message-assistant"
 import { MessageUser } from "./message-user"
@@ -19,6 +20,9 @@ type MessageProps = {
   onQuote?: (text: string, messageId: string) => void
   messageGroupId?: string | null
   isUserAuthenticated?: boolean
+  nativeTextAds?: NativeTextInstruction[]
+  smallCardAd?: SmallCardAd
+  reportedImpressions?: Set<string>
 }
 
 export function Message({
@@ -36,6 +40,9 @@ export function Message({
   onQuote,
   messageGroupId,
   isUserAuthenticated,
+  nativeTextAds = [],
+  smallCardAd,
+  reportedImpressions = new Set<string>(),
 }: MessageProps) {
   const [copied, setCopied] = useState(false)
 
@@ -77,6 +84,9 @@ export function Message({
         className={className}
         messageId={id}
         onQuote={onQuote}
+        nativeTextAds={nativeTextAds}
+        smallCardAd={smallCardAd}
+        reportedImpressions={reportedImpressions}
       >
         {children}
       </MessageAssistant>

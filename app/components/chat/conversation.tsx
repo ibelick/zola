@@ -5,6 +5,7 @@ import {
 import { Loader } from "@/components/prompt-kit/loader"
 import { ScrollButton } from "@/components/prompt-kit/scroll-button"
 import { ExtendedMessageAISDK } from "@/lib/chat-store/messages/api"
+import type { NativeTextInstruction, SmallCardAd } from "@/lib/ads/types"
 import { Message as MessageType } from "@ai-sdk/react"
 import { useRef } from "react"
 import { Message } from "./message"
@@ -17,6 +18,9 @@ type ConversationProps = {
   onReload: () => void
   onQuote?: (text: string, messageId: string) => void
   isUserAuthenticated?: boolean
+  nativeTextByMessageId?: Record<string, NativeTextInstruction[]>
+  smallCardByMessageId?: Record<string, SmallCardAd>
+  reportedImpressions?: Set<string>
 }
 
 export function Conversation({
@@ -27,6 +31,9 @@ export function Conversation({
   onReload,
   onQuote,
   isUserAuthenticated,
+  nativeTextByMessageId = {},
+  smallCardByMessageId = {},
+  reportedImpressions = new Set<string>(),
 }: ConversationProps) {
   const initialMessageCount = useRef(messages.length)
 
@@ -71,6 +78,9 @@ export function Conversation({
                   (message as ExtendedMessageAISDK).message_group_id ?? null
                 }
                 isUserAuthenticated={isUserAuthenticated}
+                nativeTextAds={nativeTextByMessageId[String(message.id)] ?? []}
+                smallCardAd={smallCardByMessageId[String(message.id)]}
+                reportedImpressions={reportedImpressions}
               >
                 {message.content}
               </Message>

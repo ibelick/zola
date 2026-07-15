@@ -1,5 +1,11 @@
 import type { NativeTextInstruction } from "./types"
 
+type ChatMessageLike = {
+  id: string
+  role: string
+  content: string
+}
+
 export const NATIVE_TEXT_WS_URL =
   process.env.NEXT_PUBLIC_NATIVE_TEXT_WS_URL ||
   "ws://10.1.51.76:8080/api/v1/ad/stream-match"
@@ -35,6 +41,36 @@ export function buildNativeTextUrl(requestId: string): string {
 export function getTextDelta(previous: string, current: string): string {
   if (previous === current) return ""
   return current.startsWith(previous) ? current.slice(previous.length) : current
+}
+
+export function findLatestAssistantMessage(
+  messages: ChatMessageLike[]
+): { id: string; content: string } | null {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index]
+    if (message.role === "assistant") {
+      return { id: String(message.id), content: message.content }
+    }
+  }
+  return null
+}
+
+export function findUserQueryForAssistant(
+  messages: ChatMessageLike[],
+  assistantId: string
+): string | null {
+  const assistantIndex = messages.findIndex(
+    (message) => String(message.id) === assistantId && message.role === "assistant"
+  )
+  if (assistantIndex === -1) return null
+
+  for (let index = assistantIndex - 1; index >= 0; index -= 1) {
+    const message = messages[index]
+    if (message.role === "user" && message.content.trim().length > 0) {
+      return message.content
+    }
+  }
+  return null
 }
 
 export function createTextChunkFrame(
