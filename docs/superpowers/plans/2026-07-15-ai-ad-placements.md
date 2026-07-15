@@ -24,12 +24,14 @@
 ### Task 1: Test runner and protocol contracts
 
 **Files:**
+
 - Modify: `package.json`
 - Create: `lib/ads/types.ts`
 - Create: `lib/ads/native-text.ts`
 - Create: `lib/ads/native-text.test.ts`
 
 **Interfaces:**
+
 - Produces: `NativeTextInstruction`, `SmallCardAd`, `buildNativeTextUrl(requestId)`, `getTextDelta(previous, current)`, `createTextChunkFrame(chunkId, text, timestamp)`, and `parseNativeTextInstruction(value)`.
 
 - [ ] **Step 1: Add a test command and write failing protocol tests**
@@ -61,8 +63,15 @@ Expected: FAIL because `lib/ads/native-text.ts` does not exist.
 Use centralized exported constants and URL validation restricted to `http:`/`https:` tracking URLs. `getTextDelta` returns the suffix only when `current.startsWith(previous)`; otherwise it returns `current` so regenerated/replaced content is not dropped.
 
 ```ts
-export function createTextChunkFrame(chunkId: number, text: string, timestamp: number) {
-  return { event: "text_chunk" as const, data: { chunk_id: chunkId, text, timestamp } }
+export function createTextChunkFrame(
+  chunkId: number,
+  text: string,
+  timestamp: number
+) {
+  return {
+    event: "text_chunk" as const,
+    data: { chunk_id: chunkId, text, timestamp },
+  }
 }
 ```
 
@@ -82,11 +91,13 @@ git commit -m "feat: add ad protocol contracts"
 ### Task 2: Small Card server proxy
 
 **Files:**
+
 - Create: `lib/ads/small-card.ts`
 - Create: `lib/ads/small-card.test.ts`
 - Create: `app/api/ads/small-card/route.ts`
 
 **Interfaces:**
+
 - Consumes: `SmallCardAd` from Task 1.
 - Produces: `buildSmallCardUpstreamRequest(input, requestId)`, `parseSmallCardResponse(value)`, and `POST(request)` returning `{ ad: SmallCardAd | null }`.
 
@@ -96,7 +107,10 @@ Tests must assert the real endpoint, all three authentication headers, slot ID `
 
 ```ts
 test("buildSmallCardUpstreamRequest maps the approved placement", () => {
-  const request = buildSmallCardUpstreamRequest({ query: "budget", language: "zh-CN" }, "req-1")
+  const request = buildSmallCardUpstreamRequest(
+    { query: "budget", language: "zh-CN" },
+    "req-1"
+  )
   assert.equal(request.url, "http://10.1.51.76:8080/api/v1/ad/query")
   assert.equal(request.headers["X-Placement-Key"], SMALL_CARD_PLACEMENT_KEY)
   assert.equal(request.headers["X-Publisher-Key"], SMALL_CARD_PLACEMENT_KEY)
@@ -119,14 +133,19 @@ The route accepts `{ query: string, language?: string }`, caps query length at t
 export async function POST(request: Request) {
   try {
     const input = await request.json()
-    const upstream = buildSmallCardUpstreamRequest(input, `req_sc_${crypto.randomUUID()}`)
+    const upstream = buildSmallCardUpstreamRequest(
+      input,
+      `req_sc_${crypto.randomUUID()}`
+    )
     const response = await fetch(upstream.url, {
       method: "POST",
       headers: upstream.headers,
       body: JSON.stringify(upstream.body),
       signal: AbortSignal.timeout(5000),
     })
-    return Response.json({ ad: response.ok ? parseSmallCardResponse(await response.json()) : null })
+    return Response.json({
+      ad: response.ok ? parseSmallCardResponse(await response.json()) : null,
+    })
   } catch {
     return Response.json({ ad: null })
   }
@@ -149,12 +168,14 @@ git commit -m "feat: proxy small card ads"
 ### Task 3: Native Text DOM injection and impression tracking
 
 **Files:**
+
 - Create: `lib/ads/dom.ts`
 - Create: `lib/ads/dom.test.ts`
 - Create: `lib/ads/impression.ts`
 - Create: `lib/ads/impression.test.ts`
 
 **Interfaces:**
+
 - Consumes: `NativeTextInstruction`.
 - Produces: `injectNativeTextAnchor(container, instruction)`, `observeAdImpression(element, options)`, and `reportTrackingUrl(url)`.
 
@@ -218,6 +239,7 @@ git commit -m "feat: add native ad rendering utilities"
 ### Task 4: Chat advertising lifecycle
 
 **Files:**
+
 - Create: `app/components/ads/use-chat-advertising.ts`
 - Create: `app/components/ads/use-native-text-anchors.ts`
 - Modify: `app/components/chat/chat.tsx`
@@ -226,6 +248,7 @@ git commit -m "feat: add native ad rendering utilities"
 - Modify: `app/components/chat/message-assistant.tsx`
 
 **Interfaces:**
+
 - Consumes: `messages`, chat `status`, `chatId`, protocol helpers, DOM injector, and impression observer.
 - Produces: `nativeTextByMessageId: Record<string, NativeTextInstruction[]>` and `smallCardByMessageId: Record<string, SmallCardAd>` passed through the existing chat component tree.
 
@@ -267,11 +290,13 @@ git commit -m "feat: connect ads to chat lifecycle"
 ### Task 5: Small Card UI and final validation
 
 **Files:**
+
 - Create: `app/components/ads/small-card-ad.tsx`
 - Modify: `app/components/chat/message-assistant.tsx`
 - Modify: `.env.example`
 
 **Interfaces:**
+
 - Consumes: `SmallCardAd`, impression observer, and the assistant message's optional `smallCardAd` prop.
 - Produces: accessible, theme-aware, full-width Small Card rendered after sources and before message actions.
 

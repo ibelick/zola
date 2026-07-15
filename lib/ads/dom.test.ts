@@ -14,7 +14,9 @@ const instruction = {
 }
 
 test("injectNativeTextAnchor skips code and injects the first prose match", () => {
-  const dom = new JSDOM(`<div><code>YNAB</code><p>Try YNAB today. YNAB works.</p></div>`)
+  const dom = new JSDOM(
+    `<div><code>YNAB</code><p>Try YNAB today. YNAB works.</p></div>`
+  )
   const container = dom.window.document.querySelector("div")!
 
   assert.equal(injectNativeTextAnchor(container, instruction), true)
@@ -30,8 +32,14 @@ test("injectNativeTextAnchor skips existing links and is idempotent", () => {
   assert.equal(injectNativeTextAnchor(container, instruction), true)
   assert.equal(injectNativeTextAnchor(container, instruction), true)
   assert.equal(container.querySelectorAll("#anchor-1").length, 1)
-  assert.equal(container.querySelector("#anchor-1")?.getAttribute("href"), instruction.click_tracking_url)
-  assert.equal(container.querySelector("#anchor-1")?.getAttribute("rel"), "noopener noreferrer sponsored")
+  assert.equal(
+    container.querySelector("#anchor-1")?.getAttribute("href"),
+    instruction.click_tracking_url
+  )
+  assert.equal(
+    container.querySelector("#anchor-1")?.getAttribute("rel"),
+    "noopener noreferrer sponsored"
+  )
 })
 
 test("injectNativeTextAnchor returns false when no eligible keyword exists", () => {

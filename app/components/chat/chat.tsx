@@ -1,7 +1,7 @@
 "use client"
 
-import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { useChatAdvertising } from "@/app/components/ads/use-chat-advertising"
+import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
 import { useModel } from "@/app/components/chat/use-model"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"

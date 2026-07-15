@@ -10,10 +10,10 @@
 
 ## 已确认的广告位与服务地址
 
-| 样式 | 广告位 ID | 广告位名称 | 接入 Key |
-| --- | --- | --- | --- |
-| Native Text | `8` | `Native_Text-Test` | `cmrloph8700031xywuz5ijj94` |
-| Small Card | `7` | `SmallCard-Test` | `cmrlha7j000011xywcsjy39x1` |
+| 样式        | 广告位 ID | 广告位名称         | 接入 Key                    |
+| ----------- | --------- | ------------------ | --------------------------- |
+| Native Text | `8`       | `Native_Text-Test` | `cmrloph8700031xywuz5ijj94` |
+| Small Card  | `7`       | `SmallCard-Test`   | `cmrlha7j000011xywcsjy39x1` |
 
 真实广告服务基地址为 `http://10.1.51.76:8080`。
 

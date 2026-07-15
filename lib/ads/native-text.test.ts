@@ -1,7 +1,8 @@
 import assert from "node:assert/strict"
 import test from "node:test"
+// prettier-ignore
 // @ts-expect-error Node's TypeScript test runner requires the explicit extension.
-import { buildNativeTextUrl, createTextChunkFrame, findLatestAssistantMessage, findUserQueryForAssistant, getTextDelta, NATIVE_TEXT_PLACEMENT_KEY, parseNativeTextInstruction } from "./native-text.ts"
+import { buildNativeTextUrl, createTextChunkFrame, findLatestAssistantMessage, findUserQueryForAssistant, getTextDelta, NATIVE_TEXT_PLACEMENT_KEY, parseNativeTextInstruction } from "./native-text.ts";
 
 test("buildNativeTextUrl uses the verified placement query parameters", () => {
   const url = new URL(buildNativeTextUrl("req-1"))

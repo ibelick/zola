@@ -41,7 +41,9 @@ function createHarness(reported = new Set<string>()) {
     reported,
     reports,
     enter: (ratio: number) =>
-      observerCallback?.([{ isIntersecting: ratio > 0, intersectionRatio: ratio }]),
+      observerCallback?.([
+        { isIntersecting: ratio > 0, intersectionRatio: ratio },
+      ]),
     fireTimer: () => timerCallback?.(),
     clearCount: () => clearCount,
     disconnectCount: () => disconnectCount,

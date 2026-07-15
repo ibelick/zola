@@ -1,7 +1,8 @@
 import assert from "node:assert/strict"
 import test from "node:test"
+// prettier-ignore
 // @ts-expect-error Node's TypeScript test runner requires the explicit extension.
-import { buildSmallCardUpstreamRequest, parseSmallCardResponse, SMALL_CARD_PLACEMENT_KEY } from "./small-card.ts"
+import { buildSmallCardUpstreamRequest, parseSmallCardResponse, SMALL_CARD_PLACEMENT_KEY } from "./small-card.ts";
 
 test("buildSmallCardUpstreamRequest maps the approved placement", () => {
   const request = buildSmallCardUpstreamRequest(

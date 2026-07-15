@@ -1,11 +1,16 @@
+import { SmallCardAd } from "@/app/components/ads/small-card-ad"
+import { useNativeTextAnchors } from "@/app/components/ads/use-native-text-anchors"
 import {
   Message,
   MessageAction,
   MessageActions,
   MessageContent,
 } from "@/components/prompt-kit/message"
+import type {
+  NativeTextInstruction,
+  SmallCardAd as SmallCardAdData,
+} from "@/lib/ads/types"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
-import type { NativeTextInstruction, SmallCardAd } from "@/lib/ads/types"
 import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
@@ -17,7 +22,6 @@ import { SearchImages } from "./search-images"
 import { SourcesList } from "./sources-list"
 import { ToolInvocation } from "./tool-invocation"
 import { useAssistantMessageSelection } from "./useAssistantMessageSelection"
-import { useNativeTextAnchors } from "@/app/components/ads/use-native-text-anchors"
 
 type MessageAssistantProps = {
   children: string
@@ -32,7 +36,7 @@ type MessageAssistantProps = {
   messageId: string
   onQuote?: (text: string, messageId: string) => void
   nativeTextAds?: NativeTextInstruction[]
-  smallCardAd?: SmallCardAd
+  smallCardAd?: SmallCardAdData
   reportedImpressions?: Set<string>
 }
 
@@ -49,6 +53,7 @@ export function MessageAssistant({
   messageId,
   onQuote,
   nativeTextAds = [],
+  smallCardAd,
   reportedImpressions = new Set<string>(),
 }: MessageAssistantProps) {
   const { preferences } = useUserPreferences()
@@ -79,12 +84,7 @@ export function MessageAssistant({
 
   const isQuoteEnabled = !preferences.multiModelEnabled
   const messageRef = useRef<HTMLDivElement>(null)
-  useNativeTextAnchors(
-    messageRef,
-    children,
-    nativeTextAds,
-    reportedImpressions
-  )
+  useNativeTextAnchors(messageRef, children, nativeTextAds, reportedImpressions)
   const { selectionInfo, clearSelection } = useAssistantMessageSelection(
     messageRef,
     isQuoteEnabled
@@ -142,6 +142,13 @@ export function MessageAssistant({
         )}
 
         {sources && sources.length > 0 && <SourcesList sources={sources} />}
+
+        {smallCardAd ? (
+          <SmallCardAd
+            ad={smallCardAd}
+            reportedImpressions={reportedImpressions}
+          />
+        ) : null}
 
         {Boolean(isLastStreaming || contentNullOrEmpty) ? null : (
           <MessageActions

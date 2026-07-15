@@ -68,7 +68,9 @@ export function useChatAdvertising({
       activeUserQueryRef.current = userQuery
 
       try {
-        const socket = new WebSocket(buildNativeTextUrl(createRequestId("req_ws")))
+        const socket = new WebSocket(
+          buildNativeTextUrl(createRequestId("req_ws"))
+        )
         socketRef.current = socket
         socket.onopen = () => {
           if (socketRef.current !== socket) return
@@ -79,7 +81,9 @@ export function useChatAdvertising({
           const assistantId = activeAssistantIdRef.current
           if (!assistantId || typeof event.data !== "string") return
           try {
-            const instruction = parseNativeTextInstruction(JSON.parse(event.data))
+            const instruction = parseNativeTextInstruction(
+              JSON.parse(event.data)
+            )
             if (!instruction) return
             setNativeTextByMessageId((current) => {
               const instructions = current[assistantId] ?? []
@@ -186,8 +190,8 @@ export function useChatAdvertising({
     ) {
       const assistantId = activeAssistantIdRef.current
       const query = assistantId
-        ? findUserQueryForAssistant(messages, assistantId) ??
-          activeUserQueryRef.current
+        ? (findUserQueryForAssistant(messages, assistantId) ??
+          activeUserQueryRef.current)
         : null
       const generation = generationRef.current
       closeSocket()

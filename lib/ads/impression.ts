@@ -35,10 +35,12 @@ export function observeAdImpression(
   const report = options.report ?? reportTrackingUrl
   const setTimer =
     options.setTimer ??
-    ((callback: () => void, delay: number) => globalThis.setTimeout(callback, delay))
+    ((callback: () => void, delay: number) =>
+      globalThis.setTimeout(callback, delay))
   const clearTimer =
     options.clearTimer ??
-    ((timer: unknown) => globalThis.clearTimeout(timer as ReturnType<typeof setTimeout>))
+    ((timer: unknown) =>
+      globalThis.clearTimeout(timer as ReturnType<typeof setTimeout>))
 
   let timer: unknown = null
   let observer: ObserverLike

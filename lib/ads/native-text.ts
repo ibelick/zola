@@ -60,7 +60,8 @@ export function findUserQueryForAssistant(
   assistantId: string
 ): string | null {
   const assistantIndex = messages.findIndex(
-    (message) => String(message.id) === assistantId && message.role === "assistant"
+    (message) =>
+      String(message.id) === assistantId && message.role === "assistant"
   )
   if (assistantIndex === -1) return null
 

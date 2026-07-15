@@ -4,7 +4,9 @@ import {
 } from "@/lib/ads/small-card"
 import { MESSAGE_MAX_LENGTH } from "@/lib/config"
 
-function parseInput(value: unknown): { query: string; language: string } | null {
+function parseInput(
+  value: unknown
+): { query: string; language: string } | null {
   if (typeof value !== "object" || value === null) return null
   const input = value as Record<string, unknown>
   if (
