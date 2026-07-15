@@ -8,6 +8,7 @@ import {
   getTextDelta,
   parseNativeTextInstruction,
 } from "@/lib/ads/native-text"
+import { replaceActiveSmallCard } from "@/lib/ads/small-card-state"
 import type { NativeTextInstruction, SmallCardAd } from "@/lib/ads/types"
 import type { Message } from "@ai-sdk/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -127,10 +128,9 @@ export function useChatAdvertising({
         if (!response.ok) return
         const payload = (await response.json()) as { ad?: SmallCardAd | null }
         if (!payload.ad || generationRef.current !== generation) return
-        setSmallCardByMessageId((current) => ({
-          ...current,
-          [messageId]: payload.ad as SmallCardAd,
-        }))
+        setSmallCardByMessageId((current) =>
+          replaceActiveSmallCard(current, messageId, payload.ad as SmallCardAd)
+        )
       } catch {
         // Ad failures must not affect the chat experience.
       }

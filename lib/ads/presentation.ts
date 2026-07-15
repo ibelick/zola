@@ -4,6 +4,9 @@ type SmallCardLinkInput = {
   landingUrl: string
 }
 
+export const SMALL_CARD_WIDTH_CLASS = "w-1/2"
+export const SMALL_CARD_DESCRIPTION_CLASS = "line-clamp-2"
+
 export function getSmallCardLinkPresentation(input: SmallCardLinkInput) {
   return {
     href: input.landingUrl,

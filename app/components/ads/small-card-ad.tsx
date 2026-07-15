@@ -1,10 +1,11 @@
 "use client"
 
+import { observeAdImpression, reportTrackingUrl } from "@/lib/ads/impression"
 import {
-  observeAdImpression,
-  reportTrackingUrl,
-} from "@/lib/ads/impression"
-import { getSmallCardLinkPresentation } from "@/lib/ads/presentation"
+  getSmallCardLinkPresentation,
+  SMALL_CARD_DESCRIPTION_CLASS,
+  SMALL_CARD_WIDTH_CLASS,
+} from "@/lib/ads/presentation"
 import type { SmallCardAd as SmallCardAdType } from "@/lib/ads/types"
 import { useEffect, useRef, useState } from "react"
 
@@ -39,7 +40,7 @@ export function SmallCardAd({ ad, reportedImpressions }: SmallCardAdProps) {
       rel={link.rel}
       aria-label={link.ariaLabel}
       onClick={() => reportTrackingUrl(ad.click_tracking_url)}
-      className="border-border/70 bg-muted/35 hover:bg-muted/65 group/ad my-2 flex w-full items-center gap-3 rounded-xl border p-3 no-underline shadow-sm transition-colors"
+      className={`${SMALL_CARD_WIDTH_CLASS} border-border/70 bg-muted/35 hover:bg-muted/65 group/ad my-2 flex items-center gap-3 rounded-xl border p-3 no-underline shadow-sm transition-colors`}
     >
       <span className="bg-muted text-muted-foreground flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg text-lg font-semibold">
         {imageFailed ? (
@@ -62,7 +63,9 @@ export function SmallCardAd({ ad, reportedImpressions }: SmallCardAdProps) {
             {ad.creative.badge_text}
           </span>
         </span>
-        <span className="text-muted-foreground mt-1 line-clamp-2 text-xs leading-4">
+        <span
+          className={`${SMALL_CARD_DESCRIPTION_CLASS} text-muted-foreground mt-1 text-xs leading-4`}
+        >
           {ad.creative.description}
         </span>
       </span>
