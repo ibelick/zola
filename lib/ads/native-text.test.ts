@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import test from "node:test"
 // prettier-ignore
 // @ts-expect-error Node's TypeScript test runner requires the explicit extension.
-import { buildNativeTextUrl, createTextChunkFrame, findLatestAssistantMessage, findUserQueryForAssistant, getNativeTextConnectSource, getTextDelta, NATIVE_TEXT_PLACEMENT_KEY, parseNativeTextInstruction, remapMessageScopedValue } from "./native-text.ts";
+import { buildNativeTextUrl, createTextChunkFrame, findLatestAssistantMessage, findUserQueryForAssistant, getNativeTextConnectSource, getTextDelta, isNativeTextPlacementFinal, NATIVE_TEXT_PLACEMENT_KEY, parseNativeTextInstruction, remapMessageScopedValue } from "./native-text.ts";
 
 test("buildNativeTextUrl uses the verified placement query parameters", () => {
   const url = new URL(buildNativeTextUrl("req-1"))
@@ -117,4 +117,11 @@ test("remapMessageScopedValue keeps ad state when an assistant message ID is rec
       "older-assistant-id": { keyword: "补水" },
     }
   )
+})
+
+test("isNativeTextPlacementFinal only leaves the active streamed answer provisional", () => {
+  assert.equal(isNativeTextPlacementFinal("streaming", true), false)
+  assert.equal(isNativeTextPlacementFinal("streaming", false), true)
+  assert.equal(isNativeTextPlacementFinal("ready", true), true)
+  assert.equal(isNativeTextPlacementFinal("error", true), true)
 })

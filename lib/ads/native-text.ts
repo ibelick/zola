@@ -6,6 +6,8 @@ type ChatMessageLike = {
   content: string
 }
 
+type NativeTextChatStatus = "streaming" | "ready" | "submitted" | "error"
+
 export const NATIVE_TEXT_WS_URL =
   process.env.NEXT_PUBLIC_NATIVE_TEXT_WS_URL ||
   "ws://10.1.51.76:8080/api/v1/ad/stream-match"
@@ -47,6 +49,13 @@ export function getNativeTextConnectSource(
 export function getTextDelta(previous: string, current: string): string {
   if (previous === current) return ""
   return current.startsWith(previous) ? current.slice(previous.length) : current
+}
+
+export function isNativeTextPlacementFinal(
+  status: NativeTextChatStatus | undefined,
+  isLast: boolean | undefined
+): boolean {
+  return status !== "streaming" || !isLast
 }
 
 export function remapMessageScopedValue<T>(

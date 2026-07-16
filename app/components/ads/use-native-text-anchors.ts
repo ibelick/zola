@@ -1,6 +1,6 @@
 "use client"
 
-import { injectNativeTextAnchor } from "@/lib/ads/dom"
+import { placeNativeTextAnchor } from "@/lib/ads/dom"
 import { observeAdImpression, reportTrackingUrl } from "@/lib/ads/impression"
 import type { NativeTextInstruction } from "@/lib/ads/types"
 import { useEffect, type RefObject } from "react"
@@ -9,6 +9,7 @@ export function useNativeTextAnchors(
   messageRef: RefObject<HTMLDivElement | null>,
   content: string,
   instructions: NativeTextInstruction[],
+  finalized: boolean,
   reportedImpressions: Set<string>
 ) {
   useEffect(() => {
@@ -17,12 +18,14 @@ export function useNativeTextAnchors(
 
     const cleanups: Array<() => void> = []
     for (const instruction of instructions) {
-      if (!injectNativeTextAnchor(container, instruction, reportTrackingUrl))
+      const result = placeNativeTextAnchor(container, instruction, {
+        finalized,
+        reportClick: reportTrackingUrl,
+      })
+      if (!result.placed || !result.anchor)
         continue
-      const anchor = container.ownerDocument.getElementById(
-        instruction.anchor_dom_id
-      )
-      if (!anchor || !container.contains(anchor)) continue
+      const anchor = result.anchor
+      if (!container.contains(anchor)) continue
       cleanups.push(
         observeAdImpression(anchor, {
           dedupeKey: `native-text:${instruction.anchor_dom_id}`,
@@ -33,5 +36,5 @@ export function useNativeTextAnchors(
     }
 
     return () => cleanups.forEach((cleanup) => cleanup())
-  }, [content, instructions, messageRef, reportedImpressions])
+  }, [content, finalized, instructions, messageRef, reportedImpressions])
 }

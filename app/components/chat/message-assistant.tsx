@@ -10,6 +10,7 @@ import type {
   NativeTextInstruction,
   SmallCardAd as SmallCardAdData,
 } from "@/lib/ads/types"
+import { isNativeTextPlacementFinal } from "@/lib/ads/native-text"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
@@ -84,7 +85,14 @@ export function MessageAssistant({
 
   const isQuoteEnabled = !preferences.multiModelEnabled
   const messageRef = useRef<HTMLDivElement>(null)
-  useNativeTextAnchors(messageRef, children, nativeTextAds, reportedImpressions)
+  const nativeTextPlacementFinal = isNativeTextPlacementFinal(status, isLast)
+  useNativeTextAnchors(
+    messageRef,
+    children,
+    nativeTextAds,
+    nativeTextPlacementFinal,
+    reportedImpressions
+  )
   const { selectionInfo, clearSelection } = useAssistantMessageSelection(
     messageRef,
     isQuoteEnabled
