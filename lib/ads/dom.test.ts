@@ -2,7 +2,13 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import { JSDOM } from "jsdom"
 // @ts-expect-error Node's TypeScript test runner requires the explicit extension.
-import { injectNativeTextAnchor } from "./dom.ts"
+import * as domHelpers from "./dom.ts"
+
+const {
+  injectNativeTextAnchor,
+  placeNativeTextAnchor,
+  shouldMoveNativeTextAnchor,
+} = domHelpers
 
 const instruction = {
   ad_id: "ad-1",
@@ -12,6 +18,81 @@ const instruction = {
   click_tracking_url: "https://example.com/click",
   impression_tracking_url: "https://example.com/impression",
 }
+
+test("placeNativeTextAnchor prefers headings over ordinary paragraphs", () => {
+  const dom = new JSDOM(
+    `<div><p>YNAB is available.</p><h2>Choose YNAB</h2></div>`
+  )
+  const container = dom.window.document.querySelector("div")!
+
+  const result = placeNativeTextAnchor(container, instruction, {
+    finalized: true,
+  })
+
+  assert.equal(result.placed, true)
+  assert.equal(container.querySelector("h2 a")?.textContent, "YNAB")
+  assert.equal(container.querySelector("p a"), null)
+})
+
+test("placeNativeTextAnchor prefers bold text over ordinary paragraphs", () => {
+  const dom = new JSDOM(
+    `<div><p>YNAB is available.</p><p><strong>Try YNAB today</strong></p></div>`
+  )
+  const container = dom.window.document.querySelector("div")!
+
+  placeNativeTextAnchor(container, instruction, { finalized: true })
+
+  assert.equal(container.querySelector("strong a")?.textContent, "YNAB")
+})
+
+test("placeNativeTextAnchor scores a terminator on the surrounding sentence", () => {
+  const dom = new JSDOM(`<div><p>YNAB works. More text follows</p></div>`)
+  const container = dom.window.document.querySelector("div")!
+
+  const result = placeNativeTextAnchor(container, instruction, {
+    finalized: true,
+  })
+
+  assert.equal(result.score, 20)
+})
+
+test("shouldMoveNativeTextAnchor requires a 15 point lead while streaming", () => {
+  assert.equal(shouldMoveNativeTextAnchor(30, 44, false), false)
+  assert.equal(shouldMoveNativeTextAnchor(30, 45, false), true)
+})
+
+test("shouldMoveNativeTextAnchor finalizes to any higher score", () => {
+  assert.equal(shouldMoveNativeTextAnchor(30, 31, true), true)
+  assert.equal(shouldMoveNativeTextAnchor(30, 30, true), false)
+})
+
+test("placeNativeTextAnchor moves the existing anchor to a better candidate", () => {
+  const dom = new JSDOM(`<div><p>Try ynab today.</p></div>`)
+  const container = dom.window.document.querySelector("div")!
+  const reports: string[] = []
+
+  const initial = placeNativeTextAnchor(container, instruction, {
+    reportClick: (url) => reports.push(url),
+  })
+  assert.equal(initial.placed, true)
+  assert.equal(container.querySelector("p a")?.textContent, "ynab")
+
+  container.insertAdjacentHTML("beforeend", `<h2>Choose YNAB</h2>`)
+  const result = placeNativeTextAnchor(container, instruction, {
+    finalized: true,
+    reportClick: (url) => reports.push(url),
+  })
+
+  assert.equal(result.moved, true)
+  assert.equal(container.querySelector("p a"), null)
+  assert.equal(container.querySelector("p")?.textContent, "Try ynab today.")
+  assert.equal(container.querySelector("h2 a")?.textContent, "YNAB")
+  assert.equal(result.anchor?.id, instruction.anchor_dom_id)
+  assert.equal(result.anchor?.getAttribute("href"), instruction.landing_url)
+  assert.equal(result.anchor?.dataset.adPlacementScore, String(result.score))
+  result.anchor?.dispatchEvent(new dom.window.MouseEvent("click"))
+  assert.deepEqual(reports, [instruction.click_tracking_url])
+})
 
 test("injectNativeTextAnchor skips code and injects the first prose match", () => {
   const dom = new JSDOM(
