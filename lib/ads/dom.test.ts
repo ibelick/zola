@@ -28,18 +28,29 @@ test("injectNativeTextAnchor skips code and injects the first prose match", () =
 test("injectNativeTextAnchor skips existing links and is idempotent", () => {
   const dom = new JSDOM(`<div><a href="/existing">YNAB</a><p>YNAB</p></div>`)
   const container = dom.window.document.querySelector("div")!
+  const reports: string[] = []
 
-  assert.equal(injectNativeTextAnchor(container, instruction), true)
-  assert.equal(injectNativeTextAnchor(container, instruction), true)
+  assert.equal(
+    injectNativeTextAnchor(container, instruction, (url) => reports.push(url)),
+    true
+  )
+  assert.equal(
+    injectNativeTextAnchor(container, instruction, (url) => reports.push(url)),
+    true
+  )
   assert.equal(container.querySelectorAll("#anchor-1").length, 1)
   assert.equal(
     container.querySelector("#anchor-1")?.getAttribute("href"),
-    instruction.click_tracking_url
+    instruction.landing_url
   )
   assert.equal(
     container.querySelector("#anchor-1")?.getAttribute("rel"),
     "noopener noreferrer sponsored"
   )
+  container
+    .querySelector<HTMLAnchorElement>("#anchor-1")
+    ?.dispatchEvent(new dom.window.MouseEvent("click"))
+  assert.deepEqual(reports, [instruction.click_tracking_url])
 })
 
 test("injectNativeTextAnchor returns false when no eligible keyword exists", () => {
@@ -47,4 +58,19 @@ test("injectNativeTextAnchor returns false when no eligible keyword exists", () 
   const container = dom.window.document.querySelector("div")!
 
   assert.equal(injectNativeTextAnchor(container, instruction), false)
+})
+
+test("injectNativeTextAnchor matches English keywords case-insensitively", () => {
+  const dom = new JSDOM(`<div><p>Try olay for daily skincare.</p></div>`)
+  const container = dom.window.document.querySelector("div")!
+
+  assert.equal(
+    injectNativeTextAnchor(container, { ...instruction, keyword: "OLAY" }),
+    true
+  )
+  assert.equal(container.querySelector("a")?.textContent, "olay")
+  assert.equal(
+    container.querySelector("a")?.getAttribute("href"),
+    instruction.landing_url
+  )
 })

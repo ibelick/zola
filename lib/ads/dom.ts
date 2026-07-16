@@ -13,7 +13,8 @@ function hasSkippedAncestor(node: Text, container: Element): boolean {
 
 export function injectNativeTextAnchor(
   container: Element,
-  instruction: NativeTextInstruction
+  instruction: NativeTextInstruction,
+  reportClick: (url: string) => void = () => undefined
 ): boolean {
   const document = container.ownerDocument
   const existing = document.getElementById(instruction.anchor_dom_id)
@@ -26,17 +27,26 @@ export function injectNativeTextAnchor(
   let node = walker.nextNode() as Text | null
 
   while (node) {
-    const index = node.data.indexOf(instruction.keyword)
+    const index = node.data
+      .toLowerCase()
+      .indexOf(instruction.keyword.toLowerCase())
     if (index !== -1 && !hasSkippedAncestor(node, container)) {
       const before = node.data.slice(0, index)
       const after = node.data.slice(index + instruction.keyword.length)
+      const matchedText = node.data.slice(
+        index,
+        index + instruction.keyword.length
+      )
       const anchor = document.createElement("a")
       anchor.id = instruction.anchor_dom_id
-      anchor.href = instruction.click_tracking_url
+      anchor.href = instruction.landing_url
       anchor.target = "_blank"
       anchor.rel = "noopener noreferrer sponsored"
-      anchor.textContent = instruction.keyword
+      anchor.textContent = matchedText
       anchor.dataset.adAnchor = "native-text"
+      anchor.addEventListener("click", () =>
+        reportClick(instruction.click_tracking_url)
+      )
       anchor.className =
         "text-primary decoration-primary/50 hover:decoration-primary font-medium underline underline-offset-2"
 

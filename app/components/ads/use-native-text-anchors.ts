@@ -1,7 +1,7 @@
 "use client"
 
 import { injectNativeTextAnchor } from "@/lib/ads/dom"
-import { observeAdImpression } from "@/lib/ads/impression"
+import { observeAdImpression, reportTrackingUrl } from "@/lib/ads/impression"
 import type { NativeTextInstruction } from "@/lib/ads/types"
 import { useEffect, type RefObject } from "react"
 
@@ -17,7 +17,8 @@ export function useNativeTextAnchors(
 
     const cleanups: Array<() => void> = []
     for (const instruction of instructions) {
-      if (!injectNativeTextAnchor(container, instruction)) continue
+      if (!injectNativeTextAnchor(container, instruction, reportTrackingUrl))
+        continue
       const anchor = container.ownerDocument.getElementById(
         instruction.anchor_dom_id
       )
