@@ -64,7 +64,7 @@ Small Card 请求只在新的助手回答正常完成后触发一次。停止生
 
 ## Native Text 渲染
 
-Native Text 渲染保持现有 Markdown 语义，不直接修改并持久化助手消息文本。当前实现不再使用“首个合法匹配”规则，而是以 [`docs/advertising-integration-guide.md`](../../advertising-integration-guide.md) 中的高价值动态选位为准：流式阶段评估全部候选并在明显更高价值时移动，回答结束后校准到全文最高分候选。
+Native Text 渲染保持现有 Markdown 语义，不直接修改并持久化助手消息文本。当前实现不再使用历史的顺序命中注入规则，而是以 [`docs/advertising-integration-guide.md`](../../advertising-integration-guide.md) 中的高价值动态选位为准：流式阶段评估全部候选并在明显更高价值时移动，回答结束后校准到全文最高分候选。
 
 - 跳过 `a`、`code`、`pre`、`script` 和 `style` 节点内容。
 - 同一 `anchor_dom_id` 只生成一个锚点。

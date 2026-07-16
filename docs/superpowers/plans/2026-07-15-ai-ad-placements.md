@@ -62,7 +62,7 @@ Expected: FAIL because `lib/ads/native-text.ts` does not exist.
 
 - [ ] **Step 3: Implement the minimal protocol module**
 
-Use centralized exported constants and URL validation restricted to `http:`/`https:` tracking URLs. `getTextDelta` returns the suffix only when `current.startsWith(previous)`; otherwise it returns `current` so regenerated/replaced content is not dropped.
+Use centralized exported constants and URL validation restricted to `http:`/`https:` reporting endpoints. `getTextDelta` returns the suffix only when `current.startsWith(previous)`; otherwise it returns `current` so regenerated/replaced content is not dropped.
 
 ```ts
 export function createTextChunkFrame(
@@ -129,7 +129,7 @@ Expected: FAIL because the Small Card module does not exist.
 
 - [ ] **Step 3: Implement the request builder, strict response parser, and route**
 
-The route accepts `{ query: string, language?: string }`, caps query length at the existing message maximum, generates `crypto.randomUUID()`, calls upstream with an `AbortSignal.timeout(5000)`, and always returns `{ ad: null }` for upstream/network/schema failures. The route must not log placement keys or complete tracking URLs.
+The route accepts `{ query: string, language?: string }`, caps query length at the existing message maximum, generates `crypto.randomUUID()`, calls upstream with an `AbortSignal.timeout(5000)`, and always returns `{ ad: null }` for upstream/network/schema failures. The route must not log placement keys or complete reporting endpoints.
 
 ```ts
 export async function POST(request: Request) {
@@ -183,10 +183,17 @@ git commit -m "feat: proxy small card ads"
 
 - [ ] **Step 1: Write failing JSDOM injection tests**
 
-Tests create a JSDOM message container and assert replacement of only the first valid text-node occurrence, preservation of matches inside `a`, `code`, and `pre`, idempotency by `anchor_dom_id`, tracking URL as `href`, and `rel="noopener noreferrer sponsored"`.
+Tests create a JSDOM message container and assert the current Native Text behavior documented in [`docs/advertising-integration-guide.md`](../../advertising-integration-guide.md):
+
+- dynamic high-value placement across valid text-node candidates;
+- preservation of matches inside `a`, `code`, and `pre`;
+- idempotency by `anchor_dom_id`;
+- background click reporting to `click_tracking_url`;
+- `landing_url` as the visible link `href`;
+- `rel="noopener noreferrer sponsored"`.
 
 ```ts
-test("injectNativeTextAnchor skips code and injects the first prose match", () => {
+test("injectNativeTextAnchor skips code and injects a valid prose match", () => {
   const dom = new JSDOM(`<div><code>YNAB</code><p>Try YNAB today.</p></div>`)
   const container = dom.window.document.querySelector("div")!
   assert.equal(injectNativeTextAnchor(container, instruction), true)
