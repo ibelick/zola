@@ -194,7 +194,7 @@ Native Text 不再采用历史“第一个匹配即注入”的规则。当前�
 | 广告生命周期 | `app/components/ads/use-chat-advertising.ts` | WebSocket 会话、文本增量、Small Card 拉取、运行时状态 |
 | Native Text 渲染 | `app/components/ads/use-native-text-anchors.ts` | 调用动态选位并绑定曝光观察器 |
 | Small Card 展示 | `app/components/ads/small-card-ad.tsx`、`lib/ads/presentation.ts` | 半宽、两行描述、`landing_url` 跳转、点击监测 |
-| CSP | `middleware.ts` | 将 Native Text WebSocket origin 加入 `connect-src` |
+| CSP | `middleware.ts` | 将 Native Text WebSocket origin 加入 `connect-src`，并将广告平台 HTTP origin 加入 `connect-src` / `img-src` |
 
 ## 8. 环境变量与 CSP
 
@@ -203,13 +203,14 @@ Native Text 不再采用历史“第一个匹配即注入”的规则。当前�
 | 变量 | 默认值 | 使用位置 |
 | --- | --- | --- |
 | `AD_SERVER_BASE_URL` | `http://10.1.51.76:8080` | Small Card 服务端代理 |
+| `AD_CSP_EXTRA_ORIGINS` | 空 | 逗号分隔的额外广告 HTTP/HTTPS origin；开发模式默认额外允许 `http://localhost:8080` |
 | `SMALL_CARD_PLACEMENT_ID` | `7` | Small Card 请求体与请求头 |
 | `SMALL_CARD_PLACEMENT_KEY` | `cmrlha7j000011xywcsjy39x1` | Small Card 鉴权请求头 |
 | `NEXT_PUBLIC_NATIVE_TEXT_WS_URL` | `ws://10.1.51.76:8080/api/v1/ad/stream-match` | 浏览器直连 Native Text |
 | `NEXT_PUBLIC_NATIVE_TEXT_PLACEMENT_ID` | `8` | Native Text WebSocket 查询参数 |
 | `NEXT_PUBLIC_NATIVE_TEXT_PLACEMENT_KEY` | `cmrloph8700031xywuz5ijj94` | Native Text WebSocket 查询参数 |
 
-`middleware.ts` 会通过 `getNativeTextConnectSource()` 将 Native Text WebSocket 的 origin 加入 CSP `connect-src`。当前项目和广告服务使用 HTTP/WS；如果项目改为 HTTPS 部署，广告平台必须提供 HTTPS/WSS，否则浏览器会因混合内容策略拦截连接。
+`middleware.ts` 会通过 `getNativeTextConnectSource()` 将 Native Text WebSocket 的 origin 加入 CSP `connect-src`，并通过 `getAdPlatformCspSources()` 将 `AD_SERVER_BASE_URL` 的 HTTP/HTTPS origin 加入 `connect-src` 与 `img-src`，用于点击/曝光追踪 GET 和 Small Card `icon_url`。本地开发额外允许 `http://localhost:8080`；其他测试源可用 `AD_CSP_EXTRA_ORIGINS` 覆盖。当前项目和广告服务使用 HTTP/WS；如果项目改为 HTTPS 部署，广告平台必须提供 HTTPS/WSS，否则浏览器会因混合内容策略拦截连接或图片。
 
 ## 9. 本地验证与排障
 
