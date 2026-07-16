@@ -1,5 +1,7 @@
 # AI 广告位接入设计
 
+> 历史设计说明：本文记录初始实现过程。当前广告接入、跳转、尺寸和 Native Text 动态选位行为以 [`docs/advertising-integration-guide.md`](../../advertising-integration-guide.md) 为准。
+
 ## 目标
 
 在不影响现有 AI 流式回答的前提下，接入 Native Text 和 Small Card 两个广告位：
@@ -62,7 +64,7 @@ Small Card 请求只在新的助手回答正常完成后触发一次。停止生
 
 ## Native Text 渲染
 
-Native Text 渲染保持现有 Markdown 语义，不直接修改并持久化助手消息文本。渲染层在当前消息 DOM 容器内定位关键词，并替换首个合法匹配：
+Native Text 渲染保持现有 Markdown 语义，不直接修改并持久化助手消息文本。当前实现不再使用“首个合法匹配”规则，而是以 [`docs/advertising-integration-guide.md`](../../advertising-integration-guide.md) 中的高价值动态选位为准：流式阶段评估全部候选并在明显更高价值时移动，回答结束后校准到全文最高分候选。
 
 - 跳过 `a`、`code`、`pre`、`script` 和 `style` 节点内容。
 - 同一 `anchor_dom_id` 只生成一个锚点。
@@ -70,15 +72,15 @@ Native Text 渲染保持现有 Markdown 语义，不直接修改并持久化助�
 - 如果关键词跨越多个 Markdown/DOM 文本节点，或当前消息中不存在完整匹配，则不注入。
 - 因流式 Markdown 重新渲染而丢失的锚点，在下一次消息内容更新后按原指令恢复。
 
-锚点使用广告服务的 `click_tracking_url` 作为 `href`，由跟踪服务完成记录并 `302` 跳转。链接以新窗口打开，并带 `noopener noreferrer sponsored`。视觉上使用可识别的文内超链接样式，但不改变段落排版。
+锚点跳转使用广告服务的 `landing_url`，点击时后台请求 `click_tracking_url` 完成监测；链接以新窗口打开，并带 `noopener noreferrer sponsored`。视觉上使用可识别的文内超链接样式，但不改变段落排版。
 
 ## Small Card 渲染
 
-Small Card 位于对应助手回答正文、来源列表之后，操作按钮之前。卡片使用现有 `max-w-3xl` 回答宽度，在消息内占满可用宽度：
+Small Card 位于对应助手回答正文、来源列表之后，操作按钮之前。当前实现为半宽卡片（`w-1/2`）：
 
-- 卡片整体可点击，使用 `click_tracking_url` 作为跳转地址。
+- 卡片整体可点击，使用 `landing_url` 作为跳转地址；点击时后台请求 `click_tracking_url`。
 - 左侧为固定正方形图标，使用服务返回的 `icon_url`，图片保持 `1:1` 且使用 `object-cover`。
-- 右侧为文字区：上方显示广告属性标识和单行加粗标题，下方显示最多两行描述。
+- 右侧为文字区：上方显示单行加粗标题和广告属性标识，下方显示最多两行描述。
 - 卡片使用现有主题变量的边框、背景和文字色，支持浅色与深色模式。
 - 图标加载失败时保留中性占位背景，不隐藏整张卡片。
 
@@ -115,7 +117,7 @@ Native Text 锚点和 Small Card 共用曝光观察器：
 
 - 从连续更新的助手文本中只计算和发送新增 Chunk。
 - WebSocket URL 参数、客户端帧和服务端指令校验。
-- Native Text 只替换首个合法关键词，且不修改链接和代码内容。
+- Native Text 按高价值动态选位替换合法关键词，且不修改链接和代码内容。
 - Small Card 代理的请求映射、真实响应解析、空广告与错误降级。
 - 曝光阈值、1 秒延时、中途离开取消和单次上报。
 - 回答完成后才拉取 Small Card，错误或中止时不拉取。

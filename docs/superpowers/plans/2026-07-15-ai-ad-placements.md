@@ -1,5 +1,7 @@
 # AI Ad Placements Implementation Plan
 
+> 历史设计说明：本文记录初始实现过程。当前广告接入、跳转、尺寸和 Native Text 动态选位行为以 [`docs/advertising-integration-guide.md`](../../advertising-integration-guide.md) 为准。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a streaming Native Text ad placement and a post-answer Small Card placement without interrupting the existing chat flow.
@@ -298,11 +300,11 @@ git commit -m "feat: connect ads to chat lifecycle"
 **Interfaces:**
 
 - Consumes: `SmallCardAd`, impression observer, and the assistant message's optional `smallCardAd` prop.
-- Produces: accessible, theme-aware, full-width Small Card rendered after sources and before message actions.
+- Produces: accessible, theme-aware, half-width Small Card rendered after sources and before message actions.
 
 - [ ] **Step 1: Implement the focused Small Card component**
 
-Render an external anchor using `click_tracking_url`, `target="_blank"`, and `rel="noopener noreferrer sponsored"`. Use a square `size-14` icon area, single-line title, two-line description, visible `badge_text`, neutral image fallback, theme tokens, and `aria-label` containing the title and badge.
+Render an external anchor using `landing_url`, `target="_blank"`, and `rel="noopener noreferrer sponsored"`; report `click_tracking_url` in the background on click. Use a square `size-14` icon area, single-line title, two-line description, visible `badge_text`, neutral image fallback, theme tokens, and `aria-label` containing the title and badge.
 
 - [ ] **Step 2: Attach impression tracking and place the card**
 
