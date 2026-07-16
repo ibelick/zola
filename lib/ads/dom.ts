@@ -273,6 +273,16 @@ function placementScore(anchor: HTMLAnchorElement): number | null {
   return Number.isFinite(score) ? score : null
 }
 
+function findCurrentAnchor(
+  container: Element,
+  anchorId: string
+): HTMLAnchorElement | null {
+  for (const anchor of container.querySelectorAll<HTMLAnchorElement>("a")) {
+    if (anchor.id === anchorId) return anchor
+  }
+  return null
+}
+
 export function shouldMoveNativeTextAnchor(
   currentScore: number,
   nextScore: number,
@@ -292,13 +302,7 @@ export function placeNativeTextAnchor(
 ): NativeTextPlacementResult {
   const reportClick = options.reportClick ?? (() => undefined)
   const candidates = collectCandidates(container, instruction)
-  const anchorById = container.ownerDocument.getElementById(
-    instruction.anchor_dom_id
-  )
-  const currentAnchor =
-    anchorById?.tagName === "A" && container.contains(anchorById)
-      ? (anchorById as HTMLAnchorElement)
-      : null
+  const currentAnchor = findCurrentAnchor(container, instruction.anchor_dom_id)
   const best = candidates.reduce<NativeTextCandidate | null>(
     (selected, candidate) =>
       selected === null || candidate.score > selected.score

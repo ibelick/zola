@@ -134,6 +134,29 @@ test("injectNativeTextAnchor skips existing links and is idempotent", () => {
   assert.deepEqual(reports, [instruction.click_tracking_url])
 })
 
+test("placeNativeTextAnchor scopes existing anchor lookup to the message container", () => {
+  const dom = new JSDOM(
+    `<main>
+      <section id="message-1"><p>YNAB helps.</p></section>
+      <section id="message-2"><p>YNAB helps.</p></section>
+    </main>`
+  )
+  const first = dom.window.document.querySelector("#message-1")!
+  const second = dom.window.document.querySelector("#message-2")!
+  const sharedInstruction = {
+    ...instruction,
+    anchor_dom_id: "shared-anchor",
+  }
+
+  assert.equal(placeNativeTextAnchor(first, sharedInstruction).placed, true)
+  assert.equal(placeNativeTextAnchor(second, sharedInstruction).placed, true)
+  assert.equal(placeNativeTextAnchor(second, sharedInstruction).placed, true)
+
+  assert.equal(first.querySelectorAll("#shared-anchor").length, 1)
+  assert.equal(second.querySelectorAll("#shared-anchor").length, 1)
+  assert.equal(second.querySelectorAll("a a").length, 0)
+})
+
 test("injectNativeTextAnchor returns false when no eligible keyword exists", () => {
   const dom = new JSDOM(`<div><pre>YNAB</pre><p>Nothing here.</p></div>`)
   const container = dom.window.document.querySelector("div")!
