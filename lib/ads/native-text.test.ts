@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import test from "node:test"
 // prettier-ignore
 // @ts-expect-error Node's TypeScript test runner requires the explicit extension.
-import { buildNativeTextUrl, createTextChunkFrame, findLatestAssistantMessage, findUserQueryForAssistant, getTextDelta, NATIVE_TEXT_PLACEMENT_KEY, parseNativeTextInstruction } from "./native-text.ts";
+import { buildNativeTextUrl, createTextChunkFrame, findLatestAssistantMessage, findUserQueryForAssistant, getNativeTextConnectSource, getTextDelta, NATIVE_TEXT_PLACEMENT_KEY, parseNativeTextInstruction, remapMessageScopedValue } from "./native-text.ts";
 
 test("buildNativeTextUrl uses the verified placement query parameters", () => {
   const url = new URL(buildNativeTextUrl("req-1"))
@@ -12,6 +12,10 @@ test("buildNativeTextUrl uses the verified placement query parameters", () => {
   assert.equal(url.searchParams.get("placement_key"), NATIVE_TEXT_PLACEMENT_KEY)
   assert.equal(url.searchParams.get("slot_id"), "8")
   assert.equal(url.searchParams.get("request_id"), "req-1")
+})
+
+test("getNativeTextConnectSource exposes the WebSocket origin for CSP", () => {
+  assert.equal(getNativeTextConnectSource(), "ws://10.1.51.76:8080")
 })
 
 test("getTextDelta only returns newly appended text", () => {
@@ -94,4 +98,23 @@ test("findUserQueryForAssistant binds the assistant to its preceding user messag
 
   assert.equal(findUserQueryForAssistant(messages, "a2"), "second question")
   assert.equal(findUserQueryForAssistant(messages, "missing"), null)
+})
+
+test("remapMessageScopedValue keeps ad state when an assistant message ID is reconciled", () => {
+  const ad = { keyword: "雅诗兰黛小棕瓶" }
+
+  assert.deepEqual(
+    remapMessageScopedValue(
+      {
+        "temporary-assistant-id": ad,
+        "older-assistant-id": { keyword: "补水" },
+      },
+      "temporary-assistant-id",
+      "database-assistant-id"
+    ),
+    {
+      "database-assistant-id": ad,
+      "older-assistant-id": { keyword: "补水" },
+    }
+  )
 })

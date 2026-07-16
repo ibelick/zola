@@ -48,7 +48,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <h1 className="text-foreground text-3xl font-medium tracking-tight sm:text-4xl">
-              Welcome to Zola
+              Welcome to hex_chat
             </h1>
             <p className="text-muted-foreground mt-3">
               Sign in below to increase your message limits.

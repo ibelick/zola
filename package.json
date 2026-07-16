@@ -1,11 +1,12 @@
 {
-  "name": "zola",
+  "name": "hex_chat",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
+    "test": "node --test --experimental-strip-types lib/**/*.test.ts",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },

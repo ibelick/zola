@@ -7,6 +7,7 @@ import {
   findUserQueryForAssistant,
   getTextDelta,
   parseNativeTextInstruction,
+  remapMessageScopedValue,
 } from "@/lib/ads/native-text"
 import { replaceActiveSmallCard } from "@/lib/ads/small-card-state"
 import type { NativeTextInstruction, SmallCardAd } from "@/lib/ads/types"
@@ -46,6 +47,22 @@ export function useChatAdvertising({
   const chunkIdRef = useRef(0)
   const previousStatusRef = useRef<ChatStatus>("ready")
   const generationRef = useRef(0)
+  const completedAssistantRef = useRef<{
+    id: string
+    content: string
+  } | null>(null)
+
+  const remapAdMessageId = useCallback(
+    (previousMessageId: string, nextMessageId: string) => {
+      setNativeTextByMessageId((current) =>
+        remapMessageScopedValue(current, previousMessageId, nextMessageId)
+      )
+      setSmallCardByMessageId((current) =>
+        remapMessageScopedValue(current, previousMessageId, nextMessageId)
+      )
+    },
+    []
+  )
 
   const closeSocket = useCallback(() => {
     const socket = socketRef.current
@@ -142,17 +159,42 @@ export function useChatAdvertising({
     cancelActiveAdSession()
     setNativeTextByMessageId({})
     setSmallCardByMessageId({})
+    completedAssistantRef.current = null
     previousStatusRef.current = "ready"
   }, [chatId, cancelActiveAdSession])
 
   const latestAssistant = findLatestAssistantMessage(messages)
 
   useEffect(() => {
-    if (status !== "streaming" || !latestAssistant) return
+    if (!latestAssistant) return
+
+    const completedAssistant = completedAssistantRef.current
+    if (
+      status === "ready" &&
+      completedAssistant &&
+      completedAssistant.id !== latestAssistant.id &&
+      completedAssistant.content === latestAssistant.content
+    ) {
+      remapAdMessageId(completedAssistant.id, latestAssistant.id)
+      completedAssistantRef.current = {
+        id: latestAssistant.id,
+        content: latestAssistant.content,
+      }
+    }
+
+    if (status !== "streaming") return
 
     if (activeAssistantIdRef.current !== latestAssistant.id) {
+      const previousAssistantId = activeAssistantIdRef.current
+      const isIdReconciliation =
+        previousAssistantId !== null &&
+        previousAssistantTextRef.current === latestAssistant.content
+
+      if (isIdReconciliation) {
+        remapAdMessageId(previousAssistantId, latestAssistant.id)
+      }
       activeAssistantIdRef.current = latestAssistant.id
-      previousAssistantTextRef.current = ""
+      if (!isIdReconciliation) previousAssistantTextRef.current = ""
       activeUserQueryRef.current =
         findUserQueryForAssistant(messages, latestAssistant.id) ??
         activeUserQueryRef.current
@@ -172,7 +214,7 @@ export function useChatAdvertising({
     const socket = socketRef.current
     if (socket?.readyState === 1) socket.send(frame)
     else if (socket?.readyState === 0) queuedFramesRef.current.push(frame)
-  }, [latestAssistant, messages, status])
+  }, [latestAssistant, messages, remapAdMessageId, status])
 
   useEffect(() => {
     const previousStatus = previousStatusRef.current
@@ -194,6 +236,12 @@ export function useChatAdvertising({
           activeUserQueryRef.current)
         : null
       const generation = generationRef.current
+      if (assistantId) {
+        completedAssistantRef.current = {
+          id: assistantId,
+          content: previousAssistantTextRef.current,
+        }
+      }
       closeSocket()
       activeAssistantIdRef.current = null
       activeUserQueryRef.current = null

@@ -1,71 +1,12 @@
 import {
   getAllModels,
-  getModelsForUserProviders,
-  getModelsWithAccessFlags,
   refreshModelsCache,
 } from "@/lib/models"
-import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    const supabase = await createClient()
-
-    if (!supabase) {
-      const allModels = await getAllModels()
-      const models = allModels.map((model) => ({
-        ...model,
-        accessible: true,
-      }))
-      return new Response(JSON.stringify({ models }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-    }
-
-    const { data: authData } = await supabase.auth.getUser()
-
-    if (!authData?.user?.id) {
-      const models = await getModelsWithAccessFlags()
-      return new Response(JSON.stringify({ models }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-    }
-
-    const { data, error } = await supabase
-      .from("user_keys")
-      .select("provider")
-      .eq("user_id", authData.user.id)
-
-    if (error) {
-      console.error("Error fetching user keys:", error)
-      const models = await getModelsWithAccessFlags()
-      return new Response(JSON.stringify({ models }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-    }
-
-    const userProviders = data?.map((k) => k.provider) || []
-
-    if (userProviders.length === 0) {
-      const models = await getModelsWithAccessFlags()
-      return new Response(JSON.stringify({ models }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-    }
-
-    const models = await getModelsForUserProviders(userProviders)
+    const models = await getAllModels()
 
     return new Response(JSON.stringify({ models }), {
       status: 200,

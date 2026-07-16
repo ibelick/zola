@@ -38,9 +38,31 @@ export function buildNativeTextUrl(requestId: string): string {
   return url.toString()
 }
 
+export function getNativeTextConnectSource(
+  wsUrl: string = NATIVE_TEXT_WS_URL
+): string {
+  return new URL(wsUrl).origin
+}
+
 export function getTextDelta(previous: string, current: string): string {
   if (previous === current) return ""
   return current.startsWith(previous) ? current.slice(previous.length) : current
+}
+
+export function remapMessageScopedValue<T>(
+  current: Record<string, T>,
+  previousMessageId: string,
+  nextMessageId: string
+): Record<string, T> {
+  if (
+    previousMessageId === nextMessageId ||
+    !Object.prototype.hasOwnProperty.call(current, previousMessageId)
+  ) {
+    return current
+  }
+
+  const { [previousMessageId]: value, ...remaining } = current
+  return { ...remaining, [nextMessageId]: value }
 }
 
 export function findLatestAssistantMessage(

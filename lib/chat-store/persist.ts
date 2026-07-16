@@ -13,7 +13,7 @@ let dbInitPromise: Promise<void> | null = null
 const stores: Record<string, any> = {}
 
 const isClient = typeof window !== "undefined"
-const DB_NAME = "zola-db"
+const DB_NAME = "hex-chat-db"
 const DB_VERSION = 2
 
 let storesReady = false
